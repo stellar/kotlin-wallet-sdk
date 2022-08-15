@@ -1,8 +1,9 @@
+import org.stellar.sdk.Network
 import org.stellar.walletsdk.Wallet
 
 fun main() {
   // Create wallet instance with Horizon
-  val wallet = Wallet("https://horizon-testnet.stellar.org", "Test SDF Network ; September 2015")
+  val wallet = Wallet("https://horizon-testnet.stellar.org", Network.TESTNET.toString())
 
   // Create account, generate keypairs
   //  val newAccountKeypair = wallet.create()

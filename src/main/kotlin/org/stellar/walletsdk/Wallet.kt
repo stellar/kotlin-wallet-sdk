@@ -5,9 +5,9 @@ import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import shadow.com.google.gson.annotations.SerializedName
 
-class Wallet(private val horizonUrl: String, private val horizonPassphrase: String) {
+class Wallet(private val horizonUrl: String, private val networkPassphrase: String) {
   private val server = Server(this.horizonUrl)
-  private val network = Network(this.horizonPassphrase)
+  private val network = Network(this.networkPassphrase)
 
   data class AccountKeypair(
     @SerializedName("publicKey") val publicKey: String,
