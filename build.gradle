@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.7.10'
     id 'application'
+    id 'com.ncorti.ktfmt.gradle' version '0.8.0'
 }
 
 group = 'org.stellar'
@@ -30,4 +31,8 @@ compileTestKotlin {
 
 application {
     mainClassName = 'MainKt'
+}
+
+ktfmt {
+    googleStyle()
 }
