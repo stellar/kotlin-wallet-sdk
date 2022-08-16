@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.7.10'
+    id 'com.diffplug.spotless' version '6.9.1'
     id 'application'
 }
 
@@ -8,8 +9,21 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-    maven { url "https://jitpack.io" }
+    maven { url 'https://jitpack.io' }
 }
+
+
+spotless {
+    kotlin {
+        ktfmt("0.39").googleStyle()
+    }
+}
+
+afterEvaluate {
+    // Applying spotless fixes
+    tasks.getByName('spotlessKotlinCheck').dependsOn(tasks.getByName('spotlessKotlinApply'))
+}
+
 
 dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
