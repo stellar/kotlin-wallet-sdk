@@ -18,7 +18,11 @@ val wallet = Wallet("https://horizon-testnet.stellar.org", Network.TESTNET.toStr
 
 ### `Wallet.create()`
 
-`fun create(): AccountKeypair(val publicKey: String, val secretKey: String)`
+```kotlin
+fun create(): AccountKeypair(
+val publicKey: String,
+val secretKey: String)
+```
 
 Example
 
@@ -27,4 +31,48 @@ val newAccountKeypair = wallet.create()
 
 // Addresses are shortened for example only
 // publicKey=GB7S...GETPQ, secretKey=SBTL...GI27
+```
+
+### `Wallet.fund()`
+
+```kotlin
+fun fund(
+    sourceAddress: String,
+    destinationAddress: String,
+    startingBalance: String = "1",
+    sponsorAddress: String = ""
+): Transaction
+```
+
+Example
+
+```kotlin
+val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val destinationAddress = "GDEIYYWIVK24CCQ3Y4QNGEIBEFABTTCFBRTVNQZ43VPOUNQARO7ZEKJY"
+
+val sponsoredFundTransaction =
+    wallet.fund(sourceAddress, destinationAddress, sponsorAddress = sourceAddress)
+```
+
+## Utils
+
+### `Operation.createSponsoredOperation()`
+
+```kotlin
+fun createSponsoredOperation(
+    sponsorAddress: String,
+    accountAddress: String,
+    operation: Operation
+): List<Operation>
+```
+
+### `Transaction.buildTransaction()`
+
+```kotlin
+fun buildTransaction(
+    sourceAddress: String,
+    server: Server,
+    network: Network,
+    operations: List<Operation>
+): Transaction
 ```
