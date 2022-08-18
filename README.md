@@ -50,23 +50,16 @@ Example
 val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
 val destinationAddress = "GDEIYYWIVK24CCQ3Y4QNGEIBEFABTTCFBRTVNQZ43VPOUNQARO7ZEKJY"
 
+val fundTransaction = wallet.fund(sourceAddress, destinationAddress)
+
+// Note: In this example `sponsorAddress` is the same as `sourceAddress`, but it doesn't have to be.
 val sponsoredFundTransaction =
     wallet.fund(sourceAddress, destinationAddress, sponsorAddress = sourceAddress)
 ```
 
 ## Utils
 
-### `Operation.sponsorOperation()`
-
-```kotlin
-fun sponsorOperation(
-    sponsorAddress: String,
-    accountAddress: String,
-    operation: Operation
-): List<Operation>
-```
-
-### `Transaction.buildTransaction()`
+### `buildTransaction()`
 
 ```kotlin
 fun buildTransaction(
@@ -75,4 +68,14 @@ fun buildTransaction(
     network: Network,
     operations: List<Operation>
 ): Transaction
+```
+
+### `sponsorOperation()`
+
+```kotlin
+fun sponsorOperation(
+    sponsorAddress: String,
+    accountAddress: String,
+    operation: Operation
+): List<Operation>
 ```
