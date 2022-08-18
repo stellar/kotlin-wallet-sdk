@@ -8,11 +8,13 @@ import org.junit.jupiter.api.Test
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
-import org.stellar.walletsdk.Constants
+import org.stellar.walletsdk.ADDRESS_ACTIVE
+import org.stellar.walletsdk.HORIZON_URL
+import org.stellar.walletsdk.OP_CREATE_ACCOUNT
 
 @DisplayName("buildTransaction")
 internal class BuildTransactionTest {
-  private val server = spyk(Server(Constants.HORIZON_URL))
+  private val server = spyk(Server(HORIZON_URL))
   private val network = spyk(Network(Network.TESTNET.toString()))
 
   @Test
@@ -23,23 +25,20 @@ internal class BuildTransactionTest {
 
     val error =
       assertFailsWith<Error>(
-        block = {
-          buildTransaction("", server, network, listOfNotNull(Constants.OP_CREATE_ACCOUNT))
-        }
+        block = { buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT)) }
       )
 
     kotlin.test.assertTrue(error.toString().contains(errorMessage))
   }
 
   private val sequenceNumber = 1
-  private val accountResponse = AccountResponse(Constants.ADDRESS_ACTIVE, sequenceNumber.toLong())
+  private val accountResponse = AccountResponse(ADDRESS_ACTIVE, sequenceNumber.toLong())
 
   @Test
   fun `successful build`() {
     every { server.accounts().account("") } returns accountResponse
 
-    val transaction =
-      buildTransaction("", server, network, listOfNotNull(Constants.OP_CREATE_ACCOUNT))
+    val transaction = buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT))
 
     kotlin.test.assertNotNull(transaction)
     kotlin.test.assertEquals(1, transaction.operations.size)
@@ -50,8 +49,7 @@ internal class BuildTransactionTest {
 
     every { server.accounts().account("") } returns accountResponse
 
-    val transaction =
-      buildTransaction("", server, network, listOfNotNull(Constants.OP_CREATE_ACCOUNT))
+    val transaction = buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT))
 
     kotlin.test.assertEquals((sequenceNumber + 1).toLong(), transaction.sequenceNumber)
   }

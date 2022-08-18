@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class WalletTest {
-  private val wallet = Wallet(Constants.HORIZON_URL, Constants.NETWORK_PASSPHRASE)
+  private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE)
 
   @Nested
   @DisplayName("create")
@@ -37,9 +37,7 @@ internal class WalletTest {
       val errorMessage = "Starting balance must be at least 1 XLM for non-sponsored accounts"
 
       val error =
-        assertFailsWith<Error>(
-          block = { wallet.fund(Constants.ADDRESS_ACTIVE, Constants.ADDRESS_INACTIVE, "0") }
-        )
+        assertFailsWith<Error>(block = { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") })
 
       assertTrue(error.toString().contains(errorMessage))
     }
@@ -47,11 +45,7 @@ internal class WalletTest {
     @Test
     fun `there are 3 operations in sponsored transaction`() {
       val transaction =
-        wallet.fund(
-          Constants.ADDRESS_ACTIVE,
-          Constants.ADDRESS_INACTIVE,
-          sponsorAddress = Constants.ADDRESS_ACTIVE
-        )
+        wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, sponsorAddress = ADDRESS_ACTIVE)
 
       assertEquals(transaction.operations.size, 3)
     }

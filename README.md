@@ -56,10 +56,10 @@ val sponsoredFundTransaction =
 
 ## Utils
 
-### `Operation.createSponsoredOperation()`
+### `Operation.sponsorOperation()`
 
 ```kotlin
-fun createSponsoredOperation(
+fun sponsorOperation(
     sponsorAddress: String,
     accountAddress: String,
     operation: Operation
