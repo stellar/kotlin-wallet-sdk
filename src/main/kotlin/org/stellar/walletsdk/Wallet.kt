@@ -1,10 +1,13 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
-import org.stellar.walletsdk.utils.Operation.Companion.createSponsoredOperation
-import org.stellar.walletsdk.utils.Transaction.Companion.buildTransaction
+import org.stellar.walletsdk.utils.buildTransaction
+import org.stellar.walletsdk.utils.sponsorOperation
 
-class Wallet(private val horizonUrl: String, private val networkPassphrase: String) {
+class Wallet(
+  private val horizonUrl: String = "https://horizon-testnet.stellar.org",
+  private val networkPassphrase: String = Network.TESTNET.toString()
+) {
   private val server = Server(this.horizonUrl)
   private val network = Network(this.networkPassphrase)
 
@@ -39,7 +42,7 @@ class Wallet(private val horizonUrl: String, private val networkPassphrase: Stri
 
     val operations: List<Operation> =
       if (isSponsored) {
-        createSponsoredOperation(sponsorAddress, destinationAddress, createAccountOp)
+        sponsorOperation(sponsorAddress, destinationAddress, createAccountOp)
       } else {
         listOfNotNull(createAccountOp)
       }
