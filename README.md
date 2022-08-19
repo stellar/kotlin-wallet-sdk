@@ -57,6 +57,84 @@ val sponsoredFundTransaction =
     wallet.fund(sourceAddress, destinationAddress, sponsorAddress = sourceAddress)
 ```
 
+### `Wallet.addAssetSupport()`
+
+```kotlin
+fun addAssetSupport(
+    sourceAddress: String,
+    assetCode: String,
+    assetIssuer: String,
+    trustLimit: String = "",
+    sponsorAddress: String = ""
+): Transaction
+```
+
+Example
+
+```kotlin
+val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val assetIssuer = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+
+val transaction = wallet.addAssetSupport(sourceAddress, "USDC", assetIssuer)
+```
+
+### `Wallet.removeAssetSupport()`
+
+```kotlin
+fun removeAssetSupport(
+    sourceAddress: String,
+    assetCode: String,
+    assetIssuer: String
+): Transaction
+```
+
+Example
+
+```kotlin
+val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val assetIssuer = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+
+val transaction = wallet.removeAssetSupport(sourceAddress, "USDC", assetIssuer)
+```
+
+### `Wallet.addAccountSigner()`
+
+```kotlin
+fun addAccountSigner(
+    sourceAddress: String,
+    signerAddress: String,
+    signerWeight: Int,
+    sponsorAddress: String = ""
+): Transaction
+```
+
+Example
+
+```kotlin
+val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val signerAddress = "GD2YC3HSNQEHSOTRCGGPOUN4J3DETJQR4ENPKY5WLF67XBOSVG5OIEQT"
+
+val transaction = wallet.addAccountSigner(sourceAddress, signerAddress, 10)
+```
+
+### `Wallet.removeAccountSigner()`
+
+```kotlin
+fun removeAccountSigner(
+    sourceAddress: String,
+    signerAddress: String
+): Transaction
+```
+
+Example
+
+```kotlin
+val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val signerAddress = "GD2YC3HSNQEHSOTRCGGPOUN4J3DETJQR4ENPKY5WLF67XBOSVG5OIEQT"
+
+val transaction = wallet.removeAccountSigner(sourceAddress, signerAddress)
+```
+
 ## Utils
 
 ### `buildTransaction()`
