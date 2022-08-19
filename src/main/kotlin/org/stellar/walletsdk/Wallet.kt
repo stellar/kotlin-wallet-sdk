@@ -49,4 +49,37 @@ class Wallet(
 
     return buildTransaction(sourceAddress, server, network, operations)
   }
+
+  // Add trustline
+  fun addAssetSupport(
+    sourceAddress: String,
+    assetCode: String,
+    assetIssuer: String,
+    trustLimit: String = "",
+    sponsorAddress: String = ""
+  ): Transaction {
+    val isSponsored = sponsorAddress.isNotBlank()
+
+    val asset = ChangeTrustAsset.createNonNativeAsset(assetCode, assetIssuer)
+    val changeTrustOp: ChangeTrustOperation =
+      ChangeTrustOperation.Builder(asset, trustLimit).setSourceAccount(sourceAddress).build()
+
+    val operations: List<Operation> =
+      if (isSponsored) {
+        sponsorOperation(sponsorAddress, sourceAddress, changeTrustOp)
+      } else {
+        listOfNotNull(changeTrustOp)
+      }
+
+    return buildTransaction(sourceAddress, server, network, operations)
+  }
+
+  // Remove trustline
+  fun removeAssetSupport(
+    sourceAddress: String,
+    assetCode: String,
+    assetIssuer: String
+  ): Transaction {
+    return addAssetSupport(sourceAddress, assetCode, assetIssuer, "0")
+  }
 }
