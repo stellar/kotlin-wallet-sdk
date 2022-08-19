@@ -2,7 +2,10 @@ package org.stellar.walletsdk.utils
 
 import io.mockk.every
 import io.mockk.spyk
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Network
@@ -28,7 +31,7 @@ internal class BuildTransactionTest {
         block = { buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT)) }
       )
 
-    kotlin.test.assertTrue(error.toString().contains(errorMessage))
+    assertTrue(error.toString().contains(errorMessage))
   }
 
   private val sequenceNumber = 1
@@ -40,8 +43,8 @@ internal class BuildTransactionTest {
 
     val transaction = buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT))
 
-    kotlin.test.assertNotNull(transaction)
-    kotlin.test.assertEquals(1, transaction.operations.size)
+    assertNotNull(transaction)
+    assertEquals(1, transaction.operations.size)
   }
 
   @Test
@@ -51,6 +54,6 @@ internal class BuildTransactionTest {
 
     val transaction = buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT))
 
-    kotlin.test.assertEquals((sequenceNumber + 1).toLong(), transaction.sequenceNumber)
+    assertEquals((sequenceNumber + 1).toLong(), transaction.sequenceNumber)
   }
 }
