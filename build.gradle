@@ -28,6 +28,7 @@ afterEvaluate {
 dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     implementation 'com.github.stellar:java-stellar-sdk:0.34.2'
+    testImplementation 'io.mockk:mockk:1.12.5'
 }
 
 test {
