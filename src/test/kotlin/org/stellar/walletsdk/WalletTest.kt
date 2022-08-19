@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.ChangeTrustOperation
+import org.stellar.sdk.SetOptionsOperation
 
 internal class WalletTest {
   private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE)
@@ -93,6 +94,51 @@ internal class WalletTest {
       val trustLimit = (transaction.operations[0] as ChangeTrustOperation).limit
 
       assertEquals("0", trustLimit)
+    }
+  }
+
+  @Nested
+  @DisplayName("addAccountSigner")
+  inner class AddAccountSigner {
+    @Test
+    fun `there is 1 operation in non-sponsored transaction`() {
+      val transaction = wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+
+      assertEquals(transaction.operations.size, 1)
+    }
+
+    @Test
+    fun `there are 3 operations in sponsored transaction`() {
+      val transaction =
+        wallet.addAccountSigner(
+          ADDRESS_ACTIVE,
+          ADDRESS_ACTIVE_TWO,
+          10,
+          sponsorAddress = ADDRESS_ACTIVE
+        )
+
+      assertEquals(transaction.operations.size, 3)
+    }
+
+    @Test
+    fun `sets correct account signer weight`() {
+      val signerWeight = 13
+      val transaction = wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, signerWeight)
+      val transactionSignerWeight = (transaction.operations[0] as SetOptionsOperation).signerWeight
+
+      assertEquals(transactionSignerWeight, signerWeight)
+    }
+  }
+
+  @Nested
+  @DisplayName("removeAccountSigner")
+  inner class RemoveAccountSigner() {
+    @Test
+    fun `account signer weight is 0`() {
+      val transaction = wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+      val transactionSignerWeight = (transaction.operations[0] as SetOptionsOperation).signerWeight
+
+      assertEquals(transactionSignerWeight, 0)
     }
   }
 }

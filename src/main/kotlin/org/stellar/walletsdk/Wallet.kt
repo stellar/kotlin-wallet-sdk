@@ -82,4 +82,33 @@ class Wallet(
   ): Transaction {
     return addAssetSupport(sourceAddress, assetCode, assetIssuer, "0")
   }
+
+  // Add signer
+  fun addAccountSigner(
+    sourceAddress: String,
+    signerAddress: String,
+    signerWeight: Int,
+    sponsorAddress: String = ""
+  ): Transaction {
+    val isSponsored = sponsorAddress.isNotBlank()
+    val keyPair = KeyPair.fromAccountId(signerAddress)
+    val signer = Signer.ed25519PublicKey(keyPair)
+
+    val addSignerOp: SetOptionsOperation =
+      SetOptionsOperation.Builder().setSigner(signer, signerWeight).build()
+
+    val operations: List<Operation> =
+      if (isSponsored) {
+        sponsorOperation(sponsorAddress, sourceAddress, addSignerOp)
+      } else {
+        listOfNotNull(addSignerOp)
+      }
+
+    return buildTransaction(sourceAddress, server, network, operations)
+  }
+
+  // Remove signer
+  fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
+    return addAccountSigner(sourceAddress, signerAddress, 0)
+  }
 }
