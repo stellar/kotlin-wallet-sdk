@@ -9,6 +9,25 @@ fun sponsorOperation(
   accountAddress: String,
   operation: Operation
 ): List<Operation> {
+  val allowedOperations =
+    listOf(
+      "ChangeTrustOperation",
+      "CreateAccountOperation",
+      "ManageDataOperation",
+      "ManageBuyOfferOperation",
+      "ManageSellOfferOperation",
+      "SetOptionsOperation",
+    )
+
+  val operationType = operation::class.simpleName
+
+  if (!allowedOperations.contains(operationType)) {
+    throw Error(
+      "$operationType cannot be sponsored. Allowed operations are: ${allowedOperations
+        .joinToString(", ")}."
+    )
+  }
+
   return listOfNotNull(
     // Start reserve sponsoring
     BeginSponsoringFutureReservesOperation.Builder(accountAddress)

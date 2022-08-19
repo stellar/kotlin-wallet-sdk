@@ -1,5 +1,6 @@
 package org.stellar.walletsdk
 
+import org.stellar.sdk.ClaimClaimableBalanceOperation
 import org.stellar.sdk.CreateAccountOperation
 
 const val HORIZON_URL = "https://horizon-testnet.stellar.org"
@@ -10,3 +11,9 @@ const val ADDRESS_INACTIVE = "GAW7QECBN2OI4LS4UUA3FO65Y2QPGQS3SPMTMRYK5ZX4IRZXXJ
 
 val OP_CREATE_ACCOUNT: CreateAccountOperation =
   CreateAccountOperation.Builder(ADDRESS_ACTIVE, "1").setSourceAccount(ADDRESS_INACTIVE).build()
+val OP_CLAIM_CLAIMABLE_BALANCE: ClaimClaimableBalanceOperation =
+  ClaimClaimableBalanceOperation.Builder(
+      "000000009c05cd4bfc4db9774d0895be09929b199c0b7625d963e6203e0cdc0c6bb3bbae"
+    )
+    .setSourceAccount(ADDRESS_ACTIVE)
+    .build()
