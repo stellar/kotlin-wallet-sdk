@@ -49,4 +49,66 @@ class Wallet(
 
     return buildTransaction(sourceAddress, server, network, operations)
   }
+
+  // Add trustline
+  fun addAssetSupport(
+    sourceAddress: String,
+    assetCode: String,
+    assetIssuer: String,
+    trustLimit: String = Long.MAX_VALUE.toBigDecimal().movePointLeft(7).toPlainString(),
+    sponsorAddress: String = ""
+  ): Transaction {
+    val isSponsored = sponsorAddress.isNotBlank()
+
+    val asset = ChangeTrustAsset.createNonNativeAsset(assetCode, assetIssuer)
+    val changeTrustOp: ChangeTrustOperation =
+      ChangeTrustOperation.Builder(asset, trustLimit).setSourceAccount(sourceAddress).build()
+
+    val operations: List<Operation> =
+      if (isSponsored) {
+        sponsorOperation(sponsorAddress, sourceAddress, changeTrustOp)
+      } else {
+        listOfNotNull(changeTrustOp)
+      }
+
+    return buildTransaction(sourceAddress, server, network, operations)
+  }
+
+  // Remove trustline
+  fun removeAssetSupport(
+    sourceAddress: String,
+    assetCode: String,
+    assetIssuer: String
+  ): Transaction {
+    return addAssetSupport(sourceAddress, assetCode, assetIssuer, "0")
+  }
+
+  // Add signer
+  fun addAccountSigner(
+    sourceAddress: String,
+    signerAddress: String,
+    signerWeight: Int,
+    sponsorAddress: String = ""
+  ): Transaction {
+    val isSponsored = sponsorAddress.isNotBlank()
+    val keyPair = KeyPair.fromAccountId(signerAddress)
+    val signer = Signer.ed25519PublicKey(keyPair)
+
+    val addSignerOp: SetOptionsOperation =
+      SetOptionsOperation.Builder().setSigner(signer, signerWeight).build()
+
+    val operations: List<Operation> =
+      if (isSponsored) {
+        sponsorOperation(sponsorAddress, sourceAddress, addSignerOp)
+      } else {
+        listOfNotNull(addSignerOp)
+      }
+
+    return buildTransaction(sourceAddress, server, network, operations)
+  }
+
+  // Remove signer
+  fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
+    return addAccountSigner(sourceAddress, signerAddress, 0)
+  }
 }
