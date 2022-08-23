@@ -6,6 +6,7 @@ import kotlin.test.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.ChangeTrustOperation
 import org.stellar.sdk.SetOptionsOperation
 
@@ -34,6 +35,13 @@ internal class WalletTest {
   @Nested
   @DisplayName("fund")
   inner class Fund {
+    @Test
+    fun `defaults work`() {
+      val transaction = wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE)
+
+      assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
+    }
+
     @Test
     fun `throws error when starting balance is less than 1 XLM for non-sponsored accounts`() {
       val errorMessage = "Starting balance must be at least 1 XLM for non-sponsored accounts"
@@ -64,6 +72,13 @@ internal class WalletTest {
   @DisplayName("addAssetSupport")
   inner class AddAssetSupport {
     @Test
+    fun `defaults work`() {
+      val transaction = wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+
+      assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
+    }
+
+    @Test
     fun `there is 1 operation in non-sponsored transaction`() {
       val transaction = wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
 
@@ -88,6 +103,14 @@ internal class WalletTest {
   @DisplayName("removeAssetSupport")
   inner class RemoveAssetSupport {
     @Test
+    fun `defaults work`() {
+      val transaction =
+        wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+
+      assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
+    }
+
+    @Test
     fun `trust limit is 0`() {
       val transaction =
         wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
@@ -100,6 +123,13 @@ internal class WalletTest {
   @Nested
   @DisplayName("addAccountSigner")
   inner class AddAccountSigner {
+    @Test
+    fun `defaults work`() {
+      val transaction = wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+
+      assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
+    }
+
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
       val transaction = wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
@@ -133,6 +163,13 @@ internal class WalletTest {
   @Nested
   @DisplayName("removeAccountSigner")
   inner class RemoveAccountSigner() {
+    @Test
+    fun `defaults work`() {
+      val transaction = wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+
+      assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
+    }
+
     @Test
     fun `account signer weight is 0`() {
       val transaction = wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)

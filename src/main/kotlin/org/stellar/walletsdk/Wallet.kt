@@ -55,7 +55,7 @@ class Wallet(
     sourceAddress: String,
     assetCode: String,
     assetIssuer: String,
-    trustLimit: String = "",
+    trustLimit: String = Long.MAX_VALUE.toBigDecimal().movePointLeft(7).toPlainString(),
     sponsorAddress: String = ""
   ): Transaction {
     val isSponsored = sponsorAddress.isNotBlank()
