@@ -1,0 +1,113 @@
+{
+  "links": {
+    "self": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS"
+    },
+    "transactions": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS/transactions{?cursor,limit,order}",
+      "templated": true
+    },
+    "operations": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS/operations{?cursor,limit,order}",
+      "templated": true
+    },
+    "payments": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS/payments{?cursor,limit,order}",
+      "templated": true
+    },
+    "effects": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS/effects{?cursor,limit,order}",
+      "templated": true
+    },
+    "offers": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS/offers{?cursor,limit,order}",
+      "templated": true
+    },
+    "trades": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS/trades{?cursor,limit,order}",
+      "templated": true
+    },
+    "data": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS/data/{key}",
+      "templated": true
+    }
+  },
+  "id": "GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS",
+  "accountId": "GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS",
+  "sequence": "132007890016796828",
+  "sequenceLedger": 41440097,
+  "sequenceTime": "1655930056",
+  "subentryCount": 6,
+  "lastModifiedLedger": 41440097,
+  "lastModifiedTime": "2022-06-22T20:34:16Z",
+  "thresholds": {
+    "lowThreshold": 0,
+    "medThreshold": 0,
+    "highThreshold": 0
+  },
+  "flags": {
+    "authRequired": false,
+    "authRevocable": true,
+    "authImmutable": false,
+    "authClawbackEnabled": true
+  },
+  "balances": [
+    {
+      "balance": "10.5417798",
+      "limit": "922337203685.4775807",
+      "buyingLiabilities": "0.0000000",
+      "sellingLiabilities": "0.0000000",
+      "lastModifiedLedger": 40368577,
+      "isAuthorized": true,
+      "isAuthorizedToMaintainLiabilities": true,
+      "assetType": "credit_alphanum4",
+      "assetCode": "AQUA",
+      "assetIssuer": "GAV273QGEOQBPUL7USV3OOAZST2ER6AJNBDOYCLMK7DGWC73UJIOO4OQ"
+    },
+    {
+      "balance": "9.6700000",
+      "limit": "922337203685.4775807",
+      "buyingLiabilities": "0.0000000",
+      "sellingLiabilities": "4.0000000",
+      "lastModifiedLedger": 40160057,
+      "isAuthorized": true,
+      "isAuthorizedToMaintainLiabilities": true,
+      "isClawbackEnabled": true,
+      "assetType": "credit_alphanum12",
+      "assetCode": "QUIET",
+      "assetIssuer": "GC4IZLJT3FEYA43JSSVELAMT2QUQMC3XARWDGFDB7FWBWW6MOD3LNPLV"
+    },
+    {
+      "balance": "0.9701371",
+      "limit": "922337203685.4775807",
+      "buyingLiabilities": "0.0000000",
+      "sellingLiabilities": "0.0000000",
+      "lastModifiedLedger": 41440072,
+      "isAuthorized": true,
+      "isAuthorizedToMaintainLiabilities": true,
+      "assetType": "credit_alphanum4",
+      "assetCode": "USDC",
+      "assetIssuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+    },
+    {
+      "balance": "42.8598684",
+      "buyingLiabilities": "2.0000000",
+      "sellingLiabilities": "0.0000000",
+      "assetType": "native"
+    }
+  ],
+  "signers": [
+    {
+      "weight": 1,
+      "key": "GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS",
+      "type": "ed25519_public_key"
+    }
+  ],
+  "data": {
+    "anotherKey": "cXdlcnR5",
+    "someKey": "c29tZVZhbHVl"
+  },
+  "numSponsoring": 1,
+  "numSponsored": 0,
+  "pagingToken": "GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS"
+}

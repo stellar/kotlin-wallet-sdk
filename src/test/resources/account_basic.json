@@ -1,0 +1,71 @@
+{
+  "links": {
+    "self": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB"
+    },
+    "transactions": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB/transactions{?cursor,limit,order}",
+      "templated": true
+    },
+    "operations": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB/operations{?cursor,limit,order}",
+      "templated": true
+    },
+    "payments": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB/payments{?cursor,limit,order}",
+      "templated": true
+    },
+    "effects": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB/effects{?cursor,limit,order}",
+      "templated": true
+    },
+    "offers": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB/offers{?cursor,limit,order}",
+      "templated": true
+    },
+    "trades": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB/trades{?cursor,limit,order}",
+      "templated": true
+    },
+    "data": {
+      "href": "https://horizon-testnet.stellar.org/accounts/GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB/data/{key}",
+      "templated": true
+    }
+  },
+  "id": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB",
+  "accountId": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB",
+  "sequence": "4382782197334016",
+  "subentryCount": 0,
+  "lastModifiedLedger": 1020446,
+  "lastModifiedTime": "2022-08-23T15:08:27Z",
+  "thresholds": {
+    "lowThreshold": 0,
+    "medThreshold": 0,
+    "highThreshold": 0
+  },
+  "flags": {
+    "authRequired": false,
+    "authRevocable": false,
+    "authImmutable": false,
+    "authClawbackEnabled": false
+  },
+  "balances": [
+    {
+      "balance": "1.0000000",
+      "buyingLiabilities": "0.0000000",
+      "sellingLiabilities": "0.0000000",
+      "assetType": "native"
+    }
+  ],
+  "signers": [
+    {
+      "weight": 1,
+      "key": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB",
+      "type": "ed25519_public_key"
+    }
+  ],
+  "data": {},
+  "numSponsoring": 0,
+  "numSponsored": 0,
+  "pagingToken": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB"
+}
