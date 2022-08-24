@@ -1,0 +1,61 @@
+package org.stellar.walletsdk.utils
+
+import io.mockk.every
+import io.mockk.spyk
+import java.lang.Exception
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.stellar.sdk.Network
+import org.stellar.sdk.Server
+import org.stellar.sdk.Transaction
+import org.stellar.sdk.responses.AccountResponse
+import org.stellar.walletsdk.*
+import org.stellar.walletsdk.helpers.objectFromJsonFile
+
+@DisplayName("validateTransaction")
+internal class ValidateTransactionTest {
+  private val server = spyk(Server(HORIZON_URL))
+  private val network = spyk(Network(Network.TESTNET.toString()))
+
+  @Test
+  fun `throws error if source account does not exist`() {
+    val errorMessage = "does not exist"
+
+    every { server.accounts().account(ADDRESS_ACTIVE) } throws Exception("Test message")
+
+    val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
+    val error = assertFailsWith<Error>(block = { validateTransaction(transaction, server) })
+
+    assertTrue(error.toString().contains(errorMessage))
+  }
+
+  @Test
+  fun `throws error if account balance is less than fees`() {
+    val errorMessage = "does not have enough XLM balance to cover"
+
+    val account =
+      objectFromJsonFile("src/test/resources/account_basic.json", AccountResponse::class.java)
+
+    every { server.accounts().account(ADDRESS_ACTIVE) } returns account
+
+    val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
+    val error = assertFailsWith<Error>(block = { validateTransaction(transaction, server) })
+
+    assertTrue(error.toString().contains(errorMessage))
+  }
+
+  @Test
+  fun `no errors`() {
+    val account =
+      objectFromJsonFile("src/test/resources/account_full.json", AccountResponse::class.java)
+
+    every { server.accounts().account(ADDRESS_ACTIVE) } returns account
+
+    val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
+
+    assertDoesNotThrow { validateTransaction(transaction, server) }
+  }
+}
