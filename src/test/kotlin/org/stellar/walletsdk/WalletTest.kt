@@ -7,8 +7,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.stellar.sdk.ChangeTrustOperation
-import org.stellar.sdk.SetOptionsOperation
+import org.stellar.sdk.*
 
 internal class WalletTest {
   private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE)

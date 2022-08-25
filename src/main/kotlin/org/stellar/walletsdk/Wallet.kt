@@ -1,6 +1,7 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
+import org.stellar.sdk.responses.SubmitTransactionResponse
 import org.stellar.walletsdk.utils.buildTransaction
 import org.stellar.walletsdk.utils.sponsorOperation
 
@@ -110,5 +111,14 @@ class Wallet(
   // Remove signer
   fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
     return addAccountSigner(sourceAddress, signerAddress, 0)
+  }
+
+  // Submit transaction
+  fun submitTransaction(signedTransaction: Transaction): SubmitTransactionResponse {
+    try {
+      return server.submitTransaction(signedTransaction)
+    } catch (e: Error) {
+      throw Error("Transaction failed: $e")
+    }
   }
 }
