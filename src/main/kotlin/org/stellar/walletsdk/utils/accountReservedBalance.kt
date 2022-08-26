@@ -10,14 +10,15 @@ fun accountReservedBalance(account: AccountResponse): String {
   val numSponsoring = account.numSponsoring.toBigDecimal()
   val numSponsored = account.numSponsored.toBigDecimal()
 
-  val buyingLiabilities =
-    account.balances.find { it.assetType == "native" }?.buyingLiabilities?.get() ?: "0"
+  val sellingLiabilities =
+    account.balances.find { it.assetType == "native" }?.sellingLiabilities?.get() ?: "0"
 
+  //  (2 + numSubEntries + numSponsoring - numSponsored) * baseReserve + liabilities.selling
   return BigDecimal(BASE_RESERVE_MIN_COUNT)
     .plus(subEntryCount)
     .plus(numSponsoring)
     .minus(numSponsored)
     .times(BASE_RESERVE.toBigDecimal())
-    .plus(buyingLiabilities.toBigDecimal())
+    .plus(sellingLiabilities.toBigDecimal())
     .toPlainString()
 }

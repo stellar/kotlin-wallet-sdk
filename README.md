@@ -182,7 +182,7 @@ fun accountReservedBalance(
 fun buildFeeBumpTransaction(
     feeAccount: String,
     innerTransaction: Transaction,
-    maxFeeInStroops: Long,
+    maxBaseFeeInStroops: Long,
     server: Server
 ): FeeBumpTransaction
 ```

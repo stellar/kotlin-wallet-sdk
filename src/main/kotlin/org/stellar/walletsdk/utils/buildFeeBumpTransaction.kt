@@ -7,7 +7,7 @@ import org.stellar.sdk.Transaction
 fun buildFeeBumpTransaction(
   feeAccount: String,
   innerTransaction: Transaction,
-  maxFeeInStroops: Long,
+  maxBaseFeeInStroops: Long,
   server: Server
 ): FeeBumpTransaction {
   try {
@@ -17,7 +17,7 @@ fun buildFeeBumpTransaction(
   }
 
   return FeeBumpTransaction.Builder(innerTransaction)
-    .setBaseFee(maxFeeInStroops)
+    .setBaseFee(maxBaseFeeInStroops)
     .setFeeAccount(feeAccount)
     .build()
 }
