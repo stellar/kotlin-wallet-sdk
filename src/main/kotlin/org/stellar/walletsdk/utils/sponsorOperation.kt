@@ -22,7 +22,7 @@ fun sponsorOperation(
   val operationType = operation::class.simpleName
 
   if (!allowedOperations.contains(operationType)) {
-    throw Error(
+    throw Exception(
       "$operationType cannot be sponsored. Allowed operations are: ${allowedOperations
         .joinToString(", ")}."
     )

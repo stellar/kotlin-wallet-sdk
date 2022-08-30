@@ -10,8 +10,7 @@ import org.stellar.walletsdk.helpers.objectFromJsonFile
 internal class AccountAvailableNativeBalanceTest {
   @Test
   fun `basic funded account has 0 available balance`() {
-    val account =
-      objectFromJsonFile("src/test/resources/account_basic.json", AccountResponse::class.java)
+    val account = objectFromJsonFile("account_basic.json", AccountResponse::class.java)
     val availableBalance = accountAvailableNativeBalance(account)
 
     assertEquals("0", availableBalance)
@@ -19,8 +18,7 @@ internal class AccountAvailableNativeBalanceTest {
 
   @Test
   fun `more complex account`() {
-    val account =
-      objectFromJsonFile("src/test/resources/account_full.json", AccountResponse::class.java)
+    val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
     val availableBalance = accountAvailableNativeBalance(account)
 
     assertEquals("36.3598684", availableBalance)

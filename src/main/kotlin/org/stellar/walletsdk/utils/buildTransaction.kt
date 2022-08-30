@@ -1,6 +1,6 @@
 package org.stellar.walletsdk.utils
 
-import java.lang.Exception
+import java.io.IOException
 import org.stellar.sdk.Network
 import org.stellar.sdk.Operation
 import org.stellar.sdk.Server
@@ -17,8 +17,8 @@ fun buildTransaction(
 
   try {
     sourceAccount = server.accounts().account(sourceAddress)
-  } catch (e: Exception) {
-    throw Error("Source account was not found")
+  } catch (e: IOException) {
+    throw Exception("Source account was not found")
   }
 
   // TODO: add memo

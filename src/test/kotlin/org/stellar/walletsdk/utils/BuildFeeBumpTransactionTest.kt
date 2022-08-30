@@ -2,8 +2,9 @@ package org.stellar.walletsdk.utils
 
 import io.mockk.every
 import io.mockk.spyk
-import java.lang.Exception
+import java.io.IOException
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -27,20 +28,19 @@ internal class BuildFeeBumpTransactionTest {
   fun `throws error if fee account does not exist`() {
     val errorMessage = "Fee account was not found"
 
-    every { server.accounts().account("") } throws Exception("Test message")
+    every { server.accounts().account(any() as String) } throws IOException("Test message")
 
-    val error =
-      assertFailsWith<Error>(
+    val exception =
+      assertFailsWith<Exception>(
         block = { buildFeeBumpTransaction(ADDRESS_ACTIVE_TWO, transaction, 500, server) }
       )
 
-    kotlin.test.assertTrue(error.toString().contains(errorMessage))
+    assertTrue(exception.toString().contains(errorMessage))
   }
 
   @Test
   fun `successful build`() {
-    val account =
-      objectFromJsonFile("src/test/resources/account_full.json", AccountResponse::class.java)
+    val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
 
     every { server.accounts().account(ADDRESS_ACTIVE_TWO) } returns account
 

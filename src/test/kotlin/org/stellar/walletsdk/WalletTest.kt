@@ -52,10 +52,10 @@ internal class WalletTest {
     fun `throws error when starting balance is less than 1 XLM for non-sponsored accounts`() {
       val errorMessage = "Starting balance must be at least 1 XLM for non-sponsored accounts"
 
-      val error =
-        assertFailsWith<Error>(block = { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") })
+      val exception =
+        assertFailsWith<Exception>(block = { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") })
 
-      assertTrue(error.toString().contains(errorMessage))
+      assertTrue(exception.toString().contains(errorMessage))
     }
 
     @Test

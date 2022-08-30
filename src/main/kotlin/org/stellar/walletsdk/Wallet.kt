@@ -31,7 +31,7 @@ class Wallet(
     val isSponsored = sponsorAddress.isNotBlank()
 
     if (!isSponsored && startingBalance.toInt() < 1) {
-      throw Error("Starting balance must be at least 1 XLM for non-sponsored accounts")
+      throw Exception("Starting balance must be at least 1 XLM for non-sponsored accounts")
     }
 
     val startBalance = if (isSponsored) "0" else startingBalance

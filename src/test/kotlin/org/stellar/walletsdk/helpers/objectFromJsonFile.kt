@@ -1,15 +1,12 @@
 package org.stellar.walletsdk.helpers
 
-import com.google.gson.Gson
-import java.io.File
+import java.io.FileReader
+import org.stellar.walletsdk.utils.GsonUtils
 
-fun <T> objectFromJsonFile(filePath: String, t: Class<T>): T {
-  val jsonString =
-    try {
-      File(filePath).readText()
-    } catch (e: Exception) {
-      throw Error("File not found")
-    }
+fun <T> objectFromJsonFile(fileName: String, t: Class<T>): T {
+  val filePath = getFileFromResource(fileName)
+  val jsonString = FileReader(filePath).use { f -> f.readText() }
+  val gson = GsonUtils.instance ?: throw Exception("Gson instance not found")
 
-  return Gson().fromJson(jsonString, t)
+  return gson.fromJson(jsonString, t)
 }

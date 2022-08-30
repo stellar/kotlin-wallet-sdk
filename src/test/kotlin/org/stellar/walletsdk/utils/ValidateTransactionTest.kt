@@ -2,7 +2,7 @@ package org.stellar.walletsdk.utils
 
 import io.mockk.every
 import io.mockk.spyk
-import java.lang.Exception
+import java.io.IOException
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.DisplayName
@@ -24,33 +24,31 @@ internal class ValidateTransactionTest {
   fun `throws error if source account does not exist`() {
     val errorMessage = "does not exist"
 
-    every { server.accounts().account(ADDRESS_ACTIVE) } throws Exception("Test message")
+    every { server.accounts().account(ADDRESS_ACTIVE) } throws IOException("Test message")
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
-    val error = assertFailsWith<Error>(block = { validateTransaction(transaction, server) })
+    val exception = assertFailsWith<Exception>(block = { validateTransaction(transaction, server) })
 
-    assertTrue(error.toString().contains(errorMessage))
+    assertTrue(exception.toString().contains(errorMessage))
   }
 
   @Test
   fun `throws error if account balance is less than fees`() {
     val errorMessage = "does not have enough XLM balance to cover"
 
-    val account =
-      objectFromJsonFile("src/test/resources/account_basic.json", AccountResponse::class.java)
+    val account = objectFromJsonFile("account_basic.json", AccountResponse::class.java)
 
     every { server.accounts().account(ADDRESS_ACTIVE) } returns account
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
-    val error = assertFailsWith<Error>(block = { validateTransaction(transaction, server) })
+    val exception = assertFailsWith<Exception>(block = { validateTransaction(transaction, server) })
 
-    assertTrue(error.toString().contains(errorMessage))
+    assertTrue(exception.toString().contains(errorMessage))
   }
 
   @Test
   fun `no errors`() {
-    val account =
-      objectFromJsonFile("src/test/resources/account_full.json", AccountResponse::class.java)
+    val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
 
     every { server.accounts().account(ADDRESS_ACTIVE) } returns account
 

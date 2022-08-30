@@ -23,11 +23,11 @@ internal class SponsorOperationTest {
 
   @Test
   fun `not allowed sponsored operation type throws an error`() {
-    val error =
-      assertFailsWith<Error>(
+    val exception =
+      assertFailsWith<Exception>(
         block = { sponsorOperation(ADDRESS_ACTIVE, ADDRESS_ACTIVE, OP_CLAIM_CLAIMABLE_BALANCE) }
       )
 
-    assertTrue(error.toString().contains("ClaimClaimableBalanceOperation cannot be sponsored"))
+    assertTrue(exception.toString().contains("ClaimClaimableBalanceOperation cannot be sponsored"))
   }
 }

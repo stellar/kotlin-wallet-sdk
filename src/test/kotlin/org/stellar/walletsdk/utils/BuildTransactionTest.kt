@@ -2,7 +2,7 @@ package org.stellar.walletsdk.utils
 
 import io.mockk.every
 import io.mockk.spyk
-import java.lang.Exception
+import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -25,14 +25,14 @@ internal class BuildTransactionTest {
   fun `throws error if source account does not exist`() {
     val errorMessage = "Source account was not found"
 
-    every { server.accounts().account("") } throws Exception("Test message")
+    every { server.accounts().account(any() as String) } throws IOException("Test message")
 
-    val error =
-      assertFailsWith<Error>(
+    val exception =
+      assertFailsWith<Exception>(
         block = { buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT)) }
       )
 
-    assertTrue(error.toString().contains(errorMessage))
+    assertTrue(exception.toString().contains(errorMessage))
   }
 
   private val sequenceNumber = 1
