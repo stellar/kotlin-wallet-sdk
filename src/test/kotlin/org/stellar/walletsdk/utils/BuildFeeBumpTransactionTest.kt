@@ -26,7 +26,7 @@ internal class BuildFeeBumpTransactionTest {
 
   @Test
   fun `throws error if fee account does not exist`() {
-    val errorMessage = "Fee account was not found"
+    val errorMessage = "was not found"
 
     every { server.accounts().account(any() as String) } throws IOException("Test message")
 

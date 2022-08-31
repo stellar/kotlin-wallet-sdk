@@ -1,7 +1,6 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
-import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
 import org.stellar.walletsdk.utils.buildTransaction
 import org.stellar.walletsdk.utils.sponsorOperation
 
@@ -115,34 +114,22 @@ class Wallet(
 
   // Submit transaction
   fun submitTransaction(signedTransaction: Transaction, serverInstance: Server = server): Boolean {
-    val maxRetries = 3
+    try {
+      val response = serverInstance.submitTransaction(signedTransaction)
 
-    for (i in 1..maxRetries) {
-      try {
-        val response = serverInstance.submitTransaction(signedTransaction)
-
-        if (response.isSuccess) {
-          break
-        }
-
-        var errorMessage = "Transaction failed"
-
-        if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
-          errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
-        }
-
-        throw Exception(errorMessage)
-      } catch (e: SubmitTransactionTimeoutResponseException) {
-        if (i < maxRetries) {
-          continue
-        } else {
-          throw e
-        }
-      } catch (e: Throwable) {
-        throw e
+      if (response.isSuccess) {
+        return true
       }
-    }
 
-    return true
+      var errorMessage = "Transaction failed"
+
+      if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
+        errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
+      }
+
+      throw Exception(errorMessage)
+    } catch (e: Throwable) {
+      throw e
+    }
   }
 }

@@ -23,7 +23,7 @@ internal class BuildTransactionTest {
 
   @Test
   fun `throws error if source account does not exist`() {
-    val errorMessage = "Source account was not found"
+    val errorMessage = "was not found"
 
     every { server.accounts().account(any() as String) } throws IOException("Test message")
 

@@ -22,7 +22,7 @@ internal class ValidateTransactionTest {
 
   @Test
   fun `throws error if source account does not exist`() {
-    val errorMessage = "does not exist"
+    val errorMessage = "was not found"
 
     every { server.accounts().account(ADDRESS_ACTIVE) } throws IOException("Test message")
 

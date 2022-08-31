@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.SubmitTransactionResponse
-import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
 
 internal class WalletTest {
   private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE)
@@ -215,20 +214,6 @@ internal class WalletTest {
 
       assertTrue(exception.toString().contains(txnResultCode))
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
-    }
-
-    @Test
-    fun `try 3 times when timed out, then throw exception`() {
-      val errorMessage = "Timeout. Please resubmit your transaction to receive submission status."
-
-      every { server.submitTransaction(any() as Transaction) } throws
-        SubmitTransactionTimeoutResponseException()
-
-      val exception =
-        assertFailsWith<Exception>(block = { wallet.submitTransaction(transaction, server) })
-
-      assertTrue(exception.toString().contains(errorMessage))
-      verify(exactly = 3) { server.submitTransaction(any() as Transaction) }
     }
 
     @Test
