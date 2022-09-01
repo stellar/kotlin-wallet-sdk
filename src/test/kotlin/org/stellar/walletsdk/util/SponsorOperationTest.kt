@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

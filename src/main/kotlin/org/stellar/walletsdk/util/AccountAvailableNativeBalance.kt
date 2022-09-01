@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import java.math.BigDecimal
 import org.stellar.sdk.responses.AccountResponse

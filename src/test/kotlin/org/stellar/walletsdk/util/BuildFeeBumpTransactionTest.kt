@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import io.mockk.every
 import io.mockk.spyk

@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import java.io.IOException
 import org.stellar.sdk.Server

@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import com.google.gson.*
 import java.lang.reflect.Type

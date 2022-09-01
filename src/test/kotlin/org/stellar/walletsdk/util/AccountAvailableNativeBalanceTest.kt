@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -6,21 +6,21 @@ import org.junit.jupiter.api.Test
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.helpers.objectFromJsonFile
 
-@DisplayName("accountReservedBalance")
-internal class AccountReservedBalanceTest {
+@DisplayName("accountAvailableNativeBalance")
+internal class AccountAvailableNativeBalanceTest {
   @Test
-  fun `basic funded account`() {
+  fun `basic funded account has 0 available balance`() {
     val account = objectFromJsonFile("account_basic.json", AccountResponse::class.java)
-    val reservedBalance = accountReservedBalance(account)
+    val availableBalance = accountAvailableNativeBalance(account)
 
-    assertEquals(1.0, reservedBalance.toDouble())
+    assertEquals("0", availableBalance)
   }
 
   @Test
   fun `more complex account`() {
     val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
-    val reservedBalance = accountReservedBalance(account)
+    val availableBalance = accountAvailableNativeBalance(account)
 
-    assertEquals(6.5, reservedBalance.toDouble())
+    assertEquals("36.3598684", availableBalance)
   }
 }

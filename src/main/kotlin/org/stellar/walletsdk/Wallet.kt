@@ -1,8 +1,8 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
-import org.stellar.walletsdk.utils.buildTransaction
-import org.stellar.walletsdk.utils.sponsorOperation
+import org.stellar.walletsdk.util.buildTransaction
+import org.stellar.walletsdk.util.sponsorOperation
 
 class Wallet(
   private val horizonUrl: String = "https://horizon-testnet.stellar.org",

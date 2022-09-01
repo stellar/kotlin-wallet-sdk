@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import org.stellar.sdk.Network
 import org.stellar.sdk.Operation

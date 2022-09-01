@@ -1,7 +1,7 @@
 package org.stellar.walletsdk.helpers
 
 import java.io.FileReader
-import org.stellar.walletsdk.utils.GsonUtils
+import org.stellar.walletsdk.util.GsonUtils
 
 fun <T> objectFromJsonFile(fileName: String, t: Class<T>): T {
   val filePath = getFileFromResource(fileName)
