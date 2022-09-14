@@ -4,7 +4,7 @@ import java.io.IOException
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
 
-fun fetchAccountFromAddress(accountAddress: String, server: Server): AccountResponse {
+fun fetchAccount(accountAddress: String, server: Server): AccountResponse {
   try {
     return server.accounts().account(accountAddress)
   } catch (e: IOException) {

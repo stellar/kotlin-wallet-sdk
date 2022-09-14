@@ -11,7 +11,7 @@ fun buildTransaction(
   network: Network,
   operations: List<Operation>
 ): Transaction {
-  val sourceAccount = fetchAccountFromAddress(sourceAddress, server)
+  val sourceAccount = fetchAccount(sourceAddress, server)
 
   // TODO: add memo
   // TODO: update max fee

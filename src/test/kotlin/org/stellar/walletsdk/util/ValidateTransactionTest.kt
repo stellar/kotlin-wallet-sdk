@@ -27,7 +27,8 @@ internal class ValidateTransactionTest {
     every { server.accounts().account(ADDRESS_ACTIVE) } throws IOException("Test message")
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
-    val exception = assertFailsWith<Exception>(block = { validateTransaction(transaction, server) })
+    val exception =
+      assertFailsWith<Exception>(block = { validateSufficientBalance(transaction, server) })
 
     assertTrue(exception.toString().contains(errorMessage))
   }
@@ -41,7 +42,8 @@ internal class ValidateTransactionTest {
     every { server.accounts().account(ADDRESS_ACTIVE) } returns account
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
-    val exception = assertFailsWith<Exception>(block = { validateTransaction(transaction, server) })
+    val exception =
+      assertFailsWith<Exception>(block = { validateSufficientBalance(transaction, server) })
 
     assertTrue(exception.toString().contains(errorMessage))
   }
@@ -54,6 +56,6 @@ internal class ValidateTransactionTest {
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
 
-    assertDoesNotThrow { validateTransaction(transaction, server) }
+    assertDoesNotThrow { validateSufficientBalance(transaction, server) }
   }
 }

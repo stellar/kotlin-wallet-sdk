@@ -3,8 +3,8 @@ package org.stellar.walletsdk.util
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 
-fun validateTransaction(transaction: Transaction, server: Server) {
-  val sourceAccount = fetchAccountFromAddress(transaction.sourceAccount, server)
+fun validateSufficientBalance(transaction: Transaction, server: Server) {
+  val sourceAccount = fetchAccount(transaction.sourceAccount, server)
   val sourceAccountBalance = accountAvailableNativeBalance(sourceAccount).toBigDecimal()
   val transactionFees = stroopsToLumens(transaction.fee.toString()).toBigDecimal()
 

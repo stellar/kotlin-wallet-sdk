@@ -114,22 +114,18 @@ class Wallet(
 
   // Submit transaction
   fun submitTransaction(signedTransaction: Transaction, serverInstance: Server = server): Boolean {
-    try {
-      val response = serverInstance.submitTransaction(signedTransaction)
+    val response = serverInstance.submitTransaction(signedTransaction)
 
-      if (response.isSuccess) {
-        return true
-      }
-
-      var errorMessage = "Transaction failed"
-
-      if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
-        errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
-      }
-
-      throw Exception(errorMessage)
-    } catch (e: Throwable) {
-      throw e
+    if (response.isSuccess) {
+      return true
     }
+
+    var errorMessage = "Transaction failed"
+
+    if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
+      errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
+    }
+
+    throw Exception(errorMessage)
   }
 }

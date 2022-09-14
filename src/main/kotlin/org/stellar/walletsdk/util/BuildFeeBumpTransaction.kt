@@ -10,7 +10,7 @@ fun buildFeeBumpTransaction(
   maxBaseFeeInStroops: Long,
   server: Server
 ): FeeBumpTransaction {
-  fetchAccountFromAddress(feeAccount, server)
+  fetchAccount(feeAccount, server)
 
   return FeeBumpTransaction.Builder(innerTransaction)
     .setBaseFee(maxBaseFeeInStroops)
