@@ -139,8 +139,9 @@ val transaction = wallet.removeAccountSigner(sourceAddress, signerAddress)
 
 ```kotlin
 fun submitTransaction(
-    signedTransaction: Transaction
-): SubmitTransactionResponse
+    signedTransaction: Transaction,
+    serverInstance: Server = server
+): Boolean
 ```
 
 Example
@@ -210,6 +211,15 @@ fun lumensToStroops(
 ): String
 ```
 
+### `fetchAccount()`
+
+```kotlin
+fun fetchAccount(
+    accountAddress: String,
+    server: Server
+): AccountResponse
+```
+
 ### `sponsorOperation()`
 
 ```kotlin
@@ -223,7 +233,7 @@ fun sponsorOperation(
 ### `validateTransaction()`
 
 ```kotlin
-fun validateTransaction(
+fun validateSufficientBalance(
     transaction: Transaction,
     server: Server
 )
