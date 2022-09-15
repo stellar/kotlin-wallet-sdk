@@ -1,10 +1,9 @@
-package org.stellar.walletsdk.utils
+package org.stellar.walletsdk.util
 
 import org.stellar.sdk.Network
 import org.stellar.sdk.Operation
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
-import org.stellar.sdk.responses.AccountResponse
 
 fun buildTransaction(
   sourceAddress: String,
@@ -12,13 +11,7 @@ fun buildTransaction(
   network: Network,
   operations: List<Operation>
 ): Transaction {
-  val sourceAccount: AccountResponse?
-
-  try {
-    sourceAccount = server.accounts().account(sourceAddress)
-  } catch (e: Error) {
-    throw Error("Source account was not found")
-  }
+  val sourceAccount = fetchAccount(sourceAddress, server)
 
   // TODO: add memo
   // TODO: update max fee

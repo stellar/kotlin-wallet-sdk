@@ -1,5 +1,9 @@
 package org.stellar.walletsdk
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
@@ -7,11 +11,12 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.stellar.sdk.ChangeTrustOperation
-import org.stellar.sdk.SetOptionsOperation
+import org.stellar.sdk.*
+import org.stellar.sdk.responses.SubmitTransactionResponse
 
 internal class WalletTest {
   private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE)
+  private val server = spyk(Server(HORIZON_URL))
 
   @Nested
   @DisplayName("create")
@@ -46,10 +51,10 @@ internal class WalletTest {
     fun `throws error when starting balance is less than 1 XLM for non-sponsored accounts`() {
       val errorMessage = "Starting balance must be at least 1 XLM for non-sponsored accounts"
 
-      val error =
-        assertFailsWith<Error>(block = { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") })
+      val exception =
+        assertFailsWith<Exception>(block = { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") })
 
-      assertTrue(error.toString().contains(errorMessage))
+      assertTrue(exception.toString().contains(errorMessage))
     }
 
     @Test
@@ -176,6 +181,52 @@ internal class WalletTest {
       val transactionSignerWeight = (transaction.operations[0] as SetOptionsOperation).signerWeight
 
       assertEquals(transactionSignerWeight, 0)
+    }
+  }
+
+  @Nested
+  @DisplayName("submitTransaction")
+  inner class SubmitTransaction() {
+    private val transaction = wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+
+    @Test
+    fun `returns true on success`() {
+      val mockResponse = mockk<SubmitTransactionResponse>()
+
+      every { mockResponse.isSuccess } returns true
+      every { server.submitTransaction(any() as Transaction) } returns mockResponse
+
+      assertTrue(wallet.submitTransaction(transaction, server))
+      verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
+    }
+
+    @Test
+    fun `throws exception with txn result code`() {
+      val txnResultCode = "txn_failed_test"
+      val mockResponse = mockk<SubmitTransactionResponse>()
+
+      every { mockResponse.isSuccess } returns false
+      every { mockResponse.extras.resultCodes.transactionResultCode } returns txnResultCode
+      every { server.submitTransaction(any() as Transaction) } returns mockResponse
+
+      val exception =
+        assertFailsWith<Exception>(block = { wallet.submitTransaction(transaction, server) })
+
+      assertTrue(exception.toString().contains(txnResultCode))
+      verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
+    }
+
+    @Test
+    fun `don't retry when generic exception`() {
+      val errorMessage = "Generic error message"
+
+      every { server.submitTransaction(any() as Transaction) } throws Exception(errorMessage)
+
+      val exception =
+        assertFailsWith<Exception>(block = { wallet.submitTransaction(transaction, server) })
+
+      assertTrue(exception.toString().contains(errorMessage))
+      verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
     }
   }
 }

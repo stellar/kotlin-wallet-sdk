@@ -135,7 +135,57 @@ val signerAddress = "GD2YC3HSNQEHSOTRCGGPOUN4J3DETJQR4ENPKY5WLF67XBOSVG5OIEQT"
 val transaction = wallet.removeAccountSigner(sourceAddress, signerAddress)
 ```
 
+### `Wallet.submitTransaction()`
+
+```kotlin
+fun submitTransaction(
+    signedTransaction: Transaction
+): SubmitTransactionResponse
+```
+
+Example
+
+```kotlin
+val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val assetIssuer = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+
+val transaction = wallet.addAssetSupport(sourceAddress, "USDC", assetIssuer)
+
+// Sign transaction using KeyStore
+// Validate transaction
+// Submit signed transaction to the network
+
+wallet.submitTransaction(transaction)
+```
+
 ## Utils
+
+### `accountAvailableNativeBalance()`
+
+```kotlin
+fun accountAvailableNativeBalance(
+    account: AccountResponse
+): String
+```
+
+### `accountReservedBalance()`
+
+```kotlin
+fun accountReservedBalance(
+    account: AccountResponse
+): String
+```
+
+### `buildFeeBumpTransaction()`
+
+```kotlin
+fun buildFeeBumpTransaction(
+    feeAccount: String,
+    innerTransaction: Transaction,
+    maxBaseFeeInStroops: Long,
+    server: Server
+): FeeBumpTransaction
+```
 
 ### `buildTransaction()`
 
@@ -148,6 +198,18 @@ fun buildTransaction(
 ): Transaction
 ```
 
+### `convertLumensStroops()`
+
+```kotlin
+fun stroopsToLumens(
+    stroops: String
+): String
+
+fun lumensToStroops(
+    lumens: String
+): String
+```
+
 ### `sponsorOperation()`
 
 ```kotlin
@@ -156,4 +218,13 @@ fun sponsorOperation(
     accountAddress: String,
     operation: Operation
 ): List<Operation>
+```
+
+### `validateTransaction()`
+
+```kotlin
+fun validateTransaction(
+    transaction: Transaction,
+    server: Server
+)
 ```

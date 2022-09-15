@@ -1,8 +1,8 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
-import org.stellar.walletsdk.utils.buildTransaction
-import org.stellar.walletsdk.utils.sponsorOperation
+import org.stellar.walletsdk.util.buildTransaction
+import org.stellar.walletsdk.util.sponsorOperation
 
 class Wallet(
   private val horizonUrl: String = "https://horizon-testnet.stellar.org",
@@ -30,7 +30,7 @@ class Wallet(
     val isSponsored = sponsorAddress.isNotBlank()
 
     if (!isSponsored && startingBalance.toInt() < 1) {
-      throw Error("Starting balance must be at least 1 XLM for non-sponsored accounts")
+      throw Exception("Starting balance must be at least 1 XLM for non-sponsored accounts")
     }
 
     val startBalance = if (isSponsored) "0" else startingBalance
@@ -110,5 +110,22 @@ class Wallet(
   // Remove signer
   fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
     return addAccountSigner(sourceAddress, signerAddress, 0)
+  }
+
+  // Submit transaction
+  fun submitTransaction(signedTransaction: Transaction, serverInstance: Server = server): Boolean {
+    val response = serverInstance.submitTransaction(signedTransaction)
+
+    if (response.isSuccess) {
+      return true
+    }
+
+    var errorMessage = "Transaction failed"
+
+    if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
+      errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
+    }
+
+    throw Exception(errorMessage)
   }
 }
