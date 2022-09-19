@@ -82,14 +82,13 @@ class Auth(
 
     if (clientDomainOperation != null) {
       challengeTxn =
-        walletSigner.signClientDomainTransaction(
+        walletSigner.signWithDomainAccount(
           challengeResponse.transaction,
           challengeResponse.network_passphrase
         )
-          ?: throw Exception("Client domain found without signing callback")
     }
 
-    walletSigner.signTransaction(challengeTxn)
+    walletSigner.signWithClientAccount(challengeTxn)
 
     return challengeTxn
   }
