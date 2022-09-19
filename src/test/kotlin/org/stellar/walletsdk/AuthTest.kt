@@ -2,6 +2,7 @@ package org.stellar.walletsdk
 
 import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class AuthTest {
 
@@ -35,5 +36,20 @@ internal class AuthTest {
         .authenticate()
 
     assertNotNull(authToken)
+  }
+
+  @Test
+  fun `throw exception if both memo and clientDomain are provided`() {
+    assertThrows<Exception> {
+      Auth(
+          ADDRESS_ACTIVE,
+          AUTH_ENDPOINT,
+          AUTH_HOME_DOMAIN,
+          memoId = "memo123",
+          clientDomain = AUTH_CLIENT_DOMAIN,
+          walletSigner = InProcessWalletSigner()
+        )
+        .authenticate()
+    }
   }
 }

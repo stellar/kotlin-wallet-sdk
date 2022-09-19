@@ -13,6 +13,7 @@ class Auth(
   private val accountAddress: String,
   private val authEndpoint: String,
   private val homeDomain: String,
+  private val memoId: String? = null,
   private val clientDomain: String? = null,
   private val networkPassPhrase: String = Network.TESTNET.toString(),
   private val walletSigner: WalletSigner
@@ -42,7 +43,15 @@ class Auth(
       .addQueryParameter("account", accountAddress)
       .addQueryParameter("home_domain", homeDomain)
 
+    if (!memoId.isNullOrBlank()) {
+      authURL.addQueryParameter("memo", memoId)
+    }
+
     if (!clientDomain.isNullOrBlank()) {
+      if (!memoId.isNullOrBlank()) {
+        throw Exception("Client domain cannot be used with memo")
+      }
+
       authURL.addQueryParameter("client_domain", clientDomain)
     }
 
