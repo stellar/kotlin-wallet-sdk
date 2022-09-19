@@ -13,10 +13,9 @@ class Auth(
   private val accountAddress: String,
   private val authEndpoint: String,
   private val homeDomain: String,
-  private val signTransaction: (Transaction) -> Transaction,
   private val clientDomain: String? = null,
-  private val signClientDomainTransaction: ((String, String) -> Transaction)? = null,
   private val networkPassPhrase: String = Network.TESTNET.toString(),
+  private val walletSigner: WalletSigner
 ) {
   private val gson = GsonUtils.instance!!
   private val okHttpClient = OkHttpClient()
@@ -83,14 +82,14 @@ class Auth(
 
     if (clientDomainOperation != null) {
       challengeTxn =
-        signClientDomainTransaction?.invoke(
+        walletSigner.signClientDomainTransaction(
           challengeResponse.transaction,
           challengeResponse.network_passphrase
         )
           ?: throw Exception("Client domain found without signing callback")
     }
 
-    signTransaction(challengeTxn)
+    walletSigner.signTransaction(challengeTxn)
 
     return challengeTxn
   }
