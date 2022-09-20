@@ -173,6 +173,12 @@ class Auth(
 )
 ```
 
+### `authenticate()`
+
+```kotlin
+fun authenticate(): String
+```
+
 Example
 
 ```kotlin
