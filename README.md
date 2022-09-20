@@ -159,6 +159,37 @@ val transaction = wallet.addAssetSupport(sourceAddress, "USDC", assetIssuer)
 wallet.submitTransaction(transaction)
 ```
 
+## Auth
+
+```kotlin
+class Auth(
+    accountAddress: String,
+    authEndpoint: String,
+    homeDomain: String,
+    memoId: String? = null,
+    clientDomain: String? = null,
+    networkPassPhrase: String = Network.TESTNET.toString(),
+    walletSigner: WalletSigner
+)
+```
+
+### `authenticate()`
+
+```kotlin
+fun authenticate(): String
+```
+
+Example
+
+```kotlin
+val authToken = Auth(
+    accountAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22",
+    authEndpoint = "https://testanchor.stellar.org/auth",
+    homeDomain = "testanchor.stellar.org",
+    walletSigner = WalletSigner()
+).authenticate()
+```
+
 ## Utils
 
 ### `accountAvailableNativeBalance()`
