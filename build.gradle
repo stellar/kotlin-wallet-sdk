@@ -47,5 +47,5 @@ compileTestKotlin {
 }
 
 application {
-    mainClassName = 'MainKt'
+    mainClassName = 'Wallet'
 }

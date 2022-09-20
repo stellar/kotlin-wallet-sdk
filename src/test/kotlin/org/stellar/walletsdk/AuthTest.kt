@@ -45,8 +45,22 @@ internal class AuthTest {
           ADDRESS_ACTIVE,
           AUTH_ENDPOINT,
           AUTH_HOME_DOMAIN,
-          memoId = "memo123",
+          memoId = "123",
           clientDomain = AUTH_CLIENT_DOMAIN,
+          walletSigner = InProcessWalletSigner()
+        )
+        .authenticate()
+    }
+  }
+
+  @Test
+  fun `throw exception if Memo ID is not a positive integer`() {
+    assertThrows<Exception> {
+      Auth(
+          ADDRESS_ACTIVE,
+          AUTH_ENDPOINT,
+          AUTH_HOME_DOMAIN,
+          memoId = "abc",
           walletSigner = InProcessWalletSigner()
         )
         .authenticate()

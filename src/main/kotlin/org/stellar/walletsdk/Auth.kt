@@ -44,6 +44,10 @@ class Auth(
       .addQueryParameter("home_domain", homeDomain)
 
     if (!memoId.isNullOrBlank()) {
+      if (memoId.toInt() < 0) {
+        throw Exception("Memo ID must be a positive integer")
+      }
+
       authURL.addQueryParameter("memo", memoId)
     }
 
