@@ -5,6 +5,7 @@ import io.mockk.spyk
 import java.io.IOException
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlinx.coroutines.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -14,11 +15,12 @@ import org.stellar.sdk.Transaction
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
 import org.stellar.walletsdk.HORIZON_URL
+import org.stellar.walletsdk.SuspendTest
 import org.stellar.walletsdk.TXN_XDR_CREATE_ACCOUNT
 import org.stellar.walletsdk.helpers.objectFromJsonFile
 
 @DisplayName("buildFeeBumpTransaction")
-internal class BuildFeeBumpTransactionTest {
+internal class BuildFeeBumpTransactionTest : SuspendTest() {
   private val server = spyk(Server(HORIZON_URL))
   private val network = spyk(Network(Network.TESTNET.toString()))
   private val transaction =
@@ -32,7 +34,9 @@ internal class BuildFeeBumpTransactionTest {
 
     val exception =
       assertFailsWith<Exception>(
-        block = { buildFeeBumpTransaction(ADDRESS_ACTIVE_TWO, transaction, 500, server) }
+        block = {
+          runBlocking { buildFeeBumpTransaction(ADDRESS_ACTIVE_TWO, transaction, 500, server) }
+        }
       )
 
     assertTrue(exception.toString().contains(errorMessage))
@@ -44,6 +48,8 @@ internal class BuildFeeBumpTransactionTest {
 
     every { server.accounts().account(ADDRESS_ACTIVE_TWO) } returns account
 
-    assertDoesNotThrow { buildFeeBumpTransaction(ADDRESS_ACTIVE_TWO, transaction, 500, server) }
+    assertDoesNotThrow {
+      runBlocking { buildFeeBumpTransaction(ADDRESS_ACTIVE_TWO, transaction, 500, server) }
+    }
   }
 }

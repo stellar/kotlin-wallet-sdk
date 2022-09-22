@@ -7,6 +7,7 @@ import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlinx.coroutines.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.SubmitTransactionResponse
 
-internal class WalletTest {
+internal class WalletTest : SuspendTest() {
   private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE)
   private val server = spyk(Server(HORIZON_URL))
 
@@ -29,7 +30,7 @@ internal class WalletTest {
 
       // Public key
       assertEquals(56, publicKey.length)
-      assertTrue(publicKey.startsWith("G"))
+      assertTrue(publicKey.startsWith(""))
 
       // Secret key
       assertEquals(56, secretKey.length)
@@ -42,7 +43,7 @@ internal class WalletTest {
   inner class Fund {
     @Test
     fun `defaults work`() {
-      val transaction = wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE)
+      val transaction = runBlocking { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE) }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
@@ -52,22 +53,25 @@ internal class WalletTest {
       val errorMessage = "Starting balance must be at least 1 XLM for non-sponsored accounts"
 
       val exception =
-        assertFailsWith<Exception>(block = { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") })
+        assertFailsWith<Exception>(
+          block = { runBlocking { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") } }
+        )
 
       assertTrue(exception.toString().contains(errorMessage))
     }
 
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
-      val transaction = wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE)
+      val transaction = runBlocking { wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE) }
 
       assertEquals(transaction.operations.size, 1)
     }
 
     @Test
     fun `there are 3 operations in sponsored transaction`() {
-      val transaction =
+      val transaction = runBlocking {
         wallet.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, sponsorAddress = ADDRESS_ACTIVE)
+      }
 
       assertEquals(transaction.operations.size, 3)
     }
@@ -78,27 +82,32 @@ internal class WalletTest {
   inner class AddAssetSupport {
     @Test
     fun `defaults work`() {
-      val transaction = wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+      val transaction = runBlocking {
+        wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+      }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
-      val transaction = wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+      val transaction = runBlocking {
+        wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+      }
 
       assertEquals(transaction.operations.size, 1)
     }
 
     @Test
     fun `there are 3 operations in sponsored transaction`() {
-      val transaction =
+      val transaction = runBlocking {
         wallet.addAssetSupport(
           ADDRESS_ACTIVE,
           USDC_ASSET_CODE,
           USDC_ASSET_ISSUER,
           sponsorAddress = ADDRESS_ACTIVE
         )
+      }
 
       assertEquals(transaction.operations.size, 3)
     }
@@ -109,16 +118,18 @@ internal class WalletTest {
   inner class RemoveAssetSupport {
     @Test
     fun `defaults work`() {
-      val transaction =
+      val transaction = runBlocking {
         wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+      }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `trust limit is 0`() {
-      val transaction =
+      val transaction = runBlocking {
         wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
+      }
       val trustLimit = (transaction.operations[0] as ChangeTrustOperation).limit
 
       assertEquals("0", trustLimit)
@@ -130,27 +141,32 @@ internal class WalletTest {
   inner class AddAccountSigner {
     @Test
     fun `defaults work`() {
-      val transaction = wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+      val transaction = runBlocking {
+        wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+      }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
-      val transaction = wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+      val transaction = runBlocking {
+        wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+      }
 
       assertEquals(transaction.operations.size, 1)
     }
 
     @Test
     fun `there are 3 operations in sponsored transaction`() {
-      val transaction =
+      val transaction = runBlocking {
         wallet.addAccountSigner(
           ADDRESS_ACTIVE,
           ADDRESS_ACTIVE_TWO,
           10,
           sponsorAddress = ADDRESS_ACTIVE
         )
+      }
 
       assertEquals(transaction.operations.size, 3)
     }
@@ -158,7 +174,9 @@ internal class WalletTest {
     @Test
     fun `sets correct account signer weight`() {
       val signerWeight = 13
-      val transaction = wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, signerWeight)
+      val transaction = runBlocking {
+        wallet.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, signerWeight)
+      }
       val transactionSignerWeight = (transaction.operations[0] as SetOptionsOperation).signerWeight
 
       assertEquals(transactionSignerWeight, signerWeight)
@@ -170,14 +188,18 @@ internal class WalletTest {
   inner class RemoveAccountSigner() {
     @Test
     fun `defaults work`() {
-      val transaction = wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+      val transaction = runBlocking {
+        wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+      }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `account signer weight is 0`() {
-      val transaction = wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+      val transaction = runBlocking {
+        wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+      }
       val transactionSignerWeight = (transaction.operations[0] as SetOptionsOperation).signerWeight
 
       assertEquals(transactionSignerWeight, 0)
@@ -187,7 +209,9 @@ internal class WalletTest {
   @Nested
   @DisplayName("submitTransaction")
   inner class SubmitTransaction() {
-    private val transaction = wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+    private val transaction = runBlocking {
+      wallet.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+    }
 
     @Test
     fun `returns true on success`() {
@@ -196,7 +220,7 @@ internal class WalletTest {
       every { mockResponse.isSuccess } returns true
       every { server.submitTransaction(any() as Transaction) } returns mockResponse
 
-      assertTrue(wallet.submitTransaction(transaction, server))
+      assertTrue(runBlocking { wallet.submitTransaction(transaction, server) })
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
     }
 
@@ -210,7 +234,9 @@ internal class WalletTest {
       every { server.submitTransaction(any() as Transaction) } returns mockResponse
 
       val exception =
-        assertFailsWith<Exception>(block = { wallet.submitTransaction(transaction, server) })
+        assertFailsWith<Exception>(
+          block = { runBlocking { wallet.submitTransaction(transaction, server) } }
+        )
 
       assertTrue(exception.toString().contains(txnResultCode))
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
@@ -223,7 +249,9 @@ internal class WalletTest {
       every { server.submitTransaction(any() as Transaction) } throws Exception(errorMessage)
 
       val exception =
-        assertFailsWith<Exception>(block = { wallet.submitTransaction(transaction, server) })
+        assertFailsWith<Exception>(
+          block = { runBlocking { wallet.submitTransaction(transaction, server) } }
+        )
 
       assertTrue(exception.toString().contains(errorMessage))
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }

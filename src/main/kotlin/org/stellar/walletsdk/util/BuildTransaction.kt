@@ -5,7 +5,7 @@ import org.stellar.sdk.Operation
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 
-fun buildTransaction(
+suspend fun buildTransaction(
   sourceAddress: String,
   server: Server,
   network: Network,

@@ -1,5 +1,8 @@
 package org.stellar.walletsdk
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import org.stellar.sdk.*
 import org.stellar.walletsdk.util.buildTransaction
 import org.stellar.walletsdk.util.sponsorOperation
@@ -21,7 +24,7 @@ class Wallet(
 
   // Fund (activate) account
   // TODO: ??? do we need to include add trustline operation here?
-  fun fund(
+  suspend fun fund(
     sourceAddress: String,
     destinationAddress: String,
     startingBalance: String = "1",
@@ -51,7 +54,7 @@ class Wallet(
   }
 
   // Add trustline
-  fun addAssetSupport(
+  suspend fun addAssetSupport(
     sourceAddress: String,
     assetCode: String,
     assetIssuer: String,
@@ -75,7 +78,7 @@ class Wallet(
   }
 
   // Remove trustline
-  fun removeAssetSupport(
+  suspend fun removeAssetSupport(
     sourceAddress: String,
     assetCode: String,
     assetIssuer: String
@@ -84,7 +87,7 @@ class Wallet(
   }
 
   // Add signer
-  fun addAccountSigner(
+  suspend fun addAccountSigner(
     sourceAddress: String,
     signerAddress: String,
     signerWeight: Int,
@@ -108,24 +111,31 @@ class Wallet(
   }
 
   // Remove signer
-  fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
+  suspend fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
     return addAccountSigner(sourceAddress, signerAddress, 0)
   }
 
   // Submit transaction
-  fun submitTransaction(signedTransaction: Transaction, serverInstance: Server = server): Boolean {
-    val response = serverInstance.submitTransaction(signedTransaction)
+  suspend fun submitTransaction(
+    signedTransaction: Transaction,
+    serverInstance: Server = server
+  ): Boolean {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        val response = serverInstance.submitTransaction(signedTransaction)
 
-    if (response.isSuccess) {
-      return true
-    }
+        if (response.isSuccess) {
+          return@async true
+        }
 
-    var errorMessage = "Transaction failed"
+        var errorMessage = "Transaction failed"
 
-    if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
-      errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
-    }
+        if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
+          errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
+        }
 
-    throw Exception(errorMessage)
+        throw Exception(errorMessage)
+      }
+      .await()
   }
 }
