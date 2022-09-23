@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import org.stellar.sdk.*
 import org.stellar.walletsdk.util.buildTransaction
+import org.stellar.walletsdk.util.getRecoveryServerTxnSignatures
 import org.stellar.walletsdk.util.sponsorOperation
 
 class Wallet(
@@ -137,5 +138,34 @@ class Wallet(
         throw Exception(errorMessage)
       }
       .await()
+  }
+
+  suspend fun signWithRecoveryServers(
+    transaction: Transaction,
+    accountAddress: String,
+    recoveryServers: List<RecoveryServerAuth>,
+    base64Decoder: ((String) -> ByteArray)? = null
+  ): Transaction {
+    val signatures =
+      recoveryServers.map {
+        CoroutineScope(Dispatchers.IO)
+          .async {
+            return@async getRecoveryServerTxnSignatures(
+              transaction = transaction,
+              accountAddress = accountAddress,
+              recoveryServer = it,
+              base64Decoder = base64Decoder
+            )
+          }
+          .await()
+      }
+
+    if (recoveryServers.size != signatures.size) {
+      throw Exception("Didn't get all recovery server signatures")
+    }
+
+    signatures.forEach { transaction.addSignature(it) }
+
+    return transaction
   }
 }
