@@ -30,7 +30,7 @@ internal class WalletTest : SuspendTest() {
 
       // Public key
       assertEquals(56, publicKey.length)
-      assertTrue(publicKey.startsWith(""))
+      assertTrue(publicKey.startsWith("G"))
 
       // Secret key
       assertEquals(56, secretKey.length)
