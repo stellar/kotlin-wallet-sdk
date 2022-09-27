@@ -5,6 +5,7 @@ import io.mockk.spyk
 import java.io.IOException
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -16,7 +17,7 @@ import org.stellar.walletsdk.*
 import org.stellar.walletsdk.helpers.objectFromJsonFile
 
 @DisplayName("validateTransaction")
-internal class ValidateTransactionTest {
+internal class ValidateTransactionTest : SuspendTest() {
   private val server = spyk(Server(HORIZON_URL))
   private val network = spyk(Network(Network.TESTNET.toString()))
 
@@ -28,7 +29,9 @@ internal class ValidateTransactionTest {
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
     val exception =
-      assertFailsWith<Exception>(block = { validateSufficientBalance(transaction, server) })
+      assertFailsWith<Exception>(
+        block = { runBlocking { validateSufficientBalance(transaction, server) } }
+      )
 
     assertTrue(exception.toString().contains(errorMessage))
   }
@@ -43,7 +46,9 @@ internal class ValidateTransactionTest {
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
     val exception =
-      assertFailsWith<Exception>(block = { validateSufficientBalance(transaction, server) })
+      assertFailsWith<Exception>(
+        block = { runBlocking { validateSufficientBalance(transaction, server) } }
+      )
 
     assertTrue(exception.toString().contains(errorMessage))
   }
@@ -56,6 +61,6 @@ internal class ValidateTransactionTest {
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
 
-    assertDoesNotThrow { validateSufficientBalance(transaction, server) }
+    assertDoesNotThrow { runBlocking { validateSufficientBalance(transaction, server) } }
   }
 }
