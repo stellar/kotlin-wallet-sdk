@@ -9,15 +9,23 @@ object OkHttpUtils {
   private const val jsonContentType = "application/json; charset=utf-8"
   private val jsonContentMediaType = jsonContentType.toMediaType()
 
-  fun buildStringGetRequest(url: String): Request {
-    return Request.Builder().url(url).build()
+  fun buildStringGetRequest(url: String, authToken: String? = null): Request {
+    val request = Request.Builder().url(url)
+
+    if (authToken != null) {
+      request.addHeader("Authorization", "Bearer $authToken")
+    }
+
+    return request.build()
   }
 
-  fun <T> buildJsonPostRequest(url: String, requestParams: T): Request {
-    return Request.Builder()
-      .url(url)
-      .header("Content-Type", jsonContentType)
-      .post(gson.toJson(requestParams).toRequestBody(jsonContentMediaType))
-      .build()
+  fun <T> buildJsonPostRequest(url: String, requestParams: T, authToken: String? = null): Request {
+    val request = Request.Builder().url(url).header("Content-Type", jsonContentType)
+
+    if (authToken != null) {
+      request.addHeader("Authorization", "Bearer $authToken")
+    }
+
+    return request.post(gson.toJson(requestParams).toRequestBody(jsonContentMediaType)).build()
   }
 }
