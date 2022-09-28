@@ -19,9 +19,12 @@ val wallet = Wallet("https://horizon-testnet.stellar.org", Network.TESTNET.toStr
 ### `Wallet.create()`
 
 ```kotlin
-fun create(): AccountKeypair(
-val publicKey: String,
-val secretKey: String)
+fun create(): AccountKeypair
+
+data class AccountKeypair(
+    val publicKey: String,
+    val secretKey: String
+)
 ```
 
 Example
@@ -36,7 +39,7 @@ val newAccountKeypair = wallet.create()
 ### `Wallet.fund()`
 
 ```kotlin
-fun fund(
+suspend fun fund(
     sourceAddress: String,
     destinationAddress: String,
     startingBalance: String = "1",
@@ -60,7 +63,7 @@ val sponsoredFundTransaction =
 ### `Wallet.addAssetSupport()`
 
 ```kotlin
-fun addAssetSupport(
+suspend fun addAssetSupport(
     sourceAddress: String,
     assetCode: String,
     assetIssuer: String,
@@ -81,7 +84,7 @@ val transaction = wallet.addAssetSupport(sourceAddress, "USDC", assetIssuer)
 ### `Wallet.removeAssetSupport()`
 
 ```kotlin
-fun removeAssetSupport(
+suspend fun removeAssetSupport(
     sourceAddress: String,
     assetCode: String,
     assetIssuer: String
@@ -100,7 +103,7 @@ val transaction = wallet.removeAssetSupport(sourceAddress, "USDC", assetIssuer)
 ### `Wallet.addAccountSigner()`
 
 ```kotlin
-fun addAccountSigner(
+suspend fun addAccountSigner(
     sourceAddress: String,
     signerAddress: String,
     signerWeight: Int,
@@ -120,7 +123,7 @@ val transaction = wallet.addAccountSigner(sourceAddress, signerAddress, 10)
 ### `Wallet.removeAccountSigner()`
 
 ```kotlin
-fun removeAccountSigner(
+suspend fun removeAccountSigner(
     sourceAddress: String,
     signerAddress: String
 ): Transaction
@@ -138,7 +141,7 @@ val transaction = wallet.removeAccountSigner(sourceAddress, signerAddress)
 ### `Wallet.submitTransaction()`
 
 ```kotlin
-fun submitTransaction(
+suspend fun submitTransaction(
     signedTransaction: Transaction,
     serverInstance: Server = server
 ): Boolean
@@ -157,6 +160,51 @@ val transaction = wallet.addAssetSupport(sourceAddress, "USDC", assetIssuer)
 // Submit signed transaction to the network
 
 wallet.submitTransaction(transaction)
+```
+
+### `Wallet.signWithRecoveryServers()`
+
+```kotlin
+suspend fun signWithRecoveryServers(
+    transaction: Transaction,
+    accountAddress: String,
+    recoveryServers: List<RecoveryServerAuth>,
+    base64Decoder: ((String) -> ByteArray)? = null
+): Transaction
+
+data class RecoveryServerAuth(
+    val endpoint: String,
+    val signerAddress: String,
+    val authToken: String,
+)
+```
+
+Note: `base64Decoder` by default uses `java.util.Base64`. If you need to support Android API level 22 and below, you can
+provide your own `base64Decorator` (for example, `android.util.Base64`).
+
+Example
+
+```kotlin
+val sourceAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val transaction = wallet.addAssetSupport(sourceAddress, "USDC", assetIssuer)
+
+wallet.signWithRecoveryServers(
+    transaction = transaction,
+    accountAddress = sourceAddress,
+    recoveryServers =
+    listOf(
+        RecoveryServerAuth(
+            endpoint = recoveryServer1.endpoint,
+            signerAddress = recoveryServer1.stellarAddress,
+            authToken = authToken1
+        ),
+        RecoveryServerAuth(
+            endpoint = recoveryServer2.endpoint,
+            signerAddress = recoveryServer2.stellarAddress,
+            authToken = authToken2
+        )
+    ),
+)
 ```
 
 ## Auth
@@ -211,7 +259,7 @@ fun accountReservedBalance(
 ### `buildFeeBumpTransaction()`
 
 ```kotlin
-fun buildFeeBumpTransaction(
+suspend fun buildFeeBumpTransaction(
     feeAccount: String,
     innerTransaction: Transaction,
     maxBaseFeeInStroops: Long,
@@ -222,7 +270,7 @@ fun buildFeeBumpTransaction(
 ### `buildTransaction()`
 
 ```kotlin
-fun buildTransaction(
+suspend fun buildTransaction(
     sourceAddress: String,
     server: Server,
     network: Network,
@@ -242,13 +290,34 @@ fun lumensToStroops(
 ): String
 ```
 
+### `createDecoratedSignature()`
+
+```kotlin
+fun createDecoratedSignature(
+    publicKey: String,
+    signatureBase64String: String,
+    base64Decoder: ((String) -> ByteArray)? = null
+): DecoratedSignature
+```
+
 ### `fetchAccount()`
 
 ```kotlin
-fun fetchAccount(
+suspend fun fetchAccount(
     accountAddress: String,
     server: Server
 ): AccountResponse
+```
+
+### `getRecoveryServerTxnSignatures()`
+
+```kotlin
+suspend fun getRecoveryServerTxnSignatures(
+    transaction: Transaction,
+    accountAddress: String,
+    recoveryServer: RecoveryServerAuth,
+    base64Decoder: ((String) -> ByteArray)? = null
+): DecoratedSignature
 ```
 
 ### `sponsorOperation()`
@@ -264,7 +333,7 @@ fun sponsorOperation(
 ### `validateTransaction()`
 
 ```kotlin
-fun validateSufficientBalance(
+suspend fun validateSufficientBalance(
     transaction: Transaction,
     server: Server
 )
