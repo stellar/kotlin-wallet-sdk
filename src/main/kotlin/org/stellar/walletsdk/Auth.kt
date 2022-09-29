@@ -1,6 +1,9 @@
 package org.stellar.walletsdk
 
 import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -25,13 +28,13 @@ class Auth(
   data class AuthToken(val token: String)
   data class AuthTransaction(val transaction: String)
 
-  fun authenticate(): String {
+  suspend fun authenticate(): String {
     val challengeTxn = challenge()
     val signedTxn = sign(challengeTxn)
     return getToken(signedTxn)
   }
 
-  private fun challenge(): ChallengeResponse {
+  private suspend fun challenge(): ChallengeResponse {
     val endpoint = authEndpoint.toHttpUrl()
     val authURL = HttpUrl.Builder().scheme("https").host(endpoint.host)
 
@@ -63,22 +66,26 @@ class Auth(
 
     val request = OkHttpUtils.buildStringGetRequest(authURL.toString())
 
-    okHttpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw IOException("Request failed: $response")
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        okHttpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) throw IOException("Request failed: $response")
 
-      val jsonResponse: ChallengeResponse =
-        gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
+          val jsonResponse: ChallengeResponse =
+            gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
 
-      if (jsonResponse.transaction.isBlank()) {
-        throw Exception("The response did not contain a transaction")
+          if (jsonResponse.transaction.isBlank()) {
+            throw Exception("The response did not contain a transaction")
+          }
+
+          if (jsonResponse.network_passphrase != networkPassPhrase) {
+            throw Exception("Networks don't match")
+          }
+
+          return@async jsonResponse
+        }
       }
-
-      if (jsonResponse.network_passphrase != networkPassPhrase) {
-        throw Exception("Networks don't match")
-      }
-
-      return jsonResponse
-    }
+      .await()
   }
 
   private fun sign(challengeResponse: ChallengeResponse): Transaction {
@@ -106,22 +113,26 @@ class Auth(
     return challengeTxn
   }
 
-  private fun getToken(signedTransaction: Transaction): String {
+  private suspend fun getToken(signedTransaction: Transaction): String {
     val signedChallengeTxnXdr = signedTransaction.toEnvelopeXdrBase64()
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
     val tokenRequest = OkHttpUtils.buildJsonPostRequest(authEndpoint, tokenRequestParams)
 
-    okHttpClient.newCall(tokenRequest).execute().use { response ->
-      if (!response.isSuccessful) throw IOException("Request failed: $response")
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        okHttpClient.newCall(tokenRequest).execute().use { response ->
+          if (!response.isSuccessful) throw IOException("Request failed: $response")
 
-      val jsonResponse: AuthToken =
-        gson.fromJson(response.body!!.charStream(), AuthToken::class.java)
+          val jsonResponse: AuthToken =
+            gson.fromJson(response.body!!.charStream(), AuthToken::class.java)
 
-      if (jsonResponse.token.isBlank()) {
-        throw Exception("Token was not returned")
+          if (jsonResponse.token.isBlank()) {
+            throw Exception("Token was not returned")
+          }
+
+          return@async jsonResponse.token
+        }
       }
-
-      return jsonResponse.token
-    }
+      .await()
   }
 }
