@@ -5,15 +5,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.*
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.*
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.SubmitTransactionResponse
 
 internal class WalletTest : SuspendTest() {
-  private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE)
+  private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE, 500)
   private val server = spyk(Server(HORIZON_URL))
 
   @Nested
@@ -252,6 +249,80 @@ internal class WalletTest : SuspendTest() {
 
       assertTrue(exception.toString().contains(errorMessage))
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
+    }
+  }
+
+  @Nested
+  @DisplayName("registerRecoveryServerSigners")
+  inner class RegisterRecoveryServerSigners {
+    @Test
+    fun `defaults work`() {
+      val transaction = runBlocking {
+        wallet.registerRecoveryServerSigners(
+          accountAddress = ADDRESS_ACTIVE,
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+          accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
+        )
+      }
+
+      assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
+    }
+
+    @Test
+    fun `there are 2 operations in non-sponsored transaction`() {
+      val transaction = runBlocking {
+        wallet.registerRecoveryServerSigners(
+          accountAddress = ADDRESS_ACTIVE,
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+          accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
+        )
+      }
+
+      assertEquals(transaction.operations.size, 2)
+    }
+
+    @Test
+    fun `there are 4 operations in sponsored transaction`() {
+      val transaction = runBlocking {
+        wallet.registerRecoveryServerSigners(
+          accountAddress = ADDRESS_ACTIVE,
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+          accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
+          sponsorAddress = ADDRESS_ACTIVE_TWO
+        )
+      }
+
+      assertEquals(transaction.operations.size, 4)
+    }
+  }
+
+  @Nested
+  @DisplayName("lockAccountMasterKey")
+  inner class LockAccountMasterKey {
+    @Test
+    fun `defaults work`() {
+      val transaction = runBlocking { wallet.lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE) }
+
+      assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
+    }
+
+    @Test
+    fun `there is 1 operation in non-sponsored transaction`() {
+      val transaction = runBlocking { wallet.lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE) }
+
+      assertEquals(transaction.operations.size, 1)
+    }
+
+    @Test
+    fun `there are 3 operations in sponsored transaction`() {
+      val transaction = runBlocking {
+        wallet.lockAccountMasterKey(
+          accountAddress = ADDRESS_ACTIVE,
+          sponsorAddress = ADDRESS_ACTIVE_TWO
+        )
+      }
+
+      assertEquals(transaction.operations.size, 3)
     }
   }
 }

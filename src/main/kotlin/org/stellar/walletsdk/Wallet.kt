@@ -4,13 +4,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import org.stellar.sdk.*
-import org.stellar.walletsdk.util.buildTransaction
-import org.stellar.walletsdk.util.getRecoveryServerTxnSignatures
-import org.stellar.walletsdk.util.sponsorOperation
+import org.stellar.walletsdk.util.*
 
 class Wallet(
   private val horizonUrl: String = "https://horizon-testnet.stellar.org",
-  private val networkPassphrase: String = Network.TESTNET.toString()
+  private val networkPassphrase: String = Network.TESTNET.toString(),
+  private val maxBaseFeeInStroops: Int = 100
 ) {
   private val server = Server(this.horizonUrl)
   private val network = Network(this.networkPassphrase)
@@ -46,12 +45,12 @@ class Wallet(
 
     val operations: List<Operation> =
       if (isSponsored) {
-        sponsorOperation(sponsorAddress, destinationAddress, createAccountOp)
+        sponsorOperation(sponsorAddress, destinationAddress, listOf(createAccountOp))
       } else {
         listOfNotNull(createAccountOp)
       }
 
-    return buildTransaction(sourceAddress, server, network, operations)
+    return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
   }
 
   // Add trustline
@@ -70,12 +69,12 @@ class Wallet(
 
     val operations: List<Operation> =
       if (isSponsored) {
-        sponsorOperation(sponsorAddress, sourceAddress, changeTrustOp)
+        sponsorOperation(sponsorAddress, sourceAddress, listOf(changeTrustOp))
       } else {
         listOfNotNull(changeTrustOp)
       }
 
-    return buildTransaction(sourceAddress, server, network, operations)
+    return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
   }
 
   // Remove trustline
@@ -103,12 +102,12 @@ class Wallet(
 
     val operations: List<Operation> =
       if (isSponsored) {
-        sponsorOperation(sponsorAddress, sourceAddress, addSignerOp)
+        sponsorOperation(sponsorAddress, sourceAddress, listOf(addSignerOp))
       } else {
         listOfNotNull(addSignerOp)
       }
 
-    return buildTransaction(sourceAddress, server, network, operations)
+    return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
   }
 
   // Remove signer
@@ -140,6 +139,7 @@ class Wallet(
       .await()
   }
 
+  //  Sign transaction with recovery servers
   suspend fun signWithRecoveryServers(
     transaction: Transaction,
     accountAddress: String,
@@ -167,5 +167,155 @@ class Wallet(
     signatures.forEach { transaction.addSignature(it) }
 
     return transaction
+  }
+
+  // TODO: create account helper to handle 409 Conflict > fetch account data from RS and return
+  //  signers[0].key
+  // TODO: handle update RS account info (PUT request)
+
+  //  Add new account signers and threshold weights to account, register with recovery servers
+  suspend fun createRecoverableWallet(
+    accountAddress: String,
+    deviceAddress: String,
+    accountThreshold: AccountThreshold,
+    accountIdentity: List<RecoveryAccountIdentity>,
+    recoveryServers: List<RecoveryServer>,
+    accountWalletSigner: WalletSigner,
+    signerWeight: SignerWeight,
+    sponsorAddress: String = ""
+  ): Transaction {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        val recoverySigners =
+          enrollWithRecoveryServer(
+            recoveryServers = recoveryServers,
+            accountAddress = accountAddress,
+            accountIdentity = accountIdentity,
+            walletSigner = accountWalletSigner
+          )
+
+        val recoveryServerSigners =
+          recoverySigners
+            .map { rs -> AccountSigner(address = rs, weight = signerWeight.recoveryServer) }
+            .toTypedArray()
+
+        val signer =
+          listOf(
+            *recoveryServerSigners,
+            AccountSigner(address = deviceAddress, weight = signerWeight.master)
+          )
+
+        return@async registerRecoveryServerSigners(
+          accountAddress = accountAddress,
+          accountSigner = signer,
+          accountThreshold = accountThreshold,
+          sponsorAddress = sponsorAddress
+        )
+      }
+      .await()
+  }
+
+  //  Register account with recovery server
+  suspend fun enrollWithRecoveryServer(
+    recoveryServers: List<RecoveryServer>,
+    accountAddress: String,
+    accountIdentity: List<RecoveryAccountIdentity>,
+    walletSigner: WalletSigner
+  ): List<String> {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        val signers =
+          recoveryServers.map { rs ->
+            setRecoveryMethods(
+              endpoint = rs.endpoint,
+              authEndpoint = rs.authEndpoint,
+              homeDomain = rs.homeDomain,
+              accountAddress = accountAddress,
+              accountIdentity = accountIdentity,
+              walletSigner = walletSigner
+            )
+          }
+
+        if (recoveryServers.size != signers.size) {
+          throw Exception("Could not register with all recovery servers")
+        }
+
+        return@async signers
+      }
+      .await()
+  }
+
+  //  Add signers to account and set threshold weights
+  suspend fun registerRecoveryServerSigners(
+    accountAddress: String,
+    accountSigner: List<AccountSigner>,
+    accountThreshold: AccountThreshold,
+    sponsorAddress: String = ""
+  ): Transaction {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        val isSponsored = sponsorAddress.isNotBlank()
+        val transactionBuilder =
+          createTransactionBuilder(
+            sourceAddress = accountAddress,
+            maxBaseFeeInStroops = maxBaseFeeInStroops,
+            server = server,
+            network = network,
+          )
+
+        val setOptionsOp =
+          listOf(
+            *accountSigner.map { signer -> addSignerOperation(signer) }.toTypedArray(),
+            setThresholdsOperation(
+              low = accountThreshold.low,
+              medium = accountThreshold.medium,
+              high = accountThreshold.high
+            )
+          )
+
+        val operations: List<Operation> =
+          if (isSponsored) {
+            sponsorOperation(sponsorAddress, accountAddress, setOptionsOp)
+          } else {
+            setOptionsOp
+          }
+
+        transactionBuilder.addOperations(operations)
+
+        return@async transactionBuilder.build()
+      }
+      .await()
+  }
+
+  //  Lock account master key (set weight to 0)
+  suspend fun lockAccountMasterKey(
+    accountAddress: String,
+    sponsorAddress: String = ""
+  ): Transaction {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        val isSponsored = sponsorAddress.isNotBlank()
+        val transactionBuilder =
+          createTransactionBuilder(
+            sourceAddress = accountAddress,
+            maxBaseFeeInStroops = maxBaseFeeInStroops,
+            server = server,
+            network = network
+          )
+
+        val lockOp = listOf(lockMasterKeyOperation())
+
+        val operations: List<Operation> =
+          if (isSponsored) {
+            sponsorOperation(sponsorAddress, accountAddress, lockOp)
+          } else {
+            lockOp
+          }
+
+        transactionBuilder.addOperations(operations)
+
+        return@async transactionBuilder.build()
+      }
+      .await()
   }
 }
