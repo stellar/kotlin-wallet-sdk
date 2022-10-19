@@ -3,6 +3,7 @@ package org.stellar.walletsdk.util
 import org.stellar.sdk.BeginSponsoringFutureReservesOperation
 import org.stellar.sdk.EndSponsoringFutureReservesOperation
 import org.stellar.sdk.Operation
+import org.stellar.walletsdk.InvalidSponsorOperationTypeException
 
 fun sponsorOperation(
   sponsorAddress: String,
@@ -23,10 +24,7 @@ fun sponsorOperation(
     val opType = op::class.simpleName
 
     if (!allowedOperations.contains(opType)) {
-      throw Exception(
-        "$opType cannot be sponsored. Allowed operations are: ${allowedOperations
-          .joinToString(", ")}."
-      )
+      throw InvalidSponsorOperationTypeException(opType.toString(), allowedOperations)
     }
   }
 

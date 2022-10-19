@@ -33,7 +33,7 @@ class Wallet(
     val isSponsored = sponsorAddress.isNotBlank()
 
     if (!isSponsored && startingBalance.toInt() < 1) {
-      throw Exception("Starting balance must be at least 1 XLM for non-sponsored accounts")
+      throw InvalidStartingBalanceException()
     }
 
     val startBalance = if (isSponsored) "0" else startingBalance
@@ -134,7 +134,7 @@ class Wallet(
           errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
         }
 
-        throw Exception(errorMessage)
+        throw TransactionSubmitFailedException(response, errorMessage)
       }
       .await()
   }
@@ -161,7 +161,7 @@ class Wallet(
       }
 
     if (recoveryServers.size != signatures.size) {
-      throw Exception("Didn't get all recovery server signatures")
+      throw RecoveryNotAllSignaturesFetchedException()
     }
 
     signatures.forEach { transaction.addSignature(it) }
@@ -237,7 +237,7 @@ class Wallet(
           }
 
         if (recoveryServers.size != signers.size) {
-          throw Exception("Could not register with all recovery servers")
+          throw RecoveryNotRegisteredWithAllServersException()
         }
 
         return@async signers
