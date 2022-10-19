@@ -5,6 +5,7 @@ import org.stellar.sdk.CreateAccountOperation
 
 const val HORIZON_URL = "https://horizon-testnet.stellar.org"
 const val NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
+const val MAX_BASE_FEE = 500
 
 const val ADDRESS_ACTIVE = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
 const val ADDRESS_ACTIVE_SECRET = "SAICIEF6C7ENEPUCFYU5YE7CF6Z2BXUCYQ4MNB3RK3MMZ4GECYFJBWZ3"

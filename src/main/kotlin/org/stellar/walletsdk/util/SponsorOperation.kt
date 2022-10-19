@@ -7,7 +7,7 @@ import org.stellar.sdk.Operation
 fun sponsorOperation(
   sponsorAddress: String,
   accountAddress: String,
-  operation: Operation
+  operation: List<Operation>
 ): List<Operation> {
   val allowedOperations =
     listOf(
@@ -19,13 +19,15 @@ fun sponsorOperation(
       "SetOptionsOperation",
     )
 
-  val operationType = operation::class.simpleName
+  operation.forEach { op ->
+    val opType = op::class.simpleName
 
-  if (!allowedOperations.contains(operationType)) {
-    throw Exception(
-      "$operationType cannot be sponsored. Allowed operations are: ${allowedOperations
-        .joinToString(", ")}."
-    )
+    if (!allowedOperations.contains(opType)) {
+      throw Exception(
+        "$opType cannot be sponsored. Allowed operations are: ${allowedOperations
+          .joinToString(", ")}."
+      )
+    }
   }
 
   return listOfNotNull(
@@ -33,8 +35,8 @@ fun sponsorOperation(
     BeginSponsoringFutureReservesOperation.Builder(accountAddress)
       .setSourceAccount(sponsorAddress)
       .build(),
-    // Operation to sponsor
-    operation,
+    // Operation(s) to sponsor
+    *operation.toTypedArray(),
     // End reserve sponsoring
     EndSponsoringFutureReservesOperation(accountAddress)
   )

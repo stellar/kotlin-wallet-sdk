@@ -14,7 +14,8 @@ import org.stellar.walletsdk.OP_CREATE_ACCOUNT
 internal class SponsorOperationTest {
   @Test
   fun `is wrapped in Begin and End SponsoringFutureReservesOperation`() {
-    val sponsoredOperation = sponsorOperation(ADDRESS_ACTIVE, ADDRESS_INACTIVE, OP_CREATE_ACCOUNT)
+    val sponsoredOperation =
+      sponsorOperation(ADDRESS_ACTIVE, ADDRESS_INACTIVE, listOf(OP_CREATE_ACCOUNT))
 
     assertEquals(3, sponsoredOperation.size)
     assertEquals("BeginSponsoringFutureReservesOperation", sponsoredOperation[0]::class.simpleName)
@@ -25,7 +26,9 @@ internal class SponsorOperationTest {
   fun `not allowed sponsored operation type throws an error`() {
     val exception =
       assertFailsWith<Exception>(
-        block = { sponsorOperation(ADDRESS_ACTIVE, ADDRESS_ACTIVE, OP_CLAIM_CLAIMABLE_BALANCE) }
+        block = {
+          sponsorOperation(ADDRESS_ACTIVE, ADDRESS_ACTIVE, listOf(OP_CLAIM_CLAIMABLE_BALANCE))
+        }
       )
 
     assertTrue(exception.toString().contains("ClaimClaimableBalanceOperation cannot be sponsored"))

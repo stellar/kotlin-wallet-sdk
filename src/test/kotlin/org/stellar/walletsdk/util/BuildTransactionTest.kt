@@ -13,10 +13,7 @@ import org.junit.jupiter.api.Test
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
-import org.stellar.walletsdk.ADDRESS_ACTIVE
-import org.stellar.walletsdk.HORIZON_URL
-import org.stellar.walletsdk.OP_CREATE_ACCOUNT
-import org.stellar.walletsdk.SuspendTest
+import org.stellar.walletsdk.*
 
 @DisplayName("buildTransaction")
 internal class BuildTransactionTest : SuspendTest() {
@@ -32,7 +29,9 @@ internal class BuildTransactionTest : SuspendTest() {
     val exception =
       assertFailsWith<Exception>(
         block = {
-          runBlocking { buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT)) }
+          runBlocking {
+            buildTransaction("", MAX_BASE_FEE, server, network, listOfNotNull(OP_CREATE_ACCOUNT))
+          }
         }
       )
 
@@ -47,7 +46,7 @@ internal class BuildTransactionTest : SuspendTest() {
     every { server.accounts().account("") } returns accountResponse
 
     val transaction = runBlocking {
-      buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT))
+      buildTransaction("", MAX_BASE_FEE, server, network, listOfNotNull(OP_CREATE_ACCOUNT))
     }
 
     assertNotNull(transaction)
@@ -60,7 +59,7 @@ internal class BuildTransactionTest : SuspendTest() {
     every { server.accounts().account("") } returns accountResponse
 
     val transaction = runBlocking {
-      buildTransaction("", server, network, listOfNotNull(OP_CREATE_ACCOUNT))
+      buildTransaction("", MAX_BASE_FEE, server, network, listOfNotNull(OP_CREATE_ACCOUNT))
     }
 
     assertEquals((sequenceNumber + 1).toLong(), transaction.sequenceNumber)

@@ -1,5 +1,8 @@
 package org.stellar.walletsdk.util
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import org.stellar.sdk.Network
 import org.stellar.sdk.Operation
 import org.stellar.sdk.Server
@@ -7,19 +10,22 @@ import org.stellar.sdk.Transaction
 
 suspend fun buildTransaction(
   sourceAddress: String,
+  maxBaseFeeInStroops: Int,
   server: Server,
   network: Network,
   operations: List<Operation>
 ): Transaction {
-  val sourceAccount = fetchAccount(sourceAddress, server)
+  return CoroutineScope(Dispatchers.IO)
+    .async {
+      val transactionBuilder =
+        createTransactionBuilder(
+          sourceAddress = sourceAddress,
+          maxBaseFeeInStroops = maxBaseFeeInStroops,
+          server = server,
+          network = network
+        )
 
-  // TODO: add memo
-  // TODO: update max fee
-  // TODO: add time bounds
-
-  return Transaction.Builder(sourceAccount, network)
-    .addOperations(operations)
-    .setBaseFee(500)
-    .setTimeout(180)
-    .build()
+      return@async transactionBuilder.addOperations(operations).build()
+    }
+    .await()
 }
