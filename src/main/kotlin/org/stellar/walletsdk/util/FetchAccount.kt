@@ -4,6 +4,7 @@ import java.io.IOException
 import kotlinx.coroutines.*
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
+import org.stellar.walletsdk.AccountNotFoundException
 
 suspend fun fetchAccount(accountAddress: String, server: Server): AccountResponse {
   try {
@@ -13,6 +14,6 @@ suspend fun fetchAccount(accountAddress: String, server: Server): AccountRespons
       }
       .await()
   } catch (e: IOException) {
-    throw Exception("Account $accountAddress was not found")
+    throw AccountNotFoundException(accountAddress)
   }
 }

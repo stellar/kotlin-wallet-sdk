@@ -1,12 +1,12 @@
 package org.stellar.walletsdk.util
 
-import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.xdr.DecoratedSignature
+import org.stellar.walletsdk.NetworkRequestFailedException
 import org.stellar.walletsdk.RecoveryServerAuth
 
 suspend fun getRecoveryServerTxnSignatures(
@@ -30,7 +30,7 @@ suspend fun getRecoveryServerTxnSignatures(
         OkHttpUtils.buildJsonPostRequest(requestUrl, requestParams, recoveryServer.authToken)
 
       client.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw IOException("Request failed: $response")
+        if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
         val authResponse: AuthSignature =
           gson.fromJson(response.body!!.charStream(), AuthSignature::class.java)

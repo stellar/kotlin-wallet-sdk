@@ -1,6 +1,5 @@
 package org.stellar.walletsdk.util
 
-import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -38,7 +37,7 @@ suspend fun setRecoveryMethods(
   return CoroutineScope(Dispatchers.IO)
     .async {
       okHttpClient.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw IOException("Request failed: $response")
+        if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
         val jsonResponse = gson.fromJson(response.body!!.charStream(), RecoveryAccount::class.java)
 
@@ -50,7 +49,7 @@ suspend fun setRecoveryMethods(
 
 fun getLatestRecoverySigner(signers: List<RecoveryAccountSigner>): String {
   if (signers.isEmpty()) {
-    throw Exception("There are no signers on this recovery server")
+    throw RecoveryNoAccountSignersOnServerException()
   }
 
   return signers[0].key

@@ -1,6 +1,5 @@
 package org.stellar.walletsdk
 
-import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -48,7 +47,7 @@ class Auth(
 
     if (!memoId.isNullOrBlank()) {
       if (memoId.toInt() < 0) {
-        throw Exception("Memo ID must be a positive integer")
+        throw InvalidMemoIdException()
       }
 
       authURL.addQueryParameter("memo", memoId)
@@ -56,7 +55,7 @@ class Auth(
 
     if (!clientDomain.isNullOrBlank()) {
       if (!memoId.isNullOrBlank()) {
-        throw Exception("Client domain cannot be used with memo")
+        throw ClientDomainWithMemoException()
       }
 
       authURL.addQueryParameter("client_domain", clientDomain)
@@ -69,17 +68,17 @@ class Auth(
     return CoroutineScope(Dispatchers.IO)
       .async {
         okHttpClient.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) throw IOException("Request failed: $response")
+          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
           val jsonResponse: ChallengeResponse =
             gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
 
           if (jsonResponse.transaction.isBlank()) {
-            throw Exception("The response did not contain a transaction")
+            throw MissingTransactionException()
           }
 
           if (jsonResponse.network_passphrase != networkPassPhrase) {
-            throw Exception("Networks don't match")
+            throw NetworkMismatchException()
           }
 
           return@async jsonResponse
@@ -121,13 +120,13 @@ class Auth(
     return CoroutineScope(Dispatchers.IO)
       .async {
         okHttpClient.newCall(tokenRequest).execute().use { response ->
-          if (!response.isSuccessful) throw IOException("Request failed: $response")
+          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
           val jsonResponse: AuthToken =
             gson.fromJson(response.body!!.charStream(), AuthToken::class.java)
 
           if (jsonResponse.token.isBlank()) {
-            throw Exception("Token was not returned")
+            throw MissingTokenException()
           }
 
           return@async jsonResponse.token
