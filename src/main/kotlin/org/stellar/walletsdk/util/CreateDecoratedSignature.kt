@@ -5,6 +5,17 @@ import org.stellar.sdk.KeyPair
 import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
 
+/**
+ * Create decorated signature using account's Stellar address (public key) and signature string.
+ *
+ * @param publicKey Stellar address of the account to use in the signature
+ * @param signatureBase64String signature string
+ * @param base64Decoder optional base64Decoder. Default `java.util.Base64` decoder works with
+ * Android API 23+. To support Android API older than API 23, custom base64Decoder needs to be
+ * provided. For example, `android.util.Base64`.
+ *
+ * @return decorated signature
+ */
 fun createDecoratedSignature(
   publicKey: String,
   signatureBase64String: String,

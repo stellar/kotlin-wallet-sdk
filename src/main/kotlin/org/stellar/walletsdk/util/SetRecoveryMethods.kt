@@ -6,6 +6,26 @@ import kotlinx.coroutines.async
 import okhttp3.OkHttpClient
 import org.stellar.walletsdk.*
 
+/**
+ * Helper to register account with a recovery server using
+ * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md) and
+ * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
+ *
+ * @param endpoint Recovery server's endpoint URL
+ * @param authEndpoint Recovery server's auth endpoint URL of the recovery server to use with SEP-10
+ * @param homeDomain Recovery server's domain hosting stellar.toml (
+ * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
+ * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
+ * @param accountAddress Stellar address of the account that is registering with the recovery server
+ * @param accountIdentity A list of account identities to be registered with the recovery server
+ * @param walletSigner [WalletSigner] interface to define wallet client signing methods
+ *
+ * @return Stellar address of signer
+ *
+ * @throws [NetworkRequestFailedException] when request fails
+ * @throws [RecoveryNoAccountSignersOnServerException] if there are no signers on the recovery
+ * server for this account
+ */
 suspend fun setRecoveryMethods(
   endpoint: String,
   authEndpoint: String,
@@ -47,6 +67,16 @@ suspend fun setRecoveryMethods(
     .await()
 }
 
+/**
+ * Helper to get the last recovery signer
+ *
+ * @param signers A list of recovery account signers
+ *
+ * @return Stellar address of the last signer
+ *
+ * @throws [RecoveryNoAccountSignersOnServerException] if there are no signers on the recovery
+ * server for this account
+ */
 fun getLatestRecoverySigner(signers: List<RecoveryAccountSigner>): String {
   if (signers.isEmpty()) {
     throw RecoveryNoAccountSignersOnServerException()
