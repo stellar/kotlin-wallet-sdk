@@ -5,6 +5,19 @@ import org.stellar.sdk.EndSponsoringFutureReservesOperation
 import org.stellar.sdk.Operation
 import org.stellar.walletsdk.InvalidSponsorOperationTypeException
 
+/**
+ * Sponsor operation(s) for another account.
+ *
+ * [Learn about operation sponsorship](https://developers.stellar.org/docs/encyclopedia/sponsored-reserves#begin-and-end-sponsorships)
+ *
+ * @param sponsorAddress Stellar address of the account sponsoring operation(s)
+ * @param accountAddress Stellar address of the account that is sponsored
+ * @param operation A list of operation(s) to sponsor
+ *
+ * @return a list of operations
+ *
+ * @throws [InvalidSponsorOperationTypeException] when an operation cannot be sponsored
+ */
 fun sponsorOperation(
   sponsorAddress: String,
   accountAddress: String,

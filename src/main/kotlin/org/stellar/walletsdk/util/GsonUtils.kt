@@ -2,6 +2,7 @@ package org.stellar.walletsdk.util
 
 import com.google.gson.*
 
+/** Helpers for [Gson] */
 object GsonUtils {
   var instance: Gson? = null
     get() {

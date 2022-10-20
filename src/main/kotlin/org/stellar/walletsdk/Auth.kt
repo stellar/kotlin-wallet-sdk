@@ -11,9 +11,24 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.util.GsonUtils
 import org.stellar.walletsdk.util.OkHttpUtils
 
+/**
+ * Authenticate to an external server using
+ * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
+ *
+ * @property accountAddress Stellar address of the account authenticating
+ * @property webAuthEndpoint Authentication endpoint URL
+ * @property homeDomain Domain hosting stellar.toml (
+ * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
+ * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
+ * @property memoId optional memo ID to distinguish the account
+ * @property clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
+ * @property networkPassPhrase Stellar network passphrase
+ * @property walletSigner interface to define wallet client and domain (if using `clientDomain`)
+ * signing methods
+ */
 class Auth(
   private val accountAddress: String,
-  private val authEndpoint: String,
+  private val webAuthEndpoint: String,
   private val homeDomain: String,
   private val memoId: String? = null,
   private val clientDomain: String? = null,
@@ -27,14 +42,40 @@ class Auth(
   data class AuthToken(val token: String)
   data class AuthTransaction(val transaction: String)
 
+  /**
+   * Authenticates to an external server.
+   *
+   * @return authentication token (JWT)
+   *
+   * @throws [InvalidMemoIdException] when memo ID is not valid
+   * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
+   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [MissingTransactionException] when request JSON response does not contain `transaction`
+   * @throws [NetworkMismatchException] when request JSON response network passphrase does not match
+   * provided network passphrase
+   * @throws [MissingTokenException] when request JSON response does not contain `token`
+   */
   suspend fun authenticate(): String {
     val challengeTxn = challenge()
     val signedTxn = sign(challengeTxn)
     return getToken(signedTxn)
   }
 
+  /**
+   * Request transaction challenge from the auth endpoint.
+   *
+   * @return transaction as Base64 encoded TransactionEnvelope XDR string and network passphrase
+   * from the auth endpoint
+   *
+   * @throws [InvalidMemoIdException] when memo ID is not valid
+   * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
+   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [MissingTransactionException] when request JSON response does not contain `transaction`
+   * @throws [NetworkMismatchException] when request JSON response network passphrase does not match
+   * provided network passphrase
+   */
   private suspend fun challenge(): ChallengeResponse {
-    val endpoint = authEndpoint.toHttpUrl()
+    val endpoint = webAuthEndpoint.toHttpUrl()
     val authURL = HttpUrl.Builder().scheme("https").host(endpoint.host)
 
     // Add path segments, if there are any
@@ -87,6 +128,15 @@ class Auth(
       .await()
   }
 
+  /**
+   * Sign transaction with client account and, optionally, domain account using [WalletSigner]
+   * methods.
+   *
+   * @param challengeResponse challenge transaction and network passphrase returned from the auth
+   * endpoint
+   *
+   * @return signed transaction
+   */
   private fun sign(challengeResponse: ChallengeResponse): Transaction {
     var challengeTxn =
       Transaction.fromEnvelopeXdr(
@@ -112,10 +162,20 @@ class Auth(
     return challengeTxn
   }
 
+  /**
+   * Send signed transaction to the auth endpoint to get JWT token.
+   *
+   * @param signedTransaction signed transaction
+   *
+   * @return transaction as Base64 encoded TransactionEnvelope XDR string
+   *
+   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [MissingTokenException] when request JSON response does not contain `token`
+   */
   private suspend fun getToken(signedTransaction: Transaction): String {
     val signedChallengeTxnXdr = signedTransaction.toEnvelopeXdrBase64()
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
-    val tokenRequest = OkHttpUtils.buildJsonPostRequest(authEndpoint, tokenRequestParams)
+    val tokenRequest = OkHttpUtils.buildJsonPostRequest(webAuthEndpoint, tokenRequestParams)
 
     return CoroutineScope(Dispatchers.IO)
       .async {
