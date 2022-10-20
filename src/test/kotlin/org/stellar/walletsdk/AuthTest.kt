@@ -15,7 +15,7 @@ internal class AuthTest : SuspendTest() {
     val authToken = runBlocking {
       Auth(
           accountAddress = ADDRESS_ACTIVE,
-          authEndpoint = AUTH_ENDPOINT,
+          webAuthEndpoint = AUTH_ENDPOINT,
           homeDomain = AUTH_HOME_DOMAIN,
           walletSigner = InProcessWalletSigner()
         )

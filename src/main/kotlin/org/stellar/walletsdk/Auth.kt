@@ -16,7 +16,7 @@ import org.stellar.walletsdk.util.OkHttpUtils
  * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
  *
  * @property accountAddress Stellar address of the account authenticating
- * @property authEndpoint Authentication endpoint URL
+ * @property webAuthEndpoint Authentication endpoint URL
  * @property homeDomain Domain hosting stellar.toml (
  * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
  * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
@@ -28,7 +28,7 @@ import org.stellar.walletsdk.util.OkHttpUtils
  */
 class Auth(
   private val accountAddress: String,
-  private val authEndpoint: String,
+  private val webAuthEndpoint: String,
   private val homeDomain: String,
   private val memoId: String? = null,
   private val clientDomain: String? = null,
@@ -75,7 +75,7 @@ class Auth(
    * provided network passphrase
    */
   private suspend fun challenge(): ChallengeResponse {
-    val endpoint = authEndpoint.toHttpUrl()
+    val endpoint = webAuthEndpoint.toHttpUrl()
     val authURL = HttpUrl.Builder().scheme("https").host(endpoint.host)
 
     // Add path segments, if there are any
@@ -175,7 +175,7 @@ class Auth(
   private suspend fun getToken(signedTransaction: Transaction): String {
     val signedChallengeTxnXdr = signedTransaction.toEnvelopeXdrBase64()
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
-    val tokenRequest = OkHttpUtils.buildJsonPostRequest(authEndpoint, tokenRequestParams)
+    val tokenRequest = OkHttpUtils.buildJsonPostRequest(webAuthEndpoint, tokenRequestParams)
 
     return CoroutineScope(Dispatchers.IO)
       .async {

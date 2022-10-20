@@ -295,7 +295,7 @@ class Wallet(
           recoveryServers.map { rs ->
             setRecoveryMethods(
               endpoint = rs.endpoint,
-              authEndpoint = rs.authEndpoint,
+              webAuthEndpoint = rs.authEndpoint,
               homeDomain = rs.homeDomain,
               accountAddress = accountAddress,
               accountIdentity = accountIdentity,

@@ -12,7 +12,7 @@ import org.stellar.walletsdk.*
  * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
  *
  * @param endpoint Recovery server's endpoint URL
- * @param authEndpoint Recovery server's auth endpoint URL of the recovery server to use with SEP-10
+ * @param webAuthEndpoint Recovery server's web auth endpoint URL to use with SEP-10
  * @param homeDomain Recovery server's domain hosting stellar.toml (
  * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
  * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
@@ -28,7 +28,7 @@ import org.stellar.walletsdk.*
  */
 suspend fun setRecoveryMethods(
   endpoint: String,
-  authEndpoint: String,
+  webAuthEndpoint: String,
   homeDomain: String,
   accountAddress: String,
   accountIdentity: List<RecoveryAccountIdentity>,
@@ -40,7 +40,7 @@ suspend fun setRecoveryMethods(
   val authToken =
     Auth(
         accountAddress = accountAddress,
-        authEndpoint = authEndpoint,
+        webAuthEndpoint = webAuthEndpoint,
         homeDomain = homeDomain,
         walletSigner = walletSigner
       )
