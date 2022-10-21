@@ -7,7 +7,9 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import org.stellar.sdk.*
+import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.SubmitTransactionResponse
+import org.stellar.walletsdk.helpers.objectFromJsonFile
 
 internal class WalletTest : SuspendTest() {
   private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE, 500)
@@ -323,6 +325,38 @@ internal class WalletTest : SuspendTest() {
       }
 
       assertEquals(transaction.operations.size, 3)
+    }
+  }
+
+  @Nested
+  @DisplayName("getInfo")
+  inner class GetInfo {
+    @Test
+    fun `basic account info`() {
+      val accountResponse = objectFromJsonFile("account_basic.json", AccountResponse::class.java)
+
+      every { server.accounts().account(ADDRESS_BASIC) } returns accountResponse
+
+      val accountInfo = runBlocking { wallet.getInfo(ADDRESS_BASIC, server) }
+
+      assertEquals(ADDRESS_BASIC, accountInfo.publicKey)
+      assertEquals("1.0000000", accountInfo.reservedNativeBalance)
+      assertEquals(1, accountInfo.assets.size)
+      assertEquals(0, accountInfo.liquidityPools.size)
+    }
+
+    @Test
+    fun `full account info`() {
+      val accountResponse = objectFromJsonFile("account_full.json", AccountResponse::class.java)
+
+      every { server.accounts().account(ADDRESS_FULL) } returns accountResponse
+
+      val accountInfo = runBlocking { wallet.getInfo(ADDRESS_FULL, server) }
+
+      assertEquals(ADDRESS_FULL, accountInfo.publicKey)
+      assertEquals("6.5000000", accountInfo.reservedNativeBalance)
+      assertEquals(4, accountInfo.assets.size)
+      assertEquals(0, accountInfo.liquidityPools.size)
     }
   }
 }
