@@ -3,6 +3,7 @@ package org.stellar.walletsdk
 import java.io.IOException
 import java.math.BigDecimal
 import okhttp3.Response
+import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.responses.SubmitTransactionResponse
 
 class AccountNotEnoughBalanceException(
@@ -30,6 +31,9 @@ class InvalidSponsorOperationTypeException(operationType: String, allowedOperati
 
 class InvalidStartingBalanceException :
   Exception("Starting balance must be at least 1 XLM for non-sponsored accounts")
+
+class LiquidityPoolNotFoundException(liquidityPoolID: LiquidityPoolID) :
+  Exception("Liquidity pool $liquidityPoolID was not found")
 
 class MissingTokenException : Exception("Token was not returned")
 

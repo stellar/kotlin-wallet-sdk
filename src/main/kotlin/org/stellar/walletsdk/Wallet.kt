@@ -482,4 +482,37 @@ class Wallet(
       }
       .await()
   }
+
+  /**
+   * Get account information from the Stellar network.
+   *
+   * @param accountAddress Stellar address of the account
+   * @param serverInstance optional Horizon server instance when default doesn't work
+   *
+   * @return formatted account information
+   *
+   * @throws [AccountNotFoundException] when account is not found
+   */
+  suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        try {
+          val account = fetchAccount(accountAddress, serverInstance)
+          val balances = formatAccountBalances(account, serverInstance)
+
+          // TODO: add accountDetails
+
+          return@async AccountInfo(
+            publicKey = account.accountId,
+            assets = balances.assets,
+            liquidityPools = balances.liquidityPools,
+            reservedNativeBalance = accountReservedBalance(account)
+          )
+        } catch (e: Exception) {
+          // TODO: Is there a way to check if response is 404 (account not found)?
+          throw e
+        }
+      }
+      .await()
+  }
 }
