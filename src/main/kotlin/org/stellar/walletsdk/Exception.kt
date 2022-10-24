@@ -19,7 +19,22 @@ class AccountNotEnoughBalanceException(
 class AccountNotFoundException(accountAddress: String) :
   Exception("Account $accountAddress was not found")
 
+class AssetNotAcceptedForDepositException(assetCode: String) :
+  Exception("Asset $assetCode is not accepted for deposits")
+
+class AssetNotAcceptedForWithdrawalException(assetCode: String) :
+  Exception("Asset $assetCode is not accepted for withdrawals")
+
+class AssetNotEnabledForDepositException(assetCode: String) :
+  Exception("Asset $assetCode is not enabled for deposits")
+
+class AssetNotEnabledForWithdrawalException(assetCode: String) :
+  Exception("Asset $assetCode is not enabled for withdrawals")
+
 class ClientDomainWithMemoException : Exception("Client domain cannot be used with memo")
+
+class InvalidAnchorServiceUrl(rawException: Exception) :
+  Exception("Anchor service URL is invalid", rawException)
 
 class InvalidMemoIdException : Exception("Memo ID must be a positive integer")
 
@@ -54,6 +69,12 @@ class RecoveryNotAllSignaturesFetchedException :
 
 class RecoveryNotRegisteredWithAllServersException :
   Exception("Could not register with all recovery servers")
+
+class StellarTomlAddressMissingHomeDomain(stellarAddress: String) :
+  Exception("Stellar address $stellarAddress does not have home domain configured")
+
+class StellarTomlMissingFields(missingFields: List<String>) :
+  Exception("TOML configuration is missing: ${missingFields.joinToString(",")}")
 
 class TransactionSubmitFailedException(
   rawResponse: SubmitTransactionResponse,

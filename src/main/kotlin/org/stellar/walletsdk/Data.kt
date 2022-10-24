@@ -11,6 +11,25 @@ data class AccountSigner(val address: String, val weight: Int)
 
 data class AccountThreshold(val low: Int, val medium: Int, val high: Int)
 
+data class AnchorServiceAsset(
+  val enabled: Boolean,
+  val min_amount: Double,
+  val max_amount: Double,
+  val fee_fixed: Double,
+  val fee_percent: Double
+)
+
+data class AnchorServiceFeatures(val account_creation: Boolean, val claimable_balances: Boolean)
+
+data class AnchorServiceFee(val enabled: Boolean)
+
+data class AnchorServiceInfo(
+  val deposit: Map<String, AnchorServiceAsset>,
+  val withdraw: Map<String, AnchorServiceAsset>,
+  val fee: AnchorServiceFee,
+  val features: AnchorServiceFeatures,
+)
+
 enum class AssetType(val type: String) {
   NATIVE("native"),
   ALPHANUM_4("credit_alphanum4"),
@@ -51,6 +70,17 @@ data class FormattedLiquidityPool(
   val totalShares: String,
   val reserves: List<LiquidityPoolReserve>
 )
+
+data class InteractiveFlowResponse(
+  val id: String,
+  val url: String,
+  val type: String,
+)
+
+enum class InteractiveFlowType(val value: String) {
+  DEPOSIT("deposit"),
+  WITHDRAW("withdraw")
+}
 
 data class LiquidityPoolInfo(
   val totalTrustlines: Long,
@@ -116,3 +146,9 @@ data class SignerWeight(
   val master: Int,
   val recoveryServer: Int,
 )
+
+enum class StellarTomlFields(val text: String) {
+  SIGNING_KEY("SIGNING_KEY"),
+  TRANSFER_SERVER_SEP0024("TRANSFER_SERVER_SEP0024"),
+  WEB_AUTH_ENDPOINT("WEB_AUTH_ENDPOINT")
+}

@@ -8,6 +8,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.NetworkRequestFailedException
+import org.stellar.walletsdk.StellarTomlAddressMissingHomeDomain
+import org.stellar.walletsdk.StellarTomlMissingFields
 import shadow.com.moandjiezana.toml.Toml
 
 // TODO: document
@@ -40,8 +42,7 @@ class StellarToml(
         val account = fetchAccount(accountAddress = stellarAddress, server)
 
         if (account.homeDomain.isNullOrBlank()) {
-          // TODO: add custom exception
-          throw Exception("Stellar address $stellarAddress does not have home domain configured")
+          throw StellarTomlAddressMissingHomeDomain(stellarAddress)
         }
 
         return@async account.homeDomain
@@ -78,8 +79,7 @@ class StellarToml(
     }
 
     if (missingFields.size > 0) {
-      // TODO: make custom exception
-      throw Exception("TOML configuration is missing: ${missingFields.joinToString(",")}")
+      throw StellarTomlMissingFields(missingFields)
     }
 
     return true

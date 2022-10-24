@@ -10,40 +10,8 @@ import okhttp3.Request
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.util.GsonUtils
-import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.StellarToml
-
-//  TODO: move to Data
-data class AnchorServiceAsset(
-  val enabled: Boolean,
-  val min_amount: Double,
-  val max_amount: Double,
-  val fee_fixed: Double,
-  val fee_percent: Double
-)
-
-data class AnchorServiceFee(val enabled: Boolean)
-
-data class AnchorServiceFeatures(val account_creation: Boolean, val claimable_balances: Boolean)
-
-data class AnchorServiceInfo(
-  val deposit: Map<String, AnchorServiceAsset>,
-  val withdraw: Map<String, AnchorServiceAsset>,
-  val fee: AnchorServiceFee,
-  val features: AnchorServiceFeatures,
-)
-
-data class InteractiveResponse(
-  val id: String,
-  val url: String,
-  val type: String,
-)
-
-enum class StellarTomlFields(val text: String) {
-  SIGNING_KEY("SIGNING_KEY"),
-  TRANSFER_SERVER_SEP0024("TRANSFER_SERVER_SEP0024"),
-  WEB_AUTH_ENDPOINT("WEB_AUTH_ENDPOINT")
-}
+import org.stellar.walletsdk.util.interactiveFlow
 
 // TODO: document
 class Anchor(
@@ -61,6 +29,7 @@ class Anchor(
       .await()
   }
 
+  //  Service info
   suspend fun getServicesInfo(serviceUrl: String): AnchorServiceInfo {
     try {
       val url = serviceUrl.toHttpUrl()
@@ -85,10 +54,12 @@ class Anchor(
         }
         .await()
     } catch (e: Exception) {
-      throw Exception("Service URL is invalid", e)
+      throw InvalidAnchorServiceUrl(e)
     }
   }
 
+  //  TODO: doc
+  //  Interactive deposit
   suspend fun getInteractiveDeposit(
     accountAddress: String,
     assetCode: String,
@@ -97,70 +68,47 @@ class Anchor(
     memoId: String? = null,
     extraFields: Map<String, Any>? = null,
     walletSigner: WalletSigner,
-  ): InteractiveResponse {
-    return CoroutineScope(Dispatchers.IO)
-      .async {
-        val sep24RequiredFields =
-          listOf(
-            StellarTomlFields.SIGNING_KEY.text,
-            StellarTomlFields.TRANSFER_SERVER_SEP0024.text,
-            StellarTomlFields.WEB_AUTH_ENDPOINT.text
-          )
-        val toml = StellarToml(stellarAddress = assetIssuer, server, httpClient)
-        val tomlContent = toml.getToml()
+  ): InteractiveFlowResponse {
+    return interactiveFlow(
+      type = InteractiveFlowType.DEPOSIT,
+      accountAddress = accountAddress,
+      assetCode = assetCode,
+      assetIssuer = assetIssuer,
+      clientDomain = clientDomain,
+      memoId = memoId,
+      extraFields = extraFields,
+      walletSigner = walletSigner,
+      anchor = Anchor(server, network, httpClient),
+      server = server,
+      network = network,
+      httpClient = httpClient
+    )
+  }
 
-        // TODO: check toml for required fields
-        toml.hasFields(fields = sep24RequiredFields, tomlContent = tomlContent)
-
-        val transferServerEndpoint =
-          tomlContent[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
-
-        // TODO: check the /info endpoint for the asset deposit
-        val serviceInfo = getServicesInfo(transferServerEndpoint)
-        val depositAsset =
-          serviceInfo.deposit[assetCode]
-            ?: throw Exception("Asset $assetCode is not accepted for deposits")
-
-        if (!depositAsset.enabled) {
-          throw Exception("Asset $assetCode is not enabled for deposits")
-        }
-
-        val homeDomain = toml.getHomeDomain()
-
-        // TODO: SEP-10 auth
-        val auth =
-          Auth(
-            accountAddress = accountAddress,
-            webAuthEndpoint = tomlContent[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
-            homeDomain = homeDomain,
-            clientDomain = clientDomain,
-            memoId = memoId,
-            networkPassPhrase = network.networkPassphrase,
-            walletSigner = walletSigner
-          )
-        val authToken = auth.authenticate()
-
-        val requestParams = mutableMapOf<String, Any>()
-        requestParams["account"] = accountAddress
-        requestParams["asset_code"] = assetCode
-
-        if (extraFields != null) {
-          requestParams += extraFields
-        }
-
-        // TODO: get SEP-24 deposit link
-        val gson = GsonUtils.instance!!
-        val client = OkHttpClient()
-
-        val requestUrl = "$transferServerEndpoint/transactions/deposit/interactive"
-        val request = OkHttpUtils.buildJsonPostRequest(requestUrl, requestParams, authToken)
-
-        client.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
-
-          return@async gson.fromJson(response.body!!.charStream(), InteractiveResponse::class.java)
-        }
-      }
-      .await()
+  //  TODO: doc
+  //  Interactive withdrawal
+  suspend fun getInteractiveWithdrawal(
+    accountAddress: String,
+    assetCode: String,
+    assetIssuer: String,
+    clientDomain: String? = null,
+    memoId: String? = null,
+    extraFields: Map<String, Any>? = null,
+    walletSigner: WalletSigner,
+  ): InteractiveFlowResponse {
+    return interactiveFlow(
+      type = InteractiveFlowType.WITHDRAW,
+      accountAddress = accountAddress,
+      assetCode = assetCode,
+      assetIssuer = assetIssuer,
+      clientDomain = clientDomain,
+      memoId = memoId,
+      extraFields = extraFields,
+      walletSigner = walletSigner,
+      anchor = Anchor(server, network, httpClient),
+      server = server,
+      network = network,
+      httpClient = httpClient
+    )
   }
 }

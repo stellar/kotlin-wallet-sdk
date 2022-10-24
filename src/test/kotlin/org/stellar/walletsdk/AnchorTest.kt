@@ -63,4 +63,22 @@ internal class AnchorTest {
       assertDoesNotThrow { depositResponse.url.toHttpUrl() }
     }
   }
+
+  @Nested
+  @DisplayName("getInteractiveWithdrawal")
+  inner class GetInteractiveWithdrawal {
+    @Test
+    fun `get interactive withdrawal URL`() {
+      val depositResponse = runBlocking {
+        anchor.getInteractiveWithdrawal(
+          accountAddress = ADDRESS_ACTIVE,
+          assetCode = ANCHOR_ASSET_CODE,
+          assetIssuer = ANCHOR_ASSET_ISSUER,
+          walletSigner = InProcessWalletSigner(),
+        )
+      }
+
+      assertDoesNotThrow { depositResponse.url.toHttpUrl() }
+    }
+  }
 }

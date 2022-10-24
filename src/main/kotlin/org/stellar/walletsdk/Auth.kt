@@ -25,6 +25,7 @@ import org.stellar.walletsdk.util.OkHttpUtils
  * @property networkPassPhrase Stellar network passphrase
  * @property walletSigner interface to define wallet client and domain (if using `clientDomain`)
  * signing methods
+ * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
 class Auth(
   private val accountAddress: String,
@@ -33,10 +34,10 @@ class Auth(
   private val memoId: String? = null,
   private val clientDomain: String? = null,
   private val networkPassPhrase: String = Network.TESTNET.toString(),
-  private val walletSigner: WalletSigner
+  private val walletSigner: WalletSigner,
+  private val httpClient: OkHttpClient = OkHttpClient()
 ) {
   private val gson = GsonUtils.instance!!
-  private val okHttpClient = OkHttpClient()
 
   data class ChallengeResponse(val transaction: String, val network_passphrase: String)
   data class AuthToken(val token: String)
@@ -108,7 +109,7 @@ class Auth(
 
     return CoroutineScope(Dispatchers.IO)
       .async {
-        okHttpClient.newCall(request).execute().use { response ->
+        httpClient.newCall(request).execute().use { response ->
           if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
           val jsonResponse: ChallengeResponse =
@@ -179,7 +180,7 @@ class Auth(
 
     return CoroutineScope(Dispatchers.IO)
       .async {
-        okHttpClient.newCall(tokenRequest).execute().use { response ->
+        httpClient.newCall(tokenRequest).execute().use { response ->
           if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
           val jsonResponse: AuthToken =
