@@ -12,12 +12,24 @@ import org.stellar.walletsdk.StellarTomlAddressMissingHomeDomain
 import org.stellar.walletsdk.StellarTomlMissingFields
 import shadow.com.moandjiezana.toml.Toml
 
-// TODO: document
+/**
+ * [Stellar info file](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)
+ * (also known as TOML file) methods.
+ *
+ * @property stellarAddress Stellar address whose TOML file to fetch
+ * @property server Horizon [Server] instance
+ * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
+ */
 class StellarToml(
   private val stellarAddress: String,
   private val server: Server,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
+  /**
+   * Get TOML file content.
+   *
+   * @return content of the TOML file
+   */
   suspend fun getToml(): Map<String, Any> {
     val homeDomain = getHomeDomain()
     val tomlUrl = buildTomlUrl(homeDomain)
@@ -36,6 +48,13 @@ class StellarToml(
       .await()
   }
 
+  /**
+   * Get Stellar account's home domain, if it's configured.
+   *
+   * @return account's home domain
+   *
+   * @throws [StellarTomlAddressMissingHomeDomain] if account does not have home domain configured
+   */
   suspend fun getHomeDomain(): String {
     return CoroutineScope(Dispatchers.IO)
       .async {
@@ -50,6 +69,13 @@ class StellarToml(
       .await()
   }
 
+  /**
+   * Build full URL with the path to Stellar TOML file.
+   *
+   * @param homeDomain home domain to use in the URL
+   *
+   * @return full URL of the TOML file
+   */
   fun buildTomlUrl(homeDomain: String): String {
     // TODO: create a helper method to normalize url
     // TODO: handle localhost
@@ -69,6 +95,16 @@ class StellarToml(
     return "$scheme://$host/$tomlPath"
   }
 
+  /**
+   * Check if a list of fields exist in the TOML file.
+   *
+   * @param fields a list of fields to check
+   * @param tomlContent TOML file content
+   *
+   * @return `true` if all fields are found in the TOML file
+   *
+   * @throws [StellarTomlMissingFields] if there are any missing fields
+   */
   fun hasFields(fields: List<String>, tomlContent: Map<String, Any>): Boolean {
     val missingFields = mutableListOf<String>()
 

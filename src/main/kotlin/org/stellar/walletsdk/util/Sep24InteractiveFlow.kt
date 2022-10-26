@@ -8,14 +8,39 @@ import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
 
-// TODO: doc
+/**
+ * Interactive flow for deposit and withdrawal using SEP-24.
+ *
+ * @param type chosen flow (deposit or withdrawal)
+ * @param accountAddress Stellar address of the account
+ * @param assetCode Asset code to use
+ * @param assetIssuer Asset issuer to use
+ * @param memoId optional memo ID to distinguish the account
+ * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
+ * @param extraFields Additional information to pass to the anchor
+ * @param walletSigner interface to define wallet client and domain (if using `clientDomain`)
+ * signing methods
+ * @param anchor instance of the [Anchor]
+ * @param server Horizon [Server] instance
+ * @param network Stellar [Network] instance
+ * @param httpClient HTTP client
+ *
+ * @return response object from the anchor
+ *
+ * @throws [AssetNotAcceptedForDepositException] if asset is not accepted for deposits
+ * @throws [AssetNotEnabledForDepositException] if asset is not enabled for deposits by the anchor
+ * @throws [AssetNotAcceptedForWithdrawalException] if asset is not accepted for withdrawals
+ * @throws [AssetNotEnabledForWithdrawalException] if asset is not enabled for withdrawals by the
+ * anchor
+ * @throws [NetworkRequestFailedException] if network request fails
+ */
 suspend fun interactiveFlow(
   type: InteractiveFlowType,
   accountAddress: String,
   assetCode: String,
   assetIssuer: String,
-  clientDomain: String? = null,
   memoId: String? = null,
+  clientDomain: String? = null,
   extraFields: Map<String, Any>? = null,
   walletSigner: WalletSigner,
   anchor: Anchor,
