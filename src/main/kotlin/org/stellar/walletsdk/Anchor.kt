@@ -28,14 +28,14 @@ class Anchor(
   /**
    * Get anchor information from a TOML file.
    *
-   * @param assetIssuer Stellar address of the asset issuer (anchor)
+   * @param homeDomain home domain where to find stellar.toml file
    *
    * @return TOML file content
    */
-  suspend fun getInfo(assetIssuer: String): Map<String, Any> {
+  suspend fun getInfo(homeDomain: String): Map<String, Any> {
     return CoroutineScope(Dispatchers.IO)
       .async {
-        val toml = StellarToml(stellarAddress = assetIssuer, server, httpClient)
+        val toml = StellarToml(homeDomain, server, httpClient)
 
         return@async toml.getToml()
       }
@@ -54,40 +54,46 @@ class Anchor(
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
   suspend fun getServicesInfo(serviceUrl: String): AnchorServiceInfo {
+    val url: HttpUrl
+
     try {
-      val url = serviceUrl.toHttpUrl()
-      val urlBuilder = HttpUrl.Builder().scheme(url.scheme).host(url.host).port(url.port)
-
-      url.pathSegments.forEach { urlBuilder.addPathSegment(it) }
-      urlBuilder.addPathSegment("info")
-
-      val infoUrl = urlBuilder.build().toString()
-
-      val request = Request.Builder().url(infoUrl).build()
-      val gson = GsonUtils.instance!!
-
-      return CoroutineScope(Dispatchers.IO)
-        .async {
-          httpClient.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw NetworkRequestFailedException(response)
-
-            val infoResponse = response.body!!.charStream()
-            return@async gson.fromJson(infoResponse, AnchorServiceInfo::class.java)
-          }
-        }
-        .await()
+      url = serviceUrl.toHttpUrl()
     } catch (e: Exception) {
       throw InvalidAnchorServiceUrl(e)
     }
+
+    val urlBuilder = HttpUrl.Builder().scheme(url.scheme).host(url.host).port(url.port)
+
+    url.pathSegments.forEach { urlBuilder.addPathSegment(it) }
+    urlBuilder.addPathSegment("info")
+
+    val infoUrl = urlBuilder.build().toString()
+
+    val request = Request.Builder().url(infoUrl).build()
+    val gson = GsonUtils.instance!!
+
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        httpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+
+          val infoResponse = response.body!!.charStream()
+          return@async gson.fromJson(infoResponse, AnchorServiceInfo::class.java)
+        }
+      }
+      .await()
   }
 
   /**
    * Interactive deposit flow using
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
    *
-   * @param accountAddress Stellar address of the account
-   * @param assetCode Asset code to use
-   * @param assetIssuer Asset issuer to use
+   * @param accountAddress Stellar address of the account, used for authentication and by default
+   * for depositing funds
+   * @param fundsAccountAddress optional Stellar address of the account for depositing funds, if
+   * different from the account address
+   * @param homeDomain home domain of the anchor
+   * @param assetCode Asset code to deposit
    * @param memoId optional memo ID to distinguish the account
    * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
    * @param extraFields Additional information to pass to the anchor
@@ -102,8 +108,9 @@ class Anchor(
    */
   suspend fun getInteractiveDeposit(
     accountAddress: String,
+    fundsAccountAddress: String? = null,
+    homeDomain: String,
     assetCode: String,
-    assetIssuer: String,
     memoId: String? = null,
     clientDomain: String? = null,
     extraFields: Map<String, Any>? = null,
@@ -112,8 +119,9 @@ class Anchor(
     return interactiveFlow(
       type = InteractiveFlowType.DEPOSIT,
       accountAddress = accountAddress,
+      fundsAccountAddress = fundsAccountAddress,
+      homeDomain = homeDomain,
       assetCode = assetCode,
-      assetIssuer = assetIssuer,
       clientDomain = clientDomain,
       memoId = memoId,
       extraFields = extraFields,
@@ -129,9 +137,12 @@ class Anchor(
    * Interactive withdrawal flow using
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
    *
-   * @param accountAddress Stellar address of the account
-   * @param assetCode Asset code to use
-   * @param assetIssuer Asset issuer to use
+   * @param accountAddress Stellar address of the account, used for authentication and by default
+   * for withdrawing funds
+   * @param fundsAccountAddress optional Stellar address of the account for withdrawing funds, if
+   * different from the account address
+   * @param homeDomain home domain of the anchor
+   * @param assetCode Asset code to deposit
    * @param memoId optional memo ID to distinguish the account
    * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
    * @param extraFields Additional information to pass to the anchor
@@ -147,8 +158,9 @@ class Anchor(
    */
   suspend fun getInteractiveWithdrawal(
     accountAddress: String,
+    fundsAccountAddress: String? = null,
+    homeDomain: String,
     assetCode: String,
-    assetIssuer: String,
     memoId: String? = null,
     clientDomain: String? = null,
     extraFields: Map<String, Any>? = null,
@@ -157,8 +169,9 @@ class Anchor(
     return interactiveFlow(
       type = InteractiveFlowType.WITHDRAW,
       accountAddress = accountAddress,
+      fundsAccountAddress = fundsAccountAddress,
+      homeDomain = homeDomain,
       assetCode = assetCode,
-      assetIssuer = assetIssuer,
       clientDomain = clientDomain,
       memoId = memoId,
       extraFields = extraFields,

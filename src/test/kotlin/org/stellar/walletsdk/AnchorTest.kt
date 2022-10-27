@@ -17,8 +17,8 @@ internal class AnchorTest {
   @DisplayName("getInfo")
   inner class GetInfo {
     @Test
-    fun `fetches TOML for asset issuer`() {
-      assertDoesNotThrow { runBlocking { anchor.getInfo(ANCHOR_ASSET_ISSUER) } }
+    fun `fetches TOML for home domain`() {
+      assertDoesNotThrow { runBlocking { anchor.getInfo(ANCHOR_HOME_DOMAIN) } }
     }
 
     @Test
@@ -55,7 +55,22 @@ internal class AnchorTest {
         anchor.getInteractiveDeposit(
           accountAddress = ADDRESS_ACTIVE,
           assetCode = ANCHOR_ASSET_CODE,
-          assetIssuer = ANCHOR_ASSET_ISSUER,
+          homeDomain = ANCHOR_HOME_DOMAIN,
+          walletSigner = InProcessWalletSigner(),
+        )
+      }
+
+      assertDoesNotThrow { depositResponse.url.toHttpUrl() }
+    }
+
+    @Test
+    fun `get interactive deposit URL with different funds account`() {
+      val depositResponse = runBlocking {
+        anchor.getInteractiveDeposit(
+          accountAddress = ADDRESS_ACTIVE,
+          fundsAccountAddress = ADDRESS_ACTIVE_TWO,
+          assetCode = ANCHOR_ASSET_CODE,
+          homeDomain = ANCHOR_HOME_DOMAIN,
           walletSigner = InProcessWalletSigner(),
         )
       }
@@ -73,7 +88,22 @@ internal class AnchorTest {
         anchor.getInteractiveWithdrawal(
           accountAddress = ADDRESS_ACTIVE,
           assetCode = ANCHOR_ASSET_CODE,
-          assetIssuer = ANCHOR_ASSET_ISSUER,
+          homeDomain = ANCHOR_HOME_DOMAIN,
+          walletSigner = InProcessWalletSigner(),
+        )
+      }
+
+      assertDoesNotThrow { depositResponse.url.toHttpUrl() }
+    }
+
+    @Test
+    fun `get interactive withdrawal URL with different funds account`() {
+      val depositResponse = runBlocking {
+        anchor.getInteractiveWithdrawal(
+          accountAddress = ADDRESS_ACTIVE,
+          fundsAccountAddress = ADDRESS_ACTIVE_TWO,
+          assetCode = ANCHOR_ASSET_CODE,
+          homeDomain = ANCHOR_HOME_DOMAIN,
           walletSigner = InProcessWalletSigner(),
         )
       }

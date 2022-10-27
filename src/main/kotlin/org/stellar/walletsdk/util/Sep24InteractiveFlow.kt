@@ -12,9 +12,12 @@ import org.stellar.walletsdk.*
  * Interactive flow for deposit and withdrawal using SEP-24.
  *
  * @param type chosen flow (deposit or withdrawal)
- * @param accountAddress Stellar address of the account
- * @param assetCode Asset code to use
- * @param assetIssuer Asset issuer to use
+ * @param accountAddress Stellar address of the account, used for authentication and by default for
+ * depositing or withdrawing funds
+ * @param fundsAccountAddress optional Stellar address of the account for depositing or withdrawing
+ * funds, if different from the account address
+ * @param homeDomain home domain of the anchor
+ * @param assetCode Asset code to deposit or withdraw
  * @param memoId optional memo ID to distinguish the account
  * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
  * @param extraFields Additional information to pass to the anchor
@@ -37,8 +40,9 @@ import org.stellar.walletsdk.*
 suspend fun interactiveFlow(
   type: InteractiveFlowType,
   accountAddress: String,
+  fundsAccountAddress: String? = null,
+  homeDomain: String,
   assetCode: String,
-  assetIssuer: String,
   memoId: String? = null,
   clientDomain: String? = null,
   extraFields: Map<String, Any>? = null,
@@ -56,11 +60,21 @@ suspend fun interactiveFlow(
           StellarTomlFields.TRANSFER_SERVER_SEP0024.text,
           StellarTomlFields.WEB_AUTH_ENDPOINT.text
         )
-      val toml = StellarToml(stellarAddress = assetIssuer, server, httpClient)
+      val toml = StellarToml(homeDomain, server, httpClient)
       val tomlContent = toml.getToml()
 
       // Check toml for required SEP-24 fields
-      toml.hasFields(fields = sep24RequiredFields, tomlContent = tomlContent)
+      val missingFields = mutableListOf<String>()
+
+      sep24RequiredFields.forEach { field ->
+        if (tomlContent[field] == null) {
+          missingFields.add(field)
+        }
+      }
+
+      if (missingFields.size > 0) {
+        throw StellarTomlMissingFields(missingFields)
+      }
 
       val transferServerEndpoint =
         tomlContent[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
@@ -84,8 +98,6 @@ suspend fun interactiveFlow(
         }
       }
 
-      val homeDomain = toml.getHomeDomain()
-
       // SEP-10 auth
       val auth =
         Auth(
@@ -101,7 +113,7 @@ suspend fun interactiveFlow(
       val authToken = auth.authenticate()
 
       val requestParams = mutableMapOf<String, Any>()
-      requestParams["account"] = accountAddress
+      requestParams["account"] = fundsAccountAddress ?: accountAddress
       requestParams["asset_code"] = assetCode
 
       if (extraFields != null) {
