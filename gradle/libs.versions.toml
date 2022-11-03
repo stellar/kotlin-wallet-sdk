@@ -24,3 +24,4 @@ okhttp3-mockserver = { module = "com.squareup.okhttp3:mockwebserver", version.re
 [plugins]
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+dokka = {id = "org.jetbrains.dokka", version.ref = "kotlin"}

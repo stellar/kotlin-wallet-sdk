@@ -53,6 +53,12 @@ subprojects {
   }
 }
 
+
+allprojects {
+  group = "org.stellar.wallet-sdk"
+  version = "0.1.0"
+}
+
 tasks.register("printVersionName") {
   println(rootProject.version.toString())
 }
