@@ -38,6 +38,7 @@
   "sequenceLedger": 41440097,
   "sequenceTime": "1655930056",
   "subentryCount": 6,
+  "homeDomain": "test.org",
   "lastModifiedLedger": 41440097,
   "lastModifiedTime": "2022-06-22T20:34:16Z",
   "thresholds": {

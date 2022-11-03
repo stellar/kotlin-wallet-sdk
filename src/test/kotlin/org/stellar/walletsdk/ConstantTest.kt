@@ -23,6 +23,11 @@ const val AUTH_HOME_DOMAIN = "testanchor.stellar.org"
 const val AUTH_CLIENT_DOMAIN = "demo-wallet-server.stellar.org"
 const val AUTH_CLIENT_DOMAIN_URL = "https://demo-wallet-server.stellar.org/sign"
 
+const val ANCHOR_ASSET_CODE = "SRT"
+const val ANCHOR_ASSET_ISSUER = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
+const val ANCHOR_SERVICE_URL = "https://testanchor.stellar.org/sep24"
+const val ANCHOR_HOME_DOMAIN = "testanchor.stellar.org"
+
 val OP_CREATE_ACCOUNT: CreateAccountOperation =
   CreateAccountOperation.Builder(ADDRESS_ACTIVE, "1").setSourceAccount(ADDRESS_INACTIVE).build()
 val OP_CLAIM_CLAIMABLE_BALANCE: ClaimClaimableBalanceOperation =
