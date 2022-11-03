@@ -34,7 +34,9 @@ val javadocJar =
 publishing {
   publications {
     create<MavenPublication>("mavenJava") {
-      groupId = "org.stellar.wallet-sdk"
+      groupId = "org.stellar"
+      artifactId = "wallet-sdk"
+
       from(components["java"])
     }
   }

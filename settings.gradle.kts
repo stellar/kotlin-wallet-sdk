@@ -1,4 +1,4 @@
-rootProject.name = "WalletSdk"
+rootProject.name = "kotlin-wallet-sdk"
 
 /** SDK */
-include("core")
+include("wallet-sdk")
