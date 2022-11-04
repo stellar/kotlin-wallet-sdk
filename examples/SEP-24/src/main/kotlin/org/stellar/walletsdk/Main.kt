@@ -68,7 +68,8 @@ suspend fun main() {
   // val transaction = GET TRANSFER_SERVER_SEP0024/transaction
 
   println("Waiting for tokens...")
-  // Wait for token to appear on user account
+  // Optional step: wait for token to appear on user account
+  // TODO: replace with waiting for transaction
   while (
     server
       .accounts()
