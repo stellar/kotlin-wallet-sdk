@@ -12,8 +12,9 @@ import org.stellar.sdk.responses.SubmitTransactionResponse
 import org.stellar.walletsdk.helpers.objectFromJsonFile
 
 internal class WalletTest : SuspendTest() {
-  private val wallet = Wallet(HORIZON_URL, NETWORK_PASSPHRASE, 500)
   private val server = spyk(Server(HORIZON_URL))
+  private val network = Network(NETWORK_PASSPHRASE)
+  private val wallet = Wallet(server = server, network = network, maxBaseFeeInStroops = 500)
 
   @Nested
   @DisplayName("create")
@@ -216,7 +217,7 @@ internal class WalletTest : SuspendTest() {
       every { mockResponse.isSuccess } returns true
       every { server.submitTransaction(any() as Transaction) } returns mockResponse
 
-      assertTrue(runBlocking { wallet.submitTransaction(transaction, server) })
+      assertTrue(runBlocking { wallet.submitTransaction(transaction) })
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
     }
 
@@ -231,7 +232,7 @@ internal class WalletTest : SuspendTest() {
 
       val exception =
         assertFailsWith<Exception>(
-          block = { runBlocking { wallet.submitTransaction(transaction, server) } }
+          block = { runBlocking { wallet.submitTransaction(transaction) } }
         )
 
       assertTrue(exception.toString().contains(txnResultCode))
@@ -246,7 +247,7 @@ internal class WalletTest : SuspendTest() {
 
       val exception =
         assertFailsWith<Exception>(
-          block = { runBlocking { wallet.submitTransaction(transaction, server) } }
+          block = { runBlocking { wallet.submitTransaction(transaction) } }
         )
 
       assertTrue(exception.toString().contains(errorMessage))

@@ -12,18 +12,15 @@ import org.stellar.walletsdk.util.*
  *
  * [Learn about Stellar network fees](https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies)
  *
- * @property horizonUrl Horizon server URL
- * @property networkPassphrase Stellar network passphrase
+ * @property server Horizon [Server] instance
+ * @property network Stellar [Network] instance
  * @property maxBaseFeeInStroops maximum base fee in stroops
  */
 class Wallet(
-  private val horizonUrl: String = "https://horizon-testnet.stellar.org",
-  private val networkPassphrase: String = Network.TESTNET.toString(),
+  private val server: Server,
+  private val network: Network,
   private val maxBaseFeeInStroops: Int = 100
 ) {
-  private val server = Server(this.horizonUrl)
-  private val network = Network(this.networkPassphrase)
-
   data class AccountKeypair(val publicKey: String, val secretKey: String)
 
   /**
@@ -191,7 +188,6 @@ class Wallet(
    * Submit transaction to the Stellar network.
    *
    * @param signedTransaction Signed transaction that is submitted
-   * @param serverInstance optional Horizon server instance when default doesn't work
    *
    * @return `true` if submitted successfully
    *
@@ -199,11 +195,10 @@ class Wallet(
    */
   suspend fun submitTransaction(
     signedTransaction: Transaction,
-    serverInstance: Server = server
   ): Boolean {
     return CoroutineScope(Dispatchers.IO)
       .async {
-        val response = serverInstance.submitTransaction(signedTransaction)
+        val response = server.submitTransaction(signedTransaction)
 
         if (response.isSuccess) {
           return@async true
