@@ -5,11 +5,13 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.*
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
+import org.stellar.walletsdk.helpers.mapFromTomlFile
 
 internal class AnchorTest {
   private val server = Server(HORIZON_URL)
   private val network = Network(NETWORK_PASSPHRASE)
   private val anchor = Anchor(server, network, AUTH_HOME_DOMAIN)
+  private val toml = mapFromTomlFile("stellar.toml")
 
   // NOTE: Tests are running on live test network for SRT asset
 
@@ -57,6 +59,7 @@ internal class AnchorTest {
         val authToken =
           anchor.getAuthToken(
             accountAddress = ADDRESS_ACTIVE,
+            toml = toml,
             walletSigner = InProcessWalletSigner()
           )
 
@@ -77,6 +80,7 @@ internal class AnchorTest {
         val authToken =
           anchor.getAuthToken(
             accountAddress = ADDRESS_ACTIVE,
+            toml = toml,
             walletSigner = InProcessWalletSigner()
           )
 
@@ -102,6 +106,7 @@ internal class AnchorTest {
         val authToken =
           anchor.getAuthToken(
             accountAddress = ADDRESS_ACTIVE,
+            toml = toml,
             walletSigner = InProcessWalletSigner()
           )
 
@@ -122,6 +127,7 @@ internal class AnchorTest {
         val authToken =
           anchor.getAuthToken(
             accountAddress = ADDRESS_ACTIVE,
+            toml = toml,
             walletSigner = InProcessWalletSigner()
           )
 
