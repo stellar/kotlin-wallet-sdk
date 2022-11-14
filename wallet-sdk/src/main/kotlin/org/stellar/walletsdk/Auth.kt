@@ -110,7 +110,9 @@ class Auth(
     return CoroutineScope(Dispatchers.IO)
       .async {
         httpClient.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+          if (!response.isSuccessful) {
+            throw NetworkRequestFailedException(response)
+          }
 
           val jsonResponse: ChallengeResponse =
             gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
