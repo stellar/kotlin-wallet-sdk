@@ -45,21 +45,30 @@ class Anchor(
       .await()
   }
 
-  //  TODO: document
+  /**
+   * Authenticate account with the anchor using SEP-10.
+   *
+   * @param accountAddress Stellar address of the account to authenticate
+   * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
+   * @param memoId optional memo ID to distinguish the account
+   * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
+   * @param walletSigner interface to define wallet client and domain (if using `clientDomain`)
+   * signing methods
+   *
+   * @return JWT auth token
+   */
   suspend fun getAuthToken(
     accountAddress: String,
     clientDomain: String? = null,
     memoId: String? = null,
+    toml: Map<String, Any>,
     walletSigner: WalletSigner
   ): String {
     return CoroutineScope(Dispatchers.IO)
       .async {
-        // TODO: can we get this cached from Anchor class?
-        val anchorToml = getInfo()
-
         return@async Auth(
             accountAddress = accountAddress,
-            webAuthEndpoint = anchorToml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
+            webAuthEndpoint = toml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
             homeDomain = homeDomain,
             clientDomain = clientDomain,
             memoId = memoId,
@@ -194,20 +203,28 @@ class Anchor(
     )
   }
 
-  // TODO: document
   // TODO: is this for SEP-24 only?
   // TODO: handle extra fields
-  suspend fun getTransactionStatus(transactionId: String, authToken: String): AnchorTransaction {
+  /**
+   * Get single transaction's current status and details.
+   *
+   * @param transactionId transaction ID
+   * @param authToken auth token of the account authenticated with the anchor
+   * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
+   *
+   * @return transaction object
+   *
+   * @throws [NetworkRequestFailedException] if network request fails
+   */
+  suspend fun getTransactionStatus(
+    transactionId: String,
+    authToken: String,
+    toml: Map<String, Any>
+  ): AnchorTransaction {
     return CoroutineScope(Dispatchers.IO)
       .async {
-        // TODO: can we get this cached from Anchor class?
-        val anchorToml = getInfo()
-
-        val transferServerEndpoint =
-          anchorToml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
-
+        val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
         val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
-
         val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
         httpClient.newCall(request).execute().use { response ->
@@ -221,23 +238,28 @@ class Anchor(
       .await()
   }
 
-  // TODO: document
   // TODO: is this for SEP-24 only?
   // TODO: handle extra fields
+  /**
+   * Get all account's transactions by specified asset.
+   *
+   * @param assetCode asset's code
+   * @param authToken auth token of the account authenticated with the anchor
+   * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
+   *
+   * @return transaction object
+   *
+   * @throws [NetworkRequestFailedException] if network request fails
+   */
   suspend fun getAllTransactionStatus(
     assetCode: String,
-    authToken: String
+    authToken: String,
+    toml: Map<String, Any>
   ): List<AnchorTransaction> {
     return CoroutineScope(Dispatchers.IO)
       .async {
-        // TODO: can we get this cached from Anchor class?
-        val anchorToml = getInfo()
-
-        val transferServerEndpoint =
-          anchorToml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
-
+        val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
         val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
-
         val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
         httpClient.newCall(request).execute().use { response ->
