@@ -11,13 +11,14 @@ import org.stellar.sdk.Transaction
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
 // https://laboratory.stellar.org/#account-creator?network=test
-private val myAddress = "GCNVZJLJ5XZZALLZBR7BGUMGMF2KVZTBIGTU2A5KOPS2PPCZS6PV4LAD"
-private val myKey = "SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I"
+private val myKey =
+  System.getenv("STELLAR_KEY") ?: "SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I"
+private val myAddress = KeyPair.fromSecretSeed(myKey).accountId
 
 suspend fun main() {
   // Create instance of server that allows to connect to Horizon
   val server = Server("https://horizon-testnet.stellar.org")
-  val wallet = Wallet()
+  val wallet = Wallet(server, Network.TESTNET)
   // Generate new (user) account and fund it with 10 XLM from main account
   val account = KeyPair.random()
   val tx = wallet.fund(myAddress, account.publicKeyString, "10")
@@ -30,7 +31,7 @@ suspend fun main() {
   val anchor = Anchor(server, Network.TESTNET)
 
   // Get info from the anchor server
-  val info = anchor.getInfo("https://testanchor.stellar.org/.well-known/stellar.toml")
+  val info = anchor.getInfo("https://testanchor.stellar.org/")
 
   // Get SEP-24 info
   val servicesInfo = anchor.getServicesInfo("https://testanchor.stellar.org/sep24")
