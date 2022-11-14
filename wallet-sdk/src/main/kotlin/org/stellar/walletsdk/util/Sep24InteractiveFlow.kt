@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import okhttp3.OkHttpClient
-import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
 
@@ -18,14 +17,10 @@ import org.stellar.walletsdk.*
  * funds, if different from the account address
  * @param homeDomain home domain of the anchor
  * @param assetCode Asset code to deposit or withdraw
- * @param memoId optional memo ID to distinguish the account
- * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
+ * @param authToken Auth token from the anchor (account's authentication using SEP-10)
  * @param extraFields Additional information to pass to the anchor
- * @param walletSigner interface to define wallet client and domain (if using `clientDomain`)
- * signing methods
  * @param anchor instance of the [Anchor]
  * @param server Horizon [Server] instance
- * @param network Stellar [Network] instance
  * @param httpClient HTTP client
  *
  * @return response object from the anchor
@@ -43,13 +38,10 @@ suspend fun interactiveFlow(
   fundsAccountAddress: String? = null,
   homeDomain: String,
   assetCode: String,
-  memoId: String? = null,
-  clientDomain: String? = null,
+  authToken: String,
   extraFields: Map<String, Any>? = null,
-  walletSigner: WalletSigner,
   anchor: Anchor,
   server: Server,
-  network: Network,
   httpClient: OkHttpClient,
 ): InteractiveFlowResponse {
   return CoroutineScope(Dispatchers.IO)
@@ -97,20 +89,6 @@ suspend fun interactiveFlow(
           throw AssetNotEnabledForWithdrawalException(assetCode)
         }
       }
-
-      // SEP-10 auth
-      val auth =
-        Auth(
-          accountAddress = accountAddress,
-          webAuthEndpoint = tomlContent[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
-          homeDomain = homeDomain,
-          clientDomain = clientDomain,
-          memoId = memoId,
-          networkPassPhrase = network.networkPassphrase,
-          walletSigner = walletSigner,
-          httpClient = httpClient
-        )
-      val authToken = auth.authenticate()
 
       val requestParams = mutableMapOf<String, Any>()
       requestParams["account"] = fundsAccountAddress ?: accountAddress

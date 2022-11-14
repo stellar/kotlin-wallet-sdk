@@ -30,6 +30,24 @@ data class AnchorServiceInfo(
   val features: AnchorServiceFeatures,
 )
 
+data class AnchorTransaction(
+  val id: String,
+  val kind: String,
+  val status: String,
+  val more_info_url: String,
+  val amount_in: String,
+  val amount_out: String,
+  val amount_fee: String,
+  val started_at: String,
+  val stellar_transaction_id: String,
+  val from: String,
+  val to: String,
+)
+
+data class AnchorTransactionStatusResponse(val transaction: AnchorTransaction)
+
+data class AnchorAllTransactionsResponse(val transactions: List<AnchorTransaction>)
+
 enum class AssetType(val type: String) {
   NATIVE("native"),
   ALPHANUM_4("credit_alphanum4"),

@@ -10,6 +10,7 @@ import okhttp3.Request
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.util.GsonUtils
+import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.StellarToml
 import org.stellar.walletsdk.util.interactiveFlow
 
@@ -18,26 +19,55 @@ import org.stellar.walletsdk.util.interactiveFlow
  *
  * @property server Horizon [Server] instance
  * @property network Stellar [Network] instance
+ * @property homeDomain home domain of the anchor
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
 class Anchor(
   private val server: Server,
   private val network: Network,
+  private val homeDomain: String,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
+  private val gson = GsonUtils.instance!!
+
   /**
    * Get anchor information from a TOML file.
    *
-   * @param homeDomain home domain where to find stellar.toml file
-   *
    * @return TOML file content
    */
-  suspend fun getInfo(homeDomain: String): Map<String, Any> {
+  suspend fun getInfo(): Map<String, Any> {
     return CoroutineScope(Dispatchers.IO)
       .async {
         val toml = StellarToml(homeDomain, server, httpClient)
 
         return@async toml.getToml()
+      }
+      .await()
+  }
+
+  //  TODO: document
+  suspend fun getAuthToken(
+    accountAddress: String,
+    clientDomain: String? = null,
+    memoId: String? = null,
+    walletSigner: WalletSigner
+  ): String {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        // TODO: can we get this cached from Anchor class?
+        val anchorToml = getInfo()
+
+        return@async Auth(
+            accountAddress = accountAddress,
+            webAuthEndpoint = anchorToml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
+            homeDomain = homeDomain,
+            clientDomain = clientDomain,
+            memoId = memoId,
+            networkPassPhrase = network.networkPassphrase,
+            walletSigner = walletSigner,
+            httpClient = httpClient
+          )
+          .authenticate()
       }
       .await()
   }
@@ -94,11 +124,7 @@ class Anchor(
    * different from the account address
    * @param homeDomain home domain of the anchor
    * @param assetCode Asset code to deposit
-   * @param memoId optional memo ID to distinguish the account
-   * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
-   * @param extraFields Additional information to pass to the anchor
-   * @param walletSigner interface to define wallet client and domain (if using `clientDomain`)
-   * signing methods
+   * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    *
    * @return response object from the anchor
    *
@@ -111,10 +137,7 @@ class Anchor(
     fundsAccountAddress: String? = null,
     homeDomain: String,
     assetCode: String,
-    memoId: String? = null,
-    clientDomain: String? = null,
-    extraFields: Map<String, Any>? = null,
-    walletSigner: WalletSigner,
+    authToken: String,
   ): InteractiveFlowResponse {
     return interactiveFlow(
       type = InteractiveFlowType.DEPOSIT,
@@ -122,13 +145,9 @@ class Anchor(
       fundsAccountAddress = fundsAccountAddress,
       homeDomain = homeDomain,
       assetCode = assetCode,
-      clientDomain = clientDomain,
-      memoId = memoId,
-      extraFields = extraFields,
-      walletSigner = walletSigner,
-      anchor = Anchor(server, network, httpClient),
+      authToken = authToken,
+      anchor = Anchor(server, network, homeDomain, httpClient),
       server = server,
-      network = network,
       httpClient = httpClient
     )
   }
@@ -143,11 +162,8 @@ class Anchor(
    * different from the account address
    * @param homeDomain home domain of the anchor
    * @param assetCode Asset code to deposit
-   * @param memoId optional memo ID to distinguish the account
-   * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
+   * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
-   * @param walletSigner interface to define wallet client and domain (if using `clientDomain`)
-   * signing methods
    *
    * @return response object from the anchor
    *
@@ -161,10 +177,8 @@ class Anchor(
     fundsAccountAddress: String? = null,
     homeDomain: String,
     assetCode: String,
-    memoId: String? = null,
-    clientDomain: String? = null,
+    authToken: String,
     extraFields: Map<String, Any>? = null,
-    walletSigner: WalletSigner,
   ): InteractiveFlowResponse {
     return interactiveFlow(
       type = InteractiveFlowType.WITHDRAW,
@@ -172,14 +186,68 @@ class Anchor(
       fundsAccountAddress = fundsAccountAddress,
       homeDomain = homeDomain,
       assetCode = assetCode,
-      clientDomain = clientDomain,
-      memoId = memoId,
+      authToken = authToken,
       extraFields = extraFields,
-      walletSigner = walletSigner,
-      anchor = Anchor(server, network, httpClient),
+      anchor = Anchor(server, network, homeDomain, httpClient),
       server = server,
-      network = network,
       httpClient = httpClient
     )
+  }
+
+  // TODO: document
+  // TODO: is this for SEP-24 only?
+  // TODO: handle extra fields
+  suspend fun getTransactionStatus(transactionId: String, authToken: String): AnchorTransaction {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        // TODO: can we get this cached from Anchor class?
+        val anchorToml = getInfo()
+
+        val transferServerEndpoint =
+          anchorToml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
+
+        val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
+
+        val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
+
+        httpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+
+          return@async gson
+            .fromJson(response.body!!.charStream(), AnchorTransactionStatusResponse::class.java)
+            .transaction
+        }
+      }
+      .await()
+  }
+
+  // TODO: document
+  // TODO: is this for SEP-24 only?
+  // TODO: handle extra fields
+  suspend fun getAllTransactionStatus(
+    assetCode: String,
+    authToken: String
+  ): List<AnchorTransaction> {
+    return CoroutineScope(Dispatchers.IO)
+      .async {
+        // TODO: can we get this cached from Anchor class?
+        val anchorToml = getInfo()
+
+        val transferServerEndpoint =
+          anchorToml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
+
+        val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
+
+        val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
+
+        httpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+
+          return@async gson
+            .fromJson(response.body!!.charStream(), AnchorAllTransactionsResponse::class.java)
+            .transactions
+        }
+      }
+      .await()
   }
 }
