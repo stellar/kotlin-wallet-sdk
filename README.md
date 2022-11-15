@@ -5,15 +5,25 @@ utilizes [Java Stellar SDK](https://github.com/stellar/java-stellar-sdk) to comm
 
 ## Wallet
 
-`class Wallet(horizonUrl: String, networkPassphrase: String)`
+```kotlin
+class Wallet(
+    private val server: Server,
+    private val network: Network,
+    private val maxBaseFeeInStroops: Int = 100
+)
+```
 
 Example
 
 ```kotlin
 import org.stellar.sdk.Network
+import org.stellar.sdk.Server
+import org.stellar.walletsdk.Wallet
 
-// Using Horizon testnet configuration
-val wallet = Wallet("https://horizon-testnet.stellar.org", Network.TESTNET.toString())
+// Using testnet configuration
+val server = Server("https://horizon-testnet.stellar.org")
+val network = Network.TESTNET
+val wallet = Wallet(server, network)
 ```
 
 ### `Wallet.create()`
@@ -67,7 +77,10 @@ suspend fun addAssetSupport(
     sourceAddress: String,
     assetCode: String,
     assetIssuer: String,
-    trustLimit: String = "",
+    trustLimit: String = Long.MAX_VALUE
+        .toBigDecimal()
+        .movePointLeft(7)
+        .toPlainString(),
     sponsorAddress: String = ""
 ): Transaction
 ```
@@ -126,7 +139,7 @@ val transaction = wallet.addAccountSigner(sourceAddress, signerAddress, 10)
 suspend fun removeAccountSigner(
     sourceAddress: String,
     signerAddress: String
-): Transaction
+): Transaction 
 ```
 
 Example
@@ -143,8 +156,7 @@ val transaction = wallet.removeAccountSigner(sourceAddress, signerAddress)
 ```kotlin
 suspend fun submitTransaction(
     signedTransaction: Transaction,
-    serverInstance: Server = server
-): Boolean
+)
 ```
 
 Example
@@ -175,7 +187,7 @@ suspend fun signWithRecoveryServers(
 data class RecoveryServerAuth(
     val endpoint: String,
     val signerAddress: String,
-    val authToken: String,
+    val authToken: String
 )
 ```
 
@@ -207,21 +219,198 @@ wallet.signWithRecoveryServers(
 )
 ```
 
+### `Wallet.enrollWithRecoveryServer()`
+
+```kotlin
+suspend fun enrollWithRecoveryServer(
+    recoveryServers: List<RecoveryServer>,
+    accountAddress: String,
+    accountIdentity: List<RecoveryAccountIdentity>,
+    walletSigner: WalletSigner
+): List<String>
+```
+
+Example
+
+```kotlin
+val accountAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val recoveryServerOne = RecoveryServer(
+    endpoint = "",
+    authEndpoint = "",
+    stellarAddress = "",
+    homeDomain = ""
+)
+val recoveryServerTwo = RecoveryServer(
+    endpoint = "",
+    authEndpoint = "",
+    stellarAddress = "",
+    homeDomain = ""
+)
+
+wallet.enrollWithRecoveryServer(
+    recoveryServers = listOf(recoveryServerOne, recoveryServerTwo),
+    accountAddress = accountAddress,
+    accountIdentity =
+    listOf(
+        RecoveryAccountIdentity(
+            // Role can be "owner", "sender", or "receiver"
+            role = "owner",
+            auth_methods =
+            // Account auth methods (phone number, email, etc)
+            listOf(
+                RecoveryAccountAuthMethod(
+                    type = "phone_number",
+                    value = "1231231234"
+                )
+            )
+        )
+    ),
+    walletSigner = accountWalletSigner
+)
+```
+
+### `Wallet.registerRecoveryServerSigners()`
+
+```kotlin
+suspend fun registerRecoveryServerSigners(
+    accountAddress: String,
+    accountSigner: List<AccountSigner>,
+    accountThreshold: AccountThreshold,
+    sponsorAddress: String = ""
+): Transaction
+```
+
+Example
+
+```kotlin
+val accountAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val deviceAddress = "GAN7KZMNUEWWN7E35VGGST72QSA2YWA34XWJ55H7CL6MFLR6WPJVEA2U"
+val recoveryServerOneAddress = "GBQRAFYEZOW36SUIPGZQEJUBVMULVGFJLSR7HRQAUO2ZIJDB6JFC3Q7D"
+val recoveryServerTwoAddress = "GDHSJGZTRRCQQQGHKULJJHPZDF4MLM2U3HTOLIOJTRWFDXSFTQY2RP23"
+val signerMasterWeight = 20
+val signerRecoveryWeight = 10
+
+wallet.registerRecoveryServerSigners(
+    accountAddress = accountAddress,
+    accountSigner = listOf(
+        AccountSigner(address = recoveryServerOneAddress, weight = signerRecoveryWeight),
+        AccountSigner(address = recoveryServerTwoAddress, weight = signerRecoveryWeight),
+        AccountSigner(address = deviceAddress, weight = signerMasterWeight)
+    ),
+    accountThreshold =
+    AccountThreshold(
+        low = signerMasterWeight,
+        medium = signerMasterWeight,
+        high = signerMasterWeight
+    ),
+)
+```
+
+### `Wallet.createRecoverableWallet()`
+
+```kotlin
+suspend fun createRecoverableWallet(
+    accountAddress: String,
+    deviceAddress: String,
+    accountThreshold: AccountThreshold,
+    accountIdentity: List<RecoveryAccountIdentity>,
+    recoveryServers: List<RecoveryServer>,
+    accountWalletSigner: WalletSigner,
+    signerWeight: SignerWeight,
+    sponsorAddress: String = ""
+): Transaction
+```
+
+Example
+
+```kotlin
+val accountAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+val deviceAddress = "GAN7KZMNUEWWN7E35VGGST72QSA2YWA34XWJ55H7CL6MFLR6WPJVEA2U"
+val signerMasterWeight = 20
+val signerRecoveryWeight = 10
+val recoveryServerOne = RecoveryServer(
+    endpoint = "",
+    authEndpoint = "",
+    stellarAddress = "",
+    homeDomain = ""
+)
+val recoveryServerTwo = RecoveryServer(
+    endpoint = "",
+    authEndpoint = "",
+    stellarAddress = "",
+    homeDomain = ""
+)
+
+wallet.createRecoverableWallet(
+    accountAddress = accountAddress,
+    deviceAddress = deviceAddress,
+    // Account thresholds
+    accountThreshold =
+    AccountThreshold(
+        low = signerMasterWeight,
+        medium = signerMasterWeight,
+        high = signerMasterWeight
+    ),
+    accountIdentity =
+    // Account identity (can be multiple) to be registered with recovery server
+    listOf(
+        RecoveryAccountIdentity(
+            // Role can be "owner", "sender", or "receiver"
+            role = "owner",
+            auth_methods =
+            // Account auth methods (phone number, email, etc)
+            listOf(
+                RecoveryAccountAuthMethod(
+                    type = "phone_number",
+                    value = "1231231234"
+                )
+            )
+        )
+    ),
+    // Recovery server information
+    recoveryServers = listOf(recoveryServerOne, recoveryServerTwo),
+    accountWalletSigner = accountWalletSigner,
+    // Account signer weights
+    signerWeight =
+    SignerWeight(master = signerMasterWeight, recoveryServer = signerRecoveryWeight)
+)
+```
+
+### `Wallet.lockAccountMasterKey()`
+
+```kotlin
+suspend fun lockAccountMasterKey(
+    accountAddress: String,
+    sponsorAddress: String = ""
+): Transaction 
+```
+
+Example
+
+```kotlin
+val accountAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
+
+wallet.lockAccountMasterKey(
+    accountAddress = accountAddress,
+)
+```
+
 ## Auth
 
 ```kotlin
 class Auth(
-    accountAddress: String,
-    authEndpoint: String,
-    homeDomain: String,
-    memoId: String? = null,
-    clientDomain: String? = null,
-    networkPassPhrase: String = Network.TESTNET.toString(),
-    walletSigner: WalletSigner
-)
+    private val accountAddress: String,
+    private val webAuthEndpoint: String,
+    private val homeDomain: String,
+    private val memoId: String? = null,
+    private val clientDomain: String? = null,
+    private val networkPassPhrase: String = Network.TESTNET.toString(),
+    private val walletSigner: WalletSigner,
+    private val httpClient: OkHttpClient = OkHttpClient()
+) 
 ```
 
-### `authenticate()`
+### `Auth.authenticate()`
 
 ```kotlin
 fun authenticate(): String
@@ -232,109 +421,8 @@ Example
 ```kotlin
 val authToken = Auth(
     accountAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22",
-    authEndpoint = "https://testanchor.stellar.org/auth",
+    webAuthEndpoint = "https://testanchor.stellar.org/auth",
     homeDomain = "testanchor.stellar.org",
     walletSigner = WalletSigner()
 ).authenticate()
-```
-
-## Utils
-
-### `accountAvailableNativeBalance()`
-
-```kotlin
-fun accountAvailableNativeBalance(
-    account: AccountResponse
-): String
-```
-
-### `accountReservedBalance()`
-
-```kotlin
-fun accountReservedBalance(
-    account: AccountResponse
-): String
-```
-
-### `buildFeeBumpTransaction()`
-
-```kotlin
-suspend fun buildFeeBumpTransaction(
-    feeAccount: String,
-    innerTransaction: Transaction,
-    maxBaseFeeInStroops: Long,
-    server: Server
-): FeeBumpTransaction
-```
-
-### `buildTransaction()`
-
-```kotlin
-suspend fun buildTransaction(
-    sourceAddress: String,
-    server: Server,
-    network: Network,
-    operations: List<Operation>
-): Transaction
-```
-
-### `convertLumensStroops()`
-
-```kotlin
-fun stroopsToLumens(
-    stroops: String
-): String
-
-fun lumensToStroops(
-    lumens: String
-): String
-```
-
-### `createDecoratedSignature()`
-
-```kotlin
-fun createDecoratedSignature(
-    publicKey: String,
-    signatureBase64String: String,
-    base64Decoder: ((String) -> ByteArray)? = null
-): DecoratedSignature
-```
-
-### `fetchAccount()`
-
-```kotlin
-suspend fun fetchAccount(
-    accountAddress: String,
-    server: Server
-): AccountResponse
-```
-
-### `getRecoveryServerTxnSignatures()`
-
-```kotlin
-suspend fun getRecoveryServerTxnSignatures(
-    transaction: Transaction,
-    accountAddress: String,
-    recoveryServer: RecoveryServerAuth,
-    base64Decoder: ((String) -> ByteArray)? = null
-): DecoratedSignature
-```
-
-### `sponsorOperation()`
-
-```kotlin
-fun sponsorOperation(
-    sponsorAddress: String,
-    accountAddress: String,
-    operation: Operation
-): List<Operation>
-```
-
-### `validateTransaction()`
-
-```kotlin
-suspend fun validateSufficientBalance(
-    transaction: Transaction,
-    server: Server
-)
 ```
