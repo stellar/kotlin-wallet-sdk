@@ -155,7 +155,7 @@ class Anchor(
       homeDomain = homeDomain,
       assetCode = assetCode,
       authToken = authToken,
-      anchor = Anchor(server, network, homeDomain, httpClient),
+      anchor = this,
       server = server,
       httpClient = httpClient
     )
@@ -197,7 +197,7 @@ class Anchor(
       assetCode = assetCode,
       authToken = authToken,
       extraFields = extraFields,
-      anchor = Anchor(server, network, homeDomain, httpClient),
+      anchor = this,
       server = server,
       httpClient = httpClient
     )
