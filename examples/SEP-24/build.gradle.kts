@@ -3,13 +3,9 @@ plugins {
 }
 
 dependencies {
-  // See gradle/libs.versions.toml for dependency resolution
-  implementation(libs.coroutines.core)
-  implementation(libs.java.stellar.sdk)
-  implementation(libs.google.gson)
-  implementation(libs.okhttp3)
-
   implementation(project(":wallet-sdk"))
+  // To use in your project
+  // implementation("org.stellar:wallet-sdk:0.1.0")
 }
 
 application { mainClass.set("org.stellar.walletsdk.MainKt") }
