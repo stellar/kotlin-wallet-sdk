@@ -6,10 +6,10 @@ plugins {
 }
 
 dependencies {
-  implementation(libs.coroutines.core)
-  implementation(libs.java.stellar.sdk)
-  implementation(libs.google.gson)
-  implementation(libs.okhttp3)
+  api(libs.coroutines.core)
+  api(libs.java.stellar.sdk)
+  api(libs.google.gson)
+  api(libs.okhttp3)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)
