@@ -3,6 +3,7 @@ package org.stellar.walletsdk.util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import okhttp3.OkHttpClient
 import org.stellar.walletsdk.*
 
@@ -54,17 +55,15 @@ suspend fun setRecoveryMethods(
       authToken
     )
 
-  return CoroutineScope(Dispatchers.IO)
-    .async {
+  return coroutineScope {
       okHttpClient.newCall(request).execute().use { response ->
         if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
         val jsonResponse = gson.fromJson(response.body!!.charStream(), RecoveryAccount::class.java)
 
-        return@async getLatestRecoverySigner(jsonResponse.signers)
+        getLatestRecoverySigner(jsonResponse.signers)
       }
     }
-    .await()
 }
 
 /**

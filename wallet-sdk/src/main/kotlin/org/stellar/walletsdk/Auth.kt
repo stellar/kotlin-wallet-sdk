@@ -3,6 +3,7 @@ package org.stellar.walletsdk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -107,28 +108,26 @@ class Auth(
 
     val request = OkHttpUtils.buildStringGetRequest(authURL.toString())
 
-    return CoroutineScope(Dispatchers.IO)
-      .async {
-        httpClient.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) {
-            throw NetworkRequestFailedException(response)
-          }
-
-          val jsonResponse: ChallengeResponse =
-            gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
-
-          if (jsonResponse.transaction.isBlank()) {
-            throw MissingTransactionException()
-          }
-
-          if (jsonResponse.network_passphrase != networkPassPhrase) {
-            throw NetworkMismatchException()
-          }
-
-          return@async jsonResponse
+    return coroutineScope {
+      httpClient.newCall(request).execute().use { response ->
+        if (!response.isSuccessful) {
+          throw NetworkRequestFailedException(response)
         }
+
+        val jsonResponse: ChallengeResponse =
+          gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
+
+        if (jsonResponse.transaction.isBlank()) {
+          throw MissingTransactionException()
+        }
+
+        if (jsonResponse.network_passphrase != networkPassPhrase) {
+          throw NetworkMismatchException()
+        }
+
+        jsonResponse
       }
-      .await()
+    }
   }
 
   /**
@@ -180,8 +179,7 @@ class Auth(
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
     val tokenRequest = OkHttpUtils.buildJsonPostRequest(webAuthEndpoint, tokenRequestParams)
 
-    return CoroutineScope(Dispatchers.IO)
-      .async {
+    return coroutineScope {
         httpClient.newCall(tokenRequest).execute().use { response ->
           if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
@@ -192,9 +190,8 @@ class Auth(
             throw MissingTokenException()
           }
 
-          return@async jsonResponse.token
+           jsonResponse.token
         }
       }
-      .await()
   }
 }

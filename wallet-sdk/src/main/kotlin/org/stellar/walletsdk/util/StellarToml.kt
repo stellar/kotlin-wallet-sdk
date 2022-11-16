@@ -1,8 +1,6 @@
 package org.stellar.walletsdk.util
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -33,16 +31,15 @@ class StellarToml(
 
     val request = Request.Builder().url(tomlUrl).build()
 
-    return CoroutineScope(Dispatchers.IO)
-      .async {
-        httpClient.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+    return coroutineScope {
+      httpClient.newCall(request).execute().use { response ->
+        if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-          val tomlContent = response.body!!.charStream()
-          return@async Toml().read(tomlContent).toMap()
-        }
+        val tomlContent = response.body!!.charStream()
+
+        Toml().read(tomlContent).toMap()
       }
-      .await()
+    }
   }
 
   /**

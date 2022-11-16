@@ -3,6 +3,7 @@ package org.stellar.walletsdk.util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.xdr.DecoratedSignature
@@ -35,8 +36,7 @@ suspend fun getRecoveryServerTxnSignature(
   val gson = GsonUtils.instance!!
   val client = OkHttpClient()
 
-  return CoroutineScope(Dispatchers.IO)
-    .async {
+  return coroutineScope {
       val requestUrl =
         "${recoveryServer.endpoint}/accounts/$accountAddress/sign/${recoveryServer.signerAddress}"
       val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
@@ -49,12 +49,11 @@ suspend fun getRecoveryServerTxnSignature(
         val authResponse: AuthSignature =
           gson.fromJson(response.body!!.charStream(), AuthSignature::class.java)
 
-        return@async createDecoratedSignature(
+         createDecoratedSignature(
           recoveryServer.signerAddress,
           authResponse.signature,
           base64Decoder
         )
       }
     }
-    .await()
 }
