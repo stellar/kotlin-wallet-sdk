@@ -1,6 +1,5 @@
 package org.stellar.walletsdk
 
-import kotlinx.coroutines.coroutineScope
 import org.stellar.sdk.*
 import org.stellar.walletsdk.util.*
 
@@ -193,11 +192,11 @@ class Wallet(
    */
   suspend fun submitTransaction(
     signedTransaction: Transaction,
-  ): Boolean = coroutineScope {
+  ): Boolean {
     val response = server.submitTransaction(signedTransaction)
 
     if (response.isSuccess) {
-      return@coroutineScope true
+      return true
     }
 
     var errorMessage = "Transaction failed"
@@ -234,14 +233,12 @@ class Wallet(
   ): Transaction {
     val signatures =
       recoveryServers.map {
-        coroutineScope {
-          getRecoveryServerTxnSignature(
-            transaction = transaction,
-            accountAddress = accountAddress,
-            recoveryServer = it,
-            base64Decoder = base64Decoder
-          )
-        }
+        getRecoveryServerTxnSignature(
+          transaction = transaction,
+          accountAddress = accountAddress,
+          recoveryServer = it,
+          base64Decoder = base64Decoder
+        )
       }
 
     if (recoveryServers.size != signatures.size) {
@@ -275,7 +272,7 @@ class Wallet(
     accountAddress: String,
     accountIdentity: List<RecoveryAccountIdentity>,
     walletSigner: WalletSigner
-  ): List<String> = coroutineScope {
+  ): List<String> {
     val signers =
       recoveryServers.map { rs ->
         setRecoveryMethods(
@@ -292,7 +289,7 @@ class Wallet(
       throw RecoveryNotRegisteredWithAllServersException()
     }
 
-    signers
+    return signers
   }
 
   /**
@@ -315,7 +312,7 @@ class Wallet(
     accountSigner: List<AccountSigner>,
     accountThreshold: AccountThreshold,
     sponsorAddress: String = ""
-  ): Transaction = coroutineScope {
+  ): Transaction {
     val isSponsored = sponsorAddress.isNotBlank()
     val transactionBuilder =
       createTransactionBuilder(
@@ -344,7 +341,7 @@ class Wallet(
 
     transactionBuilder.addOperations(operations)
 
-    transactionBuilder.build()
+    return transactionBuilder.build()
   }
 
   // TODO: create account helper to handle 409 Conflict > fetch account data from RS and return
@@ -387,7 +384,7 @@ class Wallet(
     accountWalletSigner: WalletSigner,
     signerWeight: SignerWeight,
     sponsorAddress: String = ""
-  ): Transaction = coroutineScope {
+  ): Transaction {
     val recoverySigners =
       enrollWithRecoveryServer(
         recoveryServers = recoveryServers,
@@ -407,7 +404,7 @@ class Wallet(
         AccountSigner(address = deviceAddress, weight = signerWeight.master)
       )
 
-    registerRecoveryServerSigners(
+    return registerRecoveryServerSigners(
       accountAddress = accountAddress,
       accountSigner = signer,
       accountThreshold = accountThreshold,
@@ -430,7 +427,7 @@ class Wallet(
   suspend fun lockAccountMasterKey(
     accountAddress: String,
     sponsorAddress: String = ""
-  ): Transaction = coroutineScope {
+  ): Transaction {
     val isSponsored = sponsorAddress.isNotBlank()
     val transactionBuilder =
       createTransactionBuilder(
@@ -451,7 +448,7 @@ class Wallet(
 
     transactionBuilder.addOperations(operations)
 
-    transactionBuilder.build()
+    return transactionBuilder.build()
   }
 
   /**
@@ -464,23 +461,22 @@ class Wallet(
    *
    * @throws [AccountNotFoundException] when account is not found
    */
-  suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo =
-    coroutineScope {
-      try {
-        val account = fetchAccount(accountAddress, serverInstance)
-        val balances = formatAccountBalances(account, serverInstance)
+  suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
+    try {
+      val account = fetchAccount(accountAddress, serverInstance)
+      val balances = formatAccountBalances(account, serverInstance)
 
-        // TODO: add accountDetails
+      // TODO: add accountDetails
 
-        AccountInfo(
-          publicKey = account.accountId,
-          assets = balances.assets,
-          liquidityPools = balances.liquidityPools,
-          reservedNativeBalance = accountReservedBalance(account)
-        )
-      } catch (e: Exception) {
-        // TODO: Is there a way to check if response is 404 (account not found)?
-        throw e
-      }
+      return AccountInfo(
+        publicKey = account.accountId,
+        assets = balances.assets,
+        liquidityPools = balances.liquidityPools,
+        reservedNativeBalance = accountReservedBalance(account)
+      )
+    } catch (e: Exception) {
+      // TODO: Is there a way to check if response is 404 (account not found)?
+      throw e
     }
+  }
 }

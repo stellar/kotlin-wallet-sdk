@@ -1,6 +1,5 @@
 package org.stellar.walletsdk.util
 
-import kotlinx.coroutines.coroutineScope
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
@@ -41,7 +40,7 @@ suspend fun interactiveFlow(
   anchor: Anchor,
   server: Server,
   httpClient: OkHttpClient,
-): InteractiveFlowResponse = coroutineScope {
+): InteractiveFlowResponse {
   val sep24RequiredFields =
     listOf(
       StellarTomlFields.SIGNING_KEY.text,
@@ -100,7 +99,7 @@ suspend fun interactiveFlow(
   val requestUrl = "$transferServerEndpoint/transactions/${type.value}/interactive"
   val request = OkHttpUtils.buildJsonPostRequest(requestUrl, requestParams, authToken)
 
-  httpClient.newCall(request).execute().use { response ->
+  return httpClient.newCall(request).execute().use { response ->
     if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
     gson.fromJson(response.body!!.charStream(), InteractiveFlowResponse::class.java)

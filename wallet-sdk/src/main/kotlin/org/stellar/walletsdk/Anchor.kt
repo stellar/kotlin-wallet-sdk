@@ -1,6 +1,5 @@
 package org.stellar.walletsdk
 
-import kotlinx.coroutines.coroutineScope
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -33,10 +32,10 @@ class Anchor(
    *
    * @return TOML file content
    */
-  suspend fun getInfo(): Map<String, Any> = coroutineScope {
+  suspend fun getInfo(): Map<String, Any> {
     val toml = StellarToml(homeDomain, server, httpClient)
 
-    toml.getToml()
+    return toml.getToml()
   }
 
   /**
@@ -57,8 +56,8 @@ class Anchor(
     memoId: String? = null,
     toml: Map<String, Any>,
     walletSigner: WalletSigner
-  ): String = coroutineScope {
-    Auth(
+  ): String {
+    return Auth(
         accountAddress = accountAddress,
         webAuthEndpoint = toml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
         homeDomain = homeDomain,
@@ -101,13 +100,11 @@ class Anchor(
     val request = Request.Builder().url(infoUrl).build()
     val gson = GsonUtils.instance!!
 
-    return coroutineScope {
-      httpClient.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+    return httpClient.newCall(request).execute().use { response ->
+      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-        val infoResponse = response.body!!.charStream()
-        gson.fromJson(infoResponse, AnchorServiceInfo::class.java)
-      }
+      val infoResponse = response.body!!.charStream()
+      gson.fromJson(infoResponse, AnchorServiceInfo::class.java)
     }
   }
 
@@ -208,12 +205,12 @@ class Anchor(
     transactionId: String,
     authToken: String,
     toml: Map<String, Any>
-  ): AnchorTransaction = coroutineScope {
+  ): AnchorTransaction {
     val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
-    httpClient.newCall(request).execute().use { response ->
+    return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
       gson
@@ -239,12 +236,12 @@ class Anchor(
     assetCode: String,
     authToken: String,
     toml: Map<String, Any>
-  ): List<AnchorTransaction> = coroutineScope {
+  ): List<AnchorTransaction> {
     val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
-    httpClient.newCall(request).execute().use { response ->
+    return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
       gson

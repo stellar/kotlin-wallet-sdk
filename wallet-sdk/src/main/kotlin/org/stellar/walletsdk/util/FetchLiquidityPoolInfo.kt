@@ -1,6 +1,5 @@
 package org.stellar.walletsdk.util
 
-import kotlinx.coroutines.coroutineScope
 import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.LiquidityPoolResponse
@@ -21,7 +20,7 @@ suspend fun fetchLiquidityPoolInfo(
   liquidityPoolId: LiquidityPoolID,
   cachedAssetInfo: MutableMap<String, CachedAsset>,
   server: Server
-): LiquidityPoolInfo = coroutineScope {
+): LiquidityPoolInfo {
   val response: LiquidityPoolResponse
 
   try {
@@ -72,5 +71,5 @@ suspend fun fetchLiquidityPoolInfo(
     }
   }
 
-  LiquidityPoolInfo(totalTrustlines, totalShares, reserves)
+  return LiquidityPoolInfo(totalTrustlines, totalShares, reserves)
 }

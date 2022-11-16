@@ -1,6 +1,5 @@
 package org.stellar.walletsdk.util
 
-import kotlinx.coroutines.coroutineScope
 import org.stellar.sdk.Network
 import org.stellar.sdk.Operation
 import org.stellar.sdk.Server
@@ -28,7 +27,7 @@ suspend fun buildTransaction(
   server: Server,
   network: Network,
   operations: List<Operation>
-): Transaction = coroutineScope {
+): Transaction {
   val transactionBuilder =
     createTransactionBuilder(
       sourceAddress = sourceAddress,
@@ -37,5 +36,5 @@ suspend fun buildTransaction(
       network = network
     )
 
-  transactionBuilder.addOperations(operations).build()
+  return transactionBuilder.addOperations(operations).build()
 }
