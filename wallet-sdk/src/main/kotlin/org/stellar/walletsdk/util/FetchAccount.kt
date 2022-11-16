@@ -18,11 +18,7 @@ import org.stellar.walletsdk.AccountNotFoundException
  */
 suspend fun fetchAccount(accountAddress: String, server: Server): AccountResponse {
   try {
-    return CoroutineScope(Dispatchers.IO)
-      .async {
-        return@async server.accounts().account(accountAddress)
-      }
-      .await()
+    return server.accounts().account(accountAddress)
   } catch (e: IOException) {
     throw AccountNotFoundException(accountAddress)
   }

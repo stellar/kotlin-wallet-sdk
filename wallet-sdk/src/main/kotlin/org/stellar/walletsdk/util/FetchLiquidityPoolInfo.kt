@@ -1,8 +1,5 @@
 package org.stellar.walletsdk.util
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.LiquidityPoolResponse
@@ -24,59 +21,55 @@ suspend fun fetchLiquidityPoolInfo(
   cachedAssetInfo: MutableMap<String, CachedAsset>,
   server: Server
 ): LiquidityPoolInfo {
-  return CoroutineScope(Dispatchers.IO)
-    .async {
-      val response: LiquidityPoolResponse
+  val response: LiquidityPoolResponse
 
-      try {
-        response = server.liquidityPools().liquidityPool(liquidityPoolId)
-      } catch (e: Exception) {
-        throw LiquidityPoolNotFoundException(liquidityPoolId)
-      }
+  try {
+    response = server.liquidityPools().liquidityPool(liquidityPoolId)
+  } catch (e: Exception) {
+    throw LiquidityPoolNotFoundException(liquidityPoolId)
+  }
 
-      val responseReserves = response.reserves
-      val totalTrustlines = response.totalTrustlines
-      val totalShares = response.totalShares
+  val responseReserves = response.reserves
+  val totalTrustlines = response.totalTrustlines
+  val totalShares = response.totalShares
 
-      val reserves: MutableList<LiquidityPoolReserve> = mutableListOf()
+  val reserves: MutableList<LiquidityPoolReserve> = mutableListOf()
 
-      responseReserves.forEach { item ->
-        if (item.asset.type == AssetType.NATIVE.type) {
-          val nativeReserve =
-            LiquidityPoolReserve(
-              id = XLM_ASSET_DEFAULTS.id,
-              homeDomain = XLM_ASSET_DEFAULTS.homeDomain,
-              name = XLM_ASSET_DEFAULTS.name,
-              imageUrl = XLM_ASSET_DEFAULTS.imageUrl,
-              assetCode = XLM_ASSET_DEFAULTS.assetCode,
-              assetIssuer = XLM_ASSET_DEFAULTS.assetIssuer,
-              amount = formatAmount(item.amount),
-            )
+  responseReserves.forEach { item ->
+    if (item.asset.type == AssetType.NATIVE.type) {
+      val nativeReserve =
+        LiquidityPoolReserve(
+          id = XLM_ASSET_DEFAULTS.id,
+          homeDomain = XLM_ASSET_DEFAULTS.homeDomain,
+          name = XLM_ASSET_DEFAULTS.name,
+          imageUrl = XLM_ASSET_DEFAULTS.imageUrl,
+          assetCode = XLM_ASSET_DEFAULTS.assetCode,
+          assetIssuer = XLM_ASSET_DEFAULTS.assetIssuer,
+          amount = formatAmount(item.amount),
+        )
 
-          reserves.add(nativeReserve)
-        } else {
-          val assetArr = item.asset.toString().split(":")
-          val assetCode = assetArr[0]
-          val assetIssuer = assetArr[1]
+      reserves.add(nativeReserve)
+    } else {
+      val assetArr = item.asset.toString().split(":")
+      val assetCode = assetArr[0]
+      val assetIssuer = assetArr[1]
 
-          val cachedItem = cachedAssetInfo[item.asset.toString()]
-          // TODO: if there is no cached info, fetch toml file to get homeDomain, name, and imageURL
-          val lpAsset =
-            LiquidityPoolReserve(
-              id = item.asset.toString(),
-              assetCode = assetCode,
-              assetIssuer = assetIssuer,
-              homeDomain = cachedItem?.homeDomain,
-              name = cachedItem?.name,
-              imageUrl = cachedItem?.imageUrl,
-              amount = formatAmount(item.amount),
-            )
+      val cachedItem = cachedAssetInfo[item.asset.toString()]
+      // TODO: if there is no cached info, fetch toml file to get homeDomain, name, and imageURL
+      val lpAsset =
+        LiquidityPoolReserve(
+          id = item.asset.toString(),
+          assetCode = assetCode,
+          assetIssuer = assetIssuer,
+          homeDomain = cachedItem?.homeDomain,
+          name = cachedItem?.name,
+          imageUrl = cachedItem?.imageUrl,
+          amount = formatAmount(item.amount),
+        )
 
-          reserves.add(lpAsset)
-        }
-      }
-
-      return@async LiquidityPoolInfo(totalTrustlines, totalShares, reserves)
+      reserves.add(lpAsset)
     }
-    .await()
+  }
+
+  return LiquidityPoolInfo(totalTrustlines, totalShares, reserves)
 }

@@ -1,8 +1,5 @@
 package org.stellar.walletsdk
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -107,28 +104,24 @@ class Auth(
 
     val request = OkHttpUtils.buildStringGetRequest(authURL.toString())
 
-    return CoroutineScope(Dispatchers.IO)
-      .async {
-        httpClient.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) {
-            throw NetworkRequestFailedException(response)
-          }
-
-          val jsonResponse: ChallengeResponse =
-            gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
-
-          if (jsonResponse.transaction.isBlank()) {
-            throw MissingTransactionException()
-          }
-
-          if (jsonResponse.network_passphrase != networkPassPhrase) {
-            throw NetworkMismatchException()
-          }
-
-          return@async jsonResponse
-        }
+    return httpClient.newCall(request).execute().use { response ->
+      if (!response.isSuccessful) {
+        throw NetworkRequestFailedException(response)
       }
-      .await()
+
+      val jsonResponse: ChallengeResponse =
+        gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
+
+      if (jsonResponse.transaction.isBlank()) {
+        throw MissingTransactionException()
+      }
+
+      if (jsonResponse.network_passphrase != networkPassPhrase) {
+        throw NetworkMismatchException()
+      }
+
+      jsonResponse
+    }
   }
 
   /**
@@ -180,21 +173,17 @@ class Auth(
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
     val tokenRequest = OkHttpUtils.buildJsonPostRequest(webAuthEndpoint, tokenRequestParams)
 
-    return CoroutineScope(Dispatchers.IO)
-      .async {
-        httpClient.newCall(tokenRequest).execute().use { response ->
-          if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+    httpClient.newCall(tokenRequest).execute().use { response ->
+      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-          val jsonResponse: AuthToken =
-            gson.fromJson(response.body!!.charStream(), AuthToken::class.java)
+      val jsonResponse: AuthToken =
+        gson.fromJson(response.body!!.charStream(), AuthToken::class.java)
 
-          if (jsonResponse.token.isBlank()) {
-            throw MissingTokenException()
-          }
-
-          return@async jsonResponse.token
-        }
+      if (jsonResponse.token.isBlank()) {
+        throw MissingTokenException()
       }
-      .await()
+
+      return jsonResponse.token
+    }
   }
 }
