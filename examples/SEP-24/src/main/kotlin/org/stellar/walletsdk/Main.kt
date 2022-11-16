@@ -28,10 +28,10 @@ suspend fun main() {
   tx.sign(KeyPair.fromSecretSeed(myKey))
   assert(wallet.submitTransaction(tx))
 
-  val anchor = Anchor(server, Network.TESTNET)
+  val anchor = Anchor(server, Network.TESTNET, "testanchor.stellar.org")
 
   // Get info from the anchor server
-  val info = anchor.getInfo("https://testanchor.stellar.org/")
+  val info = anchor.getInfo()
 
   // Get SEP-24 info
   val servicesInfo = anchor.getServicesInfo("https://testanchor.stellar.org/sep24")
@@ -53,13 +53,21 @@ suspend fun main() {
   addTrustline.sign(account)
   assert(wallet.submitTransaction(addTrustline))
 
+  // Authorizing
+  val token =
+    anchor.getAuthToken(
+      account.publicKeyString,
+      toml = info,
+      walletSigner = WalletSignerImpl(account)
+    )
+
   // Start interactive deposit
   val deposit =
     anchor.getInteractiveDeposit(
       account.publicKeyString,
       homeDomain = "testanchor.stellar.org",
       assetCode = "SRT",
-      walletSigner = WalletSignerImpl(account)
+      authToken = token
     )
 
   // Request user input
@@ -88,7 +96,7 @@ suspend fun main() {
       account.publicKeyString,
       homeDomain = "testanchor.stellar.org",
       assetCode = "SRT",
-      walletSigner = WalletSignerImpl(account)
+      authToken = token
     )
 
   // Request user input
