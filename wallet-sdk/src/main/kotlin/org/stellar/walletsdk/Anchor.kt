@@ -116,7 +116,6 @@ class Anchor(
    * for depositing funds
    * @param fundsAccountAddress optional Stellar address of the account for depositing funds, if
    * different from the account address
-   * @param homeDomain home domain of the anchor
    * @param assetCode Asset code to deposit
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    *
@@ -129,7 +128,6 @@ class Anchor(
   suspend fun getInteractiveDeposit(
     accountAddress: String,
     fundsAccountAddress: String? = null,
-    homeDomain: String,
     assetCode: String,
     authToken: String,
   ): InteractiveFlowResponse {
@@ -154,7 +152,6 @@ class Anchor(
    * for withdrawing funds
    * @param fundsAccountAddress optional Stellar address of the account for withdrawing funds, if
    * different from the account address
-   * @param homeDomain home domain of the anchor
    * @param assetCode Asset code to deposit
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
@@ -169,7 +166,6 @@ class Anchor(
   suspend fun getInteractiveWithdrawal(
     accountAddress: String,
     fundsAccountAddress: String? = null,
-    homeDomain: String,
     assetCode: String,
     authToken: String,
     extraFields: Map<String, Any>? = null,

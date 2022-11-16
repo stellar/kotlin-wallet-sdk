@@ -66,7 +66,6 @@ internal class AnchorTest {
         anchor.getInteractiveDeposit(
           accountAddress = ADDRESS_ACTIVE,
           assetCode = ANCHOR_ASSET_CODE,
-          homeDomain = ANCHOR_HOME_DOMAIN,
           authToken = authToken,
         )
       }
@@ -88,7 +87,6 @@ internal class AnchorTest {
           accountAddress = ADDRESS_ACTIVE,
           fundsAccountAddress = ADDRESS_ACTIVE_TWO,
           assetCode = ANCHOR_ASSET_CODE,
-          homeDomain = ANCHOR_HOME_DOMAIN,
           authToken = authToken,
         )
       }
@@ -113,7 +111,6 @@ internal class AnchorTest {
         anchor.getInteractiveWithdrawal(
           accountAddress = ADDRESS_ACTIVE,
           assetCode = ANCHOR_ASSET_CODE,
-          homeDomain = ANCHOR_HOME_DOMAIN,
           authToken = authToken,
         )
       }
@@ -135,7 +132,6 @@ internal class AnchorTest {
           accountAddress = ADDRESS_ACTIVE,
           fundsAccountAddress = ADDRESS_ACTIVE_TWO,
           assetCode = ANCHOR_ASSET_CODE,
-          homeDomain = ANCHOR_HOME_DOMAIN,
           authToken = authToken,
         )
       }

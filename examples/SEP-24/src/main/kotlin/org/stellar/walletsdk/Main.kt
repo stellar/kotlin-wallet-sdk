@@ -1,8 +1,5 @@
 package org.stellar.walletsdk
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import java.math.BigDecimal
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -66,12 +63,7 @@ suspend fun main() {
 
   // Start interactive deposit
   val deposit =
-    anchor.getInteractiveDeposit(
-      account.publicKeyString,
-      homeDomain = "testanchor.stellar.org",
-      assetCode = "SRT",
-      authToken = token
-    )
+    anchor.getInteractiveDeposit(account.publicKeyString, assetCode = "SRT", authToken = token)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -95,12 +87,7 @@ suspend fun main() {
 
   // Start interactive withdrawal
   val withdrawal =
-    anchor.getInteractiveWithdrawal(
-      account.publicKeyString,
-      homeDomain = "testanchor.stellar.org",
-      assetCode = "SRT",
-      authToken = token
-    )
+    anchor.getInteractiveWithdrawal(account.publicKeyString, assetCode = "SRT", authToken = token)
 
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
