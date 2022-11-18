@@ -1,6 +1,7 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
+import org.stellar.walletsdk.response.*
 import org.stellar.walletsdk.util.*
 
 /**
@@ -40,21 +41,17 @@ class Wallet(
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    *
    * @return transaction
-   *
-   * @throws [InvalidStartingBalanceException] when starting balance is less than 1 XLM for
-   * non-sponsored account
-   * @throws [AccountNotFoundException] when source account is not found
    */
   suspend fun fund(
     sourceAddress: String,
     destinationAddress: String,
     startingBalance: String = "1",
     sponsorAddress: String = ""
-  ): Transaction {
+  ): Result<WalletError, Transaction> = safeRun {
     val isSponsored = sponsorAddress.isNotBlank()
 
     if (!isSponsored && startingBalance.toInt() < 1) {
-      throw InvalidStartingBalanceException()
+      return fail(InvalidStartingBalanceError())
     }
 
     val startBalance = if (isSponsored) "0" else startingBalance
@@ -71,7 +68,7 @@ class Wallet(
         listOfNotNull(createAccountOp)
       }
 
-    return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
+    success(buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations))
   }
 
   /**

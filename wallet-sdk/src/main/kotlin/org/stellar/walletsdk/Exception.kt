@@ -44,9 +44,6 @@ class InvalidSponsorOperationTypeException(operationType: String, allowedOperati
       .joinToString(", ")}."
   )
 
-class InvalidStartingBalanceException :
-  Exception("Starting balance must be at least 1 XLM for non-sponsored accounts")
-
 class LiquidityPoolNotFoundException(liquidityPoolID: LiquidityPoolID) :
   Exception("Liquidity pool $liquidityPoolID was not found")
 

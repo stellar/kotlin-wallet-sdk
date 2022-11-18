@@ -10,6 +10,7 @@ dependencies {
   api(libs.java.stellar.sdk)
   api(libs.google.gson)
   api(libs.okhttp3)
+  api(libs.arrow)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)
