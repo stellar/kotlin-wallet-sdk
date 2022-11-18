@@ -1,6 +1,7 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
+import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.walletsdk.util.*
 
 /**
@@ -478,5 +479,45 @@ class Wallet(
       // TODO: Is there a way to check if response is 404 (account not found)?
       throw e
     }
+  }
+
+  // TODO: format anchor transactions
+  // TODO: document
+  suspend fun getHistory(
+    accountAddress: String,
+    limit: Int,
+    order: Order? = Order.DESC,
+    cursor: String? = "",
+    includeFailed: Boolean? = false
+  ): List<WalletOperation> {
+    if (limit > 200) {
+      throw Exception("Maximum limit is 200 operations")
+    }
+
+    val orderValue =
+      if (order == Order.ASC) {
+        RequestBuilder.Order.ASC
+      } else {
+        RequestBuilder.Order.DESC
+      }
+
+    val accountOperations =
+      server
+        .operations()
+        .forAccount(accountAddress)
+        .limit(limit)
+        .order(orderValue)
+        .cursor(cursor)
+        .includeFailed(includeFailed!!)
+        .includeTransactions(true)
+        .execute()
+        .records
+
+    val formattedOperations = mutableListOf<WalletOperation>()
+    accountOperations.forEach { op ->
+      formattedOperations.add(formatStellarOperation(accountAddress, op))
+    }
+
+    return formattedOperations.toList()
   }
 }

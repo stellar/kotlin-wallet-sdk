@@ -1,5 +1,7 @@
 package org.stellar.walletsdk
 
+import org.stellar.sdk.responses.operations.OperationResponse
+
 data class AccountInfo(
   val publicKey: String,
   val assets: List<FormattedAsset>,
@@ -10,6 +12,11 @@ data class AccountInfo(
 data class AccountSigner(val address: String, val weight: Int)
 
 data class AccountThreshold(val low: Int, val medium: Int, val high: Int)
+
+enum class AnchorOperationTypes(val type: String) {
+  DEPOSIT("deposit"),
+  WITHDRAW("withdraw")
+}
 
 data class AnchorServiceAsset(
   val enabled: Boolean,
@@ -125,6 +132,11 @@ data class NativeAssetDefaults(
   val assetIssuer: String,
 )
 
+enum class Order() {
+  ASC,
+  DESC
+}
+
 data class RecoveryServer(
   val endpoint: String,
   val authEndpoint: String,
@@ -165,8 +177,40 @@ data class SignerWeight(
   val recoveryServer: Int,
 )
 
+enum class StellarOperationTypes(val type: String) {
+  CREATE_ACCOUNT("create_account"),
+  PAYMENT("payment"),
+  PATH_PAYMENT_STRICT_RECEIVE("path_payment_strict_receive"),
+  PATH_PAYMENT_STRICT_SEND("path_payment_strict_send"),
+  ACCOUNT_MERGE("account_merge"),
+  LIQUIDITY_POOL_DEPOSIT("liquidity_pool_deposit"),
+  LIQUIDITY_POOL_WITHDRAW("liquidity_pool_withdraw"),
+  CLAIM_CLAIMABLE_BALANCE("claim_claimable_balance")
+}
+
 enum class StellarTomlFields(val text: String) {
   SIGNING_KEY("SIGNING_KEY"),
   TRANSFER_SERVER_SEP0024("TRANSFER_SERVER_SEP0024"),
   WEB_AUTH_ENDPOINT("WEB_AUTH_ENDPOINT")
+}
+
+data class WalletAsset(val id: String, val code: String, val issuer: String)
+
+data class WalletOperation(
+  val id: Long,
+  val date: String,
+  val amount: String,
+  val account: String,
+  val asset: List<WalletAsset>,
+  val type: WalletOperationTypes,
+  val rawOperation: OperationResponse,
+)
+
+enum class WalletOperationTypes() {
+  SEND,
+  RECEIVE,
+  DEPOSIT,
+  WITHDRAW,
+  SWAP,
+  OTHER
 }
