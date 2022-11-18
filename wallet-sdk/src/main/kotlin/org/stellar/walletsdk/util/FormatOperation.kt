@@ -7,7 +7,14 @@ import org.stellar.sdk.responses.operations.PathPaymentBaseOperationResponse
 import org.stellar.sdk.responses.operations.PaymentOperationResponse
 import org.stellar.walletsdk.*
 
-// TODO: document
+/**
+ * Format Stellar account operations to make them consistent.
+ *
+ * @param accountAddress Stellar address of the account
+ * @param operation Stellar operation to format
+ *
+ * @return formatted operation
+ */
 fun formatStellarOperation(accountAddress: String, operation: OperationResponse): WalletOperation {
   when (operation.type) {
     // Create account

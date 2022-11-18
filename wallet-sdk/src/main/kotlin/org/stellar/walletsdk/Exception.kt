@@ -61,6 +61,8 @@ class NetworkRequestFailedException(
   label: String? = "Request failed",
 ) : IOException("$label: $rawResponse")
 
+class OperationsLimitExceededException : Exception("Maximum limit is 200 operations")
+
 class RecoveryNoAccountSignersOnServerException :
   Exception("There are no signers on this recovery server")
 

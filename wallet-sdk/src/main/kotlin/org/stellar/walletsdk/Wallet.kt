@@ -481,8 +481,19 @@ class Wallet(
     }
   }
 
-  // TODO: format anchor transactions
-  // TODO: document
+  /**
+   * Get account operations for the specified Stellar address.
+   *
+   * @param accountAddress Stellar address of the account
+   * @param limit how many operations to fetch, maximum is 200
+   * @param order optional data order, ascending or descending, defaults to descending
+   * @param cursor optional cursor to specify a starting point
+   * @param includeFailed optional flag to include failed operations, defaults to false
+   *
+   * @return a list of formatted operations
+   *
+   * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
+   */
   suspend fun getHistory(
     accountAddress: String,
     limit: Int,
@@ -491,7 +502,7 @@ class Wallet(
     includeFailed: Boolean? = false
   ): List<WalletOperation> {
     if (limit > 200) {
-      throw Exception("Maximum limit is 200 operations")
+      throw OperationsLimitExceededException()
     }
 
     val orderValue =
