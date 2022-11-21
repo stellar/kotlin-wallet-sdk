@@ -1,6 +1,7 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
+import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.*
 
 /**
@@ -54,7 +55,7 @@ class Wallet(
     val isSponsored = sponsorAddress.isNotBlank()
 
     if (!isSponsored && startingBalance.toInt() < 1) {
-      throw InvalidStartingBalanceException()
+      throw InvalidStartingBalanceException
     }
 
     val startBalance = if (isSponsored) "0" else startingBalance
@@ -199,13 +200,7 @@ class Wallet(
       return true
     }
 
-    var errorMessage = "Transaction failed"
-
-    if (!response.extras?.resultCodes?.transactionResultCode.isNullOrBlank()) {
-      errorMessage += ": ${response.extras.resultCodes.transactionResultCode}"
-    }
-
-    throw TransactionSubmitFailedException(response, errorMessage)
+    throw TransactionSubmitFailedException(response)
   }
 
   /**
@@ -222,7 +217,7 @@ class Wallet(
    * @return transaction with recovery server signatures
    *
    * @throws [NetworkRequestFailedException] when request fails
-   * @throws [RecoveryNotAllSignaturesFetchedException] when all recovery servers don't return
+   * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return
    * signatures
    */
   suspend fun signWithRecoveryServers(
@@ -242,7 +237,7 @@ class Wallet(
       }
 
     if (recoveryServers.size != signatures.size) {
-      throw RecoveryNotAllSignaturesFetchedException()
+      throw NotAllSignaturesFetchedException
     }
 
     signatures.forEach { transaction.addSignature(it) }
@@ -262,10 +257,7 @@ class Wallet(
    * @return a list of recovery servers' signatures
    *
    * @throws [NetworkRequestFailedException] when request fails
-   * @throws [RecoveryNoAccountSignersOnServerException] if there are no signers on the recovery
-   * server for this account
-   * @throws [RecoveryNotRegisteredWithAllServersException] when all recovery servers were not
-   * registered
+   * @throws [RecoveryException] when error happens working with recovery servers
    */
   suspend fun enrollWithRecoveryServer(
     recoveryServers: List<RecoveryServer>,
@@ -286,7 +278,7 @@ class Wallet(
       }
 
     if (recoveryServers.size != signers.size) {
-      throw RecoveryNotRegisteredWithAllServersException()
+      throw NotRegisteredWithAllException
     }
 
     return signers
@@ -369,10 +361,7 @@ class Wallet(
    * @return transaction
    *
    * @throws [NetworkRequestFailedException] when request fails
-   * @throws [RecoveryNoAccountSignersOnServerException] if there are no signers on the recovery
-   * server for this account
-   * @throws [RecoveryNotRegisteredWithAllServersException] when all recovery servers were not
-   * registered
+   * @throws [RecoveryException] when error happens working with recovery servers
    * @throws [AccountNotFoundException] when account is not found
    */
   suspend fun createRecoverableWallet(

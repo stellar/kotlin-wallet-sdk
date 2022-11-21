@@ -3,7 +3,7 @@ package org.stellar.walletsdk.util
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.xdr.DecoratedSignature
-import org.stellar.walletsdk.NetworkRequestFailedException
+import org.stellar.walletsdk.exception.NetworkRequestFailedException
 import org.stellar.walletsdk.RecoveryServerAuth
 
 /**

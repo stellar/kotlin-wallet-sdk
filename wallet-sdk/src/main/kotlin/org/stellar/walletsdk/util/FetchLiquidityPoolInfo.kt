@@ -4,6 +4,7 @@ import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.LiquidityPoolResponse
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.exception.LiquidityPoolNotFoundException
 
 /**
  * Fetch liquidity pool information from the Stellar network.
@@ -26,6 +27,7 @@ suspend fun fetchLiquidityPoolInfo(
   try {
     response = server.liquidityPools().liquidityPool(liquidityPoolId)
   } catch (e: Exception) {
+    // TODO: throw on 404 only
     throw LiquidityPoolNotFoundException(liquidityPoolId)
   }
 

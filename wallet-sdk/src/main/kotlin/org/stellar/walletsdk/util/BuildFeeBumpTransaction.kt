@@ -3,7 +3,7 @@ package org.stellar.walletsdk.util
 import org.stellar.sdk.FeeBumpTransaction
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.AccountNotFoundException
+import org.stellar.walletsdk.exception.AccountNotFoundException
 
 /**
  * Fee-bump a transaction to cover the fees (sponsoring) or adjust fees on a pre-authorized

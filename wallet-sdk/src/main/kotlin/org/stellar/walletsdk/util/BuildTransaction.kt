@@ -4,7 +4,7 @@ import org.stellar.sdk.Network
 import org.stellar.sdk.Operation
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.AccountNotFoundException
+import org.stellar.walletsdk.exception.AccountNotFoundException
 
 /**
  * Build a transaction to be signed and submitted on the Stellar network.

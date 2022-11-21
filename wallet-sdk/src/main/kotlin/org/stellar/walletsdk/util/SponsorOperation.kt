@@ -3,7 +3,7 @@ package org.stellar.walletsdk.util
 import org.stellar.sdk.BeginSponsoringFutureReservesOperation
 import org.stellar.sdk.EndSponsoringFutureReservesOperation
 import org.stellar.sdk.Operation
-import org.stellar.walletsdk.InvalidSponsorOperationTypeException
+import org.stellar.walletsdk.exception.InvalidSponsorOperationTypeException
 
 /**
  * Sponsor operation(s) for another account.

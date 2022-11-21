@@ -5,6 +5,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
+import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.GsonUtils
 import org.stellar.walletsdk.util.OkHttpUtils
 
@@ -45,13 +46,9 @@ class Auth(
    *
    * @return authentication token (JWT)
    *
-   * @throws [InvalidMemoIdException] when memo ID is not valid
-   * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
+   * @throws [ValidationException] when some of the request arguments are not valid
    * @throws [NetworkRequestFailedException] when request fails
-   * @throws [MissingTransactionException] when request JSON response does not contain `transaction`
-   * @throws [NetworkMismatchException] when request JSON response network passphrase does not match
-   * provided network passphrase
-   * @throws [MissingTokenException] when request JSON response does not contain `token`
+   * @throws [InvalidResponseException] when JSON response is malformed
    */
   suspend fun authenticate(): String {
     val challengeTxn = challenge()
@@ -68,9 +65,7 @@ class Auth(
    * @throws [InvalidMemoIdException] when memo ID is not valid
    * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
    * @throws [NetworkRequestFailedException] when request fails
-   * @throws [MissingTransactionException] when request JSON response does not contain `transaction`
-   * @throws [NetworkMismatchException] when request JSON response network passphrase does not match
-   * provided network passphrase
+   * @throws [InvalidResponseException] when JSON response is malformed
    */
   private suspend fun challenge(): ChallengeResponse {
     val endpoint = webAuthEndpoint.toHttpUrl()
@@ -86,7 +81,7 @@ class Auth(
 
     if (!memoId.isNullOrBlank()) {
       if (memoId.toInt() < 0) {
-        throw InvalidMemoIdException()
+        throw InvalidMemoIdException
       }
 
       authURL.addQueryParameter("memo", memoId)
@@ -94,7 +89,7 @@ class Auth(
 
     if (!clientDomain.isNullOrBlank()) {
       if (!memoId.isNullOrBlank()) {
-        throw ClientDomainWithMemoException()
+        throw ClientDomainWithMemoException
       }
 
       authURL.addQueryParameter("client_domain", clientDomain)
@@ -113,11 +108,11 @@ class Auth(
         gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
 
       if (jsonResponse.transaction.isBlank()) {
-        throw MissingTransactionException()
+        throw MissingTransactionException
       }
 
       if (jsonResponse.network_passphrase != networkPassPhrase) {
-        throw NetworkMismatchException()
+        throw NetworkMismatchException
       }
 
       jsonResponse
@@ -180,7 +175,7 @@ class Auth(
         gson.fromJson(response.body!!.charStream(), AuthToken::class.java)
 
       if (jsonResponse.token.isBlank()) {
-        throw MissingTokenException()
+        throw MissingTokenException
       }
 
       return jsonResponse.token
