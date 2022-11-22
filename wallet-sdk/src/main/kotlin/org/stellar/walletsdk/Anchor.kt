@@ -6,9 +6,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
+import org.stellar.walletsdk.exception.AnchorAssetException
 import org.stellar.walletsdk.exception.InvalidAnchorServiceUrl
 import org.stellar.walletsdk.exception.NetworkRequestFailedException
-import org.stellar.walletsdk.exception.AnchorAssetException
 import org.stellar.walletsdk.util.GsonUtils
 import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.StellarToml
