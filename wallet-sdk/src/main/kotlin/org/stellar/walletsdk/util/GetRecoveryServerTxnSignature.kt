@@ -3,8 +3,8 @@ package org.stellar.walletsdk.util
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.xdr.DecoratedSignature
-import org.stellar.walletsdk.exception.NetworkRequestFailedException
 import org.stellar.walletsdk.RecoveryServerAuth
+import org.stellar.walletsdk.exception.NetworkRequestFailedException
 
 /**
  * Get a transaction signature from a recovery server for the account.

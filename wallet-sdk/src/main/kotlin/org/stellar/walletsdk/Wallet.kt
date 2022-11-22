@@ -217,8 +217,7 @@ class Wallet(
    * @return transaction with recovery server signatures
    *
    * @throws [NetworkRequestFailedException] when request fails
-   * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return
-   * signatures
+   * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
    */
   suspend fun signWithRecoveryServers(
     transaction: Transaction,

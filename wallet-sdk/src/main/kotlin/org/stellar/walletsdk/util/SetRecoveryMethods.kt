@@ -22,8 +22,8 @@ import org.stellar.walletsdk.exception.NoAccountSignersException
  * @return Stellar address of signer
  *
  * @throws [NetworkRequestFailedException] when request fails
- * @throws [NoAccountSignersException] if there are no signers on the recovery
- * server for this account
+ * @throws [NoAccountSignersException] if there are no signers on the recovery server for this
+ * account
  */
 suspend fun setRecoveryMethods(
   endpoint: String,
@@ -69,8 +69,8 @@ suspend fun setRecoveryMethods(
  *
  * @return Stellar address of the last signer
  *
- * @throws [NoAccountSignersException] if there are no signers on the recovery
- * server for this account
+ * @throws [NoAccountSignersException] if there are no signers on the recovery server for this
+ * account
  */
 fun getLatestRecoverySigner(signers: List<RecoveryAccountSigner>): String {
   if (signers.isEmpty()) {
