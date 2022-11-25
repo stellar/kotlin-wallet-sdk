@@ -4,6 +4,7 @@ import org.stellar.sdk.KeyPair
 import org.stellar.sdk.SetOptionsOperation
 import org.stellar.sdk.Signer
 import org.stellar.walletsdk.AccountSigner
+import org.stellar.walletsdk.AccountThreshold
 
 /**
  * Operation to add new signer.
@@ -22,17 +23,15 @@ fun addSignerOperation(signer: AccountSigner): SetOptionsOperation {
 /**
  * Operation to set account threshold weights.
  *
- * @param low Low threshold weight
- * @param medium Medium threshold weight
- * @param high High threshold weight
+ * @param accountThreshold account threshold
  *
  * @return operation
  */
-fun setThresholdsOperation(low: Int, medium: Int, high: Int): SetOptionsOperation {
+fun setThresholdsOperation(accountThreshold: AccountThreshold): SetOptionsOperation {
   return SetOptionsOperation.Builder()
-    .setLowThreshold(low)
-    .setMediumThreshold(medium)
-    .setHighThreshold(high)
+    .setLowThreshold(accountThreshold.low)
+    .setMediumThreshold(accountThreshold.medium)
+    .setHighThreshold(accountThreshold.high)
     .build()
 }
 

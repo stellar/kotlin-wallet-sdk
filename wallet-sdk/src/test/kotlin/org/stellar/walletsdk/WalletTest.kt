@@ -23,7 +23,7 @@ internal class WalletTest : SuspendTest() {
     @Test
     fun `generates Stellar public and secret keys`() {
       val accountKeys = wallet.create()
-      val publicKey = accountKeys.publicKey
+      val publicKey = accountKeys.publicKeyString
       val secretKey = accountKeys.secretKey
 
       // Public key
@@ -262,11 +262,13 @@ internal class WalletTest : SuspendTest() {
     @Test
     fun `defaults work`() {
       val transaction = runBlocking {
-        wallet.registerRecoveryServerSigners(
-          accountAddress = ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
-          accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
-        )
+        wallet
+          .recovery()
+          .registerRecoveryServerSigners(
+            accountAddress = ADDRESS_ACTIVE,
+            accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+            accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
+          )
       }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
@@ -275,11 +277,13 @@ internal class WalletTest : SuspendTest() {
     @Test
     fun `there are 2 operations in non-sponsored transaction`() {
       val transaction = runBlocking {
-        wallet.registerRecoveryServerSigners(
-          accountAddress = ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
-          accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
-        )
+        wallet
+          .recovery()
+          .registerRecoveryServerSigners(
+            accountAddress = ADDRESS_ACTIVE,
+            accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+            accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
+          )
       }
 
       assertEquals(transaction.operations.size, 2)
@@ -288,12 +292,14 @@ internal class WalletTest : SuspendTest() {
     @Test
     fun `there are 4 operations in sponsored transaction`() {
       val transaction = runBlocking {
-        wallet.registerRecoveryServerSigners(
-          accountAddress = ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
-          accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
-          sponsorAddress = ADDRESS_ACTIVE_TWO
-        )
+        wallet
+          .recovery()
+          .registerRecoveryServerSigners(
+            accountAddress = ADDRESS_ACTIVE,
+            accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+            accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
+            sponsorAddress = ADDRESS_ACTIVE_TWO
+          )
       }
 
       assertEquals(transaction.operations.size, 4)
