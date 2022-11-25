@@ -31,6 +31,8 @@ internal class SponsorOperationTest {
         }
       )
 
-    assertTrue(exception.toString().contains("ClaimClaimableBalanceOperation cannot be sponsored"))
+    assertTrue(
+      exception.toString().contains("[ClaimClaimableBalanceOperation] cannot be sponsored")
+    )
   }
 }

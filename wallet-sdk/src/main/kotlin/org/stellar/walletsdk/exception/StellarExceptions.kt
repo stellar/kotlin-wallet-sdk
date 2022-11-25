@@ -1,7 +1,9 @@
 package org.stellar.walletsdk.exception
 
 import java.math.BigDecimal
+import kotlin.reflect.KClass
 import org.stellar.sdk.LiquidityPoolID
+import org.stellar.sdk.Operation
 import org.stellar.sdk.responses.SubmitTransactionResponse
 
 sealed class StellarException : WalletException {
@@ -28,10 +30,12 @@ class TransactionSubmitFailedException(
   val resultCode = response.extras?.resultCodes?.transactionResultCode
 }
 
-class InvalidSponsorOperationTypeException(operationType: String, allowedOperations: List<String>) :
+class InvalidSponsorOperationTypeException(
+  operationType: Collection<Operation>,
+  allowedOperations: Collection<KClass<out Operation>>
+) :
   StellarException(
-    "$operationType cannot be sponsored. Allowed operations are: ${allowedOperations
-            .joinToString(", ")}."
+    "${operationType.map { it::class.simpleName }} cannot be sponsored. Allowed operations are: ${allowedOperations.map { it.simpleName }}}."
   )
 
 class AccountNotFoundException(accountAddress: String) :

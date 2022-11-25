@@ -1,10 +1,33 @@
-package org.stellar.walletsdk.util
+package org.stellar.walletsdk.extension
 
+import java.io.IOException
 import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.Server
+import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.LiquidityPoolResponse
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.exception.AccountNotFoundException
 import org.stellar.walletsdk.exception.LiquidityPoolNotFoundException
+import org.stellar.walletsdk.util.formatAmount
+
+/**
+ * Fetch account information from the Stellar network.
+ *
+ * @param accountAddress Stellar address of the account
+ *
+ * @return Account response object
+ *
+ * @throws [AccountNotFoundException] when account is not found
+ */
+@Throws(AccountNotFoundException::class)
+suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
+  try {
+    return accounts().account(accountAddress)
+  } catch (e: IOException) {
+    // TODO: check that error code is 404
+    throw AccountNotFoundException(accountAddress)
+  }
+}
 
 /**
  * Fetch liquidity pool information from the Stellar network.
@@ -17,15 +40,14 @@ import org.stellar.walletsdk.exception.LiquidityPoolNotFoundException
  *
  * @throws [LiquidityPoolNotFoundException] when liquidity pool is not found
  */
-suspend fun fetchLiquidityPoolInfo(
+suspend fun Server.liquidityPoolInfo(
   liquidityPoolId: LiquidityPoolID,
-  cachedAssetInfo: MutableMap<String, CachedAsset>,
-  server: Server
+  cachedAssetInfo: MutableMap<String, CachedAsset>
 ): LiquidityPoolInfo {
   val response: LiquidityPoolResponse
 
   try {
-    response = server.liquidityPools().liquidityPool(liquidityPoolId)
+    response = liquidityPools().liquidityPool(liquidityPoolId)
   } catch (e: Exception) {
     // TODO: throw on 404 only
     throw LiquidityPoolNotFoundException(liquidityPoolId)

@@ -30,7 +30,7 @@ internal class ValidateTransactionTest : SuspendTest() {
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
     val exception =
       assertFailsWith<Exception>(
-        block = { runBlocking { validateSufficientBalance(transaction, server) } }
+        block = { runBlocking { transaction.validateSufficientBalance(server) } }
       )
 
     assertTrue(exception.toString().contains(errorMessage))
@@ -47,7 +47,7 @@ internal class ValidateTransactionTest : SuspendTest() {
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
     val exception =
       assertFailsWith<Exception>(
-        block = { runBlocking { validateSufficientBalance(transaction, server) } }
+        block = { runBlocking { transaction.validateSufficientBalance(server) } }
       )
 
     assertTrue(exception.toString().contains(errorMessage))
@@ -61,6 +61,6 @@ internal class ValidateTransactionTest : SuspendTest() {
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
 
-    assertDoesNotThrow { runBlocking { validateSufficientBalance(transaction, server) } }
+    assertDoesNotThrow { runBlocking { transaction.validateSufficientBalance(server) } }
   }
 }
