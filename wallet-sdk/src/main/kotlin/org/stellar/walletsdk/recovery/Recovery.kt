@@ -93,9 +93,9 @@ class Recovery(
     walletSigner: WalletSigner
   ): List<String> {
     return recoveryServers.map {
+      // TODO: pass auth token as an argument?
       val authToken =
-        Auth(accountAddress, it.authEndpoint, it.homeDomain, walletSigner = walletSigner)
-          .authenticate()
+        Auth(it.authEndpoint, it.homeDomain, walletSigner).authenticate(accountAddress)
 
       val requestUrl = "${it.homeDomain}/accounts/$accountAddress"
       val request =

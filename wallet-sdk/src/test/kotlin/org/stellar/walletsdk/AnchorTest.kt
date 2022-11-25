@@ -5,6 +5,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.*
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
+import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.helpers.mapFromTomlFile
 
 internal class AnchorTest {
@@ -57,17 +58,17 @@ internal class AnchorTest {
     fun `get interactive deposit URL`() {
       val depositResponse = runBlocking {
         val authToken =
-          anchor.getAuthToken(
-            accountAddress = ADDRESS_ACTIVE,
-            toml = toml,
-            walletSigner = InProcessWalletSigner()
-          )
+          anchor
+            .auth(toml = toml, walletSigner = InProcessWalletSigner())
+            .authenticate(ADDRESS_ACTIVE)
 
-        anchor.getInteractiveDeposit(
-          accountAddress = ADDRESS_ACTIVE,
-          assetCode = ANCHOR_ASSET_CODE,
-          authToken = authToken,
-        )
+        anchor
+          .interactive()
+          .deposit(
+            accountAddress = ADDRESS_ACTIVE,
+            assetCode = ANCHOR_ASSET_CODE,
+            authToken = authToken,
+          )
       }
 
       assertDoesNotThrow { depositResponse.url.toHttpUrl() }
@@ -77,18 +78,18 @@ internal class AnchorTest {
     fun `get interactive deposit URL with different funds account`() {
       val depositResponse = runBlocking {
         val authToken =
-          anchor.getAuthToken(
-            accountAddress = ADDRESS_ACTIVE,
-            toml = toml,
-            walletSigner = InProcessWalletSigner()
-          )
+          anchor
+            .auth(toml = toml, walletSigner = InProcessWalletSigner())
+            .authenticate(ADDRESS_ACTIVE)
 
-        anchor.getInteractiveDeposit(
-          accountAddress = ADDRESS_ACTIVE,
-          fundsAccountAddress = ADDRESS_ACTIVE_TWO,
-          assetCode = ANCHOR_ASSET_CODE,
-          authToken = authToken,
-        )
+        anchor
+          .interactive()
+          .deposit(
+            accountAddress = ADDRESS_ACTIVE,
+            fundsAccountAddress = ADDRESS_ACTIVE_TWO,
+            assetCode = ANCHOR_ASSET_CODE,
+            authToken = authToken,
+          )
       }
 
       assertDoesNotThrow { depositResponse.url.toHttpUrl() }
@@ -102,17 +103,17 @@ internal class AnchorTest {
     fun `get interactive withdrawal URL`() {
       val depositResponse = runBlocking {
         val authToken =
-          anchor.getAuthToken(
-            accountAddress = ADDRESS_ACTIVE,
-            toml = toml,
-            walletSigner = InProcessWalletSigner()
-          )
+          anchor
+            .auth(toml = toml, walletSigner = InProcessWalletSigner())
+            .authenticate(ADDRESS_ACTIVE)
 
-        anchor.getInteractiveWithdrawal(
-          accountAddress = ADDRESS_ACTIVE,
-          assetCode = ANCHOR_ASSET_CODE,
-          authToken = authToken,
-        )
+        anchor
+          .interactive()
+          .withdraw(
+            accountAddress = ADDRESS_ACTIVE,
+            assetCode = ANCHOR_ASSET_CODE,
+            authToken = authToken,
+          )
       }
 
       assertDoesNotThrow { depositResponse.url.toHttpUrl() }
@@ -122,18 +123,18 @@ internal class AnchorTest {
     fun `get interactive withdrawal URL with different funds account`() {
       val depositResponse = runBlocking {
         val authToken =
-          anchor.getAuthToken(
-            accountAddress = ADDRESS_ACTIVE,
-            toml = toml,
-            walletSigner = InProcessWalletSigner()
-          )
+          anchor
+            .auth(toml = toml, walletSigner = InProcessWalletSigner())
+            .authenticate(ADDRESS_ACTIVE)
 
-        anchor.getInteractiveWithdrawal(
-          accountAddress = ADDRESS_ACTIVE,
-          fundsAccountAddress = ADDRESS_ACTIVE_TWO,
-          assetCode = ANCHOR_ASSET_CODE,
-          authToken = authToken,
-        )
+        anchor
+          .interactive()
+          .deposit(
+            accountAddress = ADDRESS_ACTIVE,
+            fundsAccountAddress = ADDRESS_ACTIVE_TWO,
+            assetCode = ANCHOR_ASSET_CODE,
+            authToken = authToken,
+          )
       }
 
       assertDoesNotThrow { depositResponse.url.toHttpUrl() }
