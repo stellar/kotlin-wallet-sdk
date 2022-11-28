@@ -4,7 +4,7 @@ const val BASE_RESERVE_MIN_COUNT = 2
 const val BASE_RESERVE = 0.5
 
 val XLM_ASSET_DEFAULTS =
-  NativeAssetDefaults(
+  NativeAssetDefault(
     id = "XLM:native",
     homeDomain = "Native",
     name = "XLM",

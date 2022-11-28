@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.stellar.sdk.Asset
 import org.stellar.sdk.responses.operations.*
 import org.stellar.walletsdk.WalletAsset
-import org.stellar.walletsdk.WalletOperationTypes
+import org.stellar.walletsdk.WalletOperationType
 import org.stellar.walletsdk.helpers.objectFromJsonFile
 
 data class StellarOperationsJson(
@@ -42,7 +42,7 @@ internal class FormatOperationTest {
       assertEquals(operation.amount, "10000.0000000")
       assertEquals(operation.account, "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR")
       assertEquals(operation.asset[0].id, "XLM:Native")
-      assertEquals(operation.type, WalletOperationTypes.SEND)
+      assertEquals(operation.type, WalletOperationType.SEND)
     }
 
     @Test
@@ -58,7 +58,7 @@ internal class FormatOperationTest {
       assertEquals(operation.amount, "10000.0000000")
       assertEquals(operation.account, "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22")
       assertEquals(operation.asset[0].id, "XLM:Native")
-      assertEquals(operation.type, WalletOperationTypes.RECEIVE)
+      assertEquals(operation.type, WalletOperationType.RECEIVE)
     }
 
     @Test
@@ -74,7 +74,7 @@ internal class FormatOperationTest {
       assertEquals(operation.amount, "0.0100000")
       assertEquals(operation.account, "GCOK6S3AUTVOEBSTFFDRMMFBWVH7BIWC56U5HUW7OH5EF5YE75WKVL42")
       assertEquals(operation.asset[0].id, "XLM:Native")
-      assertEquals(operation.type, WalletOperationTypes.SEND)
+      assertEquals(operation.type, WalletOperationType.SEND)
     }
 
     @Test
@@ -90,7 +90,7 @@ internal class FormatOperationTest {
       assertEquals(operation.amount, "0.0100000")
       assertEquals(operation.account, "GAKEBVZB3RQO5GOFMLKATWKIQ2Z7SAPBG6E3LY7MELNRREYFV43MG7FQ")
       assertEquals(operation.asset[0].id, "XLM:Native")
-      assertEquals(operation.type, WalletOperationTypes.RECEIVE)
+      assertEquals(operation.type, WalletOperationType.RECEIVE)
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class FormatOperationTest {
         operation.asset[0].id,
         "QUIET:GAXE7IP22GTI4H373KDVVSXZTPM4GMRDUKSXM4MFZMYYRB4HYQHLJCBO"
       )
-      assertEquals(operation.type, WalletOperationTypes.SEND)
+      assertEquals(operation.type, WalletOperationType.SEND)
     }
 
     @Test
@@ -128,7 +128,7 @@ internal class FormatOperationTest {
         operation.asset[0].id,
         "QUIET:GAXE7IP22GTI4H373KDVVSXZTPM4GMRDUKSXM4MFZMYYRB4HYQHLJCBO"
       )
-      assertEquals(operation.type, WalletOperationTypes.RECEIVE)
+      assertEquals(operation.type, WalletOperationType.RECEIVE)
     }
 
     @Test
@@ -151,7 +151,7 @@ internal class FormatOperationTest {
         operation.asset[1].id,
         "BRL:GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP"
       )
-      assertEquals(operation.type, WalletOperationTypes.SEND)
+      assertEquals(operation.type, WalletOperationType.SEND)
     }
 
     @Test
@@ -174,7 +174,7 @@ internal class FormatOperationTest {
         operation.asset[1].id,
         "BRL:GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP"
       )
-      assertEquals(operation.type, WalletOperationTypes.RECEIVE)
+      assertEquals(operation.type, WalletOperationType.RECEIVE)
     }
 
     @Test
@@ -197,7 +197,7 @@ internal class FormatOperationTest {
         operation.asset[1].id,
         "BRL:GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP"
       )
-      assertEquals(operation.type, WalletOperationTypes.SWAP)
+      assertEquals(operation.type, WalletOperationType.SWAP)
     }
 
     @Test
@@ -220,7 +220,7 @@ internal class FormatOperationTest {
         operation.asset[1].id,
         "BRL:GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP"
       )
-      assertEquals(operation.type, WalletOperationTypes.SEND)
+      assertEquals(operation.type, WalletOperationType.SEND)
     }
 
     @Test
@@ -243,7 +243,7 @@ internal class FormatOperationTest {
         operation.asset[1].id,
         "BRL:GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP"
       )
-      assertEquals(operation.type, WalletOperationTypes.RECEIVE)
+      assertEquals(operation.type, WalletOperationType.RECEIVE)
     }
 
     @Test
@@ -266,7 +266,7 @@ internal class FormatOperationTest {
         operation.asset[1].id,
         "BRL:GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP"
       )
-      assertEquals(operation.type, WalletOperationTypes.SWAP)
+      assertEquals(operation.type, WalletOperationType.SWAP)
     }
 
     @Test
@@ -282,7 +282,7 @@ internal class FormatOperationTest {
       assertEquals(operation.amount, "")
       assertEquals(operation.account, "")
       assertEquals(operation.asset, listOf<WalletAsset>())
-      assertEquals(operation.type, WalletOperationTypes.OTHER)
+      assertEquals(operation.type, WalletOperationType.OTHER)
     }
 
     @Test
@@ -298,7 +298,7 @@ internal class FormatOperationTest {
       assertEquals(operation.amount, "")
       assertEquals(operation.account, "")
       assertEquals(operation.asset, listOf<WalletAsset>())
-      assertEquals(operation.type, WalletOperationTypes.OTHER)
+      assertEquals(operation.type, WalletOperationType.OTHER)
     }
   }
 

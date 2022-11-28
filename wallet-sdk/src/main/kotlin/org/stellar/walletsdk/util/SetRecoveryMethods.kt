@@ -47,7 +47,7 @@ suspend fun setRecoveryMethods(
   val request =
     OkHttpUtils.buildJsonPostRequest(
       requestUrl,
-      RecoveryIdentities(identities = accountIdentity),
+      RecoveryIdentity(identity = accountIdentity),
       authToken
     )
 

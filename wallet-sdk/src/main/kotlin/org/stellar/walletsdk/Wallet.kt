@@ -1,7 +1,6 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
-import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.walletsdk.util.*
 
 /**
@@ -496,39 +495,25 @@ class Wallet(
    */
   suspend fun getHistory(
     accountAddress: String,
-    limit: Int,
-    order: Order? = Order.DESC,
-    cursor: String? = "",
-    includeFailed: Boolean? = false
+    limit: Int? = null,
+    order: Order? = null,
+    cursor: String? = null,
+    includeFailed: Boolean? = null
   ): List<WalletOperation> {
-    if (limit > 200) {
+    if (limit != null && limit > 200) {
       throw OperationsLimitExceededException()
     }
 
-    val orderValue =
-      if (order == Order.ASC) {
-        RequestBuilder.Order.ASC
-      } else {
-        RequestBuilder.Order.DESC
-      }
-
-    val accountOperations =
-      server
-        .operations()
-        .forAccount(accountAddress)
-        .limit(limit)
-        .order(orderValue)
-        .cursor(cursor)
-        .includeFailed(includeFailed!!)
-        .includeTransactions(true)
-        .execute()
-        .records
-
-    val formattedOperations = mutableListOf<WalletOperation>()
-    accountOperations.forEach { op ->
-      formattedOperations.add(formatStellarOperation(accountAddress, op))
-    }
-
-    return formattedOperations.toList()
+    return server
+      .operations()
+      .forAccount(accountAddress)
+      .limit(limit ?: 10)
+      .order(order?.builderEnum)
+      .cursor(cursor)
+      .includeFailed(includeFailed ?: false)
+      .includeTransactions(true)
+      .execute()
+      .records
+      .map { formatStellarOperation(accountAddress, it) }
   }
 }

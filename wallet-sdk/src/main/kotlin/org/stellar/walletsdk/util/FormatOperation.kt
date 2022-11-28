@@ -18,7 +18,7 @@ import org.stellar.walletsdk.*
 fun formatStellarOperation(accountAddress: String, operation: OperationResponse): WalletOperation {
   when (operation.type) {
     // Create account
-    StellarOperationTypes.CREATE_ACCOUNT.type -> {
+    "create_account" -> {
       val isCreator = (operation as CreateAccountOperationResponse).funder == accountAddress
 
       return WalletOperation(
@@ -34,15 +34,15 @@ fun formatStellarOperation(accountAddress: String, operation: OperationResponse)
         asset = formatNativeAsset(),
         type =
           if (isCreator) {
-            WalletOperationTypes.SEND
+            WalletOperationType.SEND
           } else {
-            WalletOperationTypes.RECEIVE
+            WalletOperationType.RECEIVE
           },
         rawOperation = operation
       )
     }
     // Payment
-    StellarOperationTypes.PAYMENT.type -> {
+    "payment" -> {
       // TODO: This version of Java SDK currently doesn't have "to" and "from" muxed account for
       // payment
       val isSender = (operation as PaymentOperationResponse).from == accountAddress
@@ -60,16 +60,16 @@ fun formatStellarOperation(accountAddress: String, operation: OperationResponse)
         asset = formatWalletAsset(operation),
         type =
           if (isSender) {
-            WalletOperationTypes.SEND
+            WalletOperationType.SEND
           } else {
-            WalletOperationTypes.RECEIVE
+            WalletOperationType.RECEIVE
           },
         rawOperation = operation
       )
     }
     // Path payment and swap
-    StellarOperationTypes.PATH_PAYMENT_STRICT_SEND.type,
-    StellarOperationTypes.PATH_PAYMENT_STRICT_RECEIVE.type -> {
+    "path_payment_strict_receive",
+    "path_payment_strict_send" -> {
       // TODO: check muxed account
       operation as PathPaymentBaseOperationResponse
       val isSender = operation.from == accountAddress
@@ -93,12 +93,12 @@ fun formatStellarOperation(accountAddress: String, operation: OperationResponse)
         type =
           if (isSender) {
             if (isSwap) {
-              WalletOperationTypes.SWAP
+              WalletOperationType.SWAP
             } else {
-              WalletOperationTypes.SEND
+              WalletOperationType.SEND
             }
           } else {
-            WalletOperationTypes.RECEIVE
+            WalletOperationType.RECEIVE
           },
         rawOperation = operation
       )
@@ -111,7 +111,7 @@ fun formatStellarOperation(accountAddress: String, operation: OperationResponse)
         amount = "",
         account = "",
         asset = listOf(),
-        type = WalletOperationTypes.OTHER,
+        type = WalletOperationType.OTHER,
         rawOperation = operation
       )
     }

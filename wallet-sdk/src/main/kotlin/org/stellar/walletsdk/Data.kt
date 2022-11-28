@@ -1,5 +1,6 @@
 package org.stellar.walletsdk
 
+import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.sdk.responses.operations.OperationResponse
 
 data class AccountInfo(
@@ -12,11 +13,6 @@ data class AccountInfo(
 data class AccountSigner(val address: String, val weight: Int)
 
 data class AccountThreshold(val low: Int, val medium: Int, val high: Int)
-
-enum class AnchorOperationTypes(val type: String) {
-  DEPOSIT("deposit"),
-  WITHDRAW("withdraw")
-}
 
 data class AnchorServiceAsset(
   val enabled: Boolean,
@@ -83,7 +79,7 @@ data class FormattedAsset(
   val sellingLiabilities: String
 )
 
-data class FormattedBalances(
+data class FormattedBalance(
   val assets: MutableList<FormattedAsset>,
   val liquidityPools: MutableList<FormattedLiquidityPool>
 )
@@ -123,7 +119,7 @@ data class LiquidityPoolReserve(
   val amount: String,
 )
 
-data class NativeAssetDefaults(
+data class NativeAssetDefault(
   val id: String,
   val homeDomain: String?,
   val name: String?,
@@ -132,9 +128,9 @@ data class NativeAssetDefaults(
   val assetIssuer: String,
 )
 
-enum class Order() {
-  ASC,
-  DESC
+enum class Order(internal val builderEnum: RequestBuilder.Order) {
+  ASC(RequestBuilder.Order.ASC),
+  DESC(RequestBuilder.Order.DESC)
 }
 
 data class RecoveryServer(
@@ -156,7 +152,7 @@ data class RecoveryAccount(
   val signers: List<RecoveryAccountSigner>
 )
 
-data class RecoveryIdentities(val identities: List<RecoveryAccountIdentity>)
+data class RecoveryIdentity(val identity: List<RecoveryAccountIdentity>)
 
 data class RecoveryAccountRole(val role: String, val authenticated: Boolean?)
 
@@ -177,18 +173,7 @@ data class SignerWeight(
   val recoveryServer: Int,
 )
 
-enum class StellarOperationTypes(val type: String) {
-  CREATE_ACCOUNT("create_account"),
-  PAYMENT("payment"),
-  PATH_PAYMENT_STRICT_RECEIVE("path_payment_strict_receive"),
-  PATH_PAYMENT_STRICT_SEND("path_payment_strict_send"),
-  ACCOUNT_MERGE("account_merge"),
-  LIQUIDITY_POOL_DEPOSIT("liquidity_pool_deposit"),
-  LIQUIDITY_POOL_WITHDRAW("liquidity_pool_withdraw"),
-  CLAIM_CLAIMABLE_BALANCE("claim_claimable_balance")
-}
-
-enum class StellarTomlFields(val text: String) {
+enum class StellarTomlField(val text: String) {
   SIGNING_KEY("SIGNING_KEY"),
   TRANSFER_SERVER_SEP0024("TRANSFER_SERVER_SEP0024"),
   WEB_AUTH_ENDPOINT("WEB_AUTH_ENDPOINT")
@@ -202,11 +187,11 @@ data class WalletOperation(
   val amount: String,
   val account: String,
   val asset: List<WalletAsset>,
-  val type: WalletOperationTypes,
+  val type: WalletOperationType,
   val rawOperation: OperationResponse,
 )
 
-enum class WalletOperationTypes() {
+enum class WalletOperationType() {
   SEND,
   RECEIVE,
   DEPOSIT,

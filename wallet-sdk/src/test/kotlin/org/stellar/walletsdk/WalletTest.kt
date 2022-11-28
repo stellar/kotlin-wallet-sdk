@@ -9,7 +9,6 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import org.stellar.sdk.*
-import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.Page
 import org.stellar.sdk.responses.SubmitTransactionResponse
@@ -396,8 +395,8 @@ internal class WalletTest : SuspendTest() {
           .operations()
           .forAccount(accountAddress)
           .limit(limit)
-          .order(RequestBuilder.Order.DESC)
-          .cursor("")
+          .order(null)
+          .cursor(null)
           .includeFailed(false)
           .includeTransactions(true)
           .execute()

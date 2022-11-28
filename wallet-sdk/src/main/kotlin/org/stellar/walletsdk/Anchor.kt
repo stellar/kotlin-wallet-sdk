@@ -59,7 +59,7 @@ class Anchor(
   ): String {
     return Auth(
         accountAddress = accountAddress,
-        webAuthEndpoint = toml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
+        webAuthEndpoint = toml[StellarTomlField.WEB_AUTH_ENDPOINT.text].toString(),
         homeDomain = homeDomain,
         clientDomain = clientDomain,
         memoId = memoId,
@@ -202,7 +202,7 @@ class Anchor(
     authToken: String,
     toml: Map<String, Any>
   ): AnchorTransaction {
-    val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -233,7 +233,7 @@ class Anchor(
     authToken: String,
     toml: Map<String, Any>
   ): List<AnchorTransaction> {
-    val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 

@@ -13,7 +13,7 @@ import org.stellar.walletsdk.*
  *
  * @return formatted account balances
  */
-suspend fun formatAccountBalances(account: AccountResponse, server: Server): FormattedBalances {
+suspend fun formatAccountBalances(account: AccountResponse, server: Server): FormattedBalance {
   val cachedAssetTomlInfo = mutableMapOf<String, CachedAsset>()
 
   // Caching asset info fetched from toml files to avoid multiple calls for the same asset
@@ -25,7 +25,7 @@ suspend fun formatAccountBalances(account: AccountResponse, server: Server): For
     }
   }
 
-  val result = FormattedBalances(assets = mutableListOf(), liquidityPools = mutableListOf())
+  val result = FormattedBalance(assets = mutableListOf(), liquidityPools = mutableListOf())
 
   account.balances.forEach { balance ->
     when {
