@@ -1,12 +1,12 @@
 package org.stellar.walletsdk
 
-import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.util.GsonUtils
 import org.stellar.walletsdk.util.OkHttpUtils
+import org.stellar.walletsdk.util.SchemeUtil
 
 /**
  * Authenticate to an external server using
@@ -74,10 +74,7 @@ class Auth(
    */
   private suspend fun challenge(): ChallengeResponse {
     val endpoint = webAuthEndpoint.toHttpUrl()
-    val authURL = HttpUrl.Builder().scheme("https").host(endpoint.host)
-
-    // Add path segments, if there are any
-    endpoint.pathSegments.forEach { authURL.addPathSegment(it) }
+    val authURL = endpoint.newBuilder().scheme(SchemeUtil.scheme)
 
     // Add required query params
     authURL

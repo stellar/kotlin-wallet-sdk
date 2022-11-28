@@ -48,10 +48,9 @@ class StellarToml(
    */
   fun buildTomlUrl(homeDomain: String): String {
     // TODO: create a helper method to normalize url
-    // TODO: handle localhost
 
     val tomlPath = ".well-known/stellar.toml"
-    var scheme = "https"
+    var scheme = SchemeUtil.scheme
     var host = homeDomain
 
     try {
