@@ -15,14 +15,17 @@ import org.stellar.walletsdk.*
  *
  * @return formatted operation
  */
-fun formatStellarOperation(accountAddress: String, operation: OperationResponse): WalletOperation {
+fun formatStellarOperation(
+  accountAddress: String,
+  operation: OperationResponse
+): WalletOperation<OperationResponse> {
   when (operation.type) {
     // Create account
     "create_account" -> {
       val isCreator = (operation as CreateAccountOperationResponse).funder == accountAddress
 
       return WalletOperation(
-        id = operation.id,
+        id = operation.id.toString(),
         date = operation.createdAt,
         amount = operation.startingBalance,
         account =
@@ -48,7 +51,7 @@ fun formatStellarOperation(accountAddress: String, operation: OperationResponse)
       val isSender = (operation as PaymentOperationResponse).from == accountAddress
 
       return WalletOperation(
-        id = operation.id,
+        id = operation.id.toString(),
         date = operation.createdAt,
         amount = operation.amount,
         account =
@@ -76,7 +79,7 @@ fun formatStellarOperation(accountAddress: String, operation: OperationResponse)
       val isSwap = isSender && operation.from == operation.to
 
       return WalletOperation(
-        id = operation.id,
+        id = operation.id.toString(),
         date = operation.createdAt,
         amount = operation.amount,
         account =
@@ -106,13 +109,59 @@ fun formatStellarOperation(accountAddress: String, operation: OperationResponse)
     // Other
     else -> {
       return WalletOperation(
-        id = operation.id,
+        id = operation.id.toString(),
         date = operation.createdAt,
         amount = "",
         account = "",
         asset = listOf(),
         type = WalletOperationType.OTHER,
         rawOperation = operation
+      )
+    }
+  }
+}
+
+/**
+ * Format anchor transactions to make them consistent.
+ *
+ * @param transaction anchor transaction to format
+ * @param asset transaction asset
+ *
+ * @return formatter transaction
+ */
+fun formatAnchorTransaction(
+  transaction: AnchorTransaction,
+  asset: Asset
+): WalletOperation<AnchorTransaction> {
+  val formattedAsset = formatAsset(asset)
+
+  when (transaction.kind) {
+    "deposit",
+    "withdrawal" -> {
+      return WalletOperation(
+        id = transaction.id,
+        date = transaction.started_at,
+        amount = transaction.amount_out,
+        account = "",
+        asset = listOf(formattedAsset),
+        type =
+          if (transaction.kind == "deposit") {
+            WalletOperationType.DEPOSIT
+          } else {
+            WalletOperationType.WITHDRAW
+          },
+        rawOperation = transaction
+      )
+    }
+    else -> {
+      return WalletOperation(
+        id = transaction.id,
+        date = transaction.started_at,
+        amount = "",
+        account = "",
+        asset = listOf(formattedAsset),
+        type = WalletOperationType.OTHER,
+        rawOperation = transaction
       )
     }
   }

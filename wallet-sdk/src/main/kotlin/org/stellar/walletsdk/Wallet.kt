@@ -1,6 +1,7 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
+import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.util.*
 
 /**
@@ -484,7 +485,7 @@ class Wallet(
    * Get account operations for the specified Stellar address.
    *
    * @param accountAddress Stellar address of the account
-   * @param limit how many operations to fetch, maximum is 200
+   * @param limit optional how many operations to fetch, maximum is 200, default is 10
    * @param order optional data order, ascending or descending, defaults to descending
    * @param cursor optional cursor to specify a starting point
    * @param includeFailed optional flag to include failed operations, defaults to false
@@ -499,7 +500,7 @@ class Wallet(
     order: Order? = null,
     cursor: String? = null,
     includeFailed: Boolean? = null
-  ): List<WalletOperation> {
+  ): List<WalletOperation<OperationResponse>> {
     if (limit != null && limit > 200) {
       throw OperationsLimitExceededException()
     }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Asset
 import org.stellar.sdk.responses.operations.*
+import org.stellar.walletsdk.AnchorTransaction
 import org.stellar.walletsdk.WalletAsset
 import org.stellar.walletsdk.WalletOperationType
 import org.stellar.walletsdk.helpers.objectFromJsonFile
@@ -20,6 +21,11 @@ data class StellarOperationsJson(
   val pathPaymentStrictSendSwap: PathPaymentStrictSendOperationResponse,
   val changeTrust: ChangeTrustOperationResponse,
   val claimClaimableBalance: ClaimClaimableBalanceOperationResponse
+)
+
+data class AnchorTransactionsJson(
+  val deposit: AnchorTransaction,
+  val withdrawal: AnchorTransaction
 )
 
 internal class FormatOperationTest {
@@ -37,7 +43,7 @@ internal class FormatOperationTest {
           stellarOperations.createAccount
         )
 
-      assertEquals(operation.id, 34832184791041)
+      assertEquals(operation.id, "34832184791041")
       assertEquals(operation.date, "2022-09-14T21:19:29Z")
       assertEquals(operation.amount, "10000.0000000")
       assertEquals(operation.account, "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR")
@@ -53,7 +59,7 @@ internal class FormatOperationTest {
           stellarOperations.createAccount
         )
 
-      assertEquals(operation.id, 34832184791041)
+      assertEquals(operation.id, "34832184791041")
       assertEquals(operation.date, "2022-09-14T21:19:29Z")
       assertEquals(operation.amount, "10000.0000000")
       assertEquals(operation.account, "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22")
@@ -69,7 +75,7 @@ internal class FormatOperationTest {
           stellarOperations.paymentNative
         )
 
-      assertEquals(operation.id, 163322432148766721)
+      assertEquals(operation.id, "163322432148766721")
       assertEquals(operation.date, "2021-10-28T18:35:53Z")
       assertEquals(operation.amount, "0.0100000")
       assertEquals(operation.account, "GCOK6S3AUTVOEBSTFFDRMMFBWVH7BIWC56U5HUW7OH5EF5YE75WKVL42")
@@ -85,7 +91,7 @@ internal class FormatOperationTest {
           stellarOperations.paymentNative
         )
 
-      assertEquals(operation.id, 163322432148766721)
+      assertEquals(operation.id, "163322432148766721")
       assertEquals(operation.date, "2021-10-28T18:35:53Z")
       assertEquals(operation.amount, "0.0100000")
       assertEquals(operation.account, "GAKEBVZB3RQO5GOFMLKATWKIQ2Z7SAPBG6E3LY7MELNRREYFV43MG7FQ")
@@ -101,7 +107,7 @@ internal class FormatOperationTest {
           stellarOperations.paymentAsset
         )
 
-      assertEquals(operation.id, 163328062850232321)
+      assertEquals(operation.id, "163328062850232321")
       assertEquals(operation.date, "2021-10-28T20:42:42Z")
       assertEquals(operation.amount, "10.0000000")
       assertEquals(operation.account, "GAKEBVZB3RQO5GOFMLKATWKIQ2Z7SAPBG6E3LY7MELNRREYFV43MG7FQ")
@@ -120,7 +126,7 @@ internal class FormatOperationTest {
           stellarOperations.paymentAsset
         )
 
-      assertEquals(operation.id, 163328062850232321)
+      assertEquals(operation.id, "163328062850232321")
       assertEquals(operation.date, "2021-10-28T20:42:42Z")
       assertEquals(operation.amount, "10.0000000")
       assertEquals(operation.account, "GCOK6S3AUTVOEBSTFFDRMMFBWVH7BIWC56U5HUW7OH5EF5YE75WKVL42")
@@ -139,7 +145,7 @@ internal class FormatOperationTest {
           stellarOperations.pathPaymentStrictReceive
         )
 
-      assertEquals(operation.id, 124018825644490753)
+      assertEquals(operation.id, "124018825644490753")
       assertEquals(operation.date, "2020-03-26T19:33:55Z")
       assertEquals(operation.amount, "0.1000000")
       assertEquals(operation.account, "GBZH7S5NC57XNHKHJ75C5DGMI3SP6ZFJLIKW74K6OSMA5E5DFMYBDD2Z")
@@ -162,7 +168,7 @@ internal class FormatOperationTest {
           stellarOperations.pathPaymentStrictReceive
         )
 
-      assertEquals(operation.id, 124018825644490753)
+      assertEquals(operation.id, "124018825644490753")
       assertEquals(operation.date, "2020-03-26T19:33:55Z")
       assertEquals(operation.amount, "0.1000000")
       assertEquals(operation.account, "GCOK6S3AUTVOEBSTFFDRMMFBWVH7BIWC56U5HUW7OH5EF5YE75WKVL42")
@@ -185,7 +191,7 @@ internal class FormatOperationTest {
           stellarOperations.pathPaymentStrictReceiveSwap
         )
 
-      assertEquals(operation.id, 124018825644490753)
+      assertEquals(operation.id, "124018825644490753")
       assertEquals(operation.date, "2020-03-26T19:33:55Z")
       assertEquals(operation.amount, "0.1000000")
       assertEquals(operation.account, "")
@@ -208,7 +214,7 @@ internal class FormatOperationTest {
           stellarOperations.pathPaymentStrictSend
         )
 
-      assertEquals(operation.id, 124624072438579201)
+      assertEquals(operation.id, "124624072438579201")
       assertEquals(operation.date, "2020-04-04T13:47:50Z")
       assertEquals(operation.amount, "26.5544244")
       assertEquals(operation.account, "GBZH7S5NC57XNHKHJ75C5DGMI3SP6ZFJLIKW74K6OSMA5E5DFMYBDD2Z")
@@ -231,7 +237,7 @@ internal class FormatOperationTest {
           stellarOperations.pathPaymentStrictSend
         )
 
-      assertEquals(operation.id, 124624072438579201)
+      assertEquals(operation.id, "124624072438579201")
       assertEquals(operation.date, "2020-04-04T13:47:50Z")
       assertEquals(operation.amount, "26.5544244")
       assertEquals(operation.account, "GCOK6S3AUTVOEBSTFFDRMMFBWVH7BIWC56U5HUW7OH5EF5YE75WKVL42")
@@ -254,7 +260,7 @@ internal class FormatOperationTest {
           stellarOperations.pathPaymentStrictSendSwap
         )
 
-      assertEquals(operation.id, 124624072438579201)
+      assertEquals(operation.id, "124624072438579201")
       assertEquals(operation.date, "2020-04-04T13:47:50Z")
       assertEquals(operation.amount, "26.5544244")
       assertEquals(operation.account, "")
@@ -277,7 +283,7 @@ internal class FormatOperationTest {
           stellarOperations.changeTrust
         )
 
-      assertEquals(operation.id, 163325782222753793)
+      assertEquals(operation.id, "163325782222753793")
       assertEquals(operation.date, "2021-10-28T19:50:44Z")
       assertEquals(operation.amount, "")
       assertEquals(operation.account, "")
@@ -293,12 +299,50 @@ internal class FormatOperationTest {
           stellarOperations.claimClaimableBalance
         )
 
-      assertEquals(operation.id, 163325782222753794)
+      assertEquals(operation.id, "163325782222753794")
       assertEquals(operation.date, "2021-10-29T10:51:44Z")
       assertEquals(operation.amount, "")
       assertEquals(operation.account, "")
       assertEquals(operation.asset, listOf<WalletAsset>())
       assertEquals(operation.type, WalletOperationType.OTHER)
+    }
+  }
+
+  @Nested
+  @DisplayName("formatAnchorTransaction")
+  inner class FormatAnchorTransaction {
+    private val anchorTransactions =
+      objectFromJsonFile("anchor_transactions.json", AnchorTransactionsJson::class.java)
+    private val asset = Asset.create("SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
+
+    @Test
+    fun `deposit transaction`() {
+      val operation = formatAnchorTransaction(anchorTransactions.deposit, asset)
+
+      assertEquals(operation.id, "09d12492-2d6a-48e9-a085-4ea1404dd4a6")
+      assertEquals(operation.date, "2022-05-25T20:32:54.751725Z")
+      assertEquals(operation.amount, "99.00")
+      assertEquals(operation.account, "")
+      assertEquals(
+        operation.asset[0].id,
+        "SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
+      )
+      assertEquals(operation.type, WalletOperationType.DEPOSIT)
+    }
+
+    @Test
+    fun `withdrawal transaction`() {
+      val operation = formatAnchorTransaction(anchorTransactions.withdrawal, asset)
+
+      assertEquals(operation.id, "b6debb71-0f5b-423e-94d1-adea51c760b2")
+      assertEquals(operation.date, "2022-06-07T20:18:59.349856Z")
+      assertEquals(operation.amount, "32.00")
+      assertEquals(operation.account, "")
+      assertEquals(
+        operation.asset[0].id,
+        "SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
+      )
+      assertEquals(operation.type, WalletOperationType.WITHDRAW)
     }
   }
 

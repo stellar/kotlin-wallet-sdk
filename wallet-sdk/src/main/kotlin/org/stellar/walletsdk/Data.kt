@@ -1,7 +1,6 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.requests.RequestBuilder
-import org.stellar.sdk.responses.operations.OperationResponse
 
 data class AccountInfo(
   val publicKey: String,
@@ -181,14 +180,14 @@ enum class StellarTomlField(val text: String) {
 
 data class WalletAsset(val id: String, val code: String, val issuer: String)
 
-data class WalletOperation(
-  val id: Long,
+data class WalletOperation<T>(
+  val id: String,
   val date: String,
   val amount: String,
   val account: String,
   val asset: List<WalletAsset>,
   val type: WalletOperationType,
-  val rawOperation: OperationResponse,
+  val rawOperation: T,
 )
 
 enum class WalletOperationType() {
