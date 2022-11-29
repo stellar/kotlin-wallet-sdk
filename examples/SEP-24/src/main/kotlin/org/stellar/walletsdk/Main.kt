@@ -33,7 +33,7 @@ suspend fun main() {
   val server = Server("https://horizon-testnet.stellar.org")
   val wallet = Wallet(server, Network.TESTNET)
   // Generate new (user) account and fund it with 10 XLM from main account
-  val account = KeyPair.random()
+  val account = wallet.create()
   val tx = wallet.fund(myAddress, account.publicKeyString, "10")
 
   // Sign with your main account's key and send transaction to the network
@@ -109,13 +109,7 @@ suspend fun main() {
   // Send transaction with transfer
 }
 
-val KeyPair.publicKeyString: String
-  get() = this.accountId
-
-val KeyPair.secretKey: String
-  get() = this.secretSeed.concatToString()
-
-class WalletSignerImpl(private val keyPair: KeyPair) : WalletSigner {
+class WalletSignerImpl(private val keyPair: AccountKeypair) : WalletSigner {
   override fun signWithClientAccount(txn: Transaction): Transaction {
     txn.sign(keyPair)
     return txn

@@ -1,5 +1,8 @@
 package org.stellar.walletsdk
 
+import org.stellar.sdk.AbstractTransaction
+import org.stellar.sdk.KeyPair
+
 data class AccountInfo(
   val publicKey: String,
   val assets: List<FormattedAsset>,
@@ -9,6 +12,12 @@ data class AccountInfo(
 
 data class AccountSigner(val address: String, val weight: Int)
 
+/**
+ * Account weights threshold
+ * @param low Low threshold weight
+ * @param medium Medium threshold weight
+ * @param high High threshold weight
+ */
 data class AccountThreshold(val low: Int, val medium: Int, val high: Int)
 
 data class AnchorServiceAsset(
@@ -125,48 +134,21 @@ data class NativeAssetDefaults(
   val assetIssuer: String,
 )
 
-data class RecoveryServer(
-  val endpoint: String,
-  val authEndpoint: String,
-  val stellarAddress: String,
-  val homeDomain: String,
-)
-
-data class RecoveryServerAuth(
-  val endpoint: String,
-  val signerAddress: String,
-  val authToken: String,
-)
-
-data class RecoveryAccount(
-  val address: String,
-  val identities: List<RecoveryAccountRole>,
-  val signers: List<RecoveryAccountSigner>
-)
-
-data class RecoveryIdentities(val identities: List<RecoveryAccountIdentity>)
-
-data class RecoveryAccountRole(val role: String, val authenticated: Boolean?)
-
-data class RecoveryAccountSigner(val key: String)
-
-data class RecoveryAccountAuthMethod(
-  val type: String,
-  val value: String,
-)
-
-data class RecoveryAccountIdentity(
-  val role: String,
-  val auth_methods: List<RecoveryAccountAuthMethod>,
-)
-
-data class SignerWeight(
-  val master: Int,
-  val recoveryServer: Int,
-)
-
 enum class StellarTomlFields(val text: String) {
   SIGNING_KEY("SIGNING_KEY"),
   TRANSFER_SERVER_SEP0024("TRANSFER_SERVER_SEP0024"),
   WEB_AUTH_ENDPOINT("WEB_AUTH_ENDPOINT")
+}
+
+@JvmInline
+value class AccountKeypair(val keyPair: KeyPair) {
+  val publicKeyString: String
+    get() = keyPair.accountId
+
+  val secretKey: String
+    get() = keyPair.secretSeed.concatToString()
+}
+
+fun AbstractTransaction.sign(keyPair: AccountKeypair) {
+  this.sign(keyPair.keyPair)
 }

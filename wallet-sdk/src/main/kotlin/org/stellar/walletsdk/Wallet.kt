@@ -2,6 +2,7 @@ package org.stellar.walletsdk
 
 import org.stellar.sdk.*
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.recovery.Recovery
 import org.stellar.walletsdk.util.*
 
 /**
@@ -19,7 +20,13 @@ class Wallet(
   private val network: Network,
   private val maxBaseFeeInStroops: Int = 100
 ) {
-  data class AccountKeypair(val publicKey: String, val secretKey: String)
+  /**
+   * Generates new recovery service that share this wallet's configuration.
+   * @return recovery service
+   */
+  fun recovery(): Recovery {
+    return Recovery(server, network, maxBaseFeeInStroops)
+  }
 
   /**
    * Generate new account keypair (public and secret key).
@@ -27,8 +34,7 @@ class Wallet(
    * @return public key and secret key
    */
   fun create(): AccountKeypair {
-    val keypair: KeyPair = KeyPair.random()
-    return AccountKeypair(keypair.accountId, String(keypair.secretSeed))
+    return AccountKeypair(KeyPair.random())
   }
 
   /**
@@ -201,203 +207,6 @@ class Wallet(
     }
 
     throw TransactionSubmitFailedException(response)
-  }
-
-  /**
-   * Sign transaction with recovery servers. It is used to recover an account using
-   * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
-   *
-   * @param transaction Transaction with new signer to be signed by recovery servers
-   * @param accountAddress Stellar address of the account that is recovered
-   * @param recoveryServers List of recovery servers to use
-   * @param base64Decoder optional base64Decoder. Default `java.util.Base64` decoder works with
-   * Android API 23+. To support Android API older than API 23, custom base64Decoder needs to be
-   * provided. For example, `android.util.Base64`.
-   *
-   * @return transaction with recovery server signatures
-   *
-   * @throws [NetworkRequestFailedException] when request fails
-   * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
-   */
-  suspend fun signWithRecoveryServers(
-    transaction: Transaction,
-    accountAddress: String,
-    recoveryServers: List<RecoveryServerAuth>,
-    base64Decoder: ((String) -> ByteArray)? = null
-  ): Transaction {
-    val signatures =
-      recoveryServers.map {
-        getRecoveryServerTxnSignature(
-          transaction = transaction,
-          accountAddress = accountAddress,
-          recoveryServer = it,
-          base64Decoder = base64Decoder
-        )
-      }
-
-    if (recoveryServers.size != signatures.size) {
-      throw NotAllSignaturesFetchedException
-    }
-
-    signatures.forEach { transaction.addSignature(it) }
-
-    return transaction
-  }
-
-  /**
-   * Register account with recovery servers using
-   * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
-   *
-   * @param recoveryServers A list of recovery servers to register with
-   * @param accountAddress Stellar address of the account that is registering
-   * @param accountIdentity A list of account identities to be registered with the recovery servers
-   * @param walletSigner [WalletSigner] interface to sign transaction with the account
-   *
-   * @return a list of recovery servers' signatures
-   *
-   * @throws [NetworkRequestFailedException] when request fails
-   * @throws [RecoveryException] when error happens working with recovery servers
-   */
-  suspend fun enrollWithRecoveryServer(
-    recoveryServers: List<RecoveryServer>,
-    accountAddress: String,
-    accountIdentity: List<RecoveryAccountIdentity>,
-    walletSigner: WalletSigner
-  ): List<String> {
-    val signers =
-      recoveryServers.map { rs ->
-        setRecoveryMethods(
-          endpoint = rs.endpoint,
-          webAuthEndpoint = rs.authEndpoint,
-          homeDomain = rs.homeDomain,
-          accountAddress = accountAddress,
-          accountIdentity = accountIdentity,
-          walletSigner = walletSigner
-        )
-      }
-
-    if (recoveryServers.size != signers.size) {
-      throw NotRegisteredWithAllException
-    }
-
-    return signers
-  }
-
-  /**
-   * Add recovery servers and device account as new account signers, and set new threshold weights
-   * on the account.
-   *
-   * This transaction can be sponsored.
-   *
-   * @param accountAddress Stellar address of the account that is registering
-   * @param accountSigner A list of account signers and their weights
-   * @param accountThreshold Low, medium, and high thresholds to set on the account
-   * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
-   *
-   * @return transaction
-   *
-   * @throws [AccountNotFoundException] when account is not found
-   */
-  suspend fun registerRecoveryServerSigners(
-    accountAddress: String,
-    accountSigner: List<AccountSigner>,
-    accountThreshold: AccountThreshold,
-    sponsorAddress: String = ""
-  ): Transaction {
-    val isSponsored = sponsorAddress.isNotBlank()
-    val transactionBuilder =
-      createTransactionBuilder(
-        sourceAddress = accountAddress,
-        maxBaseFeeInStroops = maxBaseFeeInStroops,
-        server = server,
-        network = network,
-      )
-
-    val setOptionsOp =
-      listOf(
-        *accountSigner.map { signer -> addSignerOperation(signer) }.toTypedArray(),
-        setThresholdsOperation(
-          low = accountThreshold.low,
-          medium = accountThreshold.medium,
-          high = accountThreshold.high
-        )
-      )
-
-    val operations: List<Operation> =
-      if (isSponsored) {
-        sponsorOperation(sponsorAddress, accountAddress, setOptionsOp)
-      } else {
-        setOptionsOp
-      }
-
-    transactionBuilder.addOperations(operations)
-
-    return transactionBuilder.build()
-  }
-
-  // TODO: create account helper to handle 409 Conflict > fetch account data from RS and return
-  //  signers[0].key
-  // TODO: handle update RS account info (PUT request)
-  /**
-   * Create new recoverable wallet using
-   * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md). It
-   * registers the account with recovery servers, adds recovery servers and device account as new
-   * account signers, and sets threshold weights on the account.
-   *
-   * This transaction can be sponsored.
-   *
-   * Uses [enrollWithRecoveryServer] and [registerRecoveryServerSigners] internally.
-   *
-   * @param accountAddress Stellar address of the account that is registering
-   * @param deviceAddress Stellar address of the device that is added as a signer
-   * @param accountThreshold Low, medium, and high thresholds to set on the account
-   * @param accountIdentity A list of account identities to be registered with the recovery servers
-   * @param recoveryServers A list of recovery servers to register with
-   * @param accountWalletSigner [WalletSigner] interface to sign transaction with the account
-   * @param signerWeight Signer weight to set
-   * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
-   *
-   * @return transaction
-   *
-   * @throws [NetworkRequestFailedException] when request fails
-   * @throws [RecoveryException] when error happens working with recovery servers
-   * @throws [AccountNotFoundException] when account is not found
-   */
-  suspend fun createRecoverableWallet(
-    accountAddress: String,
-    deviceAddress: String,
-    accountThreshold: AccountThreshold,
-    accountIdentity: List<RecoveryAccountIdentity>,
-    recoveryServers: List<RecoveryServer>,
-    accountWalletSigner: WalletSigner,
-    signerWeight: SignerWeight,
-    sponsorAddress: String = ""
-  ): Transaction {
-    val recoverySigners =
-      enrollWithRecoveryServer(
-        recoveryServers = recoveryServers,
-        accountAddress = accountAddress,
-        accountIdentity = accountIdentity,
-        walletSigner = accountWalletSigner
-      )
-
-    val recoveryServerSigners =
-      recoverySigners
-        .map { rs -> AccountSigner(address = rs, weight = signerWeight.recoveryServer) }
-        .toTypedArray()
-
-    val signer =
-      listOf(
-        *recoveryServerSigners,
-        AccountSigner(address = deviceAddress, weight = signerWeight.master)
-      )
-
-    return registerRecoveryServerSigners(
-      accountAddress = accountAddress,
-      accountSigner = signer,
-      accountThreshold = accountThreshold,
-      sponsorAddress = sponsorAddress
-    )
   }
 
   /**

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.AccountSigner
+import org.stellar.walletsdk.AccountThreshold
 
 internal class OperationTest {
   @Nested
@@ -24,7 +25,7 @@ internal class OperationTest {
   inner class SetThresholdsOperation {
     @Test
     fun `generates set thresholds operation`() {
-      val thresholdsOp = setThresholdsOperation(low = 10, medium = 10, high = 10)
+      val thresholdsOp = setThresholdsOperation(AccountThreshold(low = 10, medium = 10, high = 10))
 
       assertEquals("SetOptionsOperation", thresholdsOp::class.simpleName)
     }
