@@ -18,14 +18,14 @@ import org.stellar.walletsdk.util.SchemeUtil
  * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
  * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
  * @property network Stellar network
- * @property walletSigner interface to define wallet client and domain (if using `clientDomain`)
+ * @property defaultSigner interface to define wallet client and domain (if using `clientDomain`)
  * signing methods
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
 class Auth(
   private val webAuthEndpoint: String,
   private val homeDomain: String,
-  private val walletSigner: WalletSigner,
+  private val defaultSigner: WalletSigner,
   private val network: Network = Network.TESTNET,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
@@ -39,6 +39,7 @@ class Auth(
    * Authenticates to an external server.
    *
    * @param accountAddress Stellar address of the account authenticating
+   * @param walletSigner overriding [Auth.defaultSigner] to use in this authentication
    * @param memoId optional memo ID to distinguish the account
    * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
    *
@@ -50,11 +51,12 @@ class Auth(
    */
   suspend fun authenticate(
     accountAddress: String,
+    walletSigner: WalletSigner?,
     memoId: String? = null,
     clientDomain: String? = null
   ): String {
     val challengeTxn = challenge(accountAddress, memoId, clientDomain)
-    val signedTxn = sign(challengeTxn)
+    val signedTxn = sign(challengeTxn, walletSigner ?: this.defaultSigner)
     return getToken(signedTxn)
   }
 
@@ -131,7 +133,7 @@ class Auth(
    *
    * @return signed transaction
    */
-  private fun sign(challengeResponse: ChallengeResponse): Transaction {
+  private fun sign(challengeResponse: ChallengeResponse, walletSigner: WalletSigner): Transaction {
     var challengeTxn =
       Transaction.fromEnvelopeXdr(
         challengeResponse.transaction,

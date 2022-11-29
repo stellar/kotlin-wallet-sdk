@@ -11,15 +11,6 @@ import org.stellar.walletsdk.exception.*
 /**
  * Interactive flow for deposit and withdrawal using SEP-24.
  *
- * @param type chosen flow (deposit or withdrawal)
- * @param accountAddress Stellar address of the account, used for authentication and by default for
- * depositing or withdrawing funds
- * @param fundsAccountAddress optional Stellar address of the account for depositing or withdrawing
- * funds, if different from the account address
- * @param homeDomain home domain of the anchor
- * @param assetCode Asset code to deposit or withdraw
- * @param authToken Auth token from the anchor (account's authentication using SEP-10)
- * @param extraFields Additional information to pass to the anchor
  * @param anchor instance of the [Anchor]
  * @param server Horizon [Server] instance
  * @param httpClient HTTP client

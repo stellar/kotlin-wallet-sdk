@@ -16,7 +16,7 @@ internal class AuthTest : SuspendTest() {
       Auth(
           webAuthEndpoint = AUTH_ENDPOINT,
           homeDomain = AUTH_HOME_DOMAIN,
-          walletSigner = InProcessWalletSigner()
+          defaultSigner = InProcessWalletSigner()
         )
         .authenticate(ADDRESS_ACTIVE)
     }
@@ -27,7 +27,7 @@ internal class AuthTest : SuspendTest() {
   @Test
   fun `auth token with client domain`() {
     val authToken = runBlocking {
-      Auth(AUTH_ENDPOINT, AUTH_HOME_DOMAIN, walletSigner = InProcessWalletSigner())
+      Auth(AUTH_ENDPOINT, AUTH_HOME_DOMAIN, defaultSigner = InProcessWalletSigner())
         .authenticate(ADDRESS_ACTIVE, clientDomain = AUTH_CLIENT_DOMAIN)
     }
 
@@ -38,7 +38,7 @@ internal class AuthTest : SuspendTest() {
   fun `throw exception if both memo and clientDomain are provided`() {
     assertThrows<Exception> {
       runBlocking {
-        Auth(AUTH_ENDPOINT, AUTH_HOME_DOMAIN, walletSigner = InProcessWalletSigner())
+        Auth(AUTH_ENDPOINT, AUTH_HOME_DOMAIN, defaultSigner = InProcessWalletSigner())
           .authenticate(ADDRESS_ACTIVE, memoId = "123", clientDomain = AUTH_CLIENT_DOMAIN)
       }
     }
@@ -48,7 +48,7 @@ internal class AuthTest : SuspendTest() {
   fun `throw exception if Memo ID is not a positive integer`() {
     assertThrows<Exception> {
       runBlocking {
-        Auth(AUTH_ENDPOINT, AUTH_HOME_DOMAIN, walletSigner = InProcessWalletSigner())
+        Auth(AUTH_ENDPOINT, AUTH_HOME_DOMAIN, defaultSigner = InProcessWalletSigner())
           .authenticate(ADDRESS_ACTIVE, memoId = "abc")
       }
     }
