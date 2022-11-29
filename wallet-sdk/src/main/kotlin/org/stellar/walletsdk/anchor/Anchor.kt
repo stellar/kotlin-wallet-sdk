@@ -4,9 +4,7 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.stellar.sdk.Asset
-import org.stellar.sdk.Network
-import org.stellar.sdk.Server
+import org.stellar.sdk.*
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.*
@@ -217,14 +215,12 @@ class Anchor(
     // Add query params
     val queryParams = mutableMapOf<String, String>()
     queryParams["asset_code"] = assetCode
-    queryParams["limit"] = limit?.toString() ?: ""
-    queryParams["paging_id"] = pagingId ?: ""
-    queryParams["no_older_than"] = noOlderThan ?: ""
-    queryParams["lang"] = lang ?: "en"
+    limit?.run { queryParams["limit"] = this.toString() }
+    pagingId?.run { queryParams["paging_id"] = this }
+    noOlderThan?.run { queryParams["no_older_than"] = this }
+    lang?.run { queryParams["lang"] = this }
 
-    queryParams
-      .filter { it.value.isNotBlank() }
-      .forEach { endpointUrl.addQueryParameter(it.key, it.value) }
+    queryParams.forEach { endpointUrl.addQueryParameter(it.key, it.value) }
 
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl.build().toString(), authToken)
     val finalStatusList = listOf("completed", "refunded")
