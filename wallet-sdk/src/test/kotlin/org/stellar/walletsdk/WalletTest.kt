@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.SubmitTransactionResponse
+import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.helpers.objectFromJsonFile
 
 internal class WalletTest : SuspendTest() {
@@ -231,11 +232,11 @@ internal class WalletTest : SuspendTest() {
       every { server.submitTransaction(any() as Transaction) } returns mockResponse
 
       val exception =
-        assertFailsWith<Exception>(
+        assertFailsWith<TransactionSubmitFailedException>(
           block = { runBlocking { wallet.submitTransaction(transaction) } }
         )
 
-      assertTrue(exception.toString().contains(txnResultCode))
+      assertEquals(txnResultCode, exception.resultCode)
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
     }
 

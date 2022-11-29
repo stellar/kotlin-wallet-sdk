@@ -3,6 +3,7 @@ package org.stellar.walletsdk.util
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.exception.*
 
 /**
  * Interactive flow for deposit and withdrawal using SEP-24.
@@ -22,11 +23,7 @@ import org.stellar.walletsdk.*
  *
  * @return response object from the anchor
  *
- * @throws [AssetNotAcceptedForDepositException] if asset is not accepted for deposits
- * @throws [AssetNotEnabledForDepositException] if asset is not enabled for deposits by the anchor
- * @throws [AssetNotAcceptedForWithdrawalException] if asset is not accepted for withdrawals
- * @throws [AssetNotEnabledForWithdrawalException] if asset is not enabled for withdrawals by the
- * anchor
+ * @throws [AnchorAssetException] if asset was refused by the anchor
  * @throws [NetworkRequestFailedException] if network request fails
  */
 suspend fun interactiveFlow(

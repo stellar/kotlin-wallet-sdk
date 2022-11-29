@@ -4,7 +4,7 @@ import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.TransactionBuilder
-import org.stellar.walletsdk.AccountNotFoundException
+import org.stellar.walletsdk.exception.AccountNotFoundException
 
 /**
  * Helper method to build a transaction.
@@ -26,6 +26,7 @@ suspend fun createTransactionBuilder(
   server: Server,
   network: Network,
 ): TransactionBuilder {
+  // TODO: accept AccountResponse as an argument to not re-fetch account
   val sourceAccount = fetchAccount(sourceAddress, server)
 
   // TODO: add memo

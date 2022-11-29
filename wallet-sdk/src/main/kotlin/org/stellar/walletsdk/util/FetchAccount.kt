@@ -1,10 +1,9 @@
 package org.stellar.walletsdk.util
 
 import java.io.IOException
-import kotlinx.coroutines.*
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
-import org.stellar.walletsdk.AccountNotFoundException
+import org.stellar.walletsdk.exception.AccountNotFoundException
 
 /**
  * Fetch account information from the Stellar network.
@@ -16,10 +15,12 @@ import org.stellar.walletsdk.AccountNotFoundException
  *
  * @throws [AccountNotFoundException] when account is not found
  */
+@Throws(AccountNotFoundException::class)
 suspend fun fetchAccount(accountAddress: String, server: Server): AccountResponse {
   try {
     return server.accounts().account(accountAddress)
   } catch (e: IOException) {
+    // TODO: check that error code is 404
     throw AccountNotFoundException(accountAddress)
   }
 }

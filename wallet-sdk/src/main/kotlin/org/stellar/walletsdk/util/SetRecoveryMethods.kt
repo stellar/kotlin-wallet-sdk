@@ -2,6 +2,8 @@ package org.stellar.walletsdk.util
 
 import okhttp3.OkHttpClient
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.exception.NetworkRequestFailedException
+import org.stellar.walletsdk.exception.NoAccountSignersException
 
 /**
  * Helper to register account with a recovery server using
@@ -20,8 +22,8 @@ import org.stellar.walletsdk.*
  * @return Stellar address of signer
  *
  * @throws [NetworkRequestFailedException] when request fails
- * @throws [RecoveryNoAccountSignersOnServerException] if there are no signers on the recovery
- * server for this account
+ * @throws [NoAccountSignersException] if there are no signers on the recovery server for this
+ * account
  */
 suspend fun setRecoveryMethods(
   endpoint: String,
@@ -67,12 +69,12 @@ suspend fun setRecoveryMethods(
  *
  * @return Stellar address of the last signer
  *
- * @throws [RecoveryNoAccountSignersOnServerException] if there are no signers on the recovery
- * server for this account
+ * @throws [NoAccountSignersException] if there are no signers on the recovery server for this
+ * account
  */
 fun getLatestRecoverySigner(signers: List<RecoveryAccountSigner>): String {
   if (signers.isEmpty()) {
-    throw RecoveryNoAccountSignersOnServerException()
+    throw NoAccountSignersException
   }
 
   return signers[0].key

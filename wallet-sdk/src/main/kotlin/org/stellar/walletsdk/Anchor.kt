@@ -6,6 +6,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
+import org.stellar.walletsdk.exception.AnchorAssetException
+import org.stellar.walletsdk.exception.InvalidAnchorServiceUrl
+import org.stellar.walletsdk.exception.NetworkRequestFailedException
 import org.stellar.walletsdk.util.GsonUtils
 import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.StellarToml
@@ -86,7 +89,7 @@ class Anchor(
 
     try {
       url = serviceUrl.toHttpUrl()
-    } catch (e: Exception) {
+    } catch (e: IllegalArgumentException) {
       throw InvalidAnchorServiceUrl(e)
     }
 
@@ -121,8 +124,7 @@ class Anchor(
    *
    * @return response object from the anchor
    *
-   * @throws [AssetNotAcceptedForDepositException] if asset is not accepted for deposits
-   * @throws [AssetNotEnabledForDepositException] if asset is not enabled for deposits by the anchor
+   * @throws [AnchorAssetException] if asset was refused by the anchor
    * @throws [NetworkRequestFailedException] if network request fails
    */
   suspend fun getInteractiveDeposit(
@@ -158,9 +160,7 @@ class Anchor(
    *
    * @return response object from the anchor
    *
-   * @throws [AssetNotAcceptedForWithdrawalException] if asset is not accepted for withdrawals
-   * @throws [AssetNotEnabledForWithdrawalException] if asset is not enabled for withdrawals by the
-   * anchor
+   * @throws [AnchorAssetException] if asset was refused by the anchor
    * @throws [NetworkRequestFailedException] if network request fails
    */
   suspend fun getInteractiveWithdrawal(

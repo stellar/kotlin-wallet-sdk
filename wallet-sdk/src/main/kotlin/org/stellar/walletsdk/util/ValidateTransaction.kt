@@ -2,7 +2,7 @@ package org.stellar.walletsdk.util
 
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.AccountNotEnoughBalanceException
+import org.stellar.walletsdk.exception.AccountNotEnoughBalanceException
 
 /**
  * Helper to validate that the transaction's source account has enough native (XLM) balance to cover

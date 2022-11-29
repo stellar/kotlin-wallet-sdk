@@ -4,7 +4,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.Server
-import org.stellar.walletsdk.NetworkRequestFailedException
+import org.stellar.walletsdk.exception.NetworkRequestFailedException
 import shadow.com.moandjiezana.toml.Toml
 
 /**
