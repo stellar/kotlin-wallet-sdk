@@ -1,4 +1,4 @@
-package org.stellar.walletsdk
+package org.stellar.walletsdk.anchor
 
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -6,13 +6,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
-import org.stellar.walletsdk.exception.AnchorAssetException
+import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.InvalidAnchorServiceUrl
 import org.stellar.walletsdk.exception.NetworkRequestFailedException
-import org.stellar.walletsdk.util.GsonUtils
-import org.stellar.walletsdk.util.OkHttpUtils
-import org.stellar.walletsdk.util.StellarToml
-import org.stellar.walletsdk.util.interactiveFlow
+import org.stellar.walletsdk.util.*
 
 /**
  * Build on/off ramps with anchors.
@@ -42,35 +39,27 @@ class Anchor(
   }
 
   /**
-   * Authenticate account with the anchor using SEP-10.
+   * Create new auth object to authenticate account with the anchor using SEP-10.
    *
-   * @param accountAddress Stellar address of the account to authenticate
-   * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
-   * @param memoId optional memo ID to distinguish the account
    * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
    * @param walletSigner interface to define wallet client and domain (if using `clientDomain`)
    * signing methods
    *
-   * @return JWT auth token
+   * @return auth object
    */
-  suspend fun getAuthToken(
-    accountAddress: String,
-    clientDomain: String? = null,
-    memoId: String? = null,
+  suspend fun auth(
     toml: Map<String, Any>,
-    walletSigner: WalletSigner
-  ): String {
+    walletSigner: WalletSigner,
+  ): Auth {
+    // TODO: get toml automatically
+    // TODO: provide wallet signer as parameter to Anchor class
     return Auth(
-        accountAddress = accountAddress,
-        webAuthEndpoint = toml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
-        homeDomain = homeDomain,
-        clientDomain = clientDomain,
-        memoId = memoId,
-        networkPassPhrase = network.networkPassphrase,
-        walletSigner = walletSigner,
-        httpClient = httpClient
-      )
-      .authenticate()
+      toml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
+      homeDomain,
+      walletSigner,
+      network,
+      httpClient
+    )
   }
 
   /**
@@ -112,76 +101,12 @@ class Anchor(
   }
 
   /**
-   * Interactive deposit flow using
-   * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
+   * Creates new interactive flow for given anchor. It can be used for withdrawal or deposit.
    *
-   * @param accountAddress Stellar address of the account, used for authentication and by default
-   * for depositing funds
-   * @param fundsAccountAddress optional Stellar address of the account for depositing funds, if
-   * different from the account address
-   * @param assetCode Asset code to deposit
-   * @param authToken Auth token from the anchor (account's authentication using SEP-10)
-   *
-   * @return response object from the anchor
-   *
-   * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [NetworkRequestFailedException] if network request fails
+   * @return interactive flow service
    */
-  suspend fun getInteractiveDeposit(
-    accountAddress: String,
-    fundsAccountAddress: String? = null,
-    assetCode: String,
-    authToken: String,
-  ): InteractiveFlowResponse {
-    return interactiveFlow(
-      type = InteractiveFlowType.DEPOSIT,
-      accountAddress = accountAddress,
-      fundsAccountAddress = fundsAccountAddress,
-      homeDomain = homeDomain,
-      assetCode = assetCode,
-      authToken = authToken,
-      anchor = this,
-      server = server,
-      httpClient = httpClient
-    )
-  }
-
-  /**
-   * Interactive withdrawal flow using
-   * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
-   *
-   * @param accountAddress Stellar address of the account, used for authentication and by default
-   * for withdrawing funds
-   * @param fundsAccountAddress optional Stellar address of the account for withdrawing funds, if
-   * different from the account address
-   * @param assetCode Asset code to deposit
-   * @param authToken Auth token from the anchor (account's authentication using SEP-10)
-   * @param extraFields Additional information to pass to the anchor
-   *
-   * @return response object from the anchor
-   *
-   * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [NetworkRequestFailedException] if network request fails
-   */
-  suspend fun getInteractiveWithdrawal(
-    accountAddress: String,
-    fundsAccountAddress: String? = null,
-    assetCode: String,
-    authToken: String,
-    extraFields: Map<String, Any>? = null,
-  ): InteractiveFlowResponse {
-    return interactiveFlow(
-      type = InteractiveFlowType.WITHDRAW,
-      accountAddress = accountAddress,
-      fundsAccountAddress = fundsAccountAddress,
-      homeDomain = homeDomain,
-      assetCode = assetCode,
-      authToken = authToken,
-      extraFields = extraFields,
-      anchor = this,
-      server = server,
-      httpClient = httpClient
-    )
+  fun interactive(): Interactive {
+    return Interactive(homeDomain, this, server, httpClient)
   }
 
   // TODO: is this for SEP-24 only?

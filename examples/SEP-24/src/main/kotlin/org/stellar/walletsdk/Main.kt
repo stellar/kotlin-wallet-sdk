@@ -8,6 +8,7 @@ import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.util.SchemeUtil
+import org.stellar.walletsdk.anchor.Anchor
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -62,16 +63,11 @@ suspend fun main() {
   assert(wallet.submitTransaction(addTrustline))
 
   // Authorizing
-  val token =
-    anchor.getAuthToken(
-      account.publicKeyString,
-      toml = info,
-      walletSigner = WalletSignerImpl(account)
-    )
+  val token = anchor.auth(info, WalletSignerImpl(account)).authenticate(account.publicKeyString)
 
   // Start interactive deposit
   val deposit =
-    anchor.getInteractiveDeposit(account.publicKeyString, assetCode = assetCode, authToken = token)
+    anchor.interactive().deposit(account.publicKeyString, assetCode = assetCode, authToken = token)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -95,7 +91,7 @@ suspend fun main() {
 
   // Start interactive withdrawal
   val withdrawal =
-    anchor.getInteractiveWithdrawal(
+    anchor.interactive().withdraw(
       account.publicKeyString,
       assetCode = assetCode,
       authToken = token

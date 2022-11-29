@@ -13,26 +13,20 @@ import org.stellar.walletsdk.util.SchemeUtil
  * Authenticate to an external server using
  * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
  *
- * @property accountAddress Stellar address of the account authenticating
  * @property webAuthEndpoint Authentication endpoint URL
  * @property homeDomain Domain hosting stellar.toml (
  * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
  * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
- * @property memoId optional memo ID to distinguish the account
- * @property clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
- * @property networkPassPhrase Stellar network passphrase
- * @property walletSigner interface to define wallet client and domain (if using `clientDomain`)
+ * @property network Stellar network
+ * @property defaultSigner interface to define wallet client and domain (if using `clientDomain`)
  * signing methods
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
 class Auth(
-  private val accountAddress: String,
   private val webAuthEndpoint: String,
   private val homeDomain: String,
-  private val memoId: String? = null,
-  private val clientDomain: String? = null,
-  private val networkPassPhrase: String = Network.TESTNET.toString(),
-  private val walletSigner: WalletSigner,
+  private val defaultSigner: WalletSigner,
+  private val network: Network = Network.TESTNET,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
   private val gson = GsonUtils.instance!!
@@ -44,15 +38,25 @@ class Auth(
   /**
    * Authenticates to an external server.
    *
+   * @param accountAddress Stellar address of the account authenticating
+   * @param walletSigner overriding [Auth.defaultSigner] to use in this authentication
+   * @param memoId optional memo ID to distinguish the account
+   * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
+   *
    * @return authentication token (JWT)
    *
    * @throws [ValidationException] when some of the request arguments are not valid
    * @throws [NetworkRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
-  suspend fun authenticate(): String {
-    val challengeTxn = challenge()
-    val signedTxn = sign(challengeTxn)
+  suspend fun authenticate(
+    accountAddress: String,
+    walletSigner: WalletSigner?,
+    memoId: String? = null,
+    clientDomain: String? = null
+  ): String {
+    val challengeTxn = challenge(accountAddress, memoId, clientDomain)
+    val signedTxn = sign(challengeTxn, walletSigner ?: this.defaultSigner)
     return getToken(signedTxn)
   }
 
@@ -67,7 +71,11 @@ class Auth(
    * @throws [NetworkRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
-  private suspend fun challenge(): ChallengeResponse {
+  private suspend fun challenge(
+    accountAddress: String,
+    memoId: String? = null,
+    clientDomain: String? = null
+  ): ChallengeResponse {
     val endpoint = webAuthEndpoint.toHttpUrl()
     val authURL = endpoint.newBuilder().scheme(SchemeUtil.scheme)
 
@@ -108,7 +116,7 @@ class Auth(
         throw MissingTransactionException
       }
 
-      if (jsonResponse.network_passphrase != networkPassPhrase) {
+      if (jsonResponse.network_passphrase != network.networkPassphrase) {
         throw NetworkMismatchException
       }
 
@@ -125,7 +133,7 @@ class Auth(
    *
    * @return signed transaction
    */
-  private fun sign(challengeResponse: ChallengeResponse): Transaction {
+  private fun sign(challengeResponse: ChallengeResponse, walletSigner: WalletSigner): Transaction {
     var challengeTxn =
       Transaction.fromEnvelopeXdr(
         challengeResponse.transaction,
