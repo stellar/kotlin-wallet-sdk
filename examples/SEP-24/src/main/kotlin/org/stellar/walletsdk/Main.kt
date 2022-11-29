@@ -7,6 +7,7 @@ import org.stellar.sdk.KeyPair
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
+import org.stellar.walletsdk.util.SchemeUtil
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -15,7 +16,19 @@ private val myKey =
   System.getenv("STELLAR_KEY") ?: "SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I"
 private val myAddress = KeyPair.fromSecretSeed(myKey).accountId
 
+private val useLocal = true
+private val assetCode = if (useLocal) "USDC" else "SRT"
+private val assetIssuer =
+  if (useLocal) "GDQOE23CFSUMSVQK4Y5JHPPYK73VYCNHZHA7ENKCV37P6SUEO6XQBKPP"
+  else "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
+private val homeDomain = if (useLocal) "localhost:8080" else "testanchor.stellar.org"
+private val scheme = if (useLocal) "http" else "https"
+
 suspend fun main() {
+  if (useLocal) {
+    SchemeUtil.useHttp()
+  }
+
   // Create instance of server that allows to connect to Horizon
   val server = Server("https://horizon-testnet.stellar.org")
   val wallet = Wallet(server, Network.TESTNET)
@@ -28,25 +41,20 @@ suspend fun main() {
   tx.sign(KeyPair.fromSecretSeed(myKey))
   assert(wallet.submitTransaction(tx))
 
-  val anchor = Anchor(server, Network.TESTNET, "testanchor.stellar.org")
+  val anchor = Anchor(server, Network.TESTNET, homeDomain)
 
   // Get info from the anchor server
   val info = anchor.getInfo()
 
   // Get SEP-24 info
-  val servicesInfo = anchor.getServicesInfo("https://testanchor.stellar.org/sep24")
+  val servicesInfo = anchor.getServicesInfo("$scheme://$homeDomain/sep24")
 
   println("Info from anchor server: $info")
   println("SEP-24 info from anchor server: $servicesInfo")
 
   // Create add trustline transaction for an asset. This allows user account to receive trusted
   // asset.
-  val addTrustline =
-    wallet.addAssetSupport(
-      account.publicKeyString,
-      "SRT",
-      "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
-    )
+  val addTrustline = wallet.addAssetSupport(account.publicKeyString, assetCode, assetIssuer)
 
   // Sign and send transaction
   println("Adding trustline")
@@ -63,7 +71,7 @@ suspend fun main() {
 
   // Start interactive deposit
   val deposit =
-    anchor.getInteractiveDeposit(account.publicKeyString, assetCode = "SRT", authToken = token)
+    anchor.getInteractiveDeposit(account.publicKeyString, assetCode = assetCode, authToken = token)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -79,7 +87,7 @@ suspend fun main() {
       .accounts()
       .account(account.publicKeyString)
       .balances
-      .filter { it.assetCode.isPresent && it.assetCode.get() == "SRT" }
+      .filter { it.assetCode.isPresent && it.assetCode.get() == assetCode }
       .any { it.balance.toBigDecimal() <= BigDecimal.ZERO }
   ) {
     delay(5.seconds)
@@ -87,7 +95,11 @@ suspend fun main() {
 
   // Start interactive withdrawal
   val withdrawal =
-    anchor.getInteractiveWithdrawal(account.publicKeyString, assetCode = "SRT", authToken = token)
+    anchor.getInteractiveWithdrawal(
+      account.publicKeyString,
+      assetCode = assetCode,
+      authToken = token
+    )
 
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
