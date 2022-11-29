@@ -259,6 +259,7 @@ class Anchor(
    * @return a list of formatted operations
    *
    * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [AssetNotSupported] if asset is not supported by the anchor
    */
   suspend fun getHistory(
     assetCode: String,
@@ -273,8 +274,7 @@ class Anchor(
       ((toml as HashMap)["CURRENCIES"] as List<*>).filterIsInstance<HashMap<*, *>>().find {
         it["code"] == assetCode
       }
-      // TODO: custom exception
-      ?: throw Exception("Anchor does not support $assetCode asset")
+        ?: throw AssetNotSupported(assetCode)
     val asset = Asset.create("$assetCode:$anchorCurrency[\"issuer\"]")
 
     val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()

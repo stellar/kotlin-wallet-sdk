@@ -19,6 +19,8 @@ class AccountNotEnoughBalanceException(
 class AccountNotFoundException(accountAddress: String) :
   Exception("Account $accountAddress was not found")
 
+class AssetNotSupported(assetCode: String) : Exception("Asset $assetCode is not supported")
+
 class AssetNotAcceptedForDepositException(assetCode: String) :
   Exception("Asset $assetCode is not accepted for deposits")
 

@@ -25,23 +25,23 @@ fun formatStellarOperation(
       val isCreator = (operation as CreateAccountOperationResponse).funder == accountAddress
 
       return WalletOperation(
-        id = operation.id.toString(),
-        date = operation.createdAt,
-        amount = operation.startingBalance,
+        operation.id.toString(),
+        operation.createdAt,
+        operation.startingBalance,
         account =
           if (isCreator) {
             operation.account
           } else {
             operation.funder
           },
-        asset = formatNativeAsset(),
+        formatNativeAsset(),
         type =
           if (isCreator) {
             WalletOperationType.SEND
           } else {
             WalletOperationType.RECEIVE
           },
-        rawOperation = operation
+        operation
       )
     }
     // Payment
@@ -51,23 +51,23 @@ fun formatStellarOperation(
       val isSender = (operation as PaymentOperationResponse).from == accountAddress
 
       return WalletOperation(
-        id = operation.id.toString(),
-        date = operation.createdAt,
-        amount = operation.amount,
+        operation.id.toString(),
+        operation.createdAt,
+        operation.amount,
         account =
           if (isSender) {
             operation.to
           } else {
             operation.from
           },
-        asset = formatWalletAsset(operation),
+        formatWalletAsset(operation),
         type =
           if (isSender) {
             WalletOperationType.SEND
           } else {
             WalletOperationType.RECEIVE
           },
-        rawOperation = operation
+        operation
       )
     }
     // Path payment and swap
@@ -79,9 +79,9 @@ fun formatStellarOperation(
       val isSwap = isSender && operation.from == operation.to
 
       return WalletOperation(
-        id = operation.id.toString(),
-        date = operation.createdAt,
-        amount = operation.amount,
+        operation.id.toString(),
+        operation.createdAt,
+        operation.amount,
         account =
           if (isSender) {
             if (isSwap) {
@@ -92,7 +92,7 @@ fun formatStellarOperation(
           } else {
             operation.from
           },
-        asset = formatWalletAsset(operation),
+        formatWalletAsset(operation),
         type =
           if (isSender) {
             if (isSwap) {
@@ -103,19 +103,19 @@ fun formatStellarOperation(
           } else {
             WalletOperationType.RECEIVE
           },
-        rawOperation = operation
+        operation
       )
     }
     // Other
     else -> {
       return WalletOperation(
-        id = operation.id.toString(),
-        date = operation.createdAt,
-        amount = "",
-        account = "",
-        asset = listOf(),
-        type = WalletOperationType.OTHER,
-        rawOperation = operation
+        operation.id.toString(),
+        operation.createdAt,
+        "",
+        "",
+        listOf(),
+        WalletOperationType.OTHER,
+        operation
       )
     }
   }
@@ -139,29 +139,29 @@ fun formatAnchorTransaction(
     "deposit",
     "withdrawal" -> {
       return WalletOperation(
-        id = transaction.id,
-        date = transaction.started_at,
-        amount = transaction.amount_out,
-        account = "",
-        asset = listOf(formattedAsset),
+        transaction.id,
+        transaction.started_at,
+        transaction.amount_out,
+        "",
+        listOf(formattedAsset),
         type =
           if (transaction.kind == "deposit") {
             WalletOperationType.DEPOSIT
           } else {
             WalletOperationType.WITHDRAW
           },
-        rawOperation = transaction
+        transaction
       )
     }
     else -> {
       return WalletOperation(
-        id = transaction.id,
-        date = transaction.started_at,
-        amount = "",
-        account = "",
-        asset = listOf(formattedAsset),
-        type = WalletOperationType.OTHER,
-        rawOperation = transaction
+        transaction.id,
+        transaction.started_at,
+        "",
+        "",
+        listOf(formattedAsset),
+        WalletOperationType.OTHER,
+        transaction
       )
     }
   }
@@ -208,5 +208,5 @@ fun formatAsset(asset: Asset? = null): WalletAsset {
     }
   }
 
-  return WalletAsset(id = "$assetCode:$assetIssuer", code = assetCode, issuer = assetIssuer)
+  return WalletAsset("$assetCode:$assetIssuer", assetCode, assetIssuer)
 }
