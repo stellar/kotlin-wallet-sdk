@@ -13,3 +13,6 @@ class AssetNotEnabledForDepositException(assetCode: String) :
 
 class AssetNotEnabledForWithdrawalException(assetCode: String) :
   AnchorAssetException("Asset $assetCode is not enabled for withdrawals")
+
+class AssetNotSupportedException(assetCode: String) :
+  AnchorAssetException("Asset $assetCode is not supported")

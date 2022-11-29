@@ -40,3 +40,5 @@ class InvalidSponsorOperationTypeException(
 
 class AccountNotFoundException(accountAddress: String) :
   StellarException("Account $accountAddress was not found")
+
+class OperationsLimitExceededException : StellarException("Maximum limit is 200 operations")

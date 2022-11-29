@@ -1,8 +1,10 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
+import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.exception.AccountNotFoundException
 import org.stellar.walletsdk.exception.InvalidStartingBalanceException
+import org.stellar.walletsdk.exception.OperationsLimitExceededException
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.extension.accountByAddress
 import org.stellar.walletsdk.recovery.Recovery
@@ -278,5 +280,42 @@ class Wallet(
       // TODO: Is there a way to check if response is 404 (account not found)?
       throw e
     }
+  }
+
+  /**
+   * Get account operations for the specified Stellar address.
+   *
+   * @param accountAddress Stellar address of the account
+   * @param limit optional how many operations to fetch, maximum is 200, default is 10
+   * @param order optional data order, ascending or descending, defaults to descending
+   * @param cursor optional cursor to specify a starting point
+   * @param includeFailed optional flag to include failed operations, defaults to false
+   *
+   * @return a list of formatted operations
+   *
+   * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
+   */
+  suspend fun getHistory(
+    accountAddress: String,
+    limit: Int? = null,
+    order: Order? = null,
+    cursor: String? = null,
+    includeFailed: Boolean? = null
+  ): List<WalletOperation<OperationResponse>> {
+    if (limit != null && limit > 200) {
+      throw OperationsLimitExceededException()
+    }
+
+    return server
+      .operations()
+      .forAccount(accountAddress)
+      .limit(limit ?: 10)
+      .order(order?.builderEnum)
+      .cursor(cursor)
+      .includeFailed(includeFailed ?: false)
+      .includeTransactions(true)
+      .execute()
+      .records
+      .map { formatStellarOperation(accountAddress, it) }
   }
 }
