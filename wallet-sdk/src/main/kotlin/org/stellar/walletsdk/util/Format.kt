@@ -4,6 +4,7 @@ import java.math.BigDecimal
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.extension.liquidityPoolInfo
 
 /**
  * Format account's balances (assets and liquidity pools).
@@ -31,7 +32,7 @@ suspend fun formatAccountBalances(account: AccountResponse, server: Server): For
     when {
       // Native (XLM asset)
       balance.assetType == AssetType.NATIVE.type -> {
-        val reservedBalance = BigDecimal(accountReservedBalance(account))
+        val reservedBalance = BigDecimal(account.reservedBalance())
         val nativeAsset =
           FormattedAsset(
             id = XLM_ASSET_DEFAULTS.id,
@@ -86,10 +87,9 @@ suspend fun formatAccountBalances(account: AccountResponse, server: Server): For
       // Liquidity pool
       balance.assetType == AssetType.LIQUIDITY_POOL.type -> {
         val liquidityPoolInfo =
-          fetchLiquidityPoolInfo(
+          server.liquidityPoolInfo(
             liquidityPoolId = balance.liquidityPoolID.get(),
             cachedAssetInfo = cachedAssetTomlInfo,
-            server = server
           )
 
         val lpAsset =
@@ -119,4 +119,43 @@ suspend fun formatAccountBalances(account: AccountResponse, server: Server): For
   }
 
   return result
+}
+
+/**
+ * Format amount to consistent string.
+ *
+ * @param amount Amount string to format
+ *
+ * @return formatted amount
+ */
+@Deprecated("To be removed with wrapper")
+fun formatAmount(amount: String): String {
+  // TODO: how to always show 7 decimal points (1.0000000)?
+  return amount
+}
+
+/**
+ * Convert amount in [stroops](https://developers.stellar.org/docs/glossary#stroop) to amount in
+ * lumens (XLM).
+ *
+ * @param stroops Amount in stroops to convert to lumens
+ *
+ * @return amount in lumens (XLM)
+ */
+@Deprecated("To be removed with wrapper")
+fun stroopsToLumens(stroops: String): String {
+  return BigDecimal(stroops).divide(BigDecimal(1e7)).toPlainString()
+}
+
+/**
+ * Convert amount in lumens (XLM) to amount in
+ * [stroops](https://developers.stellar.org/docs/glossary#stroop).
+ *
+ * @param lumens Amount in lumens (XLM) to convert to stroops
+ *
+ * @return amount in stroops
+ */
+@Deprecated("To be removed with wrapper")
+fun lumensToStroops(lumens: String): String {
+  return BigDecimal(lumens).multiply(BigDecimal(1e7)).toPlainString()
 }

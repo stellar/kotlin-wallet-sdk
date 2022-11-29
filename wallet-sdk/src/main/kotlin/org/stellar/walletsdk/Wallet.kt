@@ -1,7 +1,10 @@
 package org.stellar.walletsdk
 
 import org.stellar.sdk.*
-import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.exception.AccountNotFoundException
+import org.stellar.walletsdk.exception.InvalidStartingBalanceException
+import org.stellar.walletsdk.exception.TransactionSubmitFailedException
+import org.stellar.walletsdk.extension.accountByAddress
 import org.stellar.walletsdk.recovery.Recovery
 import org.stellar.walletsdk.util.*
 
@@ -260,7 +263,7 @@ class Wallet(
    */
   suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
     try {
-      val account = fetchAccount(accountAddress, serverInstance)
+      val account = serverInstance.accountByAddress(accountAddress)
       val balances = formatAccountBalances(account, serverInstance)
 
       // TODO: add accountDetails
@@ -269,7 +272,7 @@ class Wallet(
         publicKey = account.accountId,
         assets = balances.assets,
         liquidityPools = balances.liquidityPools,
-        reservedNativeBalance = accountReservedBalance(account)
+        reservedNativeBalance = account.reservedBalance()
       )
     } catch (e: Exception) {
       // TODO: Is there a way to check if response is 404 (account not found)?
