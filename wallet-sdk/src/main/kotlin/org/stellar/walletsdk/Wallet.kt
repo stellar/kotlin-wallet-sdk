@@ -298,7 +298,7 @@ class Wallet(
   suspend fun getHistory(
     accountAddress: String,
     limit: Int? = null,
-    order: Order? = null,
+    order: Order? = Order.DESC,
     cursor: String? = null,
     includeFailed: Boolean? = null
   ): List<WalletOperation<OperationResponse>> {

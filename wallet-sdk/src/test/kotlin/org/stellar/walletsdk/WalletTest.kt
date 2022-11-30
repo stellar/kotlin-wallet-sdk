@@ -1,8 +1,6 @@
 package org.stellar.walletsdk
 
-import com.google.gson.reflect.TypeToken
 import io.mockk.*
-import java.io.FileReader
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
@@ -10,14 +8,9 @@ import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.AccountResponse
-import org.stellar.sdk.responses.Page
 import org.stellar.sdk.responses.SubmitTransactionResponse
-import org.stellar.sdk.responses.operations.OperationResponse
-import org.stellar.sdk.responses.operations.PaymentOperationResponse
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
-import org.stellar.walletsdk.helpers.getFileFromResource
 import org.stellar.walletsdk.helpers.objectFromJsonFile
-import org.stellar.walletsdk.util.GsonUtils
 
 internal class WalletTest : SuspendTest() {
   private val server = spyk(Server(HORIZON_URL))
@@ -372,46 +365,6 @@ internal class WalletTest : SuspendTest() {
       assertEquals("6.5000000", accountInfo.reservedNativeBalance)
       assertEquals(4, accountInfo.assets.size)
       assertEquals(0, accountInfo.liquidityPools.size)
-    }
-  }
-
-  @Nested
-  @DisplayName("getHistory")
-  inner class GetHistory {
-    @Test
-    fun `account's Stellar operations`() {
-      val filePath = getFileFromResource("account_operations.json")
-      val jsonString = FileReader(filePath).use { f -> f.readText() }
-      val gson = GsonUtils.instance!!
-
-      val mockResponse = mockk<Page<OperationResponse>>()
-
-      val operationsResponse =
-        gson.fromJson<ArrayList<OperationResponse>>(
-          jsonString,
-          object : TypeToken<ArrayList<PaymentOperationResponse>>() {}.type
-        )
-
-      val accountAddress = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
-      val limit = 20
-
-      every { mockResponse.records } returns operationsResponse
-
-      every {
-        server
-          .operations()
-          .forAccount(accountAddress)
-          .limit(limit)
-          .order(null)
-          .cursor(null)
-          .includeFailed(false)
-          .includeTransactions(true)
-          .execute()
-      } returns mockResponse
-
-      val accountOperations = runBlocking { wallet.getHistory(accountAddress, limit) }
-
-      assertEquals(10, accountOperations.size)
     }
   }
 }

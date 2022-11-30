@@ -254,23 +254,7 @@ internal class WalletOperationBuilder<T : Any>() {
   lateinit var type: WalletOperationType
   lateinit var rawOperation: Any
 
-  fun fromOperation(operation: OperationResponse) = apply {
-    this.defaults()
-    this.id = operation.id.toString()
-    this.date = operation.createdAt
-    this.asset = listOf()
-    this.rawOperation = operation
-  }
-
-  fun fromTransaction(transaction: AnchorTransaction, asset: Asset) = apply {
-    this.defaults()
-    this.id = transaction.id
-    this.date = transaction.started_at
-    this.asset = listOf(formatAsset(asset))
-    this.rawOperation = transaction
-  }
-
-  private fun defaults() = apply {
+  internal fun defaults() = apply {
     this.amount = ""
     this.account = ""
     this.type = WalletOperationType.OTHER
@@ -295,6 +279,25 @@ internal class WalletOperationBuilder<T : Any>() {
       rawOperation = this.rawOperation as T
     )
   }
+}
+
+internal fun <T : OperationResponse> WalletOperationBuilder<T>.fromOperation(operation: T) = apply {
+  this.defaults()
+  this.id = operation.id.toString()
+  this.date = operation.createdAt
+  this.asset = listOf()
+  this.rawOperation = operation
+}
+
+internal fun <T : AnchorTransaction> WalletOperationBuilder<T>.fromTransaction(
+  transaction: T,
+  asset: Asset
+) = apply {
+  this.defaults()
+  this.id = transaction.id
+  this.date = transaction.started_at
+  this.asset = listOf(formatAsset(asset))
+  this.rawOperation = transaction
 }
 
 fun formatNativeAsset(): List<WalletAsset> {
