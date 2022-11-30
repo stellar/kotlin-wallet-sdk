@@ -229,6 +229,7 @@ internal class WalletTest : SuspendTest() {
 
       every { mockResponse.isSuccess } returns false
       every { mockResponse.extras.resultCodes.transactionResultCode } returns txnResultCode
+      every { mockResponse.extras.resultCodes.operationsResultCodes } returns null
       every { server.submitTransaction(any() as Transaction) } returns mockResponse
 
       val exception =
