@@ -139,30 +139,20 @@ fun formatStellarOperation(
   accountAddress: String,
   operation: OperationResponse
 ): WalletOperation<OperationResponse> {
+  val opBuilder = WalletOperationBuilder<OperationResponse>()
+
   when (operation.type) {
     // Create account
     "create_account" -> {
       val isCreator = (operation as CreateAccountOperationResponse).funder == accountAddress
 
-      return WalletOperation(
-        operation.id.toString(),
-        operation.createdAt,
-        operation.startingBalance,
-        account =
-          if (isCreator) {
-            operation.account
-          } else {
-            operation.funder
-          },
-        formatNativeAsset(),
-        type =
-          if (isCreator) {
-            WalletOperationType.SEND
-          } else {
-            WalletOperationType.RECEIVE
-          },
-        operation
-      )
+      return opBuilder
+        .fromOperation(operation)
+        .amount(operation.startingBalance)
+        .account(if (isCreator) operation.account else operation.funder)
+        .asset(formatNativeAsset())
+        .type(if (isCreator) WalletOperationType.SEND else WalletOperationType.RECEIVE)
+        .build()
     }
     // Payment
     "payment" -> {
@@ -170,25 +160,13 @@ fun formatStellarOperation(
       // payment
       val isSender = (operation as PaymentOperationResponse).from == accountAddress
 
-      return WalletOperation(
-        operation.id.toString(),
-        operation.createdAt,
-        operation.amount,
-        account =
-          if (isSender) {
-            operation.to
-          } else {
-            operation.from
-          },
-        formatWalletAsset(operation),
-        type =
-          if (isSender) {
-            WalletOperationType.SEND
-          } else {
-            WalletOperationType.RECEIVE
-          },
-        operation
-      )
+      return opBuilder
+        .fromOperation(operation)
+        .amount(operation.amount)
+        .account(if (isSender) operation.to else operation.from)
+        .asset(formatWalletAsset(operation))
+        .type(if (isSender) WalletOperationType.SEND else WalletOperationType.RECEIVE)
+        .build()
     }
     // Path payment and swap
     "path_payment_strict_receive",
@@ -198,11 +176,10 @@ fun formatStellarOperation(
       val isSender = operation.from == accountAddress
       val isSwap = isSender && operation.from == operation.to
 
-      return WalletOperation(
-        operation.id.toString(),
-        operation.createdAt,
-        operation.amount,
-        account =
+      return opBuilder
+        .fromOperation(operation)
+        .amount(operation.amount)
+        .account(
           if (isSender) {
             if (isSwap) {
               ""
@@ -211,9 +188,10 @@ fun formatStellarOperation(
             }
           } else {
             operation.from
-          },
-        formatWalletAsset(operation),
-        type =
+          }
+        )
+        .asset(formatWalletAsset(operation))
+        .type(
           if (isSender) {
             if (isSwap) {
               WalletOperationType.SWAP
@@ -222,21 +200,13 @@ fun formatStellarOperation(
             }
           } else {
             WalletOperationType.RECEIVE
-          },
-        operation
-      )
+          }
+        )
+        .build()
     }
     // Other
     else -> {
-      return WalletOperation(
-        operation.id.toString(),
-        operation.createdAt,
-        "",
-        "",
-        listOf(),
-        WalletOperationType.OTHER,
-        operation
-      )
+      return opBuilder.fromOperation(operation).build()
     }
   }
 }
@@ -247,43 +217,89 @@ fun formatStellarOperation(
  * @param transaction anchor transaction to format
  * @param asset transaction asset
  *
- * @return formatter transaction
+ * @return formatted transaction
  */
 fun formatAnchorTransaction(
   transaction: AnchorTransaction,
   asset: Asset
 ): WalletOperation<AnchorTransaction> {
-  val formattedAsset = formatAsset(asset)
+  val opBuilder = WalletOperationBuilder<AnchorTransaction>()
 
   when (transaction.kind) {
     "deposit",
     "withdrawal" -> {
-      return WalletOperation(
-        transaction.id,
-        transaction.started_at,
-        transaction.amount_out,
-        "",
-        listOf(formattedAsset),
-        type =
+      return opBuilder
+        .fromTransaction(transaction, asset)
+        .amount(transaction.amount_out)
+        .type(
           if (transaction.kind == "deposit") {
             WalletOperationType.DEPOSIT
           } else {
             WalletOperationType.WITHDRAW
-          },
-        transaction
-      )
+          }
+        )
+        .build()
     }
     else -> {
-      return WalletOperation(
-        transaction.id,
-        transaction.started_at,
-        "",
-        "",
-        listOf(formattedAsset),
-        WalletOperationType.OTHER,
-        transaction
-      )
+      return opBuilder.fromTransaction(transaction, asset).build()
     }
+  }
+}
+
+/**
+ * Helper class to format wallet operation from Stellar operation or anchor transaction.
+ *
+ * @param T type of operation or transaction
+ */
+class WalletOperationBuilder<T : Any>() {
+  lateinit var id: String
+  lateinit var date: String
+  lateinit var amount: String
+  lateinit var account: String
+  lateinit var asset: List<WalletAsset>
+  lateinit var type: WalletOperationType
+  lateinit var rawOperation: Any
+
+  fun fromOperation(operation: OperationResponse) = apply {
+    this.defaults()
+    this.id = operation.id.toString()
+    this.date = operation.createdAt
+    this.asset = listOf()
+    this.rawOperation = operation
+  }
+
+  fun fromTransaction(transaction: AnchorTransaction, asset: Asset) = apply {
+    this.defaults()
+    this.id = transaction.id
+    this.date = transaction.started_at
+    this.asset = listOf(formatAsset(asset))
+    this.rawOperation = transaction
+  }
+
+  private fun defaults() = apply {
+    this.amount = ""
+    this.account = ""
+    this.type = WalletOperationType.OTHER
+  }
+
+  fun id(id: String) = apply { this.id = id }
+  fun date(date: String) = apply { this.date = date }
+  fun amount(amount: String) = apply { this.amount = amount }
+  fun account(account: String) = apply { this.account = account }
+  fun asset(asset: List<WalletAsset>) = apply { this.asset = asset }
+  fun type(type: WalletOperationType) = apply { this.type = type }
+  fun rawOperation(rawOperation: T) = apply { this.rawOperation = rawOperation }
+
+  fun build(): WalletOperation<T> {
+    return WalletOperation(
+      id = this.id,
+      date = this.date,
+      amount = this.amount,
+      account = this.account,
+      asset = this.asset,
+      type = this.type,
+      rawOperation = this.rawOperation as T
+    )
   }
 }
 
