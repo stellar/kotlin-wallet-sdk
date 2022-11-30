@@ -23,7 +23,7 @@ internal class WalletTest : SuspendTest() {
     @Test
     fun `generates Stellar public and secret keys`() {
       val accountKeys = wallet.create()
-      val publicKey = accountKeys.publicKeyString
+      val publicKey = accountKeys.address
       val secretKey = accountKeys.secretKey
 
       // Public key
@@ -236,7 +236,7 @@ internal class WalletTest : SuspendTest() {
           block = { runBlocking { wallet.submitTransaction(transaction) } }
         )
 
-      assertEquals(txnResultCode, exception.resultCode)
+      assertEquals(txnResultCode, exception.transactionResultCode)
       verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
     }
 

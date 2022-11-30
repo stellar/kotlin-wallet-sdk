@@ -132,7 +132,7 @@ enum class WalletOperationType() {
 
 @JvmInline
 value class AccountKeypair(val keyPair: KeyPair) {
-  val publicKeyString: String
+  val address: String
     get() = keyPair.accountId
 
   val secretKey: String

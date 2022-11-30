@@ -45,7 +45,3 @@ data class SignerWeight(
   val master: Int,
   val recoveryServer: Int,
 )
-
-typealias Base64Decoder = ((String) -> ByteArray)
-
-internal val defaultBase64Decoder: Base64Decoder = { it: String -> Base64.getDecoder().decode(it) }

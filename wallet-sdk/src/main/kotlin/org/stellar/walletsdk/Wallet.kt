@@ -2,6 +2,8 @@ package org.stellar.walletsdk
 
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.operations.OperationResponse
+import org.stellar.walletsdk.anchor.AnchorTransaction
+import org.stellar.walletsdk.anchor.MemoType
 import org.stellar.walletsdk.exception.AccountNotFoundException
 import org.stellar.walletsdk.exception.InvalidStartingBalanceException
 import org.stellar.walletsdk.exception.OperationsLimitExceededException
@@ -177,6 +179,68 @@ class Wallet(
       }
 
     return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
+  }
+
+  /**
+   * Creates transaction transferring asset, using Stellar's [payment operation]
+   * (https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment) to
+   * move asset between accounts.
+   *
+   * @param sourceAddress Stellar address of account making a transfer
+   * @param destinationAddress Stellar address of account receiving a transfer
+   * @param assetIssuer issuer of asset to transfer
+   * @param assetCode code of asset to transfer
+   * @param amount amount of asset to transfer
+   * @param memo optional memo
+   *
+   * @return formed transfer transaction
+   */
+  suspend fun transfer(
+    sourceAddress: String,
+    destinationAddress: String,
+    assetIssuer: String,
+    assetCode: String,
+    amount: String,
+    memo: Pair<MemoType, String>?
+  ): Transaction {
+    val transactionBuilder =
+      createTransactionBuilder(sourceAddress, maxBaseFeeInStroops, server, network)
+
+    val asset = Asset.create(null, assetCode, assetIssuer)
+
+    val payment = PaymentOperation.Builder(destinationAddress, asset, amount).build()
+
+    memo?.also { transactionBuilder.addMemo(it.first.mapper(it.second)) }
+
+    transactionBuilder.addOperation(payment)
+
+    return transactionBuilder.build()
+  }
+
+  /**
+   * Creates transaction transferring asset, using Stellar's [payment operation]
+   * (https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment) to
+   * move asset between accounts.
+   *
+   * @param transaction anchor withdrawal transaction
+   * @param assetIssuer issuer of asset to transfer
+   * @param assetCode code of asset to transfer
+   *
+   * @return formed transfer transaction
+   */
+  suspend fun transfer(
+    transaction: AnchorTransaction,
+    assetIssuer: String,
+    assetCode: String,
+  ): Transaction {
+    return transfer(
+      transaction.from,
+      transaction.withdraw_anchor_account,
+      assetIssuer,
+      assetCode,
+      transaction.amount_in,
+      transaction.withdraw_memo_type to transaction.withdraw_memo
+    )
   }
 
   /**
