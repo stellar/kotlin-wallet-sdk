@@ -72,6 +72,7 @@ suspend fun buildFeeBumpTransaction(
  *
  * @throws [AccountNotFoundException] when source account is not found
  */
+@Deprecated("To be removed")
 suspend fun buildTransaction(
   sourceAddress: String,
   maxBaseFeeInStroops: Int,

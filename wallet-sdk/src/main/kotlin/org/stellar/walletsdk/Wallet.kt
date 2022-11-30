@@ -195,7 +195,7 @@ class Wallet(
    *
    * @return formed transfer transaction
    */
-  suspend fun transfer(
+  private suspend fun transfer(
     sourceAddress: String,
     destinationAddress: String,
     assetIssuer: String,
