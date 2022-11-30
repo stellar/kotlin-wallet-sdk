@@ -21,6 +21,11 @@ data class AccountSigner(val address: String, val weight: Int)
  */
 data class AccountThreshold(val low: Int, val medium: Int, val high: Int)
 
+enum class AnchorTransactionType(val type: String) {
+  DEPOSIT("deposit"),
+  WITHDRAW("withdrawal")
+}
+
 enum class AssetType(val type: String) {
   NATIVE("native"),
   ALPHANUM_4("credit_alphanum4"),

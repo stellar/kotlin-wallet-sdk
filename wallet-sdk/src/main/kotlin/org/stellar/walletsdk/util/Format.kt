@@ -226,13 +226,13 @@ fun formatAnchorTransaction(
   val opBuilder = WalletOperationBuilder<AnchorTransaction>()
 
   when (transaction.kind) {
-    "deposit",
-    "withdrawal" -> {
+    AnchorTransactionType.DEPOSIT.type,
+    AnchorTransactionType.WITHDRAW.type -> {
       return opBuilder
         .fromTransaction(transaction, asset)
         .amount(transaction.amount_out)
         .type(
-          if (transaction.kind == "deposit") {
+          if (transaction.kind == AnchorTransactionType.DEPOSIT.type) {
             WalletOperationType.DEPOSIT
           } else {
             WalletOperationType.WITHDRAW
