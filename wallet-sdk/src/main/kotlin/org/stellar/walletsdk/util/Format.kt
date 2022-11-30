@@ -139,15 +139,14 @@ fun formatStellarOperation(
   accountAddress: String,
   operation: OperationResponse
 ): WalletOperation<OperationResponse> {
-  val opBuilder = WalletOperationBuilder<OperationResponse>()
+  val opBuilder = WalletOperationBuilder<OperationResponse>().fromOperation(operation)
 
-  when (operation.type) {
+  when (operation) {
     // Create account
-    "create_account" -> {
-      val isCreator = (operation as CreateAccountOperationResponse).funder == accountAddress
+    is CreateAccountOperationResponse -> {
+      val isCreator = operation.funder == accountAddress
 
       return opBuilder
-        .fromOperation(operation)
         .amount(operation.startingBalance)
         .account(if (isCreator) operation.account else operation.funder)
         .asset(formatNativeAsset())
@@ -155,13 +154,12 @@ fun formatStellarOperation(
         .build()
     }
     // Payment
-    "payment" -> {
+    is PaymentOperationResponse -> {
       // TODO: This version of Java SDK currently doesn't have "to" and "from" muxed account for
       // payment
-      val isSender = (operation as PaymentOperationResponse).from == accountAddress
+      val isSender = operation.from == accountAddress
 
       return opBuilder
-        .fromOperation(operation)
         .amount(operation.amount)
         .account(if (isSender) operation.to else operation.from)
         .asset(formatWalletAsset(operation))
@@ -169,15 +167,12 @@ fun formatStellarOperation(
         .build()
     }
     // Path payment and swap
-    "path_payment_strict_receive",
-    "path_payment_strict_send" -> {
+    is PathPaymentBaseOperationResponse -> {
       // TODO: check muxed account
-      operation as PathPaymentBaseOperationResponse
       val isSender = operation.from == accountAddress
       val isSwap = isSender && operation.from == operation.to
 
       return opBuilder
-        .fromOperation(operation)
         .amount(operation.amount)
         .account(
           if (isSender) {
@@ -206,7 +201,7 @@ fun formatStellarOperation(
     }
     // Other
     else -> {
-      return opBuilder.fromOperation(operation).build()
+      return opBuilder.build()
     }
   }
 }
@@ -223,13 +218,12 @@ fun formatAnchorTransaction(
   transaction: AnchorTransaction,
   asset: Asset
 ): WalletOperation<AnchorTransaction> {
-  val opBuilder = WalletOperationBuilder<AnchorTransaction>()
+  val opBuilder = WalletOperationBuilder<AnchorTransaction>().fromTransaction(transaction, asset)
 
   when (transaction.kind) {
     AnchorTransactionType.DEPOSIT.type,
     AnchorTransactionType.WITHDRAW.type -> {
       return opBuilder
-        .fromTransaction(transaction, asset)
         .amount(transaction.amount_out)
         .type(
           if (transaction.kind == AnchorTransactionType.DEPOSIT.type) {
@@ -241,7 +235,7 @@ fun formatAnchorTransaction(
         .build()
     }
     else -> {
-      return opBuilder.fromTransaction(transaction, asset).build()
+      return opBuilder.build()
     }
   }
 }
@@ -251,7 +245,7 @@ fun formatAnchorTransaction(
  *
  * @param T type of operation or transaction
  */
-class WalletOperationBuilder<T : Any>() {
+internal class WalletOperationBuilder<T : Any>() {
   lateinit var id: String
   lateinit var date: String
   lateinit var amount: String
