@@ -1,14 +1,14 @@
 package org.stellar.walletsdk
 
-import java.math.BigDecimal
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.sdk.KeyPair
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.util.SchemeUtil
 import org.stellar.walletsdk.anchor.Anchor
+import org.stellar.walletsdk.anchor.AnchorTransaction
+import org.stellar.walletsdk.util.SchemeUtil
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -17,7 +17,7 @@ private val myKey =
   System.getenv("STELLAR_KEY") ?: "SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I"
 private val myAddress = KeyPair.fromSecretSeed(myKey).accountId
 
-private val useLocal = true
+private const val useLocal = false
 private val assetCode = if (useLocal) "USDC" else "SRT"
 private val assetIssuer =
   if (useLocal) "GDQOE23CFSUMSVQK4Y5JHPPYK73VYCNHZHA7ENKCV37P6SUEO6XQBKPP"
@@ -35,7 +35,7 @@ suspend fun main() {
   val wallet = Wallet(server, Network.TESTNET)
   // Generate new (user) account and fund it with 10 XLM from main account
   val account = wallet.create()
-  val tx = wallet.fund(myAddress, account.publicKeyString, "10")
+  val tx = wallet.fund(myAddress, account.address, "10")
 
   // Sign with your main account's key and send transaction to the network
   println("Registering new account")
@@ -55,54 +55,84 @@ suspend fun main() {
 
   // Create add trustline transaction for an asset. This allows user account to receive trusted
   // asset.
-  val addTrustline = wallet.addAssetSupport(account.publicKeyString, assetCode, assetIssuer)
+  val addTrustline = wallet.addAssetSupport(account.address, assetCode, assetIssuer)
 
   // Sign and send transaction
-  println("Adding trustline")
+  println("Adding trustline...")
   addTrustline.sign(account)
   assert(wallet.submitTransaction(addTrustline))
 
   // Authorizing
-  val token = anchor.auth(info, WalletSignerImpl(account)).authenticate(account.publicKeyString)
+  val token = anchor.auth(info, WalletSignerImpl(account)).authenticate(account.address)
 
   // Start interactive deposit
   val deposit =
-    anchor.interactive().deposit(account.publicKeyString, assetCode = assetCode, authToken = token)
+    anchor.interactive().deposit(account.address, assetCode = assetCode, authToken = token)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
 
-  // Get transaction info
-  // val transaction = GET TRANSFER_SERVER_SEP0024/transaction
-
   println("Waiting for tokens...")
+
+  var status = ""
+
   // Optional step: wait for token to appear on user account
-  // TODO: replace with waiting for transaction
-  while (
-    server
-      .accounts()
-      .account(account.publicKeyString)
-      .balances
-      .filter { it.assetCode.isPresent && it.assetCode.get() == assetCode }
-      .any { it.balance.toBigDecimal() <= BigDecimal.ZERO }
-  ) {
+  do {
+    // Get transaction info
+    val transaction = anchor.getTransactionStatus(deposit.id, token, info)
+
+    if (status != transaction.status) {
+      status = transaction.status
+      println("Deposit transaction status changed to $status. Message: ${transaction.message}")
+    }
+
     delay(5.seconds)
-  }
+  } while (transaction.status != "completed")
+
+  println("Successful deposit")
 
   // Start interactive withdrawal
   val withdrawal =
-    anchor.interactive().withdraw(
-      account.publicKeyString,
-      assetCode = assetCode,
-      authToken = token
-    )
+    anchor.interactive().withdraw(account.address, assetCode = assetCode, authToken = token)
 
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
 
+  var transaction: AnchorTransaction
+
   // Wait for user input
+  do {
+    // Get transaction info
+    transaction = anchor.getTransactionStatus(withdrawal.id, token, info)
+    delay(5.seconds)
+  } while (transaction.status != "pending_user_transfer_start")
 
   // Send transaction with transfer
+  val transfer =
+    wallet.transfer(
+      transaction,
+      assetIssuer,
+      assetCode,
+    )
+
+  transfer.sign(account)
+
+  wallet.submitTransaction(transfer)
+
+  status = ""
+
+  do {
+    transaction = anchor.getTransactionStatus(withdrawal.id, token, info)
+
+    if (status != transaction.status) {
+      status = transaction.status
+      println("Withdrawal transaction status changed to $status. Message: ${transaction.message}")
+    }
+
+    delay(5.seconds)
+  } while (transaction.status != "completed")
+
+  println("Successful withdrawal")
 }
 
 class WalletSignerImpl(private val keyPair: AccountKeypair) : WalletSigner {

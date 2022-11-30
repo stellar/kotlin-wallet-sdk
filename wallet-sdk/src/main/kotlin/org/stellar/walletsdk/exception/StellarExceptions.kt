@@ -26,9 +26,20 @@ class LiquidityPoolNotFoundException(liquidityPoolID: LiquidityPoolID) :
 
 class TransactionSubmitFailedException(
   val response: SubmitTransactionResponse,
-) : StellarException("Submit transaction failed") {
-  val resultCode = response.extras?.resultCodes?.transactionResultCode
+) :
+  StellarException(
+    "Submit transaction failed with code ${response.resultCode ?: "<unknown>"}.${response.operationsResultCodes ?. run { " Operation result codes: $this" } ?: ""}"
+  ) {
+  val transactionResultCode = response.resultCode
+  val operationsResultCodes = response.operationsResultCodes
 }
+
+private val SubmitTransactionResponse.resultCode: String?
+  get() = this.extras?.resultCodes?.transactionResultCode
+
+private val SubmitTransactionResponse.operationsResultCodes: List<String>?
+  get() =
+    this.extras?.resultCodes?.operationsResultCodes?.run { if (this.isEmpty()) null else this }
 
 class InvalidSponsorOperationTypeException(
   operationType: Collection<Operation>,

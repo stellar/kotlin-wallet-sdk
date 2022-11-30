@@ -10,6 +10,7 @@ import org.stellar.walletsdk.Auth
 import org.stellar.walletsdk.WalletSigner
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.*
+import org.stellar.walletsdk.util.GlobalConfig.base64Decoder
 
 class Recovery(
   private val server: Server,
@@ -26,9 +27,6 @@ class Recovery(
    * @param transaction Transaction with new signer to be signed by recovery servers
    * @param accountAddress Stellar address of the account that is recovered
    * @param recoveryServers List of recovery servers to use
-   * @param base64Decoder optional base64Decoder. Default `java.util.Base64` decoder works with
-   * Android API 23+. To support Android API older than API 23, custom base64Decoder needs to be
-   * provided. For example, `android.util.Base64`.
    *
    * @return transaction with recovery server signatures
    *
@@ -38,13 +36,10 @@ class Recovery(
   suspend fun signWithRecoveryServers(
     transaction: Transaction,
     accountAddress: String,
-    recoveryServers: List<RecoveryServerAuth>,
-    base64Decoder: Base64Decoder = defaultBase64Decoder
+    recoveryServers: List<RecoveryServerAuth>
   ): Transaction {
     val signatures =
-      recoveryServers.map {
-        getRecoveryServerTxnSignature(transaction, accountAddress, it, base64Decoder)
-      }
+      recoveryServers.map { getRecoveryServerTxnSignature(transaction, accountAddress, it) }
 
     signatures.forEach { transaction.addSignature(it) }
 
@@ -54,8 +49,7 @@ class Recovery(
   private suspend fun getRecoveryServerTxnSignature(
     transaction: Transaction,
     accountAddress: String,
-    it: RecoveryServerAuth,
-    base64Decoder: Base64Decoder
+    it: RecoveryServerAuth
   ): DecoratedSignature {
     val requestUrl = "${it.endpoint}/accounts/$accountAddress/sign/${it.signerAddress}"
     val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
@@ -67,7 +61,7 @@ class Recovery(
       val authResponse: AuthSignature =
         gson.fromJson(response.body!!.charStream(), AuthSignature::class.java)
 
-      createDecoratedSignature(accountAddress, authResponse.signature, base64Decoder)
+      createDecoratedSignature(accountAddress, authResponse.signature)
     }
   }
 
@@ -239,8 +233,7 @@ data class RecoverableWalletConfig(
 
 internal fun createDecoratedSignature(
   accountAddress: String,
-  signatureBase64String: String,
-  base64Decoder: Base64Decoder
+  signatureBase64String: String
 ): DecoratedSignature {
   val signature = Signature()
 
