@@ -4,11 +4,9 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.stellar.sdk.Network
-import org.stellar.sdk.Server
+import org.stellar.sdk.*
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.exception.InvalidAnchorServiceUrl
-import org.stellar.walletsdk.exception.NetworkRequestFailedException
+import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.*
 
 /**
@@ -54,7 +52,7 @@ class Anchor(
     // TODO: get toml automatically
     // TODO: provide wallet signer as parameter to Anchor class
     return Auth(
-      toml[StellarTomlFields.WEB_AUTH_ENDPOINT.text].toString(),
+      toml[StellarTomlField.WEB_AUTH_ENDPOINT.text].toString(),
       homeDomain,
       walletSigner,
       network,
@@ -127,7 +125,7 @@ class Anchor(
     authToken: String,
     toml: Map<String, Any>
   ): AnchorTransaction {
-    val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -158,7 +156,7 @@ class Anchor(
     authToken: String,
     toml: Map<String, Any>
   ): List<AnchorTransaction> {
-    val transferServerEndpoint = toml[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -168,6 +166,73 @@ class Anchor(
       gson
         .fromJson(response.body!!.charStream(), AnchorAllTransactionsResponse::class.java)
         .transactions
+    }
+  }
+
+  /**
+   * Get account transactions for specified asset. Optional field implementation depends on anchor.
+   *
+   * @param assetCode asset's code
+   * @param authToken auth token of the account authenticated with the anchor
+   * @param toml Anchor's stellar.toml file containing `CURRENCIES` list of supported assets
+   * @param limit optional how many transactions to fetch
+   * @param pagingId optional return transactions prior to this ID
+   * @param noOlderThan optional return transactions starting on or after this date and time
+   * @param lang optional language code specified using
+   * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
+   *
+   * @return a list of formatted operations
+   *
+   * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [AssetNotSupportedException] if asset is not supported by the anchor
+   */
+  suspend fun getHistory(
+    assetCode: String,
+    authToken: String,
+    toml: Map<String, Any>,
+    limit: Int? = null,
+    pagingId: String? = null,
+    noOlderThan: String? = null,
+    lang: String? = null
+  ): List<WalletOperation<AnchorTransaction>> {
+    val anchorCurrency =
+      ((toml as HashMap)["CURRENCIES"] as List<*>).filterIsInstance<HashMap<*, *>>().find {
+        it["code"] == assetCode
+      }
+        ?: throw AssetNotSupportedException(assetCode)
+    val asset = Asset.create("$assetCode:$anchorCurrency[\"issuer\"]")
+
+    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
+    val endpointHttpUrl = transferServerEndpoint.toHttpUrl()
+    val endpointUrl = HttpUrl.Builder().scheme("https").host(endpointHttpUrl.host)
+
+    // Add path segments, if there are any
+    endpointHttpUrl.pathSegments.forEach { endpointUrl.addPathSegment(it) }
+
+    // Add transactions path segment
+    endpointUrl.addPathSegment("transactions")
+
+    // Add query params
+    val queryParams = mutableMapOf<String, String>()
+    queryParams["asset_code"] = assetCode
+    limit?.run { queryParams["limit"] = this.toString() }
+    pagingId?.run { queryParams["paging_id"] = this }
+    noOlderThan?.run { queryParams["no_older_than"] = this }
+    lang?.run { queryParams["lang"] = this }
+
+    queryParams.forEach { endpointUrl.addQueryParameter(it.key, it.value) }
+
+    val request = OkHttpUtils.buildStringGetRequest(endpointUrl.build().toString(), authToken)
+    val finalStatusList = listOf("completed", "refunded")
+
+    return httpClient.newCall(request).execute().use { response ->
+      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+
+      gson
+        .fromJson(response.body!!.charStream(), AnchorAllTransactionsResponse::class.java)
+        .transactions
+        .filter { finalStatusList.contains(it.status) }
+        .map { formatAnchorTransaction(it, asset) }
     }
   }
 }

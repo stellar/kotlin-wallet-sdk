@@ -100,9 +100,9 @@ class Interactive(
   ): InteractiveFlowResponse {
     val sep24RequiredFields =
       listOf(
-        StellarTomlFields.SIGNING_KEY.text,
-        StellarTomlFields.TRANSFER_SERVER_SEP0024.text,
-        StellarTomlFields.WEB_AUTH_ENDPOINT.text
+        StellarTomlField.SIGNING_KEY.text,
+        StellarTomlField.TRANSFER_SERVER_SEP0024.text,
+        StellarTomlField.WEB_AUTH_ENDPOINT.text
       )
     val toml = StellarToml(homeDomain, server, httpClient)
     val tomlContent = toml.getToml()
@@ -121,7 +121,7 @@ class Interactive(
     }
 
     val transferServerEndpoint =
-      tomlContent[StellarTomlFields.TRANSFER_SERVER_SEP0024.text].toString()
+      tomlContent[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
 
     val serviceInfo = anchor.getServicesInfo(transferServerEndpoint)
 

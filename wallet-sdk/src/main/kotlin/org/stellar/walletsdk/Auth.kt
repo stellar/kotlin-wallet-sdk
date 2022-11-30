@@ -51,7 +51,7 @@ class Auth(
    */
   suspend fun authenticate(
     accountAddress: String,
-    walletSigner: WalletSigner?,
+    walletSigner: WalletSigner? = null,
     memoId: String? = null,
     clientDomain: String? = null
   ): String {

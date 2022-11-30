@@ -34,7 +34,6 @@ suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
  *
  * @param liquidityPoolId Liquidity pool ID
  * @param cachedAssetInfo Previously cached asset information to use for liquidity pool assets
- * @param server Horizon [Server] instance
  *
  * @return liquidity pool data object
  *
@@ -63,12 +62,12 @@ suspend fun Server.liquidityPoolInfo(
     if (item.asset.type == AssetType.NATIVE.type) {
       val nativeReserve =
         LiquidityPoolReserve(
-          id = XLM_ASSET_DEFAULTS.id,
-          homeDomain = XLM_ASSET_DEFAULTS.homeDomain,
-          name = XLM_ASSET_DEFAULTS.name,
-          imageUrl = XLM_ASSET_DEFAULTS.imageUrl,
-          assetCode = XLM_ASSET_DEFAULTS.assetCode,
-          assetIssuer = XLM_ASSET_DEFAULTS.assetIssuer,
+          id = XLM_ASSET_DEFAULT.id,
+          homeDomain = XLM_ASSET_DEFAULT.homeDomain,
+          name = XLM_ASSET_DEFAULT.name,
+          imageUrl = XLM_ASSET_DEFAULT.imageUrl,
+          assetCode = XLM_ASSET_DEFAULT.assetCode,
+          assetIssuer = XLM_ASSET_DEFAULT.assetIssuer,
           amount = formatAmount(item.amount),
         )
 
