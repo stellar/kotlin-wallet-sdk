@@ -252,7 +252,7 @@ internal class WalletOperationBuilder<T : Any>() {
   lateinit var account: String
   lateinit var asset: List<WalletAsset>
   lateinit var type: WalletOperationType
-  lateinit var rawOperation: Any
+  lateinit var rawOperation: T
 
   internal fun defaults() = apply {
     this.amount = ""
