@@ -30,7 +30,7 @@ class Recovery(
    *
    * @return transaction with recovery server signatures
    *
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
    */
   suspend fun signWithRecoveryServers(
@@ -56,7 +56,7 @@ class Recovery(
     val request = OkHttpUtils.buildJsonPostRequest(requestUrl, requestParams, it.authToken)
 
     return client.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
       val authResponse: AuthSignature =
         gson.fromJson(response.body!!.charStream(), AuthSignature::class.java)
@@ -76,7 +76,7 @@ class Recovery(
    *
    * @return a list of recovery servers' signatures
    *
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
    */
   // TODO: can be private?
@@ -100,7 +100,7 @@ class Recovery(
         )
 
       client.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+        if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
         val jsonResponse = gson.fromJson(response.body!!.charStream(), RecoveryAccount::class.java)
 
@@ -134,7 +134,7 @@ class Recovery(
    *
    * @return transaction
    *
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
    * @throws [AccountNotFoundException] when account is not found
    */

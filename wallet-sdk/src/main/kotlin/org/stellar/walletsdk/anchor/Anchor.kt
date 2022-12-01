@@ -68,7 +68,7 @@ class Anchor(
    *
    * @return a list of available anchor services
    *
-   * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [AnchorRequestFailedException] if network request fails
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
   suspend fun getServicesInfo(serviceUrl: String): AnchorServiceInfo {
@@ -91,7 +91,7 @@ class Anchor(
     val gson = GsonUtils.instance!!
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw AnchorRequestFailedException(response)
 
       val infoResponse = response.body!!.charStream()
       gson.fromJson(infoResponse, AnchorServiceInfo::class.java)
@@ -118,7 +118,7 @@ class Anchor(
    *
    * @return transaction object
    *
-   * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [AnchorRequestFailedException] if network request fails
    */
   suspend fun getTransactionStatus(
     transactionId: String,
@@ -130,7 +130,7 @@ class Anchor(
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw AnchorRequestFailedException(response)
 
       gson
         .fromJson(response.body!!.charStream(), AnchorTransactionStatusResponse::class.java)
@@ -149,7 +149,7 @@ class Anchor(
    *
    * @return transaction object
    *
-   * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [AnchorRequestFailedException] if network request fails
    */
   suspend fun getAllTransactionStatus(
     assetCode: String,
@@ -161,7 +161,7 @@ class Anchor(
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw AnchorRequestFailedException(response)
 
       gson
         .fromJson(response.body!!.charStream(), AnchorAllTransactionsResponse::class.java)
@@ -183,7 +183,7 @@ class Anchor(
    *
    * @return a list of formatted operations
    *
-   * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [AnchorRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
   suspend fun getHistory(
@@ -226,7 +226,7 @@ class Anchor(
     val finalStatusList = listOf("completed", "refunded")
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw AnchorRequestFailedException(response)
 
       gson
         .fromJson(response.body!!.charStream(), AnchorAllTransactionsResponse::class.java)

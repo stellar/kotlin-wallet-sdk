@@ -4,7 +4,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.Server
-import org.stellar.walletsdk.exception.NetworkRequestFailedException
+import org.stellar.walletsdk.exception.ServerRequestFailedException
 import shadow.com.moandjiezana.toml.Toml
 
 /**
@@ -31,7 +31,7 @@ class StellarToml(
     val request = Request.Builder().url(tomlUrl).build()
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
       val tomlContent = response.body!!.charStream()
 
