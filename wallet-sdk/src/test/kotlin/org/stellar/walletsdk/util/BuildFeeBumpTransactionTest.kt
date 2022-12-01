@@ -44,7 +44,7 @@ internal class BuildFeeBumpTransactionTest : SuspendTest() {
 
   @Test
   fun `successful build`() {
-    val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
+    val account = objectFromJsonFile<AccountResponse>("account_full.json")
 
     every { server.accounts().account(ADDRESS_ACTIVE_TWO) } returns account
 

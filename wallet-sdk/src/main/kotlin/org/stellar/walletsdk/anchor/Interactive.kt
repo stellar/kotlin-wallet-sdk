@@ -142,15 +142,13 @@ class Interactive(
     }
 
     // Get SEP-24 anchor response
-    val gson = GsonUtils.instance!!
-
     val requestUrl = "$transferServerEndpoint/transactions/${type}/interactive"
-    val request = OkHttpUtils.buildJsonPostRequest(requestUrl, requestParams, authToken)
+    val request = OkHttpUtils.makePostRequest(requestUrl, requestParams, authToken)
 
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-      gson.fromJson(response.body!!.charStream(), InteractiveFlowResponse::class.java)
+      response.toJson()
     }
   }
 }

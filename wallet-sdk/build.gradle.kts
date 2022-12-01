@@ -4,18 +4,20 @@ plugins {
   `maven-publish`
   alias(libs.plugins.dokka)
   signing
+  alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
   api(libs.coroutines.core)
   api(libs.java.stellar.sdk)
-  api(libs.google.gson)
+  api(libs.kotlin.serialization.json)
   api(libs.okhttp3)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.mockk)
   testImplementation(libs.okhttp3.mockserver)
+  testImplementation(libs.google.gson)
 }
 
 val dokkaOutputDir = buildDir.resolve("dokka")

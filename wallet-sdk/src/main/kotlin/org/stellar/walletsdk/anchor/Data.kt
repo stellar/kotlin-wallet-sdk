@@ -1,10 +1,12 @@
 package org.stellar.walletsdk.anchor
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.stellar.sdk.Memo
 import org.stellar.walletsdk.util.GlobalConfig
 import org.stellar.walletsdk.util.Util.isHex
 
+@Serializable
 data class AnchorServiceAsset(
   val enabled: Boolean,
   val min_amount: Double,
@@ -13,10 +15,12 @@ data class AnchorServiceAsset(
   val fee_percent: Double
 )
 
+@Serializable
 data class AnchorServiceFeatures(val account_creation: Boolean, val claimable_balances: Boolean)
 
-data class AnchorServiceFee(val enabled: Boolean)
+@Serializable data class AnchorServiceFee(val enabled: Boolean)
 
+@Serializable
 data class AnchorServiceInfo(
   val deposit: Map<String, AnchorServiceAsset>,
   val withdraw: Map<String, AnchorServiceAsset>,
@@ -25,6 +29,7 @@ data class AnchorServiceInfo(
 )
 
 // TODO: polymorphism based on kind
+@Serializable
 data class AnchorTransaction(
   val id: String,
   val kind: String,
@@ -44,16 +49,16 @@ data class AnchorTransaction(
 )
 
 enum class MemoType(val mapper: (String) -> Memo) {
-  @SerializedName("text") TEXT(Memo::text),
+  @SerialName("text") TEXT(Memo::text),
   /** Hash memo. Supports hex or base64 string encoding */
-  @SerializedName("hash") HASH(::hash),
-  @SerializedName("id") ID({ Memo.id(it.toLong()) })
+  @SerialName("hash") HASH(::hash),
+  @SerialName("id") ID({ Memo.id(it.toLong()) })
 }
 
 private fun hash(s: String): Memo {
   return if (s.isHex()) Memo.hash(s) else Memo.hash(GlobalConfig.base64Decoder(s))
 }
 
-data class AnchorTransactionStatusResponse(val transaction: AnchorTransaction)
+@Serializable data class AnchorTransactionStatusResponse(val transaction: AnchorTransaction)
 
-data class AnchorAllTransactionsResponse(val transactions: List<AnchorTransaction>)
+@Serializable data class AnchorAllTransactionsResponse(val transactions: List<AnchorTransaction>)

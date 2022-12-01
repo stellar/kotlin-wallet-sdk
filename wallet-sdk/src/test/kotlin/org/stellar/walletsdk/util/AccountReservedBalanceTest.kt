@@ -10,7 +10,7 @@ import org.stellar.walletsdk.helpers.objectFromJsonFile
 internal class AccountReservedBalanceTest {
   @Test
   fun `basic funded account`() {
-    val account = objectFromJsonFile("account_basic.json", AccountResponse::class.java)
+    val account = objectFromJsonFile<AccountResponse>("account_basic.json")
     val reservedBalance = account.reservedBalance()
 
     assertEquals(1.0, reservedBalance.toDouble())
@@ -18,7 +18,7 @@ internal class AccountReservedBalanceTest {
 
   @Test
   fun `more complex account`() {
-    val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
+    val account = objectFromJsonFile<AccountResponse>("account_full.json")
     val reservedBalance = account.reservedBalance()
 
     assertEquals(6.5, reservedBalance.toDouble())

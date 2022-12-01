@@ -33,7 +33,7 @@ internal class FormatOperationTest {
   @DisplayName("formatStellarOperation")
   inner class FormatStellarOperation {
     private val stellarOperations =
-      objectFromJsonFile("stellar_operations.json", StellarOperationsJson::class.java)
+      objectFromJsonFile<StellarOperationsJson>("stellar_operations.json")
 
     @Test
     fun `create account for account creator`() {
@@ -312,7 +312,7 @@ internal class FormatOperationTest {
   @DisplayName("formatAnchorTransaction")
   inner class FormatAnchorTransaction {
     private val anchorTransactions =
-      objectFromJsonFile("anchor_transactions.json", AnchorTransactionsJson::class.java)
+      objectFromJsonFile<AnchorTransactionsJson>("anchor_transactions.json")
     private val asset = Asset.create("SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
 
     @Test

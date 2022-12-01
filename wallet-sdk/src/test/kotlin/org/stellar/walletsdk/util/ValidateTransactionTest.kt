@@ -40,7 +40,7 @@ internal class ValidateTransactionTest : SuspendTest() {
   fun `throws error if account balance is less than fees`() {
     val errorMessage = "does not have enough XLM balance to cover"
 
-    val account = objectFromJsonFile("account_basic.json", AccountResponse::class.java)
+    val account = objectFromJsonFile<AccountResponse>("account_basic.json")
 
     every { server.accounts().account(ADDRESS_ACTIVE) } returns account
 
@@ -55,7 +55,7 @@ internal class ValidateTransactionTest : SuspendTest() {
 
   @Test
   fun `no errors`() {
-    val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
+    val account = objectFromJsonFile<AccountResponse>("account_full.json")
 
     every { server.accounts().account(ADDRESS_ACTIVE) } returns account
 
