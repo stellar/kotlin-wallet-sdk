@@ -5,8 +5,9 @@ import okhttp3.OkHttpClient
 import org.stellar.sdk.KeyPair
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.util.GsonUtils
+import org.stellar.walletsdk.auth.ChallengeResponse
 import org.stellar.walletsdk.util.OkHttpUtils
+import org.stellar.walletsdk.util.toJson
 
 class InProcessWalletSigner : WalletSigner {
   override fun signWithClientAccount(txn: Transaction): Transaction {
@@ -18,19 +19,17 @@ class InProcessWalletSigner : WalletSigner {
     transactionString: String,
     networkPassPhrase: String
   ): Transaction {
-    val gson = GsonUtils.instance!!
     val okHttpClient = OkHttpClient()
 
-    val clientDomainRequestParams = Auth.ChallengeResponse(transactionString, networkPassPhrase)
+    val clientDomainRequestParams = ChallengeResponse(transactionString, networkPassPhrase)
 
     val clientDomainRequest =
-      OkHttpUtils.buildJsonPostRequest(AUTH_CLIENT_DOMAIN_URL, clientDomainRequestParams)
+      OkHttpUtils.makePostRequest(AUTH_CLIENT_DOMAIN_URL, clientDomainRequestParams)
 
     okHttpClient.newCall(clientDomainRequest).execute().use { response ->
       if (!response.isSuccessful) throw IOException("Request failed: $response")
 
-      val jsonResponse: Auth.ChallengeResponse =
-        gson.fromJson(response.body!!.charStream(), Auth.ChallengeResponse::class.java)
+      val jsonResponse = response.toJson<ChallengeResponse>()
 
       if (jsonResponse.transaction.isBlank()) {
         throw Exception("The response did not contain a transaction")

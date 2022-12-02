@@ -15,7 +15,7 @@ import org.stellar.sdk.requests.ErrorResponse
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.extension.validateSufficientBalance
-import org.stellar.walletsdk.helpers.objectFromJsonFile
+import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
 @DisplayName("validateTransaction")
 internal class ValidateTransactionTest : SuspendTest() {
@@ -41,7 +41,7 @@ internal class ValidateTransactionTest : SuspendTest() {
   fun `throws error if account balance is less than fees`() {
     val errorMessage = "does not have enough XLM balance to cover"
 
-    val account = objectFromJsonFile("account_basic.json", AccountResponse::class.java)
+    val account = stellarObjectFromJsonFile<AccountResponse>("account_basic.json")
 
     every { server.accounts().account(ADDRESS_ACTIVE) } returns account
 
@@ -56,7 +56,7 @@ internal class ValidateTransactionTest : SuspendTest() {
 
   @Test
   fun `no errors`() {
-    val account = objectFromJsonFile("account_full.json", AccountResponse::class.java)
+    val account = stellarObjectFromJsonFile<AccountResponse>("account_full.json")
 
     every { server.accounts().account(ADDRESS_ACTIVE) } returns account
 

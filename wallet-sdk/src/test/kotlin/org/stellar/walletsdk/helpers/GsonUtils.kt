@@ -1,4 +1,4 @@
-package org.stellar.walletsdk.util
+package org.stellar.walletsdk.helpers
 
 import com.google.gson.*
 

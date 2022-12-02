@@ -1,5 +1,6 @@
 package org.stellar.walletsdk
 
+import kotlinx.serialization.Serializable
 import org.stellar.sdk.AbstractTransaction
 import org.stellar.sdk.KeyPair
 import org.stellar.sdk.requests.RequestBuilder
@@ -20,11 +21,6 @@ data class AccountSigner(val address: String, val weight: Int)
  * @param high High threshold weight
  */
 data class AccountThreshold(val low: Int, val medium: Int, val high: Int)
-
-enum class AnchorTransactionType(val type: String) {
-  DEPOSIT("deposit"),
-  WITHDRAW("withdrawal")
-}
 
 enum class AssetType(val type: String) {
   NATIVE("native"),
@@ -67,6 +63,7 @@ data class FormattedLiquidityPool(
   val reserves: List<LiquidityPoolReserve>
 )
 
+@Serializable
 data class InteractiveFlowResponse(
   val id: String,
   val url: String,

@@ -7,7 +7,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 /** Helpers for [OkHttpClient] */
 object OkHttpUtils {
-  private val gson = GsonUtils.instance!!
   private const val jsonContentType = "application/json; charset=utf-8"
   private val jsonContentMediaType = jsonContentType.toMediaType()
 
@@ -20,14 +19,17 @@ object OkHttpUtils {
 
     return request.build()
   }
-
-  fun <T> buildJsonPostRequest(url: String, requestParams: T, authToken: String? = null): Request {
+  internal inline fun <reified T : Any> makePostRequest(
+    url: String,
+    requestParams: T,
+    authToken: String? = null
+  ): Request {
     val request = Request.Builder().url(url).header("Content-Type", jsonContentType)
 
     if (authToken != null) {
       request.addHeader("Authorization", "Bearer $authToken")
     }
 
-    return request.post(gson.toJson(requestParams).toRequestBody(jsonContentMediaType)).build()
+    return request.post(requestParams.toJson().toRequestBody(jsonContentMediaType)).build()
   }
 }

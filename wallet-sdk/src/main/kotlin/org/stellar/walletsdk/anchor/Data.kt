@@ -1,22 +1,26 @@
 package org.stellar.walletsdk.anchor
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.stellar.sdk.Memo
 import org.stellar.walletsdk.util.GlobalConfig
 import org.stellar.walletsdk.util.Util.isHex
 
+@Serializable
 data class AnchorServiceAsset(
   val enabled: Boolean,
-  val min_amount: Double,
-  val max_amount: Double,
-  val fee_fixed: Double,
-  val fee_percent: Double
+  val min_amount: Double? = null,
+  val max_amount: Double? = null,
+  val fee_fixed: Double? = null,
+  val fee_percent: Double? = null
 )
 
+@Serializable
 data class AnchorServiceFeatures(val account_creation: Boolean, val claimable_balances: Boolean)
 
-data class AnchorServiceFee(val enabled: Boolean)
+@Serializable data class AnchorServiceFee(val enabled: Boolean)
 
+@Serializable
 data class AnchorServiceInfo(
   val deposit: Map<String, AnchorServiceAsset>,
   val withdraw: Map<String, AnchorServiceAsset>,
@@ -24,36 +28,32 @@ data class AnchorServiceInfo(
   val features: AnchorServiceFeatures,
 )
 
-// TODO: polymorphism based on kind
-data class AnchorTransaction(
-  val id: String,
-  val kind: String,
-  val status: String,
-  val more_info_url: String,
-  val amount_in: String,
-  val amount_out: String,
-  val amount_fee: String,
-  val started_at: String,
-  val stellar_transaction_id: String,
-  val from: String,
-  val to: String,
-  val message: String,
-  val withdraw_memo_type: MemoType,
-  val withdraw_memo: String,
-  val withdraw_anchor_account: String
+@Serializable
+data class Refunds(
+  @SerialName("amount_fee") val amountFee: String,
+  @SerialName("amount_refunded") val amountRefunded: String,
+  @SerialName("payments") val payments: List<Payment>
+)
+
+@Serializable
+data class Payment(
+  @SerialName("amount") val amount: String,
+  @SerialName("fee") val fee: String,
+  @SerialName("id") val id: String,
+  @SerialName("id_type") val idType: String
 )
 
 enum class MemoType(val mapper: (String) -> Memo) {
-  @SerializedName("text") TEXT(Memo::text),
+  @SerialName("text") TEXT(Memo::text),
   /** Hash memo. Supports hex or base64 string encoding */
-  @SerializedName("hash") HASH(::hash),
-  @SerializedName("id") ID({ Memo.id(it.toLong()) })
+  @SerialName("hash") HASH(::hash),
+  @SerialName("id") ID({ Memo.id(it.toLong()) })
 }
 
 private fun hash(s: String): Memo {
   return if (s.isHex()) Memo.hash(s) else Memo.hash(GlobalConfig.base64Decoder(s))
 }
 
-data class AnchorTransactionStatusResponse(val transaction: AnchorTransaction)
+@Serializable data class AnchorTransactionStatusResponse(val transaction: AnchorTransaction)
 
-data class AnchorAllTransactionsResponse(val transactions: List<AnchorTransaction>)
+@Serializable data class AnchorAllTransactionsResponse(val transactions: List<AnchorTransaction>)

@@ -5,11 +5,11 @@ plugins {
   alias(libs.plugins.kotlin.jvm)
 }
 
-val jvmVersion = "11"
+val jvmVersion = JavaVersion.VERSION_1_8
 
 allprojects {
   group = "org.stellar.wallet-sdk"
-  version = "0.2.0-SNAPSHOT"
+  version = "0.2.0"
 }
 
 subprojects {
@@ -49,7 +49,7 @@ subprojects {
   tasks {
     compileKotlin {
       dependsOn("spotlessKotlinApply")
-      kotlinOptions.jvmTarget = jvmVersion
+      kotlinOptions.jvmTarget = jvmVersion.toString()
     }
 
     test {

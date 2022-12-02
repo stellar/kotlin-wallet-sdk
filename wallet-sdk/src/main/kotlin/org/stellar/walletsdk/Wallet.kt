@@ -2,8 +2,8 @@ package org.stellar.walletsdk
 
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.operations.OperationResponse
-import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.MemoType
+import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.accountByAddress
 import org.stellar.walletsdk.extension.accountOperations
@@ -218,28 +218,36 @@ class Wallet(
   }
 
   /**
-   * Creates transaction transferring asset, using Stellar's [payment operation]
-   * (https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment) to
-   * move asset between accounts.
+   * Creates transaction transferring asset, using Stellar's
+   * [payment operation](https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment)
+   * to move asset between accounts.
    *
    * @param transaction anchor withdrawal transaction
    * @param assetIssuer issuer of asset to transfer
    * @param assetCode code of asset to transfer
    *
    * @return formed transfer transaction
+   * @throws IncorrectTransactionStatusException if transaction can't be sent due to having
+   * incorrect state
    */
   suspend fun transfer(
-    transaction: AnchorTransaction,
+    transaction: WithdrawalTransaction,
     assetIssuer: String,
     assetCode: String,
   ): Transaction {
+    transaction.requireStatus("pending_user_transfer_start")
+
     return transfer(
       transaction.from,
-      transaction.withdraw_anchor_account,
+      transaction.withdrawAnchorAccount
+        ?: throw InvalidDataException(
+          "Missing withdrawal anchor account field in transaction $transaction"
+        ),
       assetIssuer,
       assetCode,
-      transaction.amount_in,
-      transaction.withdraw_memo_type to transaction.withdraw_memo
+      transaction.amountIn
+        ?: throw InvalidDataException("Missing amountIn field in transaction $transaction"),
+      transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }
     )
   }
 

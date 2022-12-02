@@ -6,19 +6,19 @@ import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
-import org.stellar.walletsdk.Auth
 import org.stellar.walletsdk.WalletSigner
+import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.createTransactionBuilder
 import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.GlobalConfig.base64Decoder
+import org.stellar.walletsdk.util.toJson
 
 class Recovery(
   private val server: Server,
   private val network: Network,
   private val maxBaseFeeInStroops: Int = 100
 ) {
-  private val gson = GsonUtils.instance!!
   private val client = OkHttpClient()
 
   /**
@@ -54,13 +54,12 @@ class Recovery(
   ): DecoratedSignature {
     val requestUrl = "${it.endpoint}/accounts/$accountAddress/sign/${it.signerAddress}"
     val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
-    val request = OkHttpUtils.buildJsonPostRequest(requestUrl, requestParams, it.authToken)
+    val request = OkHttpUtils.makePostRequest(requestUrl, requestParams, it.authToken)
 
     return client.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
-      val authResponse: AuthSignature =
-        gson.fromJson(response.body!!.charStream(), AuthSignature::class.java)
+      val authResponse: AuthSignature = response.toJson()
 
       createDecoratedSignature(accountAddress, authResponse.signature)
     }
@@ -94,7 +93,7 @@ class Recovery(
 
       val requestUrl = "${it.homeDomain}/accounts/$accountAddress"
       val request =
-        OkHttpUtils.buildJsonPostRequest(
+        OkHttpUtils.makePostRequest(
           requestUrl,
           RecoveryIdentities(identities = accountIdentity),
           authToken
@@ -103,7 +102,7 @@ class Recovery(
       client.newCall(request).execute().use { response ->
         if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
-        val jsonResponse = gson.fromJson(response.body!!.charStream(), RecoveryAccount::class.java)
+        val jsonResponse = response.toJson<RecoveryAccount>()
 
         getLatestRecoverySigner(jsonResponse.signers)
       }

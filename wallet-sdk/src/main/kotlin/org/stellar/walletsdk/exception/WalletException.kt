@@ -2,21 +2,18 @@ package org.stellar.walletsdk.exception
 
 import okhttp3.Response
 import org.stellar.sdk.requests.ErrorResponse
-import org.stellar.walletsdk.util.GsonUtils
+import org.stellar.walletsdk.util.toJson
 
 data class AnchorErrorResponse(val error: String)
 
 sealed class WalletException : Exception {
-  val gson = GsonUtils.instance!!
-
   constructor(message: String) : super(message)
   constructor(message: String, cause: Exception) : super(message, cause)
 }
 
 open class ServerRequestFailedException(response: Response) :
   WalletException("Anchor request failed") {
-  private val errorResponse: AnchorErrorResponse =
-    gson.fromJson(response.body!!.charStream(), AnchorErrorResponse::class.java)
+  private val errorResponse: AnchorErrorResponse = response.toJson()
 
   val errorCode = response.code
   override val message = errorResponse.error
