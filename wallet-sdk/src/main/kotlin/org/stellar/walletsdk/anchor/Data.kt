@@ -1,7 +1,9 @@
 package org.stellar.walletsdk.anchor
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 import org.stellar.sdk.Memo
 import org.stellar.walletsdk.util.GlobalConfig
 import org.stellar.walletsdk.util.Util.isHex
@@ -9,10 +11,10 @@ import org.stellar.walletsdk.util.Util.isHex
 @Serializable
 data class AnchorServiceAsset(
   val enabled: Boolean,
-  val min_amount: Double,
-  val max_amount: Double,
-  val fee_fixed: Double,
-  val fee_percent: Double
+  val min_amount: Double? = null,
+  val max_amount: Double? = null,
+  val fee_fixed: Double? = null,
+  val fee_percent: Double? = null
 )
 
 @Serializable
@@ -29,23 +31,48 @@ data class AnchorServiceInfo(
 )
 
 // TODO: polymorphism based on kind
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
+@JsonClassDiscriminator("kind")
 data class AnchorTransaction(
   val id: String,
   val kind: String,
   val status: String,
-  val more_info_url: String,
-  val amount_in: String,
-  val amount_out: String,
-  val amount_fee: String,
-  val started_at: String,
-  val stellar_transaction_id: String,
+  @SerialName("status_eta") val statusEta: String? = null,
+  @SerialName("kyc_verified") val kycVerified: Boolean? = null,
+  @SerialName("more_info_url") val moreInfoUrl: String,
+  @SerialName("amount_in_asset") val amountInAsset: String? = null,
+  @SerialName("amount_in") val amountIn: String,
+  @SerialName("amount_out_asset") val amountOutAsset: String? = null,
+  @SerialName("amount_out") val amountOut: String,
+  @SerialName("amount_fee_asset") val amountFeeAsset: String? = null,
+  @SerialName("amount_fee") val amountFee: String,
+  @SerialName("started_at") val startedAt: String,
+  @SerialName("completed_at") val completedAt: String? = null,
+  @SerialName("stellar_transaction_id") val stellarTransactionId: String,
+  @SerialName("external_transaction_id") val externalTransactionId: String? = null,
+  val message: String? = null,
+  val refunds: Refunds? = null,
   val from: String,
   val to: String,
-  val message: String,
   val withdraw_memo_type: MemoType,
   val withdraw_memo: String,
   val withdraw_anchor_account: String
+)
+
+@Serializable
+data class Refunds(
+  @SerialName("amount_fee") val amountFee: String,
+  @SerialName("amount_refunded") val amountRefunded: String,
+  @SerialName("payments") val payments: List<Payment>
+)
+
+@Serializable
+data class Payment(
+  @SerialName("amount") val amount: String,
+  @SerialName("fee") val fee: String,
+  @SerialName("id") val id: String,
+  @SerialName("id_type") val idType: String
 )
 
 enum class MemoType(val mapper: (String) -> Memo) {

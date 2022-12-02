@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
+import kotlinx.serialization.Serializable
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -9,7 +10,8 @@ import org.stellar.sdk.responses.operations.*
 import org.stellar.walletsdk.WalletAsset
 import org.stellar.walletsdk.WalletOperationType
 import org.stellar.walletsdk.anchor.AnchorTransaction
-import org.stellar.walletsdk.helpers.objectFromJsonFile
+import org.stellar.walletsdk.helpers.sdkObjectFromJsonFile
+import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
 data class StellarOperationsJson(
   val createAccount: CreateAccountOperationResponse,
@@ -23,6 +25,7 @@ data class StellarOperationsJson(
   val claimClaimableBalance: ClaimClaimableBalanceOperationResponse
 )
 
+@Serializable
 data class AnchorTransactionsJson(
   val deposit: AnchorTransaction,
   val withdrawal: AnchorTransaction
@@ -33,7 +36,7 @@ internal class FormatOperationTest {
   @DisplayName("formatStellarOperation")
   inner class FormatStellarOperation {
     private val stellarOperations =
-      objectFromJsonFile<StellarOperationsJson>("stellar_operations.json")
+      stellarObjectFromJsonFile<StellarOperationsJson>("stellar_operations.json")
 
     @Test
     fun `create account for account creator`() {
@@ -312,7 +315,7 @@ internal class FormatOperationTest {
   @DisplayName("formatAnchorTransaction")
   inner class FormatAnchorTransaction {
     private val anchorTransactions =
-      objectFromJsonFile<AnchorTransactionsJson>("anchor_transactions.json")
+      sdkObjectFromJsonFile<AnchorTransactionsJson>("anchor_transactions.json")
     private val asset = Asset.create("SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
 
     @Test

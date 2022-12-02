@@ -17,7 +17,7 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.SuspendTest
 import org.stellar.walletsdk.TXN_XDR_CREATE_ACCOUNT
-import org.stellar.walletsdk.helpers.objectFromJsonFile
+import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
 @DisplayName("buildFeeBumpTransaction")
 internal class BuildFeeBumpTransactionTest : SuspendTest() {
@@ -44,7 +44,7 @@ internal class BuildFeeBumpTransactionTest : SuspendTest() {
 
   @Test
   fun `successful build`() {
-    val account = objectFromJsonFile<AccountResponse>("account_full.json")
+    val account = stellarObjectFromJsonFile<AccountResponse>("account_full.json")
 
     every { server.accounts().account(ADDRESS_ACTIVE_TWO) } returns account
 

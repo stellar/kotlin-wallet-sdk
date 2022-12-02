@@ -10,7 +10,7 @@ import org.stellar.sdk.*
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.SubmitTransactionResponse
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
-import org.stellar.walletsdk.helpers.objectFromJsonFile
+import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
 internal class WalletTest : SuspendTest() {
   private val server = spyk(Server(HORIZON_URL))
@@ -342,7 +342,7 @@ internal class WalletTest : SuspendTest() {
   inner class GetInfo {
     @Test
     fun `basic account info`() {
-      val accountResponse = objectFromJsonFile<AccountResponse>("account_basic.json")
+      val accountResponse = stellarObjectFromJsonFile<AccountResponse>("account_basic.json")
 
       every { server.accounts().account(ADDRESS_BASIC) } returns accountResponse
 
@@ -356,7 +356,7 @@ internal class WalletTest : SuspendTest() {
 
     @Test
     fun `full account info`() {
-      val accountResponse = objectFromJsonFile<AccountResponse>("account_full.json")
+      val accountResponse = stellarObjectFromJsonFile<AccountResponse>("account_full.json")
 
       every { server.accounts().account(ADDRESS_FULL) } returns accountResponse
 

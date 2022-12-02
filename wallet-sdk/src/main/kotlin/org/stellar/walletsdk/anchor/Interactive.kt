@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.util
 
 import okhttp3.OkHttpClient
+import okhttp3.internal.toImmutableMap
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.Anchor
@@ -47,7 +48,7 @@ class Interactive(
     accountAddress: String,
     assetCode: String,
     authToken: String,
-    extraFields: Map<String, Any>? = null,
+    extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
     return flow(
@@ -81,7 +82,7 @@ class Interactive(
     accountAddress: String,
     assetCode: String,
     authToken: String,
-    extraFields: Map<String, Any>? = null,
+    extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
     return flow(accountAddress, assetCode, authToken, extraFields, fundsAccountAddress, "deposit") {
@@ -89,11 +90,24 @@ class Interactive(
     }
   }
 
+  /**
+   * TODO: there should be a custom serializer Signature of method:
+   * ```kotlin
+   * fun flow(
+   *  request: InteractiveRequest,
+   *  requestMapper: (InteractiveRequest) -> (Unit) = {},
+   *  extraSEP9: Map<String, String>
+   * )
+   * ```
+   * It should regularly encode InteractiveRequest (typed) + append all fields from sep9 (currently
+   * string)
+   * [documentation](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md#request)
+   */
   private suspend fun flow(
     accountAddress: String,
     assetCode: String,
     authToken: String,
-    extraFields: Map<String, Any>?,
+    extraFields: Map<String, String>?,
     fundsAccountAddress: String?,
     type: String,
     assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
@@ -133,7 +147,7 @@ class Interactive(
       throw AssetNotEnabledForDepositException(assetCode)
     }
 
-    val requestParams = mutableMapOf<String, Any>()
+    val requestParams = mutableMapOf<String, String>()
     requestParams["account"] = fundsAccountAddress ?: accountAddress
     requestParams["asset_code"] = assetCode
 
@@ -143,7 +157,7 @@ class Interactive(
 
     // Get SEP-24 anchor response
     val requestUrl = "$transferServerEndpoint/transactions/${type}/interactive"
-    val request = OkHttpUtils.makePostRequest(requestUrl, requestParams, authToken)
+    val request = OkHttpUtils.makePostRequest(requestUrl, requestParams.toImmutableMap(), authToken)
 
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)

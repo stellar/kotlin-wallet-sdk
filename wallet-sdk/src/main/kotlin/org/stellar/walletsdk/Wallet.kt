@@ -238,7 +238,7 @@ class Wallet(
       transaction.withdraw_anchor_account,
       assetIssuer,
       assetCode,
-      transaction.amount_in,
+      transaction.amountIn,
       transaction.withdraw_memo_type to transaction.withdraw_memo
     )
   }

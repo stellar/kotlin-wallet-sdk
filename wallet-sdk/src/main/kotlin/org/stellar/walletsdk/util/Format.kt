@@ -224,7 +224,7 @@ fun formatAnchorTransaction(
     AnchorTransactionType.DEPOSIT.type,
     AnchorTransactionType.WITHDRAW.type -> {
       return opBuilder
-        .amount(transaction.amount_out)
+        .amount(transaction.amountOut)
         .type(
           if (transaction.kind == AnchorTransactionType.DEPOSIT.type) {
             WalletOperationType.DEPOSIT
@@ -295,7 +295,7 @@ internal fun <T : AnchorTransaction> WalletOperationBuilder<T>.fromTransaction(
 ) = apply {
   this.defaults()
   this.id = transaction.id
-  this.date = transaction.started_at
+  this.date = transaction.startedAt
   this.asset = listOf(formatAsset(asset))
   this.rawOperation = transaction
 }
