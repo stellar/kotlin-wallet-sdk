@@ -1,10 +1,11 @@
 package org.stellar.walletsdk.recovery
 
 import java.util.*
+import kotlinx.serialization.Serializable
 
-internal data class TransactionRequest(val transaction: String)
+@Serializable internal data class TransactionRequest(val transaction: String)
 
-internal data class AuthSignature(val signature: String)
+@Serializable internal data class AuthSignature(val signature: String)
 
 data class RecoveryServer(
   val endpoint: String,
@@ -19,23 +20,27 @@ data class RecoveryServerAuth(
   val authToken: String,
 )
 
+@Serializable
 data class RecoveryAccount(
   val address: String,
   val identities: List<RecoveryAccountRole>,
   val signers: List<RecoveryAccountSigner>
 )
 
-data class RecoveryIdentities(val identities: List<RecoveryAccountIdentity>)
+@Serializable data class RecoveryIdentities(val identities: List<RecoveryAccountIdentity>)
 
-data class RecoveryAccountRole(val role: String, val authenticated: Boolean?)
+@Serializable
+data class RecoveryAccountRole(val role: String, val authenticated: Boolean? = null)
 
-data class RecoveryAccountSigner(val key: String)
+@Serializable data class RecoveryAccountSigner(val key: String)
 
+@Serializable
 data class RecoveryAccountAuthMethod(
   val type: String,
   val value: String,
 )
 
+@Serializable
 data class RecoveryAccountIdentity(
   val role: String,
   val auth_methods: List<RecoveryAccountAuthMethod>,

@@ -4,6 +4,7 @@ coroutines = "1.6.4"
 google-gson = "2.8.9"
 java-stellar-sdk = "0.34.2"
 kotlin = "1.7.20"
+kotlinx-json = "1.4.1"
 mockk = "1.12.2"
 okhttp3 = "4.9.3"
 
@@ -17,6 +18,7 @@ google-gson = { module = "com.google.code.gson:gson", version.ref = "google-gson
 java-stellar-sdk = { module = "com.github.stellar:java-stellar-sdk", version.ref = "java-stellar-sdk" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-json" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp3" }
 okhttp3-mockserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp3" }
@@ -24,4 +26,5 @@ okhttp3-mockserver = { module = "com.squareup.okhttp3:mockwebserver", version.re
 [plugins]
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-dokka = {id = "org.jetbrains.dokka", version.ref = "kotlin"}
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "kotlin" }

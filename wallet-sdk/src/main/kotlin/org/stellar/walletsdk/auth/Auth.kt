@@ -1,13 +1,14 @@
-package org.stellar.walletsdk
+package org.stellar.walletsdk.auth
 
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
+import org.stellar.walletsdk.WalletSigner
 import org.stellar.walletsdk.exception.*
-import org.stellar.walletsdk.util.GsonUtils
 import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.SchemeUtil
+import org.stellar.walletsdk.util.toJson
 
 /**
  * Authenticate to an external server using
@@ -29,12 +30,6 @@ class Auth(
   private val network: Network = Network.TESTNET,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
-  private val gson = GsonUtils.instance!!
-
-  data class ChallengeResponse(val transaction: String, val network_passphrase: String)
-  data class AuthToken(val token: String)
-  data class AuthTransaction(val transaction: String)
-
   /**
    * Authenticates to an external server.
    *
@@ -109,8 +104,7 @@ class Auth(
         throw NetworkRequestFailedException(response)
       }
 
-      val jsonResponse: ChallengeResponse =
-        gson.fromJson(response.body!!.charStream(), ChallengeResponse::class.java)
+      val jsonResponse: ChallengeResponse = response.toJson()
 
       if (jsonResponse.transaction.isBlank()) {
         throw MissingTransactionException
@@ -171,13 +165,12 @@ class Auth(
   private suspend fun getToken(signedTransaction: Transaction): String {
     val signedChallengeTxnXdr = signedTransaction.toEnvelopeXdrBase64()
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
-    val tokenRequest = OkHttpUtils.buildJsonPostRequest(webAuthEndpoint, tokenRequestParams)
+    val tokenRequest = OkHttpUtils.makePostRequest(webAuthEndpoint, tokenRequestParams)
 
     httpClient.newCall(tokenRequest).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-      val jsonResponse: AuthToken =
-        gson.fromJson(response.body!!.charStream(), AuthToken::class.java)
+      val jsonResponse: AuthToken = response.toJson()
 
       if (jsonResponse.token.isBlank()) {
         throw MissingTokenException

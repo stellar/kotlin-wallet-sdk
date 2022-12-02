@@ -25,3 +25,5 @@ object MissingTransactionException :
   InvalidResponseException("The response did not contain a transaction")
 
 object NetworkMismatchException : InvalidResponseException("Networks don't match")
+
+class InvalidDataException(message: String) : InvalidResponseException(message)

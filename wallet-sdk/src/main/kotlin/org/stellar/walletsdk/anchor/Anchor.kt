@@ -1,13 +1,16 @@
 package org.stellar.walletsdk.anchor
 
+import java.lang.Exception
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.*
+import org.stellar.walletsdk.util.toJson
 
 /**
  * Build on/off ramps with anchors.
@@ -23,8 +26,6 @@ class Anchor(
   private val homeDomain: String,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
-  private val gson = GsonUtils.instance!!
-
   /**
    * Get anchor information from a TOML file.
    *
@@ -88,13 +89,11 @@ class Anchor(
     val infoUrl = urlBuilder.build().toString()
 
     val request = Request.Builder().url(infoUrl).build()
-    val gson = GsonUtils.instance!!
 
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-      val infoResponse = response.body!!.charStream()
-      gson.fromJson(infoResponse, AnchorServiceInfo::class.java)
+      response.toJson<AnchorServiceInfo>()
     }
   }
 
@@ -132,9 +131,7 @@ class Anchor(
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-      gson
-        .fromJson(response.body!!.charStream(), AnchorTransactionStatusResponse::class.java)
-        .transaction
+      response.toJson<AnchorTransactionStatusResponse>().transaction
     }
   }
 
@@ -163,9 +160,7 @@ class Anchor(
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-      gson
-        .fromJson(response.body!!.charStream(), AnchorAllTransactionsResponse::class.java)
-        .transactions
+      response.toJson<AnchorAllTransactionsResponse>().transactions
     }
   }
 
@@ -228,8 +223,8 @@ class Anchor(
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw NetworkRequestFailedException(response)
 
-      gson
-        .fromJson(response.body!!.charStream(), AnchorAllTransactionsResponse::class.java)
+      response
+        .toJson<AnchorAllTransactionsResponse>()
         .transactions
         .filter { finalStatusList.contains(it.status) }
         .map { formatAnchorTransaction(it, asset) }
