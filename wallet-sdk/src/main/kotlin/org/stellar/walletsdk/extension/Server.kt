@@ -7,11 +7,20 @@ import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.LiquidityPoolResponse
 import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.exception.AccountNotFoundException
 import org.stellar.walletsdk.exception.HorizonRequestFailedException
-import org.stellar.walletsdk.exception.LiquidityPoolNotFoundException
 import org.stellar.walletsdk.exception.OperationsLimitExceededException
 import org.stellar.walletsdk.util.formatAmount
+
+private fun <T> safeHorizonCall(body: () -> T): T {
+  try {
+    return body()
+  } catch (e: Exception) {
+    if (e is ErrorResponse) {
+      throw HorizonRequestFailedException(e)
+    }
+    throw e
+  }
+}
 
 /**
  * Fetch account information from the Stellar network.
@@ -20,26 +29,11 @@ import org.stellar.walletsdk.util.formatAmount
  *
  * @return Account response object
  *
- * @throws [AccountNotFoundException] when account is not found
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
-@Throws(AccountNotFoundException::class)
+@Throws(HorizonRequestFailedException::class)
 suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
-  return safeCallForAccount({ accounts().account(accountAddress) }, accountAddress)
-}
-
-private fun <T> safeCallForAccount(body: () -> T, accountAddress: String): T {
-  try {
-    return body()
-  } catch (e: Exception) {
-    if (e is ErrorResponse) {
-      if (e.code == 404) {
-        throw AccountNotFoundException(accountAddress)
-      }
-      throw HorizonRequestFailedException(e)
-    }
-    throw e
-  }
+  return safeHorizonCall { accounts().account(accountAddress) }
 }
 
 /**
@@ -50,25 +44,14 @@ private fun <T> safeCallForAccount(body: () -> T, accountAddress: String): T {
  *
  * @return liquidity pool data object
  *
- * @throws [LiquidityPoolNotFoundException] when liquidity pool is not found
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 suspend fun Server.liquidityPoolInfo(
   liquidityPoolId: LiquidityPoolID,
   cachedAssetInfo: MutableMap<String, CachedAsset>
 ): LiquidityPoolInfo {
-  val response: LiquidityPoolResponse
-
-  try {
-    response = liquidityPools().liquidityPool(liquidityPoolId)
-  } catch (e: Exception) {
-    if (e is ErrorResponse) {
-      if (e.code == 404) {
-        throw LiquidityPoolNotFoundException(liquidityPoolId)
-      }
-      throw HorizonRequestFailedException(e)
-    }
-    throw e
+  val response: LiquidityPoolResponse = safeHorizonCall {
+    liquidityPools().liquidityPool(liquidityPoolId)
   }
 
   val responseReserves = response.reserves
@@ -128,7 +111,6 @@ suspend fun Server.liquidityPoolInfo(
  * @return a list of account operations
  *
  * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
- * @throws [AccountNotFoundException] when account is not found
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 suspend fun Server.accountOperations(
@@ -142,18 +124,15 @@ suspend fun Server.accountOperations(
     throw OperationsLimitExceededException()
   }
 
-  return safeCallForAccount(
-    {
-      operations()
-        .forAccount(accountAddress)
-        .limit(limit ?: 10)
-        .order(order?.builderEnum)
-        .cursor(cursor)
-        .includeFailed(includeFailed ?: false)
-        .includeTransactions(true)
-        .execute()
-        .records
-    },
-    accountAddress
-  )
+  return safeHorizonCall {
+    operations()
+      .forAccount(accountAddress)
+      .limit(limit ?: 10)
+      .order(order?.builderEnum)
+      .cursor(cursor)
+      .includeFailed(includeFailed ?: false)
+      .includeTransactions(true)
+      .execute()
+      .records
+  }
 }

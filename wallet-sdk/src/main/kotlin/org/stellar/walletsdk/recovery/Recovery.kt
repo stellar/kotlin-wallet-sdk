@@ -136,7 +136,7 @@ class Recovery(
    *
    * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
-   * @throws [AccountNotFoundException] when account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun createRecoverableWallet(config: RecoverableWalletConfig): Transaction {
     val recoverySigners =
@@ -175,7 +175,7 @@ class Recovery(
    *
    * @return transaction
    *
-   * @throws [AccountNotFoundException] when account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   // TODO: can be private?
   suspend fun registerRecoveryServerSigners(

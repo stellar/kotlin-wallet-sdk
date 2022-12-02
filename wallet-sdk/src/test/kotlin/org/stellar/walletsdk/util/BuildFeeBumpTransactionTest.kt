@@ -2,8 +2,8 @@ package org.stellar.walletsdk.util
 
 import io.mockk.every
 import io.mockk.spyk
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -17,6 +17,7 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.SuspendTest
 import org.stellar.walletsdk.TXN_XDR_CREATE_ACCOUNT
+import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.extension.buildFeeBumpTransaction
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
@@ -34,13 +35,13 @@ internal class BuildFeeBumpTransactionTest : SuspendTest() {
     every { server.accounts().account(any() as String) } throws ErrorResponse(404, "")
 
     val exception =
-      assertFailsWith<Exception>(
+      assertFailsWith<HorizonRequestFailedException>(
         block = {
           runBlocking { buildFeeBumpTransaction(ADDRESS_ACTIVE_TWO, transaction, 500, server) }
         }
       )
 
-    assertTrue(exception.toString().contains(errorMessage))
+    assertEquals(exception.errorCode, 404)
   }
 
   @Test

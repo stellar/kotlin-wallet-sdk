@@ -57,7 +57,6 @@ class Wallet(
    *
    * @throws [InvalidStartingBalanceException] when starting balance is less than 1 XLM for
    * non-sponsored account
-   * @throws [AccountNotFoundException] when source account is not found
    */
   suspend fun fund(
     sourceAddress: String,
@@ -99,7 +98,7 @@ class Wallet(
    *
    * @return transaction
    *
-   * @throws [AccountNotFoundException] when source account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun addAssetSupport(
     sourceAddress: String,
@@ -133,7 +132,7 @@ class Wallet(
    *
    * @return transaction
    *
-   * @throws [AccountNotFoundException] when source account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun removeAssetSupport(
     sourceAddress: String,
@@ -156,7 +155,7 @@ class Wallet(
    *
    * @return transaction
    *
-   * @throws [AccountNotFoundException] when source account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun addAccountSigner(
     sourceAddress: String,
@@ -259,7 +258,7 @@ class Wallet(
    *
    * @return transaction
    *
-   * @throws [AccountNotFoundException] when source account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
     return addAccountSigner(sourceAddress, signerAddress, 0)
@@ -296,7 +295,7 @@ class Wallet(
    *
    * @return transaction
    *
-   * @throws [AccountNotFoundException] when account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun lockAccountMasterKey(
     accountAddress: String,
@@ -333,7 +332,6 @@ class Wallet(
    *
    * @return formatted account information
    *
-   * @throws [AccountNotFoundException] when account is not found
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
@@ -362,7 +360,6 @@ class Wallet(
    * @return a list of formatted operations
    *
    * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
-   * @throws [AccountNotFoundException] when account is not found
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun getHistory(
