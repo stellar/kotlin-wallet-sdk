@@ -1,13 +1,13 @@
-package org.stellar.walletsdk.util
+package org.stellar.walletsdk.anchor
 
 import okhttp3.OkHttpClient
 import okhttp3.internal.toImmutableMap
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.anchor.Anchor
-import org.stellar.walletsdk.anchor.AnchorServiceAsset
-import org.stellar.walletsdk.anchor.AnchorServiceInfo
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.util.OkHttpUtils
+import org.stellar.walletsdk.util.StellarToml
+import org.stellar.walletsdk.util.toJson
 
 /**
  * Interactive flow for deposit and withdrawal using SEP-24.
@@ -19,7 +19,7 @@ import org.stellar.walletsdk.exception.*
  * @return response object from the anchor
  *
  * @throws [AnchorAssetException] if asset was refused by the anchor
- * @throws [NetworkRequestFailedException] if network request fails
+ * @throws [ServerRequestFailedException] if network request fails
  */
 class Interactive(
   private val homeDomain: String,
@@ -42,7 +42,7 @@ class Interactive(
    * @return response object from the anchor
    *
    * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun withdraw(
     accountAddress: String,
@@ -76,7 +76,7 @@ class Interactive(
    * @return response object from the anchor
    *
    * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [NetworkRequestFailedException] if network request fails
+   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun deposit(
     accountAddress: String,
@@ -160,7 +160,7 @@ class Interactive(
     val request = OkHttpUtils.makePostRequest(requestUrl, requestParams.toImmutableMap(), authToken)
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
       response.toJson()
     }

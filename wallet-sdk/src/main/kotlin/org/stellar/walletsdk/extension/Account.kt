@@ -25,8 +25,6 @@ fun AccountResponse.availableNativeBalance(): String {
  *
  * [Learn about Stellar account base reserve](https://developers.stellar.org/docs/fundamentals-and-concepts/stellar-data-structures/accounts#base-reserves-and-subentries)
  *
- * @param account Account response object
- *
  * @return account's reserved balance
  */
 fun AccountResponse.reservedBalance(): String {

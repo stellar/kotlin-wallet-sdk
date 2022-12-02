@@ -41,7 +41,7 @@ class Auth(
    * @return authentication token (JWT)
    *
    * @throws [ValidationException] when some of the request arguments are not valid
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
   suspend fun authenticate(
@@ -63,7 +63,7 @@ class Auth(
    *
    * @throws [InvalidMemoIdException] when memo ID is not valid
    * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
   private suspend fun challenge(
@@ -100,9 +100,7 @@ class Auth(
     val request = OkHttpUtils.buildStringGetRequest(authURL.toString())
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) {
-        throw NetworkRequestFailedException(response)
-      }
+      if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
       val jsonResponse: ChallengeResponse = response.toJson()
 
@@ -159,7 +157,7 @@ class Auth(
    *
    * @return transaction as Base64 encoded TransactionEnvelope XDR string
    *
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [MissingTokenException] when request JSON response does not contain `token`
    */
   private suspend fun getToken(signedTransaction: Transaction): String {
@@ -168,7 +166,7 @@ class Auth(
     val tokenRequest = OkHttpUtils.makePostRequest(webAuthEndpoint, tokenRequestParams)
 
     httpClient.newCall(tokenRequest).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
       val jsonResponse: AuthToken = response.toJson()
 

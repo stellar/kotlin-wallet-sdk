@@ -9,6 +9,7 @@ import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.WalletSigner
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.extension.createTransactionBuilder
 import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.GlobalConfig.base64Decoder
 import org.stellar.walletsdk.util.toJson
@@ -30,7 +31,7 @@ class Recovery(
    *
    * @return transaction with recovery server signatures
    *
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
    */
   suspend fun signWithRecoveryServers(
@@ -56,7 +57,7 @@ class Recovery(
     val request = OkHttpUtils.makePostRequest(requestUrl, requestParams, it.authToken)
 
     return client.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+      if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
       val authResponse: AuthSignature = response.toJson()
 
@@ -75,7 +76,7 @@ class Recovery(
    *
    * @return a list of recovery servers' signatures
    *
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
    */
   // TODO: can be private?
@@ -99,7 +100,7 @@ class Recovery(
         )
 
       client.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw NetworkRequestFailedException(response)
+        if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
         val jsonResponse = response.toJson<RecoveryAccount>()
 
@@ -133,9 +134,9 @@ class Recovery(
    *
    * @return transaction
    *
-   * @throws [NetworkRequestFailedException] when request fails
+   * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
-   * @throws [AccountNotFoundException] when account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun createRecoverableWallet(config: RecoverableWalletConfig): Transaction {
     val recoverySigners =
@@ -174,7 +175,7 @@ class Recovery(
    *
    * @return transaction
    *
-   * @throws [AccountNotFoundException] when account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   // TODO: can be private?
   suspend fun registerRecoveryServerSigners(
