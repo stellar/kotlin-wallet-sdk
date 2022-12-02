@@ -11,14 +11,14 @@ sealed class WalletException : Exception {
   constructor(message: String, cause: Exception) : super(message, cause)
 }
 
-open class ServerRequestFailedException(response: Response) : WalletException("") {
+open class ServerRequestFailedException(val response: Response) : WalletException("") {
   private val errorResponse = response.toJsonOrNull<AnchorErrorResponse>()
 
   val errorCode = response.code
   override val message = errorResponse?.error ?: "Anchor request failed"
 }
 
-class HorizonRequestFailedException(response: ErrorResponse) :
+class HorizonRequestFailedException(val response: ErrorResponse) :
   WalletException(response.body ?: response.message ?: "Horizon request failed") {
   val errorCode = response.code
 }
