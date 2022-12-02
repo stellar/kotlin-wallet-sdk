@@ -2,7 +2,7 @@ package org.stellar.walletsdk.exception
 
 import okhttp3.Response
 import org.stellar.sdk.requests.ErrorResponse
-import org.stellar.walletsdk.util.toJson
+import org.stellar.walletsdk.util.toJsonOrNull
 
 data class AnchorErrorResponse(val error: String)
 
@@ -11,21 +11,17 @@ sealed class WalletException : Exception {
   constructor(message: String, cause: Exception) : super(message, cause)
 }
 
-open class ServerRequestFailedException(response: Response) :
-  WalletException("Anchor request failed") {
-  private val errorResponse: AnchorErrorResponse = response.toJson()
+open class ServerRequestFailedException(response: Response) : WalletException("") {
+  private val errorResponse = response.toJsonOrNull<AnchorErrorResponse>()
 
   val errorCode = response.code
-  override val message = errorResponse.error
+  override val message = errorResponse?.error ?: "Anchor request failed"
 }
 
 class HorizonRequestFailedException(response: ErrorResponse) :
-  WalletException("Horizon request failed") {
+  WalletException(response.body ?: response.message ?: "Horizon request failed") {
   val errorCode = response.code
-  override val message = response.body ?: response.message
 }
-
-class AnchorRequestFailedException(response: Response) : ServerRequestFailedException(response)
 
 // TODO: delete when TOML is parsed
 @Deprecated("To be removed")

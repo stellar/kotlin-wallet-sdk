@@ -19,7 +19,7 @@ import org.stellar.walletsdk.util.toJson
  * @return response object from the anchor
  *
  * @throws [AnchorAssetException] if asset was refused by the anchor
- * @throws [AnchorRequestFailedException] if network request fails
+ * @throws [ServerRequestFailedException] if network request fails
  */
 class Interactive(
   private val homeDomain: String,
@@ -42,7 +42,7 @@ class Interactive(
    * @return response object from the anchor
    *
    * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [AnchorRequestFailedException] if network request fails
+   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun withdraw(
     accountAddress: String,
@@ -76,7 +76,7 @@ class Interactive(
    * @return response object from the anchor
    *
    * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [AnchorRequestFailedException] if network request fails
+   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun deposit(
     accountAddress: String,
@@ -160,7 +160,7 @@ class Interactive(
     val request = OkHttpUtils.makePostRequest(requestUrl, requestParams.toImmutableMap(), authToken)
 
     return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw AnchorRequestFailedException(response)
+      if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
       response.toJson()
     }

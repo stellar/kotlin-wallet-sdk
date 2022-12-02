@@ -25,8 +25,12 @@ import org.stellar.walletsdk.util.formatAmount
  */
 @Throws(AccountNotFoundException::class)
 suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
+  return safeCallForAccount({ accounts().account(accountAddress) }, accountAddress)
+}
+
+private fun <T> safeCallForAccount(body: () -> T, accountAddress: String): T {
   try {
-    return accounts().account(accountAddress)
+    return body()
   } catch (e: Exception) {
     if (e is ErrorResponse) {
       if (e.code == 404) {
@@ -138,23 +142,18 @@ suspend fun Server.accountOperations(
     throw OperationsLimitExceededException()
   }
 
-  try {
-    return operations()
-      .forAccount(accountAddress)
-      .limit(limit ?: 10)
-      .order(order?.builderEnum)
-      .cursor(cursor)
-      .includeFailed(includeFailed ?: false)
-      .includeTransactions(true)
-      .execute()
-      .records
-  } catch (e: Exception) {
-    if (e is ErrorResponse) {
-      if (e.code == 404) {
-        throw AccountNotFoundException(accountAddress)
-      }
-      throw HorizonRequestFailedException(e)
-    }
-    throw e
-  }
+  return safeCallForAccount(
+    {
+      operations()
+        .forAccount(accountAddress)
+        .limit(limit ?: 10)
+        .order(order?.builderEnum)
+        .cursor(cursor)
+        .includeFailed(includeFailed ?: false)
+        .includeTransactions(true)
+        .execute()
+        .records
+    },
+    accountAddress
+  )
 }
