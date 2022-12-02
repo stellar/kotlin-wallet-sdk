@@ -1,13 +1,16 @@
 package org.stellar.walletsdk.extension
 
-import java.io.IOException
 import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.Server
+import org.stellar.sdk.requests.ErrorResponse
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.LiquidityPoolResponse
+import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.AccountNotFoundException
+import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.exception.LiquidityPoolNotFoundException
+import org.stellar.walletsdk.exception.OperationsLimitExceededException
 import org.stellar.walletsdk.util.formatAmount
 
 /**
@@ -18,14 +21,20 @@ import org.stellar.walletsdk.util.formatAmount
  * @return Account response object
  *
  * @throws [AccountNotFoundException] when account is not found
+ * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 @Throws(AccountNotFoundException::class)
 suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
   try {
     return accounts().account(accountAddress)
-  } catch (e: IOException) {
-    // TODO: check that error code is 404
-    throw AccountNotFoundException(accountAddress)
+  } catch (e: Exception) {
+    if (e is ErrorResponse) {
+      if (e.code == 404) {
+        throw AccountNotFoundException(accountAddress)
+      }
+      throw HorizonRequestFailedException(e)
+    }
+    throw e
   }
 }
 
@@ -38,6 +47,7 @@ suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
  * @return liquidity pool data object
  *
  * @throws [LiquidityPoolNotFoundException] when liquidity pool is not found
+ * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 suspend fun Server.liquidityPoolInfo(
   liquidityPoolId: LiquidityPoolID,
@@ -48,8 +58,13 @@ suspend fun Server.liquidityPoolInfo(
   try {
     response = liquidityPools().liquidityPool(liquidityPoolId)
   } catch (e: Exception) {
-    // TODO: throw on 404 only
-    throw LiquidityPoolNotFoundException(liquidityPoolId)
+    if (e is ErrorResponse) {
+      if (e.code == 404) {
+        throw LiquidityPoolNotFoundException(liquidityPoolId)
+      }
+      throw HorizonRequestFailedException(e)
+    }
+    throw e
   }
 
   val responseReserves = response.reserves
@@ -95,4 +110,51 @@ suspend fun Server.liquidityPoolInfo(
   }
 
   return LiquidityPoolInfo(totalTrustlines, totalShares, reserves)
+}
+
+/**
+ * Fetch account operations from Stellar network.
+ *
+ * @param accountAddress Stellar address of the account
+ * @param limit optional how many operations to fetch, maximum is 200, default is 10
+ * @param order optional data order, ascending or descending, defaults to descending
+ * @param cursor optional cursor to specify a starting point
+ * @param includeFailed optional flag to include failed operations, defaults to false
+ *
+ * @return a list of account operations
+ *
+ * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
+ * @throws [AccountNotFoundException] when account is not found
+ * @throws [HorizonRequestFailedException] for Horizon exceptions
+ */
+suspend fun Server.accountOperations(
+  accountAddress: String,
+  limit: Int? = null,
+  order: Order? = Order.DESC,
+  cursor: String? = null,
+  includeFailed: Boolean? = null
+): List<OperationResponse> {
+  if (limit != null && limit > 200) {
+    throw OperationsLimitExceededException()
+  }
+
+  try {
+    return operations()
+      .forAccount(accountAddress)
+      .limit(limit ?: 10)
+      .order(order?.builderEnum)
+      .cursor(cursor)
+      .includeFailed(includeFailed ?: false)
+      .includeTransactions(true)
+      .execute()
+      .records
+  } catch (e: Exception) {
+    if (e is ErrorResponse) {
+      if (e.code == 404) {
+        throw AccountNotFoundException(accountAddress)
+      }
+      throw HorizonRequestFailedException(e)
+    }
+    throw e
+  }
 }

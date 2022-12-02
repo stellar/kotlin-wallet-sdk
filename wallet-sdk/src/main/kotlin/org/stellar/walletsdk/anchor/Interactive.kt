@@ -1,12 +1,12 @@
-package org.stellar.walletsdk.util
+package org.stellar.walletsdk.anchor
 
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.anchor.Anchor
-import org.stellar.walletsdk.anchor.AnchorServiceAsset
-import org.stellar.walletsdk.anchor.AnchorServiceInfo
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.util.GsonUtils
+import org.stellar.walletsdk.util.OkHttpUtils
+import org.stellar.walletsdk.util.StellarToml
 
 /**
  * Interactive flow for deposit and withdrawal using SEP-24.
@@ -57,9 +57,7 @@ class Interactive(
       extraFields,
       fundsAccountAddress,
       "withdraw"
-    ) {
-      it.withdraw[assetCode]
-    }
+    ) { it.withdraw[assetCode] }
   }
 
   /**

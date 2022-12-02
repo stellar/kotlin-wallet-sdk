@@ -1,8 +1,11 @@
-package org.stellar.walletsdk.util
+package org.stellar.walletsdk.extension
 
 import org.stellar.sdk.*
 import org.stellar.walletsdk.exception.AccountNotEnoughBalanceException
-import org.stellar.walletsdk.extension.accountByAddress
+import org.stellar.walletsdk.exception.AccountNotFoundException
+import org.stellar.walletsdk.exception.HorizonRequestFailedException
+import org.stellar.walletsdk.util.availableNativeBalance
+import org.stellar.walletsdk.util.stroopsToLumens
 
 /**
  * Helper to validate that the transaction's source account has enough native (XLM) balance to cover
@@ -10,7 +13,9 @@ import org.stellar.walletsdk.extension.accountByAddress
  *
  * @param server Horizon [Server] instance
  *
+ * @throws [AccountNotFoundException] when account is not found
  * @throws [AccountNotEnoughBalanceException] if there is not enough native balance
+ * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 suspend fun Transaction.validateSufficientBalance(server: Server) {
   val sourceAccount = server.accountByAddress(sourceAccount)
@@ -40,7 +45,8 @@ suspend fun Transaction.validateSufficientBalance(server: Server) {
  *
  * @return fee-bumped transaction
  *
- * @throws [AccountNotFoundException] when fee account is not found
+ * @throws [AccountNotFoundException] when account is not found
+ * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 suspend fun buildFeeBumpTransaction(
   feeAccount: String,
@@ -104,6 +110,7 @@ suspend fun buildTransaction(
  * @return transaction builder
  *
  * @throws [AccountNotFoundException] when source account is not found
+ * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 suspend fun createTransactionBuilder(
   sourceAddress: String,

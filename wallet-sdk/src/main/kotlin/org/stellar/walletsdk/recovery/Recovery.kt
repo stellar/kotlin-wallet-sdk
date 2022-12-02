@@ -9,6 +9,7 @@ import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Auth
 import org.stellar.walletsdk.WalletSigner
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.extension.createTransactionBuilder
 import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.GlobalConfig.base64Decoder
 

@@ -2,7 +2,6 @@ package org.stellar.walletsdk.util
 
 import io.mockk.every
 import io.mockk.spyk
-import java.io.IOException
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.*
@@ -12,11 +11,13 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
+import org.stellar.sdk.requests.ErrorResponse
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.SuspendTest
 import org.stellar.walletsdk.TXN_XDR_CREATE_ACCOUNT
+import org.stellar.walletsdk.extension.buildFeeBumpTransaction
 import org.stellar.walletsdk.helpers.objectFromJsonFile
 
 @DisplayName("buildFeeBumpTransaction")
@@ -30,7 +31,7 @@ internal class BuildFeeBumpTransactionTest : SuspendTest() {
   fun `throws error if fee account does not exist`() {
     val errorMessage = "was not found"
 
-    every { server.accounts().account(any() as String) } throws IOException("Test message")
+    every { server.accounts().account(any() as String) } throws ErrorResponse(404, "")
 
     val exception =
       assertFailsWith<Exception>(

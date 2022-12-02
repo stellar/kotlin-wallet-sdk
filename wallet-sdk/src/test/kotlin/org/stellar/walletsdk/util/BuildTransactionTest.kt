@@ -2,7 +2,6 @@ package org.stellar.walletsdk.util
 
 import io.mockk.every
 import io.mockk.spyk
-import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -12,8 +11,10 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
+import org.stellar.sdk.requests.ErrorResponse
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.extension.buildTransaction
 
 @DisplayName("buildTransaction")
 internal class BuildTransactionTest : SuspendTest() {
@@ -24,7 +25,7 @@ internal class BuildTransactionTest : SuspendTest() {
   fun `throws error if source account does not exist`() {
     val errorMessage = "was not found"
 
-    every { server.accounts().account(any() as String) } throws IOException("Test message")
+    every { server.accounts().account(any() as String) } throws ErrorResponse(404, "")
 
     val exception =
       assertFailsWith<Exception>(

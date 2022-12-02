@@ -4,11 +4,11 @@ import org.stellar.sdk.*
 import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.MemoType
-import org.stellar.walletsdk.exception.AccountNotFoundException
-import org.stellar.walletsdk.exception.InvalidStartingBalanceException
-import org.stellar.walletsdk.exception.OperationsLimitExceededException
-import org.stellar.walletsdk.exception.TransactionSubmitFailedException
+import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.accountByAddress
+import org.stellar.walletsdk.extension.accountOperations
+import org.stellar.walletsdk.extension.buildTransaction
+import org.stellar.walletsdk.extension.createTransactionBuilder
 import org.stellar.walletsdk.recovery.Recovery
 import org.stellar.walletsdk.util.*
 
@@ -326,24 +326,20 @@ class Wallet(
    * @return formatted account information
    *
    * @throws [AccountNotFoundException] when account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
-    try {
-      val account = serverInstance.accountByAddress(accountAddress)
-      val balances = formatAccountBalances(account, serverInstance)
+    val account = serverInstance.accountByAddress(accountAddress)
+    val balances = formatAccountBalances(account, serverInstance)
 
-      // TODO: add accountDetails
+    // TODO: add accountDetails
 
-      return AccountInfo(
-        publicKey = account.accountId,
-        assets = balances.assets,
-        liquidityPools = balances.liquidityPools,
-        reservedNativeBalance = account.reservedBalance()
-      )
-    } catch (e: Exception) {
-      // TODO: Is there a way to check if response is 404 (account not found)?
-      throw e
-    }
+    return AccountInfo(
+      publicKey = account.accountId,
+      assets = balances.assets,
+      liquidityPools = balances.liquidityPools,
+      reservedNativeBalance = account.reservedBalance()
+    )
   }
 
   /**
@@ -358,6 +354,8 @@ class Wallet(
    * @return a list of formatted operations
    *
    * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
+   * @throws [AccountNotFoundException] when account is not found
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun getHistory(
     accountAddress: String,
@@ -366,20 +364,8 @@ class Wallet(
     cursor: String? = null,
     includeFailed: Boolean? = null
   ): List<WalletOperation<OperationResponse>> {
-    if (limit != null && limit > 200) {
-      throw OperationsLimitExceededException()
+    return server.accountOperations(accountAddress, limit, order, cursor, includeFailed).map {
+      formatStellarOperation(accountAddress, it)
     }
-
-    return server
-      .operations()
-      .forAccount(accountAddress)
-      .limit(limit ?: 10)
-      .order(order?.builderEnum)
-      .cursor(cursor)
-      .includeFailed(includeFailed ?: false)
-      .includeTransactions(true)
-      .execute()
-      .records
-      .map { formatStellarOperation(accountAddress, it) }
   }
 }
