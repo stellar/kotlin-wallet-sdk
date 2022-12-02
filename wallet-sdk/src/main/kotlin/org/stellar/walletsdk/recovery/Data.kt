@@ -29,7 +29,8 @@ data class RecoveryAccount(
 
 @Serializable data class RecoveryIdentities(val identities: List<RecoveryAccountIdentity>)
 
-@Serializable data class RecoveryAccountRole(val role: String, val authenticated: Boolean?)
+@Serializable
+data class RecoveryAccountRole(val role: String, val authenticated: Boolean? = null)
 
 @Serializable data class RecoveryAccountSigner(val key: String)
 

@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import java.lang.Exception
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient

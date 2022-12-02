@@ -1,5 +1,7 @@
 package org.stellar.walletsdk.exception
 
+import org.stellar.walletsdk.anchor.AnchorTransaction
+
 sealed class AnchorAssetException(message: String) : WalletException(message)
 
 class AssetNotAcceptedForDepositException(assetCode: String) :
@@ -16,3 +18,11 @@ class AssetNotEnabledForWithdrawalException(assetCode: String) :
 
 class AssetNotSupportedException(assetCode: String) :
   AnchorAssetException("Asset $assetCode is not supported")
+
+class IncorrectTransactionStatusException(
+  val transaction: AnchorTransaction,
+  expectedStatus: String
+) :
+  WalletException(
+    "Incorrect status of transaction ${transaction.id}. Expected status to be $expectedStatus and transaction has status ${transaction.status}"
+  )
