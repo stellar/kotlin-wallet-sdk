@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.auth
 
+import mu.KotlinLogging
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
@@ -30,6 +31,8 @@ class Auth(
   private val network: Network = Network.TESTNET,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
+  private val log = KotlinLogging.logger {}
+
   /**
    * Authenticates to an external server.
    *
@@ -96,6 +99,10 @@ class Auth(
     }
 
     authURL.build()
+
+    log.debug {
+      "Challenge request: account = $accountAddress, memo = $memoId, client_domain = $clientDomain"
+    }
 
     val request = OkHttpUtils.buildStringGetRequest(authURL.toString())
 
@@ -173,6 +180,8 @@ class Auth(
       if (jsonResponse.token.isBlank()) {
         throw MissingTokenException
       }
+
+      log.debug { "Auth token: ${jsonResponse.token.take(8)}..." }
 
       return jsonResponse.token
     }
