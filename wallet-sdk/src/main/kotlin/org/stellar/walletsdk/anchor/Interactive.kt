@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.internal.toImmutableMap
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.StellarToml
@@ -49,20 +50,13 @@ class Interactive(
    */
   suspend fun withdraw(
     accountAddress: String,
-    assetCode: String,
+    assetId: IssuedAssetId,
     authToken: String,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
-    return flow(
-      accountAddress,
-      assetCode,
-      authToken,
-      extraFields,
-      fundsAccountAddress,
-      "withdraw"
-    ) {
-      it.withdraw[assetCode]
+    return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "withdraw") {
+      it.withdraw[assetId.code]
     }
   }
 
@@ -85,13 +79,13 @@ class Interactive(
    */
   suspend fun deposit(
     accountAddress: String,
-    assetCode: String,
+    assetId: IssuedAssetId,
     authToken: String,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
-    return flow(accountAddress, assetCode, authToken, extraFields, fundsAccountAddress, "deposit") {
-      it.deposit[assetCode]
+    return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "deposit") {
+      it.deposit[assetId.code]
     }
   }
 
@@ -110,7 +104,7 @@ class Interactive(
    */
   private suspend fun flow(
     accountAddress: String,
-    assetCode: String,
+    assetId: IssuedAssetId,
     authToken: String,
     extraFields: Map<String, String>?,
     fundsAccountAddress: String?,
@@ -146,22 +140,23 @@ class Interactive(
 
     // Check if deposit/withdraw is enabled for the asset
 
-    val asset = assetGet(serviceInfo) ?: throw AssetNotAcceptedForDepositException(assetCode)
+    val asset = assetGet(serviceInfo) ?: throw AssetNotAcceptedForDepositException(assetId)
 
     if (!asset.enabled) {
-      throw AssetNotEnabledForDepositException(assetCode)
+      throw AssetNotEnabledForDepositException(assetId)
     }
 
     val requestParams = mutableMapOf<String, String>()
     val account = fundsAccountAddress ?: accountAddress
-    requestParams["account"] = account
-    requestParams["asset_code"] = assetCode
+    requestParams["account"] = fundsAccountAddress ?: accountAddress
+    requestParams["asset_code"] = assetId.code
+    requestParams["asset_issuer"] = assetId.issuer
 
     if (extraFields != null) {
       requestParams += extraFields
     }
 
-    log.debug { "Interactive $type request: account = $account, asset_code = $assetCode" }
+    log.debug { "Interactive $type request: account = $account, asset_code = ${assetId.code}" }
 
     // Get SEP-24 anchor response
     val requestUrl = "$transferServerEndpoint/transactions/${type}/interactive"

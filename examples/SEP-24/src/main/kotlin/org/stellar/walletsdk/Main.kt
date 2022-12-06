@@ -8,6 +8,7 @@ import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
+import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.util.SchemeUtil
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
@@ -18,10 +19,11 @@ private val myKey =
 private val myAddress = KeyPair.fromSecretSeed(myKey).accountId
 
 private const val useLocal = false
-private val assetCode = if (useLocal) "USDC" else "SRT"
-private val assetIssuer =
-  if (useLocal) "GDQOE23CFSUMSVQK4Y5JHPPYK73VYCNHZHA7ENKCV37P6SUEO6XQBKPP"
-  else "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
+private val SRT = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
+private val USDC = IssuedAssetId("SRT", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
+private val USDC_ANCHOR_PLATFORM =
+  IssuedAssetId("USDC", "GDQOE23CFSUMSVQK4Y5JHPPYK73VYCNHZHA7ENKCV37P6SUEO6XQBKPP")
+private val asset = if (useLocal) USDC_ANCHOR_PLATFORM else USDC
 private val homeDomain = if (useLocal) "localhost:8080" else "testanchor.stellar.org"
 private val scheme = if (useLocal) "http" else "https"
 
@@ -55,7 +57,7 @@ suspend fun main() {
 
   // Create add trustline transaction for an asset. This allows user account to receive trusted
   // asset.
-  val addTrustline = wallet.addAssetSupport(account.address, assetCode, assetIssuer)
+  val addTrustline = wallet.addAssetSupport(account.address, asset)
 
   // Sign and send transaction
   println("Adding trustline...")
@@ -66,8 +68,7 @@ suspend fun main() {
   val token = anchor.auth(info, WalletSignerImpl(account)).authenticate(account.address)
 
   // Start interactive deposit
-  val deposit =
-    anchor.interactive().deposit(account.address, assetCode = assetCode, authToken = token)
+  val deposit = anchor.interactive().deposit(account.address, asset, authToken = token)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -92,8 +93,7 @@ suspend fun main() {
   println("Successful deposit")
 
   // Start interactive withdrawal
-  val withdrawal =
-    anchor.interactive().withdraw(account.address, assetCode = assetCode, authToken = token)
+  val withdrawal = anchor.interactive().withdraw(account.address, asset, authToken = token)
 
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
@@ -111,8 +111,7 @@ suspend fun main() {
   val transfer =
     wallet.transfer(
       transaction,
-      assetIssuer,
-      assetCode,
+      asset,
     )
 
   transfer.sign(account)

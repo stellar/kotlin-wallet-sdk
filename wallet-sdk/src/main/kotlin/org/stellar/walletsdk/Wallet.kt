@@ -5,6 +5,9 @@ import org.stellar.sdk.*
 import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.anchor.MemoType
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
+import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.asset.StellarAssetId
+import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.recovery.Recovery
@@ -96,8 +99,7 @@ class Wallet(
    * Add an asset (trustline) to the account. This transaction can be sponsored.
    *
    * @param sourceAddress Stellar address of the account that is opting-in for the asset
-   * @param assetCode Identifying code of the asset
-   * @param assetIssuer Stellar address of the asset issuer
+   * @param asset Target asset
    * @param trustLimit optional The limit of the trustline. Default value is maximum supported.
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    *
@@ -107,16 +109,15 @@ class Wallet(
    */
   suspend fun addAssetSupport(
     sourceAddress: String,
-    assetCode: String,
-    assetIssuer: String,
+    asset: IssuedAssetId,
     trustLimit: String = Long.MAX_VALUE.toBigDecimal().movePointLeft(7).toPlainString(),
     sponsorAddress: String = ""
   ): Transaction {
     val isSponsored = sponsorAddress.isNotBlank()
 
-    val asset = ChangeTrustAsset.createNonNativeAsset(assetCode, assetIssuer)
+    val stellarAsset = ChangeTrustAsset.createNonNativeAsset(asset.code, asset.issuer)
     val changeTrustOp: ChangeTrustOperation =
-      ChangeTrustOperation.Builder(asset, trustLimit).setSourceAccount(sourceAddress).build()
+      ChangeTrustOperation.Builder(stellarAsset, trustLimit).setSourceAccount(sourceAddress).build()
 
     val operations: List<Operation> =
       if (isSponsored) {
@@ -126,8 +127,7 @@ class Wallet(
       }
 
     log.debug {
-      "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, assetCode = $assetCode, " +
-        "assetIssuer = $assetIssuer, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
+      "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, asset=$asset, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
     }
 
     return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
@@ -137,19 +137,14 @@ class Wallet(
    * Remove an asset (trustline) from the account.
    *
    * @param sourceAddress Stellar address of the account that is opting-out of the asset
-   * @param assetCode Identifying code of the asset
-   * @param assetIssuer Stellar address of the asset issuer
+   * @param assetId Target asset
    *
    * @return transaction
    *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  suspend fun removeAssetSupport(
-    sourceAddress: String,
-    assetCode: String,
-    assetIssuer: String
-  ): Transaction {
-    return addAssetSupport(sourceAddress, assetCode, assetIssuer, "0")
+  suspend fun removeAssetSupport(sourceAddress: String, assetId: IssuedAssetId): Transaction {
+    return addAssetSupport(sourceAddress, assetId, "0")
   }
 
   /**
@@ -216,8 +211,7 @@ class Wallet(
    *
    * @param sourceAddress Stellar address of account making a transfer
    * @param destinationAddress Stellar address of account receiving a transfer
-   * @param assetIssuer issuer of asset to transfer
-   * @param assetCode code of asset to transfer
+   * @param assetId: Target asset id
    * @param amount amount of asset to transfer
    * @param memo optional memo
    *
@@ -226,17 +220,14 @@ class Wallet(
   private suspend fun transfer(
     sourceAddress: String,
     destinationAddress: String,
-    assetIssuer: String,
-    assetCode: String,
+    assetId: StellarAssetId,
     amount: String,
     memo: Pair<MemoType, String>?
   ): Transaction {
     val transactionBuilder =
       createTransactionBuilder(sourceAddress, maxBaseFeeInStroops, server, network)
 
-    val asset = Asset.create(null, assetCode, assetIssuer)
-
-    val payment = PaymentOperation.Builder(destinationAddress, asset, amount).build()
+    val payment = PaymentOperation.Builder(destinationAddress, assetId.toAsset(), amount).build()
 
     memo?.also { transactionBuilder.addMemo(it.first.mapper(it.second)) }
 
@@ -260,8 +251,7 @@ class Wallet(
    */
   suspend fun transfer(
     transaction: WithdrawalTransaction,
-    assetIssuer: String,
-    assetCode: String,
+    assetId: StellarAssetId,
   ): Transaction {
     transaction.requireStatus("pending_user_transfer_start")
 
@@ -271,8 +261,7 @@ class Wallet(
         ?: throw InvalidDataException(
           "Missing withdrawal anchor account field in transaction $transaction"
         ),
-      assetIssuer,
-      assetCode,
+      assetId,
       transaction.amountIn
         ?: throw InvalidDataException("Missing amountIn field in transaction $transaction"),
       transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }

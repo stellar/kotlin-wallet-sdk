@@ -80,18 +80,14 @@ internal class WalletTest : SuspendTest() {
   inner class AddAssetSupport {
     @Test
     fun `defaults work`() {
-      val transaction = runBlocking {
-        wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
-      }
+      val transaction = runBlocking { wallet.addAssetSupport(ADDRESS_ACTIVE, USDC) }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
-      val transaction = runBlocking {
-        wallet.addAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
-      }
+      val transaction = runBlocking { wallet.addAssetSupport(ADDRESS_ACTIVE, USDC) }
 
       assertEquals(transaction.operations.size, 1)
     }
@@ -99,12 +95,7 @@ internal class WalletTest : SuspendTest() {
     @Test
     fun `there are 3 operations in sponsored transaction`() {
       val transaction = runBlocking {
-        wallet.addAssetSupport(
-          ADDRESS_ACTIVE,
-          USDC_ASSET_CODE,
-          USDC_ASSET_ISSUER,
-          sponsorAddress = ADDRESS_ACTIVE
-        )
+        wallet.addAssetSupport(ADDRESS_ACTIVE, USDC, sponsorAddress = ADDRESS_ACTIVE)
       }
 
       assertEquals(transaction.operations.size, 3)
@@ -116,18 +107,14 @@ internal class WalletTest : SuspendTest() {
   inner class RemoveAssetSupport {
     @Test
     fun `defaults work`() {
-      val transaction = runBlocking {
-        wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
-      }
+      val transaction = runBlocking { wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC) }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `trust limit is 0`() {
-      val transaction = runBlocking {
-        wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC_ASSET_CODE, USDC_ASSET_ISSUER)
-      }
+      val transaction = runBlocking { wallet.removeAssetSupport(ADDRESS_ACTIVE, USDC) }
       val trustLimit = (transaction.operations[0] as ChangeTrustOperation).limit
 
       assertEquals("0", trustLimit)
