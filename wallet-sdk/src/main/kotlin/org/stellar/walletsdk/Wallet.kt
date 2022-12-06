@@ -125,10 +125,8 @@ class Wallet(
         listOfNotNull(changeTrustOp)
       }
 
-    val logLabel = if (trustLimit == "0") "Remove" else "Add"
-
     log.debug {
-      "$logLabel asset txn: sourceAddress = $sourceAddress, assetCode = $assetCode, " +
+      "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, assetCode = $assetCode, " +
         "assetIssuer = $assetIssuer, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
     }
 
@@ -189,10 +187,8 @@ class Wallet(
         listOfNotNull(addSignerOp)
       }
 
-    val logLabel = if (signerWeight == 0) "Remove" else "Add"
-
     log.debug {
-      "$logLabel account signer txn: sourceAddress = $sourceAddress, signerAddress = " +
+      "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = $sourceAddress, signerAddress = " +
         "$signerAddress, signerWeight = $signerWeight, sponsorAddress = $sponsorAddress"
     }
 

@@ -1,6 +1,5 @@
 package org.stellar.walletsdk.extension
 
-import mu.KotlinLogging
 import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.Server
 import org.stellar.sdk.requests.ErrorResponse
@@ -11,8 +10,6 @@ import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.exception.OperationsLimitExceededException
 import org.stellar.walletsdk.util.formatAmount
-
-private val log = KotlinLogging.logger {}
 
 private fun <T> safeHorizonCall(body: () -> T): T {
   try {
@@ -36,8 +33,6 @@ private fun <T> safeHorizonCall(body: () -> T): T {
  */
 @Throws(HorizonRequestFailedException::class)
 suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
-  log.debug { "Server account request: accountAddress = $accountAddress" }
-
   return safeHorizonCall { accounts().account(accountAddress) }
 }
 
@@ -55,8 +50,6 @@ suspend fun Server.liquidityPoolInfo(
   liquidityPoolId: LiquidityPoolID,
   cachedAssetInfo: MutableMap<String, CachedAsset>
 ): LiquidityPoolInfo {
-  log.debug { "Server liquidity pool request: liquidityPoolId = $liquidityPoolId" }
-
   val response: LiquidityPoolResponse = safeHorizonCall {
     liquidityPools().liquidityPool(liquidityPoolId)
   }
@@ -127,11 +120,6 @@ suspend fun Server.accountOperations(
   cursor: String? = null,
   includeFailed: Boolean? = null
 ): List<OperationResponse> {
-  log.debug {
-    "Server account operations: accountAddress = $accountAddress, limit = $limit, order" +
-      " = $order, cursor = $cursor, includeFailed = $includeFailed"
-  }
-
   if (limit != null && limit > 200) {
     throw OperationsLimitExceededException()
   }

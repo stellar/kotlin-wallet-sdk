@@ -61,7 +61,9 @@ class Interactive(
       extraFields,
       fundsAccountAddress,
       "withdraw"
-    ) { it.withdraw[assetCode] }
+    ) {
+      it.withdraw[assetCode]
+    }
   }
 
   /**
@@ -168,11 +170,7 @@ class Interactive(
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
-      val responseJson = response.toJson<InteractiveFlowResponse>()
-
-      log.debug { "Interactive $type response: url = ${responseJson.url}" }
-
-      responseJson
+      response.toJson()
     }
   }
 }
