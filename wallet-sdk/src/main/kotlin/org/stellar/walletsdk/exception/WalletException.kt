@@ -2,7 +2,7 @@ package org.stellar.walletsdk.exception
 
 import okhttp3.Response
 import org.stellar.sdk.requests.ErrorResponse
-import org.stellar.walletsdk.util.toJsonOrNull
+import org.stellar.walletsdk.json.toJsonOrNull
 
 data class AnchorErrorResponse(val error: String)
 

@@ -1,11 +1,10 @@
-package org.stellar.walletsdk.util
+package org.stellar.walletsdk.json
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 import okhttp3.Response
-import org.stellar.walletsdk.exception.AnchorErrorResponse
 
 private val log = KotlinLogging.logger {}
 
@@ -24,11 +23,9 @@ internal inline fun <reified T : Any> T.toJson(format: Json = defaultJson): Stri
   return format.encodeToString(this)
 }
 
-internal inline fun <reified T> Response.toJsonOrNull(
-  format: Json = defaultJson
-): AnchorErrorResponse? {
+internal inline fun <reified T> Response.toJsonOrNull(format: Json = defaultJson): T? {
   return try {
-    this.body!!.string().fromJson(format)
+    this.toJson<T>(format)
   } catch (e: Exception) {
     null
   }

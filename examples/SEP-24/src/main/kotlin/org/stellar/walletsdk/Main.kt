@@ -7,6 +7,7 @@ import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.anchor.Anchor
+import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.util.SchemeUtil
@@ -98,27 +99,25 @@ suspend fun main() {
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
 
-  var transaction: WithdrawalTransaction
+  var transaction: AnchorTransaction
 
   // Wait for user input
   do {
     // Get transaction info
-    transaction = anchor.getTransactionStatus(withdrawal.id, token, info) as WithdrawalTransaction
+    transaction = anchor.getTransactionStatus(withdrawal.id, token, info)
     delay(5.seconds)
   } while (transaction.status != "pending_user_transfer_start")
 
   // Send transaction with transfer
   val transfer =
     wallet.transfer(
-      transaction,
+      transaction as WithdrawalTransaction,
       asset,
     )
 
   transfer.sign(account)
 
   wallet.submitTransaction(transfer)
-
-  status = ""
 
   do {
     transaction = anchor.getTransactionStatus(withdrawal.id, token, info) as WithdrawalTransaction

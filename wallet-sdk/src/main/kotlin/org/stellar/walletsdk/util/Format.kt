@@ -9,9 +9,7 @@ import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.sdk.responses.operations.PathPaymentBaseOperationResponse
 import org.stellar.sdk.responses.operations.PaymentOperationResponse
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.anchor.AnchorTransaction
-import org.stellar.walletsdk.anchor.DepositTransaction
-import org.stellar.walletsdk.anchor.WithdrawalTransaction
+import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.extension.liquidityPoolInfo
 import org.stellar.walletsdk.extension.reservedBalance
 
@@ -224,11 +222,18 @@ fun formatAnchorTransaction(
   val opBuilder = WalletOperationBuilder<AnchorTransaction>().fromTransaction(transaction, asset)
 
   return opBuilder
-    .amount(transaction.amountOut ?: "")
+    .amount(
+      when (transaction) {
+        is ProcessingAnchorTransaction -> transaction.amountOut
+        else -> ""
+      }
+    )
     .type(
       when (transaction) {
         is DepositTransaction -> WalletOperationType.DEPOSIT
         is WithdrawalTransaction -> WalletOperationType.WITHDRAW
+        is IncompleteDepositTransaction -> WalletOperationType.DEPOSIT
+        is IncompleteWithdrawalTransaction -> WalletOperationType.WITHDRAW
       }
     )
     .build()
