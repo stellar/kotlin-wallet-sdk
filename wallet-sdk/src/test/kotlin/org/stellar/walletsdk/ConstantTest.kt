@@ -2,6 +2,7 @@ package org.stellar.walletsdk
 
 import org.stellar.sdk.ClaimClaimableBalanceOperation
 import org.stellar.sdk.CreateAccountOperation
+import org.stellar.walletsdk.asset.IssuedAssetId
 
 const val HORIZON_URL = "https://horizon-testnet.stellar.org"
 const val NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
@@ -15,16 +16,14 @@ const val ADDRESS_INACTIVE = "GAW7QECBN2OI4LS4UUA3FO65Y2QPGQS3SPMTMRYK5ZX4IRZXXJ
 const val ADDRESS_BASIC = "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB"
 const val ADDRESS_FULL = "GC5UMI2LAP4XF677VIN2EG7WRLPPPUHCE24JA6GTKETFT5IRJCTXJIFS"
 
-const val USDC_ASSET_CODE = "USDC"
-const val USDC_ASSET_ISSUER = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+val ASSET_USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
 const val AUTH_ENDPOINT = "https://testanchor.stellar.org/auth"
 const val AUTH_HOME_DOMAIN = "testanchor.stellar.org"
 const val AUTH_CLIENT_DOMAIN = "demo-wallet-server.stellar.org"
 const val AUTH_CLIENT_DOMAIN_URL = "https://demo-wallet-server.stellar.org/sign"
 
-const val ANCHOR_ASSET_CODE = "SRT"
-const val ANCHOR_ASSET_ISSUER = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
+val ASSET_SRT = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
 const val ANCHOR_SERVICE_URL = "https://testanchor.stellar.org/sep24"
 const val ANCHOR_HOME_DOMAIN = "testanchor.stellar.org"
 

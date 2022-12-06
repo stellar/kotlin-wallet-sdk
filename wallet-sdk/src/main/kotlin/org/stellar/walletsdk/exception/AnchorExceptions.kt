@@ -1,22 +1,23 @@
 package org.stellar.walletsdk.exception
 
 import org.stellar.walletsdk.anchor.AnchorTransaction
+import org.stellar.walletsdk.asset.IssuedAssetId
 
 sealed class AnchorAssetException(message: String) : WalletException(message)
 
-class AssetNotAcceptedForDepositException(assetCode: String) :
+class AssetNotAcceptedForDepositException(assetCode: IssuedAssetId) :
   AnchorAssetException("Asset $assetCode is not accepted for deposits")
 
-class AssetNotAcceptedForWithdrawalException(assetCode: String) :
+class AssetNotAcceptedForWithdrawalException(assetCode: IssuedAssetId) :
   AnchorAssetException("Asset $assetCode is not accepted for withdrawals")
 
-class AssetNotEnabledForDepositException(assetCode: String) :
+class AssetNotEnabledForDepositException(assetCode: IssuedAssetId) :
   AnchorAssetException("Asset $assetCode is not enabled for deposits")
 
-class AssetNotEnabledForWithdrawalException(assetCode: String) :
+class AssetNotEnabledForWithdrawalException(assetCode: IssuedAssetId) :
   AnchorAssetException("Asset $assetCode is not enabled for withdrawals")
 
-class AssetNotSupportedException(assetCode: String) :
+class AssetNotSupportedException(assetCode: IssuedAssetId) :
   AnchorAssetException("Asset $assetCode is not supported")
 
 class IncorrectTransactionStatusException(

@@ -7,6 +7,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.*
@@ -192,7 +194,7 @@ class Anchor(
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
   suspend fun getHistory(
-    assetCode: String,
+    assetId: IssuedAssetId,
     authToken: String,
     toml: Map<String, Any>,
     limit: Int? = null,
@@ -202,10 +204,10 @@ class Anchor(
   ): List<WalletOperation<AnchorTransaction>> {
     val anchorCurrency =
       ((toml as HashMap)["CURRENCIES"] as List<*>).filterIsInstance<HashMap<*, *>>().find {
-        it["code"] == assetCode
+        it["code"] == assetId.code
       }
-        ?: throw AssetNotSupportedException(assetCode)
-    val asset = Asset.create("$assetCode:$anchorCurrency[\"issuer\"]")
+        ?: throw AssetNotSupportedException(assetId)
+    val asset = assetId.toAsset()
 
     val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointHttpUrl = transferServerEndpoint.toHttpUrl()
@@ -219,7 +221,7 @@ class Anchor(
 
     // Add query params
     val queryParams = mutableMapOf<String, String>()
-    queryParams["asset_code"] = assetCode
+    queryParams["asset_code"] = assetId.code
     limit?.run { queryParams["limit"] = this.toString() }
     pagingId?.run { queryParams["paging_id"] = this }
     noOlderThan?.run { queryParams["no_older_than"] = this }
@@ -231,7 +233,7 @@ class Anchor(
     val finalStatusList = listOf("completed", "refunded")
 
     log.debug {
-      "Anchor account's formatted history request: assetCode = $assetCode, authToken = " +
+      "Anchor account's formatted history request: asset = $asset, authToken = " +
         "${authToken.take(8)}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
         "lang = $lang"
     }
