@@ -11,6 +11,8 @@ import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.SchemeUtil
 import org.stellar.walletsdk.util.toJson
 
+private val log = KotlinLogging.logger {}
+
 /**
  * Authenticate to an external server using
  * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
@@ -31,8 +33,6 @@ class Auth(
   private val network: Network = Network.TESTNET,
   private val httpClient: OkHttpClient = OkHttpClient()
 ) {
-  private val log = KotlinLogging.logger {}
-
   /**
    * Authenticates to an external server.
    *

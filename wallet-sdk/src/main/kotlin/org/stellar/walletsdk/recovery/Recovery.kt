@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.recovery
 
+import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import org.stellar.sdk.*
 import org.stellar.sdk.xdr.DecoratedSignature
@@ -13,6 +14,8 @@ import org.stellar.walletsdk.extension.createTransactionBuilder
 import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.GlobalConfig.base64Decoder
 import org.stellar.walletsdk.util.toJson
+
+private val log = KotlinLogging.logger {}
 
 class Recovery(
   private val server: Server,
@@ -56,6 +59,11 @@ class Recovery(
     val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
     val request = OkHttpUtils.makePostRequest(requestUrl, requestParams, it.authToken)
 
+    log.debug {
+      "Recovery server signature request: accountAddress = $accountAddress, " +
+        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.take(8)}..."
+    }
+
     return client.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
@@ -98,6 +106,11 @@ class Recovery(
           RecoveryIdentities(identities = accountIdentity),
           authToken
         )
+
+      log.debug {
+        "Recovery server enroll request: accountAddress = $accountAddress, homeDomain =" +
+          " ${it.homeDomain}, authToken = ${authToken.take(8)}..."
+      }
 
       client.newCall(request).execute().use { response ->
         if (!response.isSuccessful) throw ServerRequestFailedException(response)

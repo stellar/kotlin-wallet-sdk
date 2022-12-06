@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -10,6 +11,8 @@ import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.toJson
+
+private val log = KotlinLogging.logger {}
 
 /**
  * Build on/off ramps with anchors.
@@ -87,6 +90,8 @@ class Anchor(
 
     val infoUrl = urlBuilder.build().toString()
 
+    log.debug { "Anchor services /info request: serviceUrl = $serviceUrl" }
+
     val request = Request.Builder().url(infoUrl).build()
 
     return httpClient.newCall(request).execute().use { response ->
@@ -127,6 +132,8 @@ class Anchor(
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
+    log.debug { "Anchor account's transaction by ID request: transactionId = $transactionId" }
+
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
@@ -155,6 +162,10 @@ class Anchor(
     val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
     val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
+
+    log.debug {
+      "Anchor account's all transactions request: assetCode = $assetCode, authToken = ${authToken.take(8)}"
+    }
 
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
@@ -218,6 +229,12 @@ class Anchor(
 
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl.build().toString(), authToken)
     val finalStatusList = listOf("completed", "refunded")
+
+    log.debug {
+      "Anchor account's formatted history request: assetCode = $assetCode, authToken = " +
+        "${authToken.take(8)}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
+        "lang = $lang"
+    }
 
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
