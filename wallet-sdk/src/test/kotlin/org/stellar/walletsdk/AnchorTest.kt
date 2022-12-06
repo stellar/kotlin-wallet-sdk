@@ -66,7 +66,7 @@ internal class AnchorTest {
           .interactive()
           .deposit(
             accountAddress = ADDRESS_ACTIVE,
-            SRT,
+            ASSET_SRT,
             authToken = authToken,
           )
       }
@@ -87,7 +87,7 @@ internal class AnchorTest {
           .deposit(
             accountAddress = ADDRESS_ACTIVE,
             fundsAccountAddress = ADDRESS_ACTIVE_TWO,
-            assetId = SRT,
+            assetId = ASSET_SRT,
             authToken = authToken,
           )
       }
@@ -111,7 +111,7 @@ internal class AnchorTest {
           .interactive()
           .withdraw(
             accountAddress = ADDRESS_ACTIVE,
-            SRT,
+            ASSET_SRT,
             authToken = authToken,
           )
       }
@@ -132,7 +132,7 @@ internal class AnchorTest {
           .deposit(
             accountAddress = ADDRESS_ACTIVE,
             fundsAccountAddress = ADDRESS_ACTIVE_TWO,
-            assetId = SRT,
+            assetId = ASSET_SRT,
             authToken = authToken,
           )
       }
