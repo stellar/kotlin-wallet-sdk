@@ -4,6 +4,7 @@ import kotlin.test.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.responses.AccountResponse
+import org.stellar.walletsdk.extension.availableNativeBalance
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
 @DisplayName("accountAvailableNativeBalance")

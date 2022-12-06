@@ -61,9 +61,7 @@ class Interactive(
       extraFields,
       fundsAccountAddress,
       "withdraw"
-    ) {
-      it.withdraw[assetCode]
-    }
+    ) { it.withdraw[assetCode] }
   }
 
   /**

@@ -13,6 +13,7 @@ import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.DepositTransaction
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.extension.liquidityPoolInfo
+import org.stellar.walletsdk.extension.reservedBalance
 
 /**
  * Format account's balances (assets and liquidity pools).

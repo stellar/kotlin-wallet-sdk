@@ -3,7 +3,6 @@ package org.stellar.walletsdk.extension
 import org.stellar.sdk.*
 import org.stellar.walletsdk.exception.AccountNotEnoughBalanceException
 import org.stellar.walletsdk.exception.HorizonRequestFailedException
-import org.stellar.walletsdk.util.availableNativeBalance
 import org.stellar.walletsdk.util.stroopsToLumens
 
 /**
