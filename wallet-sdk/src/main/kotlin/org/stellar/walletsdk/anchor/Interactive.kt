@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import okhttp3.internal.toImmutableMap
 import org.stellar.sdk.Server
@@ -8,6 +9,8 @@ import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.OkHttpUtils
 import org.stellar.walletsdk.util.StellarToml
 import org.stellar.walletsdk.util.toJson
+
+private val log = KotlinLogging.logger {}
 
 /**
  * Interactive flow for deposit and withdrawal using SEP-24.
@@ -58,7 +61,9 @@ class Interactive(
       extraFields,
       fundsAccountAddress,
       "withdraw"
-    ) { it.withdraw[assetCode] }
+    ) {
+      it.withdraw[assetCode]
+    }
   }
 
   /**
@@ -148,12 +153,15 @@ class Interactive(
     }
 
     val requestParams = mutableMapOf<String, String>()
-    requestParams["account"] = fundsAccountAddress ?: accountAddress
+    val account = fundsAccountAddress ?: accountAddress
+    requestParams["account"] = account
     requestParams["asset_code"] = assetCode
 
     if (extraFields != null) {
       requestParams += extraFields
     }
+
+    log.debug { "Interactive $type request: account = $account, asset_code = $assetCode" }
 
     // Get SEP-24 anchor response
     val requestUrl = "$transferServerEndpoint/transactions/${type}/interactive"

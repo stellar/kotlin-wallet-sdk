@@ -12,12 +12,14 @@ dependencies {
   api(libs.java.stellar.sdk)
   api(libs.kotlin.serialization.json)
   api(libs.okhttp3)
+  api(libs.kotlin.logging)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.mockk)
   testImplementation(libs.okhttp3.mockserver)
   testImplementation(libs.google.gson)
+  testImplementation(libs.logback.classic)
 }
 
 val dokkaOutputDir = buildDir.resolve("dokka")
@@ -34,10 +36,11 @@ val javadocJar =
     from(dokkaOutputDir)
   }
 
-val sourcesJar by tasks.registering(Jar::class) {
-  archiveClassifier.set("sources")
-  from(kotlin.sourceSets.main.get().kotlin)
-}
+val sourcesJar by
+  tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(kotlin.sourceSets.main.get().kotlin)
+  }
 
 publishing {
   repositories {

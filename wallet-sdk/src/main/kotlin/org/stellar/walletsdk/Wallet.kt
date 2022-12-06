@@ -1,16 +1,16 @@
 package org.stellar.walletsdk
 
+import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.anchor.MemoType
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.exception.*
-import org.stellar.walletsdk.extension.accountByAddress
-import org.stellar.walletsdk.extension.accountOperations
-import org.stellar.walletsdk.extension.buildTransaction
-import org.stellar.walletsdk.extension.createTransactionBuilder
+import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.recovery.Recovery
 import org.stellar.walletsdk.util.*
+
+private val log = KotlinLogging.logger {}
 
 /**
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
@@ -84,6 +84,11 @@ class Wallet(
         listOfNotNull(createAccountOp)
       }
 
+    log.debug {
+      "Fund txn: sourceAddress = $sourceAddress, destinationAddress = $destinationAddress, " +
+        "startBalance = $startBalance, sponsorAddress = $sponsorAddress"
+    }
+
     return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
   }
 
@@ -119,6 +124,11 @@ class Wallet(
       } else {
         listOfNotNull(changeTrustOp)
       }
+
+    log.debug {
+      "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, assetCode = $assetCode, " +
+        "assetIssuer = $assetIssuer, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
+    }
 
     return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
   }
@@ -177,7 +187,26 @@ class Wallet(
         listOfNotNull(addSignerOp)
       }
 
+    log.debug {
+      "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = $sourceAddress, signerAddress = " +
+        "$signerAddress, signerWeight = $signerWeight, sponsorAddress = $sponsorAddress"
+    }
+
     return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
+  }
+
+  /**
+   * Remove signer from the account.
+   *
+   * @param sourceAddress Stellar address of the account that is removing the signer
+   * @param signerAddress Stellar address of the signer that is removed
+   *
+   * @return transaction
+   *
+   * @throws [HorizonRequestFailedException] for Horizon exceptions
+   */
+  suspend fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
+    return addAccountSigner(sourceAddress, signerAddress, 0)
   }
 
   /**
@@ -251,20 +280,6 @@ class Wallet(
   }
 
   /**
-   * Remove signer from the account.
-   *
-   * @param sourceAddress Stellar address of the account that is removing the signer
-   * @param signerAddress Stellar address of the signer that is removed
-   *
-   * @return transaction
-   *
-   * @throws [HorizonRequestFailedException] for Horizon exceptions
-   */
-  suspend fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
-    return addAccountSigner(sourceAddress, signerAddress, 0)
-  }
-
-  /**
    * Submit transaction to the Stellar network.
    *
    * @param signedTransaction Signed transaction that is submitted
@@ -276,6 +291,13 @@ class Wallet(
   suspend fun submitTransaction(
     signedTransaction: Transaction,
   ): Boolean {
+    log.debug {
+      "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
+        "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
+        "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
+                .signatures.size}"
+    }
+
     val response = server.submitTransaction(signedTransaction)
 
     if (response.isSuccess) {
@@ -321,6 +343,10 @@ class Wallet(
 
     transactionBuilder.addOperations(operations)
 
+    log.debug {
+      "Lock master key txn: accountAddress = $accountAddress, sponsorAddress = $sponsorAddress"
+    }
+
     return transactionBuilder.build()
   }
 
@@ -337,6 +363,8 @@ class Wallet(
   suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
     val account = serverInstance.accountByAddress(accountAddress)
     val balances = formatAccountBalances(account, serverInstance)
+
+    log.debug { "Account info: accountAddress = $accountAddress" }
 
     // TODO: add accountDetails
 
@@ -369,6 +397,11 @@ class Wallet(
     cursor: String? = null,
     includeFailed: Boolean? = null
   ): List<WalletOperation<OperationResponse>> {
+    log.debug {
+      "Account history: accountAddress = $accountAddress, limit = $limit, order" +
+        " = $order, cursor = $cursor, includeFailed = $includeFailed"
+    }
+
     return server.accountOperations(accountAddress, limit, order, cursor, includeFailed).map {
       formatStellarOperation(accountAddress, it)
     }
