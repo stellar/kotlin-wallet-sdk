@@ -11,9 +11,9 @@ import org.stellar.walletsdk.WalletSigner
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.createTransactionBuilder
+import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.GlobalConfig.base64Decoder
-import org.stellar.walletsdk.util.toJson
 
 private val log = KotlinLogging.logger {}
 

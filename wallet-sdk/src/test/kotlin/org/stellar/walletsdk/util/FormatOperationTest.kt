@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlinx.serialization.Serializable
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -9,7 +10,7 @@ import org.stellar.sdk.Asset
 import org.stellar.sdk.responses.operations.*
 import org.stellar.walletsdk.WalletAsset
 import org.stellar.walletsdk.WalletOperationType
-import org.stellar.walletsdk.anchor.AnchorTransaction
+import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.helpers.sdkObjectFromJsonFile
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
@@ -28,7 +29,9 @@ data class StellarOperationsJson(
 @Serializable
 data class AnchorTransactionsJson(
   val deposit: AnchorTransaction,
-  val withdrawal: AnchorTransaction
+  val withdrawal: AnchorTransaction,
+  val incompleteDeposit: AnchorTransaction,
+  val incompleteWithdrawal: AnchorTransaction
 )
 
 internal class FormatOperationTest {
@@ -308,6 +311,33 @@ internal class FormatOperationTest {
       assertEquals(operation.account, "")
       assertEquals(operation.asset, listOf<WalletAsset>())
       assertEquals(operation.type, WalletOperationType.OTHER)
+    }
+  }
+
+  @Nested
+  @DisplayName("deserializeAnchorTransaction")
+  inner class DeserializeTransaction {
+    private val anchorTransactions =
+      sdkObjectFromJsonFile<AnchorTransactionsJson>("anchor_transactions.json")
+
+    @Test
+    fun deposit() {
+      assertIs<DepositTransaction>(anchorTransactions.deposit)
+    }
+
+    @Test
+    fun withdrawal() {
+      assertIs<WithdrawalTransaction>(anchorTransactions.withdrawal)
+    }
+
+    @Test
+    fun `incomplete deposit`() {
+      assertIs<IncompleteDepositTransaction>(anchorTransactions.incompleteDeposit)
+    }
+
+    @Test
+    fun `incomplete withdrawal`() {
+      assertIs<IncompleteWithdrawalTransaction>(anchorTransactions.incompleteWithdrawal)
     }
   }
 

@@ -27,3 +27,6 @@ object MissingTransactionException :
 object NetworkMismatchException : InvalidResponseException("Networks don't match")
 
 class InvalidDataException(message: String) : InvalidResponseException(message)
+
+class InvalidJsonException(reason: String, json: Any) :
+  InvalidResponseException("Invalid json response object: $reason. Json: $json")

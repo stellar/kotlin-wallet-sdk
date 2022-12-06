@@ -257,14 +257,10 @@ class Wallet(
 
     return transfer(
       transaction.from,
-      transaction.withdrawAnchorAccount
-        ?: throw InvalidDataException(
-          "Missing withdrawal anchor account field in transaction $transaction"
-        ),
+      transaction.withdrawAnchorAccount,
       assetId,
-      transaction.amountIn
-        ?: throw InvalidDataException("Missing amountIn field in transaction $transaction"),
-      transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }
+      transaction.amountIn,
+      transaction.withdrawalMemo.let { transaction.withdrawalMemoType to it }
     )
   }
 

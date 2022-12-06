@@ -6,8 +6,8 @@ import org.stellar.sdk.KeyPair
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.auth.ChallengeResponse
+import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.OkHttpUtils
-import org.stellar.walletsdk.util.toJson
 
 class InProcessWalletSigner : WalletSigner {
   override fun signWithClientAccount(txn: Transaction): Transaction {

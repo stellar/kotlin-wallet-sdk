@@ -2,6 +2,9 @@ package org.stellar.walletsdk.asset
 
 import org.stellar.sdk.Asset
 
+internal const val STELLAR_SCHEME = "stellar"
+internal const val FIAT_SCHEME = "iso4217"
+
 sealed interface AssetId {
   val id: String
   val scheme: String
@@ -11,7 +14,7 @@ sealed interface AssetId {
 
 sealed interface StellarAssetId : AssetId {
   override val scheme: String
-    get() = "stellar"
+    get() = STELLAR_SCHEME
 }
 
 data class IssuedAssetId(val code: String, val issuer: String) : StellarAssetId {
@@ -27,7 +30,7 @@ object NativeAssetId : StellarAssetId {
 @JvmInline
 value class FiatAssetId(override val id: String) : AssetId {
   override val scheme: String
-    get() = "iso4217"
+    get() = FIAT_SCHEME
 
   override fun toString() = sep38
 }
