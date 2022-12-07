@@ -11,9 +11,7 @@ class Stellar
 internal constructor(
   private val cfg: Config,
 ) {
-  private val server: Server = cfg.stellar.server
-  private val network: Network = cfg.stellar.network
-  private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
+  val server: Server = cfg.stellar.server
 
   fun account(): Account {
     return Account(cfg)
