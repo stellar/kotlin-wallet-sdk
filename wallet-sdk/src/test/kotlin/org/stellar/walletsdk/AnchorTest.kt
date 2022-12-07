@@ -3,15 +3,11 @@ package org.stellar.walletsdk
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.*
-import org.stellar.sdk.Network
-import org.stellar.sdk.Server
-import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.helpers.mapFromTomlFile
 
 internal class AnchorTest {
-  private val server = Server(HORIZON_URL)
-  private val network = Network(NETWORK_PASSPHRASE)
-  private val anchor = Anchor(server, network, AUTH_HOME_DOMAIN)
+  private val wallet = TestWallet
+  private val anchor = wallet.anchor(AUTH_HOME_DOMAIN)
   private val toml = mapFromTomlFile("stellar.toml")
 
   // NOTE: Tests are running on live test network for SRT asset
@@ -26,7 +22,7 @@ internal class AnchorTest {
 
     @Test
     fun `throws exception if TOML is not found`() {
-      val anchorInvalid = Anchor(server, network, ADDRESS_ACTIVE)
+      val anchorInvalid = wallet.anchor(ADDRESS_ACTIVE)
 
       assertThrows<Exception> { runBlocking { anchorInvalid.getInfo() } }
     }
@@ -57,10 +53,7 @@ internal class AnchorTest {
     @Test
     fun `get interactive deposit URL`() {
       val depositResponse = runBlocking {
-        val authToken =
-          anchor
-            .auth(toml = toml, walletSigner = InProcessWalletSigner())
-            .authenticate(ADDRESS_ACTIVE)
+        val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
 
         anchor
           .interactive()
@@ -77,10 +70,7 @@ internal class AnchorTest {
     @Test
     fun `get interactive deposit URL with different funds account`() {
       val depositResponse = runBlocking {
-        val authToken =
-          anchor
-            .auth(toml = toml, walletSigner = InProcessWalletSigner())
-            .authenticate(ADDRESS_ACTIVE)
+        val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
 
         anchor
           .interactive()
@@ -102,10 +92,7 @@ internal class AnchorTest {
     @Test
     fun `get interactive withdrawal URL`() {
       val depositResponse = runBlocking {
-        val authToken =
-          anchor
-            .auth(toml = toml, walletSigner = InProcessWalletSigner())
-            .authenticate(ADDRESS_ACTIVE)
+        val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
 
         anchor
           .interactive()
@@ -122,10 +109,7 @@ internal class AnchorTest {
     @Test
     fun `get interactive withdrawal URL with different funds account`() {
       val depositResponse = runBlocking {
-        val authToken =
-          anchor
-            .auth(toml = toml, walletSigner = InProcessWalletSigner())
-            .authenticate(ADDRESS_ACTIVE)
+        val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
 
         anchor
           .interactive()

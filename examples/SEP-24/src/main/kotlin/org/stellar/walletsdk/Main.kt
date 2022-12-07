@@ -4,13 +4,11 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.sdk.KeyPair
 import org.stellar.sdk.Network
-import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
-import org.stellar.walletsdk.util.SchemeUtil
+import org.stellar.walletsdk.auth.WalletSigner
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -29,23 +27,27 @@ private val homeDomain = if (useLocal) "localhost:8080" else "testanchor.stellar
 private val scheme = if (useLocal) "http" else "https"
 
 suspend fun main() {
-  if (useLocal) {
-    SchemeUtil.useHttp()
-  }
+  val signer = WalletSignerImpl()
+  val wallet =
+    Wallet(
+      StellarConfiguration.Testnet,
+      ApplicationConfiguration(WalletSignerImpl(), useHttp = useLocal)
+    )
 
-  // Create instance of server that allows to connect to Horizon
-  val server = Server("https://horizon-testnet.stellar.org")
-  val wallet = Wallet(server, Network.TESTNET)
+  // Create instance of stellar, account and transaction services
+  val stellar = wallet.stellar()
+  val account = wallet.stellar().account()
+  val transactionBuilder = wallet.stellar().transaction()
   // Generate new (user) account and fund it with 10 XLM from main account
-  val account = wallet.create()
-  val tx = wallet.fund(myAddress, account.address, "10")
+  val keypair = account.create()
+  val tx = transactionBuilder.fund(myAddress, keypair.address, "10")
 
   // Sign with your main account's key and send transaction to the network
   println("Registering new account")
   tx.sign(KeyPair.fromSecretSeed(myKey))
-  assert(wallet.submitTransaction(tx))
+  assert(stellar.submitTransaction(tx))
 
-  val anchor = Anchor(server, Network.TESTNET, homeDomain)
+  val anchor = wallet.anchor(homeDomain)
 
   // Get info from the anchor server
   val info = anchor.getInfo()
@@ -58,18 +60,18 @@ suspend fun main() {
 
   // Create add trustline transaction for an asset. This allows user account to receive trusted
   // asset.
-  val addTrustline = wallet.addAssetSupport(account.address, asset)
+  val addTrustline = transactionBuilder.addAssetSupport(keypair.address, asset)
 
   // Sign and send transaction
   println("Adding trustline...")
-  addTrustline.sign(account)
-  assert(wallet.submitTransaction(addTrustline))
+  addTrustline.sign(keypair)
+  assert(stellar.submitTransaction(addTrustline))
 
   // Authorizing
-  val token = anchor.auth(info, WalletSignerImpl(account)).authenticate(account.address)
+  val token = anchor.auth(info).authenticate(keypair.address)
 
   // Start interactive deposit
-  val deposit = anchor.interactive().deposit(account.address, asset, authToken = token)
+  val deposit = anchor.interactive().deposit(keypair.address, asset, authToken = token)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -94,7 +96,7 @@ suspend fun main() {
   println("Successful deposit")
 
   // Start interactive withdrawal
-  val withdrawal = anchor.interactive().withdraw(account.address, asset, authToken = token)
+  val withdrawal = anchor.interactive().withdraw(keypair.address, asset, authToken = token)
 
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
@@ -110,14 +112,14 @@ suspend fun main() {
 
   // Send transaction with transfer
   val transfer =
-    wallet.transfer(
+    transactionBuilder.transfer(
       transaction as WithdrawalTransaction,
       asset,
     )
 
-  transfer.sign(account)
+  transfer.sign(keypair)
 
-  wallet.submitTransaction(transfer)
+  stellar.submitTransaction(transfer)
 
   do {
     transaction = anchor.getTransactionStatus(withdrawal.id, token, info) as WithdrawalTransaction
@@ -133,15 +135,17 @@ suspend fun main() {
   println("Successful withdrawal")
 }
 
-class WalletSignerImpl(private val keyPair: AccountKeypair) : WalletSigner {
-  override fun signWithClientAccount(txn: Transaction): Transaction {
+class WalletSignerImpl() : WalletSigner {
+  lateinit var keyPair: KeyPair
+  override fun signWithClientAccount(txn: Transaction, address: String): Transaction {
     txn.sign(keyPair)
     return txn
   }
 
   override fun signWithDomainAccount(
     transactionString: String,
-    networkPassPhrase: String
+    networkPassPhrase: String,
+    address: String
   ): Transaction {
     val txn =
       Transaction.fromEnvelopeXdr(transactionString, Network(networkPassPhrase)) as Transaction

@@ -24,19 +24,22 @@ private val log = KotlinLogging.logger {}
  * @property homeDomain home domain of the anchor
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
-class Anchor(
-  private val server: Server,
-  private val network: Network,
+class Anchor
+internal constructor(
+  private val cfg: Config,
   private val homeDomain: String,
-  private val httpClient: OkHttpClient = OkHttpClient()
+  private val httpClient: OkHttpClient
 ) {
+  private val server = cfg.stellar.server
+  private val network = cfg.stellar.network
+
   /**
    * Get anchor information from a TOML file.
    *
    * @return TOML file content
    */
   suspend fun getInfo(): Map<String, Any> {
-    val toml = StellarToml(homeDomain, server, httpClient)
+    val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
 
     return toml.getToml()
   }
@@ -45,22 +48,18 @@ class Anchor(
    * Create new auth object to authenticate account with the anchor using SEP-10.
    *
    * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
-   * @param walletSigner interface to define wallet client and domain (if using `clientDomain`)
-   * signing methods
    *
    * @return auth object
    */
   suspend fun auth(
     toml: Map<String, Any>,
-    walletSigner: WalletSigner,
   ): Auth {
     // TODO: get toml automatically
     // TODO: provide wallet signer as parameter to Anchor class
     return Auth(
+      cfg,
       toml[StellarTomlField.WEB_AUTH_ENDPOINT.text].toString(),
       homeDomain,
-      walletSigner,
-      network,
       httpClient
     )
   }
@@ -109,7 +108,7 @@ class Anchor(
    * @return interactive flow service
    */
   fun interactive(): Interactive {
-    return Interactive(homeDomain, this, server, httpClient)
+    return Interactive(homeDomain, this, cfg, httpClient)
   }
 
   // TODO: is this for SEP-24 only?

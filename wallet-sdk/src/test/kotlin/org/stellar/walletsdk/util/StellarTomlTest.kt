@@ -2,6 +2,7 @@ package org.stellar.walletsdk.util
 
 import io.mockk.spyk
 import kotlin.test.assertEquals
+import okhttp3.OkHttpClient
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -11,7 +12,7 @@ import org.stellar.walletsdk.HORIZON_URL
 
 internal class StellarTomlTest {
   private val server = spyk(Server(HORIZON_URL))
-  val stellarToml = StellarToml(ADDRESS_ACTIVE, server)
+  val stellarToml = StellarToml("https", ADDRESS_ACTIVE, OkHttpClient())
 
   @Nested
   @DisplayName("buildTomlUrl")
