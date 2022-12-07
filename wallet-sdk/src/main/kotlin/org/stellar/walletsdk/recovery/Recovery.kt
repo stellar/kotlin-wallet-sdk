@@ -69,7 +69,7 @@ class Recovery(
 
       val authResponse: AuthSignature = response.toJson()
 
-      createDecoratedSignature(accountAddress, authResponse.signature)
+      createDecoratedSignature(it.signerAddress, authResponse.signature)
     }
   }
 
@@ -99,7 +99,7 @@ class Recovery(
       val authToken =
         Auth(it.authEndpoint, it.homeDomain, walletSigner).authenticate(accountAddress)
 
-      val requestUrl = "${it.homeDomain}/accounts/$accountAddress"
+      val requestUrl = "${it.endpoint}/accounts/$accountAddress"
       val request =
         OkHttpUtils.makePostRequest(
           requestUrl,
@@ -245,7 +245,7 @@ data class RecoverableWalletConfig(
 )
 
 internal fun createDecoratedSignature(
-  accountAddress: String,
+  signatureAddress: String,
   signatureBase64String: String
 ): DecoratedSignature {
   val signature = Signature()
@@ -254,7 +254,7 @@ internal fun createDecoratedSignature(
 
   val decoratedSig = DecoratedSignature()
   decoratedSig.signature = signature
-  decoratedSig.hint = KeyPair.fromAccountId(accountAddress).signatureHint
+  decoratedSig.hint = KeyPair.fromAccountId(signatureAddress).signatureHint
 
   return decoratedSig
 }
