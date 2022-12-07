@@ -13,8 +13,8 @@ internal constructor(
 ) {
   val server: Server = cfg.stellar.server
 
-  fun account(): Account {
-    return Account(cfg)
+  fun account(): AccountService {
+    return AccountService(cfg)
   }
 
   fun transaction(): TransactionBuilder {

@@ -19,7 +19,7 @@ private val log = KotlinLogging.logger {}
  * @property network Stellar [Network] instance
  * @property maxBaseFeeInStroops maximum base fee in stroops
  */
-class Account
+class AccountService
 internal constructor(
   private val cfg: Config,
 ) {
