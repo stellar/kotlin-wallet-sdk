@@ -5,6 +5,23 @@ plugins {
   alias(libs.plugins.dokka)
   signing
   alias(libs.plugins.kotlin.serialization)
+  idea
+}
+
+fun DependencyHandler.testIntegrationImplementation(dependencyNotation: Any): Dependency? =
+  add("testIntegrationImplementation", dependencyNotation)
+
+sourceSets {
+  val testIntegration by creating {
+    compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+    runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+  }
+}
+
+configurations {
+  val testIntegrationImplementation by getting {
+    extendsFrom(configurations.testImplementation.get())
+  }
 }
 
 dependencies {
@@ -21,6 +38,26 @@ dependencies {
   testImplementation(libs.google.gson)
   testImplementation(libs.logback.classic)
 }
+
+idea.module {
+  val testSources = testSourceDirs
+
+  testSources.addAll(project.sourceSets.getByName("testIntegration").kotlin.srcDirs)
+  testSources.addAll(project.sourceSets.getByName("testIntegration").resources.srcDirs)
+
+  testSourceDirs = testSources
+}
+
+val testIntegration by tasks.register<Test>("integrationTest") {
+  useJUnitPlatform()
+
+  testClassesDirs = sourceSets.getByName("testIntegration").output.classesDirs
+  classpath = sourceSets.getByName("testIntegration").runtimeClasspath
+
+  mustRunAfter(tasks.test)
+}
+
+tasks.check.get().dependsOn += testIntegration
 
 val dokkaOutputDir = buildDir.resolve("dokka")
 
