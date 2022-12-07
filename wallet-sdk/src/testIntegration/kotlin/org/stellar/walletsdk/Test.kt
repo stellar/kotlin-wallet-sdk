@@ -10,9 +10,4 @@ class Test {
     println("OK")
   }
 
-  @Test
-  fun testFail() {
-    println("FAIL")
-    assertFalse(true)
-  }
 }
