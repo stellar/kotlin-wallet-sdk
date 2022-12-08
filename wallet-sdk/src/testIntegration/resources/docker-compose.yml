@@ -1,1 +1,26 @@
-# TODO
+version: "3.8"
+
+services:
+  webauth1:
+    image: stellar/webauth:42e5528b
+    environment:
+      SIGNING_KEY: "SBR43URYCOXLDBC26CRYQETHJ3T5WKXL2DEJIRDPPRMKPSTRYQZ2WPCB"
+      DOMAIN: "webauth1"
+      AUTH_HOME_DOMAIN: "webauth1" # do we need to run backend service?
+      JWK: '{"kty":"EC","crv":"P-256","alg":"ES256","x":"Q_0T69snAobPX1Qm3JaidEG2lLPryRcQ5X3pi7sxcVw","y":"vUE9N1UdyWQo4AB8SOjXLZR22HgfukvF-BKc58qguw4","d":"VIKYCrJPopS3gz4Bm3VYxpm0abjr7MFfTn6gUp3IAXM"}'
+      JWT_ISSUER: "webauth1"
+      PORT: 80
+    ports:
+      - "7011:80"
+
+  webauth2:
+    image: stellar/webauth:42e5528b
+    environment:
+      SIGNING_KEY: "SARUIJA4KGZ7WT53BWWPPHH4ORER6XUD3ZJCICSDVNC5UQ3QTQOT2SMU"
+      DOMAIN: "webauth2"
+      AUTH_HOME_DOMAIN: "webauth2" # do we need to run backend service?
+      JWK: '{"kty":"EC","crv":"P-256","alg":"ES256","x":"39kC7UKcP1KI47FrB73E1jwWPKN5yUGYsub9MZWf91k","y":"9f4hRdT6Vh_SNKj-jdZlL-Oto7mHsedCWnsH3nXjr1Y","d":"Uy6ED4TPkNLlsLGHto2s0gOUfjrxBYAmSoTg6cpd6lk"}'
+      JWT_ISSUER: "webauth2"
+      PORT: 80
+    ports:
+      - "7012:80"

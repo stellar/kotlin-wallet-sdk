@@ -37,8 +37,7 @@ dependencies {
   testImplementation(libs.okhttp3.mockserver)
   testImplementation(libs.google.gson)
   testImplementation(libs.logback.classic)
-
-  testCompileOnly(libs.docker.compose.rule)
+  testImplementation(libs.docker.compose.rule)
 }
 
 idea.module {
