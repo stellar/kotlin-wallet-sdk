@@ -37,6 +37,8 @@ dependencies {
   testImplementation(libs.okhttp3.mockserver)
   testImplementation(libs.google.gson)
   testImplementation(libs.logback.classic)
+
+  testCompileOnly(libs.docker.compose.rule)
 }
 
 idea.module {
@@ -48,14 +50,15 @@ idea.module {
   testSourceDirs = testSources
 }
 
-val testIntegration by tasks.register<Test>("integrationTest") {
-  useJUnitPlatform()
+val testIntegration by
+  tasks.register<Test>("integrationTest") {
+    useJUnitPlatform()
 
-  testClassesDirs = sourceSets.getByName("testIntegration").output.classesDirs
-  classpath = sourceSets.getByName("testIntegration").runtimeClasspath
+    testClassesDirs = sourceSets.getByName("testIntegration").output.classesDirs
+    classpath = sourceSets.getByName("testIntegration").runtimeClasspath
 
-  mustRunAfter(tasks.test)
-}
+    mustRunAfter(tasks.test)
+  }
 
 tasks.check.get().dependsOn += testIntegration
 

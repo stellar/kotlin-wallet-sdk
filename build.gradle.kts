@@ -20,6 +20,7 @@ subprojects {
     mavenLocal()
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://dl.bintray.com/palantir/releases") }
   }
 
   spotless {
@@ -29,10 +30,12 @@ subprojects {
       logger.warn("!!! WARNING !!!")
       logger.warn("=================")
       logger.warn(
-          "    You are running Java version:[{}]. Spotless may not work well with JDK 17.",
-          javaVersion)
+        "    You are running Java version:[{}]. Spotless may not work well with JDK 17.",
+        javaVersion
+      )
       logger.warn(
-          "    In IntelliJ, go to [File -> Build -> Execution, Build, Deployment -> Gradle] and check Gradle JVM")
+        "    In IntelliJ, go to [File -> Build -> Execution, Build, Deployment -> Gradle] and check Gradle JVM"
+      )
     }
 
     if (javaVersion < JavaVersion.VERSION_11) {
@@ -52,13 +55,10 @@ subprojects {
       kotlinOptions.jvmTarget = jvmVersion.toString()
     }
 
-    test {
-      useJUnitPlatform()
-    }
+    test { useJUnitPlatform() }
   }
 }
 
 tasks.register("printVersionName") {
   println(rootProject.version.toString())
 }
-
