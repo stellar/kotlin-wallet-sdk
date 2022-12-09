@@ -26,7 +26,7 @@ internal class ValidateTransactionTest : SuspendTest() {
 
   @Test
   fun `throws error if source account does not exist`() {
-    every { server.accounts().account(ADDRESS_ACTIVE) } throws ErrorResponse(404, "")
+    every { server.accounts().account(ADDRESS_ACTIVE.address) } throws ErrorResponse(404, "")
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
     val exception =
@@ -43,7 +43,7 @@ internal class ValidateTransactionTest : SuspendTest() {
 
     val account = stellarObjectFromJsonFile<AccountResponse>("account_basic.json")
 
-    every { server.accounts().account(ADDRESS_ACTIVE) } returns account
+    every { server.accounts().account(ADDRESS_ACTIVE.address) } returns account
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
     val exception =
@@ -58,7 +58,7 @@ internal class ValidateTransactionTest : SuspendTest() {
   fun `no errors`() {
     val account = stellarObjectFromJsonFile<AccountResponse>("account_full.json")
 
-    every { server.accounts().account(ADDRESS_ACTIVE) } returns account
+    every { server.accounts().account(ADDRESS_ACTIVE.address) } returns account
 
     val transaction = Transaction.fromEnvelopeXdr(TXN_XDR_CREATE_ACCOUNT, network) as Transaction
 

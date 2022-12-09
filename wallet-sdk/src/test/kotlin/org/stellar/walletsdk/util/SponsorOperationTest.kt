@@ -15,7 +15,7 @@ internal class SponsorOperationTest {
   @Test
   fun `is wrapped in Begin and End SponsoringFutureReservesOperation`() {
     val sponsoredOperation =
-      sponsorOperation(ADDRESS_ACTIVE, ADDRESS_INACTIVE, listOf(OP_CREATE_ACCOUNT))
+      sponsorOperation(ADDRESS_ACTIVE.address, ADDRESS_INACTIVE, listOf(OP_CREATE_ACCOUNT))
 
     assertEquals(3, sponsoredOperation.size)
     assertEquals("BeginSponsoringFutureReservesOperation", sponsoredOperation[0]::class.simpleName)
@@ -27,7 +27,11 @@ internal class SponsorOperationTest {
     val exception =
       assertFailsWith<Exception>(
         block = {
-          sponsorOperation(ADDRESS_ACTIVE, ADDRESS_ACTIVE, listOf(OP_CLAIM_CLAIMABLE_BALANCE))
+          sponsorOperation(
+            ADDRESS_ACTIVE.address,
+            ADDRESS_ACTIVE.secretKey,
+            listOf(OP_CLAIM_CLAIMABLE_BALANCE)
+          )
         }
       )
 

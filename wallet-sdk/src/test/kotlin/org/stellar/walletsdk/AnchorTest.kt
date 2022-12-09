@@ -22,7 +22,7 @@ internal class AnchorTest {
 
     @Test
     fun `throws exception if TOML is not found`() {
-      val anchorInvalid = wallet.anchor(ADDRESS_ACTIVE)
+      val anchorInvalid = wallet.anchor(ADDRESS_ACTIVE.address)
 
       assertThrows<Exception> { runBlocking { anchorInvalid.getInfo() } }
     }
@@ -58,7 +58,7 @@ internal class AnchorTest {
         anchor
           .interactive()
           .deposit(
-            accountAddress = ADDRESS_ACTIVE,
+            accountAddress = ADDRESS_ACTIVE.address,
             ASSET_SRT,
             authToken = authToken,
           )
@@ -75,7 +75,7 @@ internal class AnchorTest {
         anchor
           .interactive()
           .deposit(
-            accountAddress = ADDRESS_ACTIVE,
+            accountAddress = ADDRESS_ACTIVE.address,
             fundsAccountAddress = ADDRESS_ACTIVE_TWO,
             assetId = ASSET_SRT,
             authToken = authToken,
@@ -97,7 +97,7 @@ internal class AnchorTest {
         anchor
           .interactive()
           .withdraw(
-            accountAddress = ADDRESS_ACTIVE,
+            accountAddress = ADDRESS_ACTIVE.address,
             ASSET_SRT,
             authToken = authToken,
           )
@@ -114,7 +114,7 @@ internal class AnchorTest {
         anchor
           .interactive()
           .deposit(
-            accountAddress = ADDRESS_ACTIVE,
+            accountAddress = ADDRESS_ACTIVE.address,
             fundsAccountAddress = ADDRESS_ACTIVE_TWO,
             assetId = ASSET_SRT,
             authToken = authToken,

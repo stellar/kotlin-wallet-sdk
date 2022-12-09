@@ -28,12 +28,13 @@ internal constructor(
   private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
 
   /**
-   * Generate new account keypair (public and secret key).
+   * Generate new account keypair (public and secret key). This key pair can be used to create a
+   * Stellar account.
    *
    * @return public key and secret key
    */
-  fun create(): AccountKeypair {
-    return AccountKeypair(KeyPair.random())
+  fun createKeyPair(): SigningKeyPair {
+    return SigningKeyPair(KeyPair.random())
   }
 
   /**

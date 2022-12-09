@@ -23,7 +23,7 @@ internal class AccountTest : SuspendTest() {
   inner class Create {
     @Test
     fun `generates Stellar public and secret keys`() {
-      val accountKeys = wallet.stellar().account().create()
+      val accountKeys = wallet.stellar().account().createKeyPair()
       val publicKey = accountKeys.address
       val secretKey = accountKeys.secretKey
 
@@ -43,7 +43,7 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `defaults work`() {
       val transaction = runBlocking {
-        wallet.stellar().transaction().fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE)
+        wallet.stellar().transaction().fund(ADDRESS_ACTIVE.address, ADDRESS_INACTIVE)
       }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
@@ -55,7 +55,9 @@ internal class AccountTest : SuspendTest() {
 
       val exception =
         assertFailsWith<Exception>(
-          block = { runBlocking { transactions.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, "0") } }
+          block = {
+            runBlocking { transactions.fund(ADDRESS_ACTIVE.address, ADDRESS_INACTIVE, "0") }
+          }
         )
 
       assertTrue(exception.toString().contains(errorMessage))
@@ -63,7 +65,7 @@ internal class AccountTest : SuspendTest() {
 
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
-      val transaction = runBlocking { transactions.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE) }
+      val transaction = runBlocking { transactions.fund(ADDRESS_ACTIVE.address, ADDRESS_INACTIVE) }
 
       assertEquals(transaction.operations.size, 1)
     }
@@ -71,7 +73,11 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `there are 3 operations in sponsored transaction`() {
       val transaction = runBlocking {
-        transactions.fund(ADDRESS_ACTIVE, ADDRESS_INACTIVE, sponsorAddress = ADDRESS_ACTIVE)
+        transactions.fund(
+          ADDRESS_ACTIVE.address,
+          ADDRESS_INACTIVE,
+          sponsorAddress = ADDRESS_ACTIVE.address
+        )
       }
 
       assertEquals(transaction.operations.size, 3)
@@ -83,14 +89,18 @@ internal class AccountTest : SuspendTest() {
   inner class AddAssetSupport {
     @Test
     fun `defaults work`() {
-      val transaction = runBlocking { transactions.addAssetSupport(ADDRESS_ACTIVE, ASSET_USDC) }
+      val transaction = runBlocking {
+        transactions.addAssetSupport(ADDRESS_ACTIVE.address, ASSET_USDC)
+      }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
-      val transaction = runBlocking { transactions.addAssetSupport(ADDRESS_ACTIVE, ASSET_USDC) }
+      val transaction = runBlocking {
+        transactions.addAssetSupport(ADDRESS_ACTIVE.address, ASSET_USDC)
+      }
 
       assertEquals(transaction.operations.size, 1)
     }
@@ -98,7 +108,11 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `there are 3 operations in sponsored transaction`() {
       val transaction = runBlocking {
-        transactions.addAssetSupport(ADDRESS_ACTIVE, ASSET_USDC, sponsorAddress = ADDRESS_ACTIVE)
+        transactions.addAssetSupport(
+          ADDRESS_ACTIVE.address,
+          ASSET_USDC,
+          sponsorAddress = ADDRESS_ACTIVE.address
+        )
       }
 
       assertEquals(transaction.operations.size, 3)
@@ -110,14 +124,18 @@ internal class AccountTest : SuspendTest() {
   inner class RemoveAssetSupport {
     @Test
     fun `defaults work`() {
-      val transaction = runBlocking { transactions.removeAssetSupport(ADDRESS_ACTIVE, ASSET_USDC) }
+      val transaction = runBlocking {
+        transactions.removeAssetSupport(ADDRESS_ACTIVE.address, ASSET_USDC)
+      }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
     }
 
     @Test
     fun `trust limit is 0`() {
-      val transaction = runBlocking { transactions.removeAssetSupport(ADDRESS_ACTIVE, ASSET_USDC) }
+      val transaction = runBlocking {
+        transactions.removeAssetSupport(ADDRESS_ACTIVE.address, ASSET_USDC)
+      }
       val trustLimit = (transaction.operations[0] as ChangeTrustOperation).limit
 
       assertEquals("0", trustLimit)
@@ -130,7 +148,7 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `defaults work`() {
       val transaction = runBlocking {
-        transactions.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+        transactions.addAccountSigner(ADDRESS_ACTIVE.address, ADDRESS_ACTIVE_TWO, 10)
       }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
@@ -139,7 +157,7 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
       val transaction = runBlocking {
-        transactions.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, 10)
+        transactions.addAccountSigner(ADDRESS_ACTIVE.address, ADDRESS_ACTIVE_TWO, 10)
       }
 
       assertEquals(transaction.operations.size, 1)
@@ -149,10 +167,10 @@ internal class AccountTest : SuspendTest() {
     fun `there are 3 operations in sponsored transaction`() {
       val transaction = runBlocking {
         transactions.addAccountSigner(
-          ADDRESS_ACTIVE,
+          ADDRESS_ACTIVE.address,
           ADDRESS_ACTIVE_TWO,
           10,
-          sponsorAddress = ADDRESS_ACTIVE
+          sponsorAddress = ADDRESS_ACTIVE.address
         )
       }
 
@@ -163,7 +181,7 @@ internal class AccountTest : SuspendTest() {
     fun `sets correct account signer weight`() {
       val signerWeight = 13
       val transaction = runBlocking {
-        transactions.addAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO, signerWeight)
+        transactions.addAccountSigner(ADDRESS_ACTIVE.address, ADDRESS_ACTIVE_TWO, signerWeight)
       }
       val transactionSignerWeight = (transaction.operations[0] as SetOptionsOperation).signerWeight
 
@@ -177,7 +195,7 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `defaults work`() {
       val transaction = runBlocking {
-        transactions.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+        transactions.removeAccountSigner(ADDRESS_ACTIVE.address, ADDRESS_ACTIVE_TWO)
       }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
@@ -186,7 +204,7 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `account signer weight is 0`() {
       val transaction = runBlocking {
-        transactions.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+        transactions.removeAccountSigner(ADDRESS_ACTIVE.address, ADDRESS_ACTIVE_TWO)
       }
       val transactionSignerWeight = (transaction.operations[0] as SetOptionsOperation).signerWeight
 
@@ -198,7 +216,7 @@ internal class AccountTest : SuspendTest() {
   @DisplayName("submitTransaction")
   inner class SubmitTransaction() {
     private val transaction = runBlocking {
-      transactions.removeAccountSigner(ADDRESS_ACTIVE, ADDRESS_ACTIVE_TWO)
+      transactions.removeAccountSigner(ADDRESS_ACTIVE.address, ADDRESS_ACTIVE_TWO)
     }
 
     @Test
@@ -256,7 +274,7 @@ internal class AccountTest : SuspendTest() {
         wallet
           .recovery()
           .registerRecoveryServerSigners(
-            accountAddress = ADDRESS_ACTIVE,
+            ADDRESS_ACTIVE,
             accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
             accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
           )
@@ -271,7 +289,7 @@ internal class AccountTest : SuspendTest() {
         wallet
           .recovery()
           .registerRecoveryServerSigners(
-            accountAddress = ADDRESS_ACTIVE,
+            ADDRESS_ACTIVE,
             accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
             accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
           )
@@ -286,7 +304,7 @@ internal class AccountTest : SuspendTest() {
         wallet
           .recovery()
           .registerRecoveryServerSigners(
-            accountAddress = ADDRESS_ACTIVE,
+            ADDRESS_ACTIVE,
             accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
             accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
             sponsorAddress = ADDRESS_ACTIVE_TWO
@@ -303,7 +321,7 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `defaults work`() {
       val transaction = runBlocking {
-        wallet.stellar().transaction().lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE)
+        wallet.stellar().transaction().lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE.address)
       }
 
       assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
@@ -312,7 +330,7 @@ internal class AccountTest : SuspendTest() {
     @Test
     fun `there is 1 operation in non-sponsored transaction`() {
       val transaction = runBlocking {
-        wallet.stellar().transaction().lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE)
+        wallet.stellar().transaction().lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE.address)
       }
 
       assertEquals(transaction.operations.size, 1)
@@ -324,10 +342,7 @@ internal class AccountTest : SuspendTest() {
         wallet
           .stellar()
           .transaction()
-          .lockAccountMasterKey(
-            accountAddress = ADDRESS_ACTIVE,
-            sponsorAddress = ADDRESS_ACTIVE_TWO
-          )
+          .lockAccountMasterKey(ADDRESS_ACTIVE.address, sponsorAddress = ADDRESS_ACTIVE_TWO)
       }
 
       assertEquals(transaction.operations.size, 3)

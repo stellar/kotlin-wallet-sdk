@@ -38,7 +38,7 @@ internal class BuildTransactionTest : SuspendTest() {
   }
 
   private val sequenceNumber = 1
-  private val accountResponse = AccountResponse(ADDRESS_ACTIVE, sequenceNumber.toLong())
+  private val accountResponse = AccountResponse(ADDRESS_ACTIVE.address, sequenceNumber.toLong())
 
   @Test
   fun `successful build`() {

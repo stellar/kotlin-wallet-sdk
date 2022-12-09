@@ -14,7 +14,8 @@ internal class OperationTest {
   inner class AddSignerOperation {
     @Test
     fun `generates add signer operation`() {
-      val signerOp = addSignerOperation(AccountSigner(address = ADDRESS_ACTIVE, weight = 10))
+      val signerOp =
+        addSignerOperation(AccountSigner(address = ADDRESS_ACTIVE.address, weight = 10))
 
       assertEquals("SetOptionsOperation", signerOp::class.simpleName)
     }

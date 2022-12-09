@@ -2,20 +2,18 @@ package org.stellar.walletsdk
 
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
-import org.stellar.sdk.KeyPair
-import org.stellar.sdk.Network
-import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
-import org.stellar.walletsdk.auth.WalletSigner
+import org.stellar.walletsdk.horizon.SigningKeyPair
+import org.stellar.walletsdk.horizon.sign
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
 // https://laboratory.stellar.org/#account-creator?network=test
 private val myKey =
   System.getenv("STELLAR_KEY") ?: "SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I"
-private val myAddress = KeyPair.fromSecretSeed(myKey).accountId
+private val myAccount = SigningKeyPair.fromSecret(myKey)
 
 private const val useLocal = false
 private val SRT = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
@@ -27,24 +25,19 @@ private val homeDomain = if (useLocal) "localhost:8080" else "testanchor.stellar
 private val scheme = if (useLocal) "http" else "https"
 
 suspend fun main() {
-  val signer = WalletSignerImpl()
-  val wallet =
-    Wallet(
-      StellarConfiguration.Testnet,
-      ApplicationConfiguration(WalletSignerImpl(), useHttp = useLocal)
-    )
+  val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = useLocal))
 
   // Create instance of stellar, account and transaction services
   val stellar = wallet.stellar()
   val account = wallet.stellar().account()
   val transactionBuilder = wallet.stellar().transaction()
   // Generate new (user) account and fund it with 10 XLM from main account
-  val keypair = account.create()
-  val tx = transactionBuilder.fund(myAddress, keypair.address, "10")
+  val keypair = account.createKeyPair()
+  val tx = transactionBuilder.fund(myAccount.address, keypair.address, "10")
 
   // Sign with your main account's key and send transaction to the network
   println("Registering new account")
-  tx.sign(KeyPair.fromSecretSeed(myKey))
+  tx.sign(myAccount)
   assert(stellar.submitTransaction(tx))
 
   val anchor = wallet.anchor(homeDomain)
@@ -68,7 +61,7 @@ suspend fun main() {
   assert(stellar.submitTransaction(addTrustline))
 
   // Authorizing
-  val token = anchor.auth(info).authenticate(keypair.address)
+  val token = anchor.auth(info).authenticate(keypair)
 
   // Start interactive deposit
   val deposit = anchor.interactive().deposit(keypair.address, asset, authToken = token)
@@ -133,23 +126,4 @@ suspend fun main() {
   } while (transaction.status != "completed")
 
   println("Successful withdrawal")
-}
-
-class WalletSignerImpl() : WalletSigner {
-  lateinit var keyPair: KeyPair
-  override fun signWithClientAccount(txn: Transaction, address: String): Transaction {
-    txn.sign(keyPair)
-    return txn
-  }
-
-  override fun signWithDomainAccount(
-    transactionString: String,
-    networkPassPhrase: String,
-    address: String
-  ): Transaction {
-    val txn =
-      Transaction.fromEnvelopeXdr(transactionString, Network(networkPassPhrase)) as Transaction
-    txn.sign(keyPair)
-    return txn
-  }
 }

@@ -18,7 +18,7 @@ internal class CreateDecoratedSignatureTest {
   @Test
   fun `creates decorated signature`() {
     val decoratedSig =
-      createDecoratedSignature(publicKey, defaultBase64Decoder(signatureBase64String))
+      createDecoratedSignature(publicKey.address, defaultBase64Decoder(signatureBase64String))
     assertEquals(DecoratedSignature::class.java, decoratedSig::class.java)
   }
 

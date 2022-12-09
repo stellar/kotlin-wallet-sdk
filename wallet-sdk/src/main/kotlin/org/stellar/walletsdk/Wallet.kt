@@ -82,7 +82,7 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
  * @constructor Create empty Application configuration
  */
 data class ApplicationConfiguration(
-  val defaultSigner: WalletSigner,
+  val defaultSigner: WalletSigner = WalletSigner.Default,
   val base64Decoder: Base64Decoder = defaultBase64Decoder,
   val useHttp: Boolean = false
 )
