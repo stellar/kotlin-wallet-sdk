@@ -12,7 +12,7 @@ import org.stellar.walletsdk.HORIZON_URL
 
 internal class StellarTomlTest {
   private val server = spyk(Server(HORIZON_URL))
-  val stellarToml = StellarToml("https", ADDRESS_ACTIVE, OkHttpClient())
+  val stellarToml = StellarToml("https", ADDRESS_ACTIVE.address, OkHttpClient())
 
   @Nested
   @DisplayName("buildTomlUrl")

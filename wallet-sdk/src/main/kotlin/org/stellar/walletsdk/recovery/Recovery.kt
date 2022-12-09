@@ -12,6 +12,7 @@ import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.createTransactionBuilder
+import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.*
 
@@ -88,16 +89,15 @@ class Recovery internal constructor(private val cfg: Config, private val client:
   // TODO: can be private?
   suspend fun enrollWithRecoveryServer(
     recoveryServers: List<RecoveryServer>,
-    accountAddress: String,
+    account: AccountKeyPair,
     accountIdentity: List<RecoveryAccountIdentity>
   ): List<String> {
     return recoveryServers.map {
       // TODO: pass auth token as an argument?
       val authToken =
-        Auth(cfg, it.authEndpoint, it.homeDomain, client)
-          .authenticate(accountAddress, it.walletSigner)
+        Auth(cfg, it.authEndpoint, it.homeDomain, client).authenticate(account, it.walletSigner)
 
-      val requestUrl = "${it.endpoint}/accounts/$accountAddress"
+      val requestUrl = "${it.endpoint}/accounts/${account.address}"
       val request =
         OkHttpUtils.makePostRequest(
           requestUrl,
@@ -106,7 +106,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
         )
 
       log.debug {
-        "Recovery server enroll request: accountAddress = $accountAddress, homeDomain =" +
+        "Recovery server enroll request: accountAddress = ${account.address}, homeDomain =" +
           " ${it.homeDomain}, authToken = ${authToken.take(8)}..."
       }
 
@@ -189,14 +189,14 @@ class Recovery internal constructor(private val cfg: Config, private val client:
    */
   // TODO: can be private?
   suspend fun registerRecoveryServerSigners(
-    accountAddress: String,
+    account: AccountKeyPair,
     accountSigner: List<AccountSigner>,
     accountThreshold: AccountThreshold,
     sponsorAddress: String? = null
   ): Transaction {
     val transactionBuilder =
       createTransactionBuilder(
-        sourceAddress = accountAddress,
+        sourceAddress = account.address,
         maxBaseFeeInStroops = maxBaseFeeInStroops,
         server = server,
         network = network,
@@ -207,7 +207,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
 
     val operations: List<Operation> =
       if (sponsorAddress != null) {
-        sponsorOperation(sponsorAddress, accountAddress, setOptionsOp)
+        sponsorOperation(sponsorAddress, account.address, setOptionsOp)
       } else {
         setOptionsOp
       }
@@ -230,7 +230,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
  * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
  */
 data class RecoverableWalletConfig(
-  val accountAddress: String,
+  val accountAddress: AccountKeyPair,
   val deviceAddress: String,
   val accountThreshold: AccountThreshold,
   val accountIdentity: List<RecoveryAccountIdentity>,

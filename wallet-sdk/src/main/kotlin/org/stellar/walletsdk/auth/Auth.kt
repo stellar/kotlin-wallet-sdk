@@ -7,6 +7,7 @@ import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.scheme
 import org.stellar.walletsdk.util.OkHttpUtils
@@ -48,7 +49,7 @@ internal constructor(
    * @throws [InvalidResponseException] when JSON response is malformed
    */
   suspend fun authenticate(
-    accountAddress: String,
+    accountAddress: AccountKeyPair,
     walletSigner: WalletSigner? = null,
     memoId: String? = null,
     clientDomain: String? = null
@@ -70,7 +71,7 @@ internal constructor(
    * @throws [InvalidResponseException] when JSON response is malformed
    */
   private suspend fun challenge(
-    accountAddress: String,
+    account: AccountKeyPair,
     memoId: String? = null,
     clientDomain: String? = null
   ): ChallengeResponse {
@@ -79,7 +80,7 @@ internal constructor(
 
     // Add required query params
     authURL
-      .addQueryParameter("account", accountAddress)
+      .addQueryParameter("account", account.address)
       .addQueryParameter("home_domain", homeDomain)
 
     if (!memoId.isNullOrBlank()) {
@@ -101,7 +102,7 @@ internal constructor(
     authURL.build()
 
     log.debug {
-      "Challenge request: account = $accountAddress, memo = $memoId, client_domain = $clientDomain"
+      "Challenge request: account = $account, memo = $memoId, client_domain = $clientDomain"
     }
 
     val request = OkHttpUtils.buildStringGetRequest(authURL.toString())
@@ -133,7 +134,7 @@ internal constructor(
    * @return signed transaction
    */
   private fun sign(
-    accountAddress: String,
+    account: AccountKeyPair,
     challengeResponse: ChallengeResponse,
     walletSigner: WalletSigner
   ): Transaction {
@@ -153,11 +154,11 @@ internal constructor(
         walletSigner.signWithDomainAccount(
           challengeResponse.transaction,
           challengeResponse.network_passphrase,
-          accountAddress
+          account
         )
     }
 
-    walletSigner.signWithClientAccount(challengeTxn, accountAddress)
+    walletSigner.signWithClientAccount(challengeTxn, account)
 
     return challengeTxn
   }

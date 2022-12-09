@@ -1,8 +1,6 @@
 package org.stellar.walletsdk
 
 import kotlinx.serialization.Serializable
-import org.stellar.sdk.AbstractTransaction
-import org.stellar.sdk.KeyPair
 import org.stellar.sdk.requests.RequestBuilder
 
 data class AccountInfo(
@@ -125,17 +123,4 @@ enum class WalletOperationType() {
   WITHDRAW,
   SWAP,
   OTHER
-}
-
-@JvmInline
-value class AccountKeypair(val keyPair: KeyPair) {
-  val address: String
-    get() = keyPair.accountId
-
-  val secretKey: String
-    get() = keyPair.secretSeed.concatToString()
-}
-
-fun AbstractTransaction.sign(keyPair: AccountKeypair) {
-  this.sign(keyPair.keyPair)
 }

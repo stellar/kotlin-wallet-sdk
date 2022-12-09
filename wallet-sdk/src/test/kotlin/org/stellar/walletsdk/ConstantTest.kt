@@ -3,13 +3,14 @@ package org.stellar.walletsdk
 import org.stellar.sdk.ClaimClaimableBalanceOperation
 import org.stellar.sdk.CreateAccountOperation
 import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.horizon.SigningKeyPair
 
 const val HORIZON_URL = "https://horizon-testnet.stellar.org"
 const val NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
 const val MAX_BASE_FEE = 500
 
-const val ADDRESS_ACTIVE = "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22"
-const val ADDRESS_ACTIVE_SECRET = "SAICIEF6C7ENEPUCFYU5YE7CF6Z2BXUCYQ4MNB3RK3MMZ4GECYFJBWZ3"
+val ADDRESS_ACTIVE =
+  SigningKeyPair.fromSecret("SAICIEF6C7ENEPUCFYU5YE7CF6Z2BXUCYQ4MNB3RK3MMZ4GECYFJBWZ3")
 const val ADDRESS_ACTIVE_TWO = "GD2YC3HSNQEHSOTRCGGPOUN4J3DETJQR4ENPKY5WLF67XBOSVG5OIEQT"
 const val ADDRESS_INACTIVE = "GAW7QECBN2OI4LS4UUA3FO65Y2QPGQS3SPMTMRYK5ZX4IRZXXJPRWOBN"
 
@@ -28,12 +29,14 @@ const val ANCHOR_SERVICE_URL = "https://testanchor.stellar.org/sep24"
 const val ANCHOR_HOME_DOMAIN = "testanchor.stellar.org"
 
 val OP_CREATE_ACCOUNT: CreateAccountOperation =
-  CreateAccountOperation.Builder(ADDRESS_ACTIVE, "1").setSourceAccount(ADDRESS_INACTIVE).build()
+  CreateAccountOperation.Builder(ADDRESS_ACTIVE.address, "1")
+    .setSourceAccount(ADDRESS_INACTIVE)
+    .build()
 val OP_CLAIM_CLAIMABLE_BALANCE: ClaimClaimableBalanceOperation =
   ClaimClaimableBalanceOperation.Builder(
       "000000009c05cd4bfc4db9774d0895be09929b199c0b7625d963e6203e0cdc0c6bb3bbae"
     )
-    .setSourceAccount(ADDRESS_ACTIVE)
+    .setSourceAccount(ADDRESS_ACTIVE.address)
     .build()
 
 // Source account GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22
