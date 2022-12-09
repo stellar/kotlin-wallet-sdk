@@ -12,45 +12,14 @@ Maven:
 <dependency>
   <groupId>org.stellar</groupId>
   <artifactId>wallet-sdk</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
 Gradle:
 ```kotlin
-implementation("org.stellar:wallet-sdk:0.2.0")
+implementation("org.stellar:wallet-sdk:0.3.0")
 ```
-### Using snapshots
-<details>
-
-This library is currently in the active development. Snapshot from the latest `main` is uploaded periodically to the 
-snapshot repository. To use it, please update your version to the latest snapshot (`0.3.0-SNAPSHOT`) and configure snapshot repository: 
-
-Maven:
-```pom
-<repositories>
-    <repository>
-        <id>snapshots-repo</id>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        <releases>
-            <enabled>false</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-</repositories>
-```
-
-Gradle:
-```kotlin
-repositories {
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-    }
-}
-```
-</details>
 
 ## Wallet
 
