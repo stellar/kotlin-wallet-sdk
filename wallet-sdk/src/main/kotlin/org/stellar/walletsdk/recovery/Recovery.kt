@@ -7,22 +7,20 @@ import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
-import org.stellar.walletsdk.WalletSigner
+import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.auth.Auth
+import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.createTransactionBuilder
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.*
-import org.stellar.walletsdk.util.GlobalConfig.base64Decoder
 
 private val log = KotlinLogging.logger {}
 
-class Recovery(
-  private val server: Server,
-  private val network: Network,
-  private val maxBaseFeeInStroops: Int = 100
-) {
-  private val client = OkHttpClient()
+class Recovery internal constructor(private val cfg: Config, private val client: OkHttpClient) {
+  private val server: Server = cfg.stellar.server
+  private val network: Network = cfg.stellar.network
+  private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
 
   /**
    * Sign transaction with recovery servers. It is used to recover an account using
@@ -69,7 +67,7 @@ class Recovery(
 
       val authResponse: AuthSignature = response.toJson()
 
-      createDecoratedSignature(it.signerAddress, authResponse.signature)
+      createDecoratedSignature(it.signerAddress, cfg.app.base64Decoder(authResponse.signature))
     }
   }
 
@@ -91,13 +89,13 @@ class Recovery(
   suspend fun enrollWithRecoveryServer(
     recoveryServers: List<RecoveryServer>,
     accountAddress: String,
-    accountIdentity: List<RecoveryAccountIdentity>,
-    walletSigner: WalletSigner
+    accountIdentity: List<RecoveryAccountIdentity>
   ): List<String> {
     return recoveryServers.map {
       // TODO: pass auth token as an argument?
       val authToken =
-        Auth(it.authEndpoint, it.homeDomain, walletSigner).authenticate(accountAddress)
+        Auth(cfg, it.authEndpoint, it.homeDomain, client)
+          .authenticate(accountAddress, it.walletSigner)
 
       val requestUrl = "${it.endpoint}/accounts/$accountAddress"
       val request =
@@ -157,7 +155,6 @@ class Recovery(
         config.recoveryServers,
         config.accountAddress,
         config.accountIdentity,
-        config.accountWalletSigner
       )
 
     val signer =
@@ -229,7 +226,6 @@ class Recovery(
  * @param accountThreshold Low, medium, and high thresholds to set on the account
  * @param accountIdentity A list of account identities to be registered with the recovery servers
  * @param recoveryServers A list of recovery servers to register with
- * @param accountWalletSigner [WalletSigner] interface to sign transaction with the account
  * @param signerWeight Signer weight to set
  * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
  */
@@ -239,18 +235,17 @@ data class RecoverableWalletConfig(
   val accountThreshold: AccountThreshold,
   val accountIdentity: List<RecoveryAccountIdentity>,
   val recoveryServers: List<RecoveryServer>,
-  val accountWalletSigner: WalletSigner,
   val signerWeight: SignerWeight,
   val sponsorAddress: String? = null
 )
 
 internal fun createDecoratedSignature(
   signatureAddress: String,
-  signatureBase64String: String
+  decodedSignature: ByteArray
 ): DecoratedSignature {
   val signature = Signature()
 
-  signature.signature = base64Decoder(signatureBase64String)
+  signature.signature = decodedSignature
 
   val decoratedSig = DecoratedSignature()
   decoratedSig.signature = signature

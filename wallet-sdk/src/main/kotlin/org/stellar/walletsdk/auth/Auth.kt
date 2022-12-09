@@ -5,11 +5,11 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.WalletSigner
+import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
+import org.stellar.walletsdk.scheme
 import org.stellar.walletsdk.util.OkHttpUtils
-import org.stellar.walletsdk.util.SchemeUtil
 
 private val log = KotlinLogging.logger {}
 
@@ -26,12 +26,12 @@ private val log = KotlinLogging.logger {}
  * signing methods
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
-class Auth(
+class Auth
+internal constructor(
+  private val cfg: Config,
   private val webAuthEndpoint: String,
   private val homeDomain: String,
-  private val defaultSigner: WalletSigner,
-  private val network: Network = Network.TESTNET,
-  private val httpClient: OkHttpClient = OkHttpClient()
+  private val httpClient: OkHttpClient
 ) {
   /**
    * Authenticates to an external server.
@@ -54,7 +54,7 @@ class Auth(
     clientDomain: String? = null
   ): String {
     val challengeTxn = challenge(accountAddress, memoId, clientDomain)
-    val signedTxn = sign(challengeTxn, walletSigner ?: this.defaultSigner)
+    val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
   }
 
@@ -75,7 +75,7 @@ class Auth(
     clientDomain: String? = null
   ): ChallengeResponse {
     val endpoint = webAuthEndpoint.toHttpUrl()
-    val authURL = endpoint.newBuilder().scheme(SchemeUtil.scheme)
+    val authURL = endpoint.newBuilder().scheme(cfg.scheme)
 
     // Add required query params
     authURL
@@ -115,7 +115,7 @@ class Auth(
         throw MissingTransactionException
       }
 
-      if (jsonResponse.network_passphrase != network.networkPassphrase) {
+      if (jsonResponse.network_passphrase != cfg.stellar.network.networkPassphrase) {
         throw NetworkMismatchException
       }
 
@@ -132,7 +132,11 @@ class Auth(
    *
    * @return signed transaction
    */
-  private fun sign(challengeResponse: ChallengeResponse, walletSigner: WalletSigner): Transaction {
+  private fun sign(
+    accountAddress: String,
+    challengeResponse: ChallengeResponse,
+    walletSigner: WalletSigner
+  ): Transaction {
     var challengeTxn =
       Transaction.fromEnvelopeXdr(
         challengeResponse.transaction,
@@ -148,11 +152,12 @@ class Auth(
       challengeTxn =
         walletSigner.signWithDomainAccount(
           challengeResponse.transaction,
-          challengeResponse.network_passphrase
+          challengeResponse.network_passphrase,
+          accountAddress
         )
     }
 
-    walletSigner.signWithClientAccount(challengeTxn)
+    walletSigner.signWithClientAccount(challengeTxn, accountAddress)
 
     return challengeTxn
   }

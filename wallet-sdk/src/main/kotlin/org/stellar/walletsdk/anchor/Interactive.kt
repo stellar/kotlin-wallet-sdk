@@ -25,10 +25,11 @@ private val log = KotlinLogging.logger {}
  * @throws [AnchorAssetException] if asset was refused by the anchor
  * @throws [ServerRequestFailedException] if network request fails
  */
-class Interactive(
+class Interactive
+internal constructor(
   private val homeDomain: String,
   private val anchor: Anchor,
-  private val server: Server,
+  private val cfg: Config,
   private val httpClient: OkHttpClient,
 ) {
   /**
@@ -117,7 +118,7 @@ class Interactive(
         StellarTomlField.TRANSFER_SERVER_SEP0024.text,
         StellarTomlField.WEB_AUTH_ENDPOINT.text
       )
-    val toml = StellarToml(homeDomain, server, httpClient)
+    val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
     val tomlContent = toml.getToml()
 
     // Check toml for required SEP-24 fields

@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.exception.ServerRequestFailedException
+import org.stellar.walletsdk.scheme
 import shadow.com.moandjiezana.toml.Toml
 
 /**
@@ -15,10 +16,10 @@ import shadow.com.moandjiezana.toml.Toml
  * @property server Horizon [Server] instance
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
-class StellarToml(
+internal class StellarToml(
+  private val scheme: String,
   private val homeDomain: String,
-  private val server: Server,
-  private val httpClient: OkHttpClient = OkHttpClient()
+  private val httpClient: OkHttpClient
 ) {
   /**
    * Get TOML file content.
@@ -50,7 +51,7 @@ class StellarToml(
     // TODO: create a helper method to normalize url
 
     val tomlPath = ".well-known/stellar.toml"
-    var scheme = SchemeUtil.scheme
+    var scheme = scheme
     var host = homeDomain
 
     try {

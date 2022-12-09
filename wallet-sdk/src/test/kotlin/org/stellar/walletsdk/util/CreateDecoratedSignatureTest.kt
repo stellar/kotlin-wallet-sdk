@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.walletsdk.ADDRESS_ACTIVE
+import org.stellar.walletsdk.defaultBase64Decoder
 import org.stellar.walletsdk.recovery.createDecoratedSignature
 
 @DisplayName("createDecoratedSignature")
@@ -16,12 +17,15 @@ internal class CreateDecoratedSignatureTest {
 
   @Test
   fun `creates decorated signature`() {
-    val decoratedSig = createDecoratedSignature(publicKey, signatureBase64String)
+    val decoratedSig =
+      createDecoratedSignature(publicKey, defaultBase64Decoder(signatureBase64String))
     assertEquals(DecoratedSignature::class.java, decoratedSig::class.java)
   }
 
   @Test
   fun `throws exception if public key is invalid`() {
-    assertThrows<Exception> { createDecoratedSignature("ABC", signatureBase64String) }
+    assertThrows<Exception> {
+      createDecoratedSignature("ABC", defaultBase64Decoder(signatureBase64String))
+    }
   }
 }

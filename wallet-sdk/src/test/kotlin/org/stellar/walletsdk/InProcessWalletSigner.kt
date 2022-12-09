@@ -6,18 +6,20 @@ import org.stellar.sdk.KeyPair
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.auth.ChallengeResponse
+import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.OkHttpUtils
 
 class InProcessWalletSigner : WalletSigner {
-  override fun signWithClientAccount(txn: Transaction): Transaction {
+  override fun signWithClientAccount(txn: Transaction, address: String): Transaction {
     txn.sign(KeyPair.fromSecretSeed(ADDRESS_ACTIVE_SECRET))
     return txn
   }
 
   override fun signWithDomainAccount(
     transactionString: String,
-    networkPassPhrase: String
+    networkPassPhrase: String,
+    address: String
   ): Transaction {
     val okHttpClient = OkHttpClient()
 
