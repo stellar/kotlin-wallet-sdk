@@ -8,8 +8,8 @@ import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
+import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.util.OkHttpUtils
-import org.stellar.walletsdk.util.StellarToml
 
 private val log = KotlinLogging.logger {}
 

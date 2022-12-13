@@ -12,6 +12,7 @@ import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
+import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.util.*
 
 private val log = KotlinLogging.logger {}

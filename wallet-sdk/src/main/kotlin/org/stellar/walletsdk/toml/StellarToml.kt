@@ -1,11 +1,9 @@
-package org.stellar.walletsdk.util
+package org.stellar.walletsdk.toml
 
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.stellar.sdk.Server
 import org.stellar.walletsdk.exception.ServerRequestFailedException
-import org.stellar.walletsdk.scheme
 import shadow.com.moandjiezana.toml.Toml
 
 /**
@@ -13,7 +11,6 @@ import shadow.com.moandjiezana.toml.Toml
  * (also known as TOML file) methods.
  *
  * @property homeDomain Home domain where to find stellar.toml file
- * @property server Horizon [Server] instance
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
 internal class StellarToml(
