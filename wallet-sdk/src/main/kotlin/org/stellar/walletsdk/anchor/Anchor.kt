@@ -12,6 +12,9 @@ import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
+import org.stellar.walletsdk.toml.StellarToml
+import org.stellar.walletsdk.toml.TomlInfo
+import org.stellar.walletsdk.toml.parseToml
 import org.stellar.walletsdk.util.*
 
 private val log = KotlinLogging.logger {}
@@ -38,27 +41,28 @@ internal constructor(
    *
    * @return TOML file content
    */
-  suspend fun getInfo(): Map<String, Any> {
+  suspend fun getInfo(): TomlInfo {
     val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
 
-    return toml.getToml()
+    return parseToml(toml.getToml())
   }
 
   /**
    * Create new auth object to authenticate account with the anchor using SEP-10.
    *
    * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
-   *
    * @return auth object
+   * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
    */
   suspend fun auth(
-    toml: Map<String, Any>,
+    toml: TomlInfo,
   ): Auth {
     // TODO: get toml automatically
     // TODO: provide wallet signer as parameter to Anchor class
+
     return Auth(
       cfg,
-      toml[StellarTomlField.WEB_AUTH_ENDPOINT.text].toString(),
+      toml.services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported(),
       homeDomain,
       httpClient
     )
@@ -69,9 +73,7 @@ internal constructor(
    * payment methods.
    *
    * @param serviceUrl URL where `/info` endpoint is hosted
-   *
    * @return a list of available anchor services
-   *
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
@@ -119,17 +121,17 @@ internal constructor(
    * @param transactionId transaction ID
    * @param authToken auth token of the account authenticated with the anchor
    * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
-   *
    * @return transaction object
-   *
+   * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun getTransactionStatus(
     transactionId: String,
     authToken: String,
-    toml: Map<String, Any>
+    toml: TomlInfo
   ): AnchorTransaction {
-    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint =
+      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported()
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -150,17 +152,17 @@ internal constructor(
    * @param assetCode asset's code
    * @param authToken auth token of the account authenticated with the anchor
    * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
-   *
    * @return transaction object
-   *
+   * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun getAllTransactionStatus(
     assetCode: String,
     authToken: String,
-    toml: Map<String, Any>
+    toml: TomlInfo
   ): List<AnchorTransaction> {
-    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint =
+      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported()
     val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -178,7 +180,6 @@ internal constructor(
   /**
    * Get account transactions for specified asset. Optional field implementation depends on anchor.
    *
-   * @param assetCode asset's code
    * @param authToken auth token of the account authenticated with the anchor
    * @param toml Anchor's stellar.toml file containing `CURRENCIES` list of supported assets
    * @param limit optional how many transactions to fetch
@@ -186,29 +187,25 @@ internal constructor(
    * @param noOlderThan optional return transactions starting on or after this date and time
    * @param lang optional language code specified using
    * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
-   *
    * @return a list of formatted operations
-   *
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
   suspend fun getHistory(
     assetId: IssuedAssetId,
     authToken: String,
-    toml: Map<String, Any>,
+    toml: TomlInfo,
     limit: Int? = null,
     pagingId: String? = null,
     noOlderThan: String? = null,
     lang: String? = null
   ): List<WalletOperation<AnchorTransaction>> {
     val anchorCurrency =
-      ((toml as HashMap)["CURRENCIES"] as List<*>).filterIsInstance<HashMap<*, *>>().find {
-        it["code"] == assetId.code
-      }
-        ?: throw AssetNotSupportedException(assetId)
+      toml.currencies?.find { it.assetId == assetId } ?: throw AssetNotSupportedException(assetId)
     val asset = assetId.toAsset()
 
-    val transferServerEndpoint = toml[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint =
+      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported()
     val endpointHttpUrl = transferServerEndpoint.toHttpUrl()
     val endpointUrl = HttpUrl.Builder().scheme("https").host(endpointHttpUrl.host)
 

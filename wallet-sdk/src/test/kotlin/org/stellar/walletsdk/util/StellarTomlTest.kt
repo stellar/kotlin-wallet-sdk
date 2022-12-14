@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.HORIZON_URL
+import org.stellar.walletsdk.toml.StellarToml
 
 internal class StellarTomlTest {
   private val server = spyk(Server(HORIZON_URL))
