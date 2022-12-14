@@ -14,6 +14,7 @@ data class AccountSigner(val address: String, val weight: Int)
 
 /**
  * Account weights threshold
+ *
  * @param low Low threshold weight
  * @param medium Medium threshold weight
  * @param high High threshold weight
@@ -97,12 +98,6 @@ data class NativeAssetDefault(
   val assetCode: String,
   val assetIssuer: String,
 )
-
-enum class StellarTomlField(val text: String) {
-  SIGNING_KEY("SIGNING_KEY"),
-  TRANSFER_SERVER_SEP0024("TRANSFER_SERVER_SEP0024"),
-  WEB_AUTH_ENDPOINT("WEB_AUTH_ENDPOINT")
-}
 
 data class WalletAsset(val id: String, val code: String, val issuer: String)
 

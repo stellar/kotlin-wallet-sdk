@@ -27,3 +27,9 @@ class IncorrectTransactionStatusException(
   WalletException(
     "Incorrect status of transaction ${transaction.id}. Expected status to be $expectedStatus and transaction has status ${transaction.status}"
   )
+
+class AnchorAuthNotSupported() :
+  AnchorAssetException("Anchor does not have SEP-10 auth configured in TOML file")
+
+class AnchorInteractiveFlowNotSupported() :
+  AnchorAssetException("Anchor does not have SEP-24 interactive flow configured in TOML file")

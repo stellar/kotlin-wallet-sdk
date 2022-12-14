@@ -5,14 +5,12 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.*
 import org.stellar.walletsdk.helpers.mapFromTomlFile
-import org.stellar.walletsdk.toml.TomlInfo
 import org.stellar.walletsdk.toml.parseToml
 
 internal class AnchorTest {
   private val wallet = TestWallet
   private val anchor = wallet.anchor(AUTH_HOME_DOMAIN)
-  private val toml = mapFromTomlFile("stellar.toml")
-  private val tomlInfo: TomlInfo = parseToml(toml)
+  private val toml = parseToml(mapFromTomlFile("stellar.toml"))
 
   // NOTE: Tests are running on live test network for SRT asset
 
@@ -33,12 +31,12 @@ internal class AnchorTest {
 
     @Test
     fun `services should be defined`() {
-      assertNotNull(tomlInfo.services)
+      assertNotNull(toml.services)
     }
 
     @Test
     fun `currency should have assetId`() {
-      val currency = tomlInfo.currencies?.get(0)
+      val currency = toml.currencies?.get(0)
 
       assertNotNull(currency?.assetId)
     }

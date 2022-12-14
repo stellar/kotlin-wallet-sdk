@@ -9,6 +9,7 @@ import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
+import org.stellar.walletsdk.toml.parseToml
 import org.stellar.walletsdk.util.OkHttpUtils
 
 private val log = KotlinLogging.logger {}
@@ -19,9 +20,7 @@ private val log = KotlinLogging.logger {}
  * @param anchor instance of the [Anchor]
  * @param server Horizon [Server] instance
  * @param httpClient HTTP client
- *
  * @return response object from the anchor
- *
  * @throws [AnchorAssetException] if asset was refused by the anchor
  * @throws [ServerRequestFailedException] if network request fails
  */
@@ -43,9 +42,7 @@ internal constructor(
    * @param assetCode Asset code to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
-   *
    * @return response object from the anchor
-   *
    * @throws [AnchorAssetException] if asset was refused by the anchor
    * @throws [ServerRequestFailedException] if network request fails
    */
@@ -72,9 +69,7 @@ internal constructor(
    * @param assetCode Asset code to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
-   *
    * @return response object from the anchor
-   *
    * @throws [AnchorAssetException] if asset was refused by the anchor
    * @throws [ServerRequestFailedException] if network request fails
    */
@@ -99,6 +94,7 @@ internal constructor(
    *  extraSEP9: Map<String, String>
    * )
    * ```
+   *
    * It should regularly encode InteractiveRequest (typed) + append all fields from sep9 (currently
    * string)
    * [documentation](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md#request)
@@ -112,30 +108,17 @@ internal constructor(
     type: String,
     assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
   ): InteractiveFlowResponse {
-    val sep24RequiredFields =
-      listOf(
-        StellarTomlField.SIGNING_KEY.text,
-        StellarTomlField.TRANSFER_SERVER_SEP0024.text,
-        StellarTomlField.WEB_AUTH_ENDPOINT.text
-      )
     val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
-    val tomlContent = toml.getToml()
+    val tomlInfo = parseToml(toml.getToml())
 
-    // Check toml for required SEP-24 fields
-    val missingFields = mutableListOf<String>()
-
-    sep24RequiredFields.forEach { field ->
-      if (tomlContent[field] == null) {
-        missingFields.add(field)
-      }
+    // Check if SEP-24 and SEP-10 are configured
+    if (tomlInfo.services.sep24 == null) {
+      throw AnchorInteractiveFlowNotSupported()
+    } else if (!tomlInfo.services.sep24.hasAuth) {
+      throw AnchorAuthNotSupported()
     }
 
-    if (missingFields.size > 0) {
-      throw StellarTomlMissingFields(missingFields)
-    }
-
-    val transferServerEndpoint =
-      tomlContent[StellarTomlField.TRANSFER_SERVER_SEP0024.text].toString()
+    val transferServerEndpoint = tomlInfo.services.sep24.transferServerSep24
 
     val serviceInfo = anchor.getServicesInfo(transferServerEndpoint)
 
