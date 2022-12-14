@@ -6,15 +6,13 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.*
 import org.stellar.walletsdk.helpers.mapFromTomlFile
 import org.stellar.walletsdk.toml.TomlInfo
-import org.stellar.walletsdk.toml.fromJson
-import shadow.com.google.gson.GsonBuilder
+import org.stellar.walletsdk.toml.parseToml
 
 internal class AnchorTest {
-  private val gson = GsonBuilder().create()
   private val wallet = TestWallet
   private val anchor = wallet.anchor(AUTH_HOME_DOMAIN)
   private val toml = mapFromTomlFile("stellar.toml")
-  private val tomlInfo: TomlInfo = gson.fromJson(toml)
+  private val tomlInfo: TomlInfo = parseToml(toml)
 
   // NOTE: Tests are running on live test network for SRT asset
 

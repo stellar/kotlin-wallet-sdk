@@ -13,6 +13,8 @@ import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
+import org.stellar.walletsdk.toml.TomlInfo
+import org.stellar.walletsdk.toml.parseToml
 import org.stellar.walletsdk.util.*
 
 private val log = KotlinLogging.logger {}
@@ -39,10 +41,10 @@ internal constructor(
    *
    * @return TOML file content
    */
-  suspend fun getInfo(): Map<String, Any> {
+  suspend fun getInfo(): TomlInfo {
     val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
 
-    return toml.getToml()
+    return parseToml(toml.getToml())
   }
 
   /**
