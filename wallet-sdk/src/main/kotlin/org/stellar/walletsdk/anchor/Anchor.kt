@@ -200,8 +200,10 @@ internal constructor(
     noOlderThan: String? = null,
     lang: String? = null
   ): List<WalletOperation<AnchorTransaction>> {
-    val anchorCurrency =
-      toml.currencies?.find { it.assetId == assetId } ?: throw AssetNotSupportedException(assetId)
+    if (toml.currencies?.find { it.assetId == assetId } == null) {
+      throw AssetNotSupportedException(assetId)
+    }
+
     val asset = assetId.toAsset()
 
     val transferServerEndpoint =

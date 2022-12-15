@@ -111,7 +111,7 @@ data class WalletOperation<T>(
   val rawOperation: T,
 )
 
-enum class WalletOperationType() {
+enum class WalletOperationType {
   SEND,
   RECEIVE,
   DEPOSIT,

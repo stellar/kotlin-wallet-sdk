@@ -3,6 +3,7 @@
 plugins {
   alias(libs.plugins.spotless)
   alias(libs.plugins.kotlin.jvm)
+  alias(libs.plugins.detekt)
 }
 
 val jvmVersion = JavaVersion.VERSION_1_8
@@ -15,6 +16,7 @@ allprojects {
 subprojects {
   apply(plugin = "com.diffplug.spotless")
   apply(plugin = "kotlin")
+  apply(plugin = "io.gitlab.arturbosch.detekt")
 
   repositories {
     mavenLocal()
@@ -42,6 +44,13 @@ subprojects {
     kotlin { ktfmt("0.39").googleStyle() }
   }
 
+  detekt {
+    toolVersion = "1.22.0"
+    config = files("$rootDir/config/detekt/detekt.yml")
+    buildUponDefaultConfig = true
+    allRules = true
+  }
+
   dependencies {
     // Define common dependencies here
   }
@@ -56,7 +65,19 @@ subprojects {
       useJUnitPlatform()
     }
   }
+
+  tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+      xml.required.set(true)
+      html.required.set(true)
+      txt.required.set(true)
+      sarif.required.set(true)
+      md.required.set(true)
+    }
+  }
 }
+
+// TODO: add detekt reports
 
 tasks.register("printVersionName") {
   println(rootProject.version.toString())

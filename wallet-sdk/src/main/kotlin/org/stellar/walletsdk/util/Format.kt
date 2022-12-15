@@ -244,7 +244,7 @@ fun formatAnchorTransaction(
  *
  * @param T type of operation or transaction
  */
-internal class WalletOperationBuilder<T : Any>() {
+internal class WalletOperationBuilder<T : Any> {
   lateinit var id: String
   lateinit var date: String
   lateinit var amount: String
@@ -366,7 +366,7 @@ fun formatAmount(amount: String): String {
  */
 @Deprecated("To be removed with wrapper")
 fun stroopsToLumens(stroops: String): String {
-  return BigDecimal(stroops).divide(BigDecimal(1e7)).toPlainString()
+  return BigDecimal(stroops).divide(BigDecimal(XLM_PRECISION)).toPlainString()
 }
 
 /**
@@ -379,5 +379,5 @@ fun stroopsToLumens(stroops: String): String {
  */
 @Deprecated("To be removed with wrapper")
 fun lumensToStroops(lumens: String): String {
-  return BigDecimal(lumens).multiply(BigDecimal(1e7)).toPlainString()
+  return BigDecimal(lumens).multiply(BigDecimal(XLM_PRECISION)).toPlainString()
 }

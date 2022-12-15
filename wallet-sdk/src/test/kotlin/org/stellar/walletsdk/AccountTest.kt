@@ -191,7 +191,7 @@ internal class AccountTest : SuspendTest() {
 
   @Nested
   @DisplayName("removeAccountSigner")
-  inner class RemoveAccountSigner() {
+  inner class RemoveAccountSigner {
     @Test
     fun `defaults work`() {
       val transaction = runBlocking {
@@ -214,7 +214,7 @@ internal class AccountTest : SuspendTest() {
 
   @Nested
   @DisplayName("submitTransaction")
-  inner class SubmitTransaction() {
+  inner class SubmitTransaction {
     private val transaction = runBlocking {
       transactions.removeAccountSigner(ADDRESS_ACTIVE.address, ADDRESS_ACTIVE_TWO)
     }

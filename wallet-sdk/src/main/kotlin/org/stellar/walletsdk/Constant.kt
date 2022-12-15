@@ -13,3 +13,5 @@ val XLM_ASSET_DEFAULT =
     assetCode = "XLM",
     assetIssuer = "Native",
   )
+
+const val XLM_PRECISION = 1e7
