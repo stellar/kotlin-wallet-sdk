@@ -89,7 +89,7 @@ data class ApplicationConfiguration(
 
 typealias Base64Decoder = ((String) -> ByteArray)
 
-internal val defaultBase64Decoder: Base64Decoder = { it: String -> Base64.getDecoder().decode(it) }
+internal val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }
 
 internal val Config.scheme: String
   get() {

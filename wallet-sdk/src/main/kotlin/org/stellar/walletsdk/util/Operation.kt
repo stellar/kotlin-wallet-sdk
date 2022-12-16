@@ -54,6 +54,7 @@ fun lockMasterKeyOperation(): SetOptionsOperation {
   return setMasterKeyWeightOperation(0)
 }
 
+@Suppress("MaxLineLength")
 /**
  * Sponsor operation(s) for another account.
  *

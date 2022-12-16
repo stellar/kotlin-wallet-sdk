@@ -21,6 +21,9 @@ jobs:
       - name: Check code formatting
         run: ./gradlew spotlessCheck || echo "❌ Your code is not properly formatted. You can run './gradlew spotlessApply' to format it. 👀"
 
+      - name: Detekt
+        run: ./gradlew detekt
+
       - name: Test and build
         run: ./gradlew clean build
 

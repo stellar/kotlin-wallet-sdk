@@ -10,6 +10,7 @@ import org.stellar.walletsdk.util.*
 
 private val log = KotlinLogging.logger {}
 
+@Suppress("MaxLineLength")
 /**
  * Key store for Stellar accounts
  *

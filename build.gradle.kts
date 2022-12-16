@@ -48,7 +48,6 @@ subprojects {
     toolVersion = "1.22.0"
     config = files("$rootDir/config/detekt/detekt.yml")
     buildUponDefaultConfig = true
-    allRules = true
   }
 
   dependencies {
@@ -68,16 +67,14 @@ subprojects {
 
   tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
-      xml.required.set(true)
+      xml.required.set(false)
       html.required.set(true)
-      txt.required.set(true)
-      sarif.required.set(true)
-      md.required.set(true)
+      txt.required.set(false)
+      sarif.required.set(false)
+      md.required.set(false)
     }
   }
 }
-
-// TODO: add detekt reports
 
 tasks.register("printVersionName") {
   println(rootProject.version.toString())

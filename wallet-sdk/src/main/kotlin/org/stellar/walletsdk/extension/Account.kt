@@ -20,6 +20,7 @@ fun AccountResponse.availableNativeBalance(): String {
   } else availableAmount.toPlainString()
 }
 
+@Suppress("MaxLineLength")
 /**
  * Get account's base reserve in XLM.
  *
