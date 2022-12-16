@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
+import org.stellar.walletsdk.STRING_TRIM_LENGTH
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.json.toJson
@@ -187,7 +188,7 @@ internal constructor(
         throw MissingTokenException
       }
 
-      log.debug { "Auth token: ${jsonResponse.token.take(8)}..." }
+      log.debug { "Auth token: ${jsonResponse.token.take(STRING_TRIM_LENGTH)}..." }
 
       return jsonResponse.token
     }

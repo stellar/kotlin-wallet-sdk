@@ -120,14 +120,14 @@ suspend fun Server.accountOperations(
   cursor: String? = null,
   includeFailed: Boolean? = null
 ): List<OperationResponse> {
-  if (limit != null && limit > 200) {
+  if (limit != null && limit > HORIZON_LIMIT_MAX) {
     throw OperationsLimitExceededException()
   }
 
   return safeHorizonCall {
     operations()
       .forAccount(accountAddress)
-      .limit(limit ?: 10)
+      .limit(limit ?: HORIZON_LIMIT_DEFAULT)
       .order(order?.builderEnum)
       .cursor(cursor)
       .includeFailed(includeFailed ?: false)

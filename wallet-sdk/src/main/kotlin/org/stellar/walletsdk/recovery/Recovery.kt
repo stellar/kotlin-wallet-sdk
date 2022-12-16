@@ -8,6 +8,7 @@ import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Config
+import org.stellar.walletsdk.STRING_TRIM_LENGTH
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.exception.*
@@ -60,7 +61,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
 
     log.debug {
       "Recovery server signature request: accountAddress = $accountAddress, " +
-        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.take(8)}..."
+        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.take(STRING_TRIM_LENGTH)}..."
     }
 
     return client.newCall(request).execute().use { response ->
@@ -107,7 +108,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
 
       log.debug {
         "Recovery server enroll request: accountAddress = ${account.address}, homeDomain =" +
-          " ${it.homeDomain}, authToken = ${authToken.take(8)}..."
+          " ${it.homeDomain}, authToken = ${authToken.take(STRING_TRIM_LENGTH)}..."
       }
 
       client.newCall(request).execute().use { response ->
@@ -178,7 +179,6 @@ class Recovery internal constructor(private val cfg: Config, private val client:
    *
    * This transaction can be sponsored.
    *
-   * @param accountAddress Stellar address of the account that is registering
    * @param accountSigner A list of account signers and their weights
    * @param accountThreshold Low, medium, and high thresholds to set on the account
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction

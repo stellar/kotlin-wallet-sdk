@@ -26,6 +26,7 @@ internal constructor(
 ) {
   private val server: Server = cfg.stellar.server
   private val network: Network = cfg.stellar.network
+  @Suppress("UnusedPrivateMember")
   private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
 
   /**

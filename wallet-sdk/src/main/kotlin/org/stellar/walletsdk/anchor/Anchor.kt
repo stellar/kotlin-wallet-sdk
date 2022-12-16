@@ -167,7 +167,8 @@ internal constructor(
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
     log.debug {
-      "Anchor account's all transactions request: assetCode = $assetCode, authToken = ${authToken.take(8)}"
+      "Anchor account's all transactions request: assetCode = $assetCode, authToken = ${authToken
+        .take(STRING_TRIM_LENGTH)}"
     }
 
     return httpClient.newCall(request).execute().use { response ->
@@ -232,7 +233,7 @@ internal constructor(
 
     log.debug {
       "Anchor account's formatted history request: asset = $asset, authToken = " +
-        "${authToken.take(8)}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
+        "${authToken.take(STRING_TRIM_LENGTH)}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
         "lang = $lang"
     }
 

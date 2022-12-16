@@ -60,6 +60,7 @@ internal object AssetIdSerializer : KSerializer<AssetId> {
       val split = str.split(":")
 
       // scheme:code:issuer
+      @Suppress("MagicNumber")
       if (split.size != 3) {
         throw InvalidJsonException("Invalid asset format", str)
       }

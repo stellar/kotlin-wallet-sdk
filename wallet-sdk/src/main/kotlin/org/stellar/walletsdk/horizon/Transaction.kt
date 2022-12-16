@@ -122,7 +122,7 @@ internal constructor(
   suspend fun addAssetSupport(
     sourceAddress: String,
     asset: IssuedAssetId,
-    trustLimit: String = Long.MAX_VALUE.toBigDecimal().movePointLeft(7).toPlainString(),
+    trustLimit: String = Long.MAX_VALUE.toBigDecimal().movePointLeft(DECIMAL_POINT_PRECISION).toPlainString(),
     sponsorAddress: String = ""
   ): Transaction {
     val isSponsored = sponsorAddress.isNotBlank()

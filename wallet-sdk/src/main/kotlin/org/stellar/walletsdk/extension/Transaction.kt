@@ -119,5 +119,6 @@ suspend fun createTransactionBuilder(
   // TODO: add memo
   // TODO: add time bounds
 
+  @Suppress("MagicNumber")
   return Transaction.Builder(sourceAccount, network).setBaseFee(maxBaseFeeInStroops).setTimeout(180)
 }
