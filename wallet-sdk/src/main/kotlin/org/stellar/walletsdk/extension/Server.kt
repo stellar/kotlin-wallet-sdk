@@ -14,8 +14,8 @@ import org.stellar.walletsdk.util.formatAmount
 @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
 private fun <T> safeHorizonCall(body: () -> T): T {
   try {
-    return body() }
-  catch (e: ErrorResponse) {
+    return body()
+  } catch (e: ErrorResponse) {
     throw HorizonRequestFailedException(e)
   } catch (e: Exception) {
     throw e

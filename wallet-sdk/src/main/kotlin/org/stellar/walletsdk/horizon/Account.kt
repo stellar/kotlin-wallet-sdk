@@ -9,40 +9,42 @@ import org.stellar.sdk.KeyPair
  * to public key pair via calling [toPublicKeyPair] helper function.
  */
 sealed interface AccountKeyPair {
-    val keyPair: KeyPair
-    val address: String
-        get() = keyPair.accountId
-    val publicKey: ByteArray
-        get() = keyPair.publicKey
+  val keyPair: KeyPair
+  val address: String
+    get() = keyPair.accountId
+  val publicKey: ByteArray
+    get() = keyPair.publicKey
 }
 
-@JvmInline
-value class PublicKeyPair(override val keyPair: KeyPair) : AccountKeyPair
+@JvmInline value class PublicKeyPair(override val keyPair: KeyPair) : AccountKeyPair
 
 @JvmInline
 value class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
-    init {
-        require(keyPair.canSign()) { "This keypair doesn't have private key and can't sign" }
+  init {
+    @Suppress("UseRequire")
+    if (!keyPair.canSign()) {
+      throw IllegalArgumentException("This keypair doesn't have private key and can't sign")
     }
+  }
 
-    val secretKey: String
-        get() = keyPair.secretSeed.concatToString()
+  val secretKey: String
+    get() = keyPair.secretSeed.concatToString()
 
-    fun <T : AbstractTransaction> sign(transaction: T): T {
-        return transaction.sign(this)
+  fun <T : AbstractTransaction> sign(transaction: T): T {
+    return transaction.sign(this)
+  }
+
+  companion object {
+    fun fromSecret(secret: String): SigningKeyPair {
+      return SigningKeyPair(KeyPair.fromSecretSeed(secret))
     }
-
-    companion object {
-        fun fromSecret(secret: String): SigningKeyPair {
-            return SigningKeyPair(KeyPair.fromSecretSeed(secret))
-        }
-    }
+  }
 }
 
 fun <T : AbstractTransaction> T.sign(keyPair: SigningKeyPair): T {
-    return this.also { this.sign(keyPair.keyPair) }
+  return this.also { this.sign(keyPair.keyPair) }
 }
 
 fun String.toPublicKeyPair(): AccountKeyPair {
-    return PublicKeyPair(KeyPair.fromAccountId(this))
+  return PublicKeyPair(KeyPair.fromAccountId(this))
 }
