@@ -1,12 +1,15 @@
 package org.stellar.walletsdk.auth
 
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.stellar.walletsdk.STRING_TRIM_LENGTH
 
-@Suppress("ConstructorParameterNaming")
 @Serializable
-data class ChallengeResponse(val transaction: String, val network_passphrase: String)
+data class ChallengeResponse(
+  val transaction: String,
+  @SerialName("network_passphrase") val networkPassphrase: String
+)
 
 @Serializable
 @JvmInline

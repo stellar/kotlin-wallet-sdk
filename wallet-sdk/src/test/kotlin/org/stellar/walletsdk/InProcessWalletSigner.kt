@@ -40,7 +40,7 @@ class InProcessWalletSigner : WalletSigner {
 
       return Transaction.fromEnvelopeXdr(
         jsonResponse.transaction,
-        Network(jsonResponse.network_passphrase)
+        Network(jsonResponse.networkPassphrase)
       ) as Transaction
     }
   }

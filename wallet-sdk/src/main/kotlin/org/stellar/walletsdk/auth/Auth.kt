@@ -114,7 +114,7 @@ internal constructor(
         throw MissingTransactionException
       }
 
-      if (jsonResponse.network_passphrase != cfg.stellar.network.networkPassphrase) {
+      if (jsonResponse.networkPassphrase != cfg.stellar.network.networkPassphrase) {
         throw NetworkMismatchException
       }
 
@@ -138,7 +138,7 @@ internal constructor(
     var challengeTxn =
       Transaction.fromEnvelopeXdr(
         challengeResponse.transaction,
-        Network(challengeResponse.network_passphrase)
+        Network(challengeResponse.networkPassphrase)
       ) as Transaction
 
     val clientDomainOperation =
@@ -150,7 +150,7 @@ internal constructor(
       challengeTxn =
         walletSigner.signWithDomainAccount(
           challengeResponse.transaction,
-          challengeResponse.network_passphrase,
+          challengeResponse.networkPassphrase,
           account
         )
     }
