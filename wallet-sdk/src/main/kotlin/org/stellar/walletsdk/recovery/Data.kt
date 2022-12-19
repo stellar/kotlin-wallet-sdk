@@ -1,7 +1,7 @@
 package org.stellar.walletsdk.recovery
 
 import kotlinx.serialization.Serializable
-import org.stellar.walletsdk.auth.AuthTokenValue
+import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.auth.WalletSigner
 
 @Serializable internal data class TransactionRequest(val transaction: String)
@@ -19,7 +19,7 @@ data class RecoveryServer(
 data class RecoveryServerAuth(
   val endpoint: String,
   val signerAddress: String,
-  val authToken: AuthTokenValue,
+  val authToken: AuthToken,
 )
 
 @Serializable

@@ -6,7 +6,7 @@ import okhttp3.internal.toImmutableMap
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
-import org.stellar.walletsdk.auth.AuthTokenValue
+import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
@@ -50,7 +50,7 @@ internal constructor(
   suspend fun withdraw(
     accountAddress: String,
     assetId: IssuedAssetId,
-    authToken: AuthTokenValue,
+    authToken: AuthToken,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
@@ -77,7 +77,7 @@ internal constructor(
   suspend fun deposit(
     accountAddress: String,
     assetId: IssuedAssetId,
-    authToken: AuthTokenValue,
+    authToken: AuthToken,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
@@ -104,7 +104,7 @@ internal constructor(
   private suspend fun flow(
     accountAddress: String,
     assetId: IssuedAssetId,
-    authToken: AuthTokenValue,
+    authToken: AuthToken,
     extraFields: Map<String, String>?,
     fundsAccountAddress: String?,
     type: String,

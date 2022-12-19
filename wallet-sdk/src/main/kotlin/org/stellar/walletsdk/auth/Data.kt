@@ -10,7 +10,7 @@ data class ChallengeResponse(val transaction: String, val network_passphrase: St
 
 @Serializable
 @JvmInline
-value class AuthTokenValue(private val value: String) {
+value class AuthToken(private val value: String) {
   fun prettify(): String {
     return value.take(STRING_TRIM_LENGTH)
   }
@@ -20,6 +20,6 @@ value class AuthTokenValue(private val value: String) {
   }
 }
 
-@Serializable internal data class AuthToken(@Contextual val token: AuthTokenValue)
+@Serializable internal data class AuthTokenResponse(@Contextual val token: AuthToken)
 
 @Serializable internal data class AuthTransaction(val transaction: String)

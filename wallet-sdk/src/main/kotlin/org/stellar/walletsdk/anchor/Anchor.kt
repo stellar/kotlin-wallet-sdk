@@ -10,7 +10,7 @@ import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.auth.Auth
-import org.stellar.walletsdk.auth.AuthTokenValue
+import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
@@ -128,7 +128,7 @@ internal constructor(
    */
   suspend fun getTransactionStatus(
     transactionId: String,
-    authToken: AuthTokenValue,
+    authToken: AuthToken,
     toml: TomlInfo
   ): AnchorTransaction {
     val transferServerEndpoint =
@@ -159,7 +159,7 @@ internal constructor(
    */
   suspend fun getAllTransactionStatus(
     assetCode: String,
-    authToken: AuthTokenValue,
+    authToken: AuthToken,
     toml: TomlInfo
   ): List<AnchorTransaction> {
     val transferServerEndpoint =
@@ -195,7 +195,7 @@ internal constructor(
   @Suppress("LongParameterList")
   suspend fun getHistory(
     assetId: IssuedAssetId,
-    authToken: AuthTokenValue,
+    authToken: AuthToken,
     toml: TomlInfo,
     limit: Int? = null,
     pagingId: String? = null,
