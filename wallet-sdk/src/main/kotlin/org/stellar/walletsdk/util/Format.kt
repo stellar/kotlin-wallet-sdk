@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package org.stellar.walletsdk.util
 
 import java.math.BigDecimal
@@ -18,7 +20,6 @@ import org.stellar.walletsdk.extension.reservedBalance
  *
  * @param account Account response object whose balances to format
  * @param server Horizon [Server] instance
- *
  * @return formatted account balances
  */
 @Suppress("LongMethod")
@@ -134,7 +135,6 @@ suspend fun formatAccountBalances(account: AccountResponse, server: Server): For
  *
  * @param accountAddress Stellar address of the account
  * @param operation Stellar operation to format
- *
  * @return formatted operation
  */
 @Suppress("ReturnCount")
@@ -214,7 +214,6 @@ fun formatStellarOperation(
  *
  * @param transaction anchor transaction to format
  * @param asset transaction asset
- *
  * @return formatted transaction
  */
 fun formatAnchorTransaction(
@@ -349,7 +348,6 @@ fun formatAsset(asset: Asset? = null): WalletAsset {
  * Format amount to consistent string.
  *
  * @param amount Amount string to format
- *
  * @return formatted amount
  */
 @Deprecated("To be removed with wrapper")
@@ -363,7 +361,6 @@ fun formatAmount(amount: String): String {
  * lumens (XLM).
  *
  * @param stroops Amount in stroops to convert to lumens
- *
  * @return amount in lumens (XLM)
  */
 @Deprecated("To be removed with wrapper")
@@ -376,7 +373,6 @@ fun stroopsToLumens(stroops: String): String {
  * [stroops](https://developers.stellar.org/docs/glossary#stroop).
  *
  * @param lumens Amount in lumens (XLM) to convert to stroops
- *
  * @return amount in stroops
  */
 @Deprecated("To be removed with wrapper")

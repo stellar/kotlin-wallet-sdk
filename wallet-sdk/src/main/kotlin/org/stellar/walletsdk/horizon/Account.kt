@@ -21,10 +21,7 @@ sealed interface AccountKeyPair {
 @JvmInline
 value class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
   init {
-    @Suppress("UseRequire")
-    if (!keyPair.canSign()) {
-      throw IllegalArgumentException("This keypair doesn't have private key and can't sign")
-    }
+    require(keyPair.canSign()) { "This keypair doesn't have private key and can't sign" }
   }
 
   val secretKey: String
