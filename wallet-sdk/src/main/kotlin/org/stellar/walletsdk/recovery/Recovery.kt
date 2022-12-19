@@ -8,7 +8,6 @@ import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Config
-import org.stellar.walletsdk.STRING_TRIM_LENGTH
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.exception.*
@@ -61,7 +60,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
 
     log.debug {
       "Recovery server signature request: accountAddress = $accountAddress, " +
-        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.take(STRING_TRIM_LENGTH)}..."
+        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.prettify()}..."
     }
 
     return client.newCall(request).execute().use { response ->
@@ -108,7 +107,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
 
       log.debug {
         "Recovery server enroll request: accountAddress = ${account.address}, homeDomain =" +
-          " ${it.homeDomain}, authToken = ${authToken.take(STRING_TRIM_LENGTH)}..."
+          " ${it.homeDomain}, authToken = ${authToken.prettify()}..."
       }
 
       client.newCall(request).execute().use { response ->

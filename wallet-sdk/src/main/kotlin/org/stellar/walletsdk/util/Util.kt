@@ -5,7 +5,6 @@ import org.stellar.walletsdk.exception.IncorrectTransactionStatusException
 
 internal object Util {
   fun String.isHex(): Boolean {
-    @Suppress("MagicNumber")
     return this.toBigIntegerOrNull(16) != null
   }
 }

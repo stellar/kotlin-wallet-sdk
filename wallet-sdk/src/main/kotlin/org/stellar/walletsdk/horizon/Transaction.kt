@@ -69,11 +69,11 @@ internal constructor(
    * @param sourceAddress Stellar address of the account that is funding the account
    * @param destinationAddress Stellar address of the account that is being funded
    * @param startingBalance optional Starting account balance in XLM. Minimum for non-sponsored
-   *   accounts is 1 XLM, sponsored accounts can leave it at 0 XLM. Default value is 1.
+   * accounts is 1 XLM, sponsored accounts can leave it at 0 XLM. Default value is 1.
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    * @return transaction
    * @throws [InvalidStartingBalanceException] when starting balance is less than 1 XLM for
-   *   non-sponsored account
+   * non-sponsored account
    */
   suspend fun fund(
     sourceAddress: String,
@@ -122,7 +122,8 @@ internal constructor(
   suspend fun addAssetSupport(
     sourceAddress: String,
     asset: IssuedAssetId,
-    trustLimit: String = Long.MAX_VALUE.toBigDecimal().movePointLeft(DECIMAL_POINT_PRECISION).toPlainString(),
+    trustLimit: String =
+      Long.MAX_VALUE.toBigDecimal().movePointLeft(DECIMAL_POINT_PRECISION).toPlainString(),
     sponsorAddress: String = ""
   ): Transaction {
     val isSponsored = sponsorAddress.isNotBlank()
@@ -251,7 +252,7 @@ internal constructor(
    * @param transaction anchor withdrawal transaction
    * @return formed transfer transaction
    * @throws IncorrectTransactionStatusException if transaction can't be sent due to having
-   *   incorrect state
+   * incorrect state
    */
   suspend fun transfer(
     transaction: WithdrawalTransaction,

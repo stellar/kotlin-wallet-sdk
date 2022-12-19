@@ -6,7 +6,6 @@ import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
-import org.stellar.walletsdk.STRING_TRIM_LENGTH
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.json.toJson
@@ -54,7 +53,7 @@ internal constructor(
     walletSigner: WalletSigner? = null,
     memoId: String? = null,
     clientDomain: String? = null
-  ): String {
+  ): AuthTokenValue {
     val challengeTxn = challenge(accountAddress, memoId, clientDomain)
     val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
@@ -174,7 +173,7 @@ internal constructor(
    * @throws [ServerRequestFailedException] when request fails
    * @throws [MissingTokenException] when request JSON response does not contain `token`
    */
-  private suspend fun getToken(signedTransaction: Transaction): String {
+  private suspend fun getToken(signedTransaction: Transaction): AuthTokenValue {
     val signedChallengeTxnXdr = signedTransaction.toEnvelopeXdrBase64()
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
     val tokenRequest = OkHttpUtils.makePostRequest(webAuthEndpoint, tokenRequestParams)
@@ -184,11 +183,11 @@ internal constructor(
 
       val jsonResponse: AuthToken = response.toJson()
 
-      if (jsonResponse.token.isBlank()) {
+      if (jsonResponse.token.toString().isBlank()) {
         throw MissingTokenException
       }
 
-      log.debug { "Auth token: ${jsonResponse.token.take(STRING_TRIM_LENGTH)}..." }
+      log.debug { "Auth token: ${jsonResponse.token.prettify()}..." }
 
       return jsonResponse.token
     }
