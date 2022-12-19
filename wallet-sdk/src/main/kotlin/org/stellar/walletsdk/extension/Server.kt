@@ -11,13 +11,13 @@ import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.exception.OperationsLimitExceededException
 import org.stellar.walletsdk.util.formatAmount
 
+@Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
 private fun <T> safeHorizonCall(body: () -> T): T {
   try {
-    return body()
+    return body() }
+  catch (e: ErrorResponse) {
+    throw HorizonRequestFailedException(e)
   } catch (e: Exception) {
-    if (e is ErrorResponse) {
-      throw HorizonRequestFailedException(e)
-    }
     throw e
   }
 }

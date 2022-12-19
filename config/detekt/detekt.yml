@@ -5,3 +5,19 @@ style:
     active: false
   WildcardImport:
     active: false
+  ThrowsCount:
+    active: true
+    max: 3
+    excludeGuardClauses: false
+complexity:
+  TooManyFunctions:
+    active: true
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
+    thresholdInFiles: 15
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 15
+    ignoreDeprecated: false
+    ignorePrivate: false
+    ignoreOverridden: false

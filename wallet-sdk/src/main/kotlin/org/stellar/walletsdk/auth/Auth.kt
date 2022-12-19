@@ -70,6 +70,7 @@ internal constructor(
    * @throws [ServerRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
+  @Suppress("ThrowsCount")
   private suspend fun challenge(
     account: AccountKeyPair,
     memoId: String? = null,

@@ -3,6 +3,7 @@ package org.stellar.walletsdk.helpers
 import java.io.FileReader
 import org.stellar.walletsdk.json.fromJson
 
+@Suppress("TooGenericExceptionThrown")
 internal inline fun <reified T> stellarObjectFromJsonFile(fileName: String): T {
   val filePath = getFileFromResource(fileName)
   val jsonString = FileReader(filePath).use { f -> f.readText() }

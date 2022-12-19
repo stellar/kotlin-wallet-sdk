@@ -6,6 +6,7 @@ import org.stellar.sdk.Memo
 import org.stellar.walletsdk.ApplicationConfiguration
 import org.stellar.walletsdk.util.Util.isHex
 
+@Suppress("ConstructorParameterNaming")
 @Serializable
 data class AnchorServiceAsset(
   val enabled: Boolean,
@@ -15,6 +16,7 @@ data class AnchorServiceAsset(
   val fee_percent: Double? = null
 )
 
+@Suppress("ConstructorParameterNaming")
 @Serializable
 data class AnchorServiceFeatures(val account_creation: Boolean, val claimable_balances: Boolean)
 

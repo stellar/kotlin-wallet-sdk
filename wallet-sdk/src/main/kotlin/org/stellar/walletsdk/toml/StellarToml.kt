@@ -51,6 +51,7 @@ internal class StellarToml(
     var scheme = scheme
     var host = homeDomain
 
+    @Suppress("SwallowedException", "TooGenericExceptionCaught")
     try {
       val url = homeDomain.toHttpUrl()
       scheme = url.scheme

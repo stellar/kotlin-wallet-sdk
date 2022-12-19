@@ -23,6 +23,7 @@ internal inline fun <reified T : Any> T.toJson(format: Json = defaultJson): Stri
   return format.encodeToString(this)
 }
 
+@Suppress("SwallowedException", "TooGenericExceptionCaught")
 internal inline fun <reified T> Response.toJsonOrNull(format: Json = defaultJson): T? {
   return try {
     this.toJson<T>(format)

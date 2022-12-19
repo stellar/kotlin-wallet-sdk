@@ -192,6 +192,7 @@ internal constructor(
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
+  @Suppress("LongParameterList")
   suspend fun getHistory(
     assetId: IssuedAssetId,
     authToken: AuthTokenValue,

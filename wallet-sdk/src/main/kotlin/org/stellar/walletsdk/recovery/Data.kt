@@ -41,6 +41,7 @@ data class RecoveryAccountAuthMethod(
   val value: String,
 )
 
+@Suppress("ConstructorParameterNaming")
 @Serializable
 data class RecoveryAccountIdentity(
   val role: String,

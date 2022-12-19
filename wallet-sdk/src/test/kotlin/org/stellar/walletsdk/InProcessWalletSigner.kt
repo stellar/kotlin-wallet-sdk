@@ -33,6 +33,7 @@ class InProcessWalletSigner : WalletSigner {
 
       val jsonResponse = response.toJson<ChallengeResponse>()
 
+      @Suppress("TooGenericExceptionThrown")
       if (jsonResponse.transaction.isBlank()) {
         throw Exception("The response did not contain a transaction")
       }

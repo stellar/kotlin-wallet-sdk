@@ -100,6 +100,7 @@ internal constructor(
    * string)
    * [documentation](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md#request)
    */
+  @Suppress("LongParameterList", "ThrowsCount")
   private suspend fun flow(
     accountAddress: String,
     assetId: IssuedAssetId,
