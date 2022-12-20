@@ -7,7 +7,7 @@ import org.stellar.sdk.Asset
 import org.stellar.walletsdk.WalletAsset
 
 @DisplayName("formatAsset")
-class FormatAssetTest {
+internal class FormatAssetTest {
   @Test
   fun `native asset`() {
     val asset = Asset.create("native")
