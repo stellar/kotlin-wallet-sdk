@@ -7,6 +7,7 @@ fun getFileFromResource(fileName: String): File {
   val classLoader: ClassLoader = {}.javaClass.classLoader
   val resource: URL? = classLoader.getResource(fileName)
 
+  @Suppress("IllegalArgumentException", "UseRequire")
   return if (resource == null) {
     throw IllegalArgumentException("file not found! $fileName")
   } else {

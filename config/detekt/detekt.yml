@@ -1,0 +1,11 @@
+style:
+  ForbiddenComment:
+    active: false
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: false
+  ThrowsCount:
+    active: true
+    max: 3
+    excludeGuardClauses: false

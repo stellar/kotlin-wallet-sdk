@@ -41,9 +41,7 @@ internal constructor(
    * @param walletSigner overriding [Auth.defaultSigner] to use in this authentication
    * @param memoId optional memo ID to distinguish the account
    * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
-   *
    * @return authentication token (JWT)
-   *
    * @throws [ValidationException] when some of the request arguments are not valid
    * @throws [ServerRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
@@ -53,7 +51,7 @@ internal constructor(
     walletSigner: WalletSigner? = null,
     memoId: String? = null,
     clientDomain: String? = null
-  ): String {
+  ): AuthToken {
     val challengeTxn = challenge(accountAddress, memoId, clientDomain)
     val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
@@ -64,12 +62,12 @@ internal constructor(
    *
    * @return transaction as Base64 encoded TransactionEnvelope XDR string and network passphrase
    * from the auth endpoint
-   *
    * @throws [InvalidMemoIdException] when memo ID is not valid
    * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
    * @throws [ServerRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
+  @Suppress("ThrowsCount")
   private suspend fun challenge(
     account: AccountKeyPair,
     memoId: String? = null,
@@ -116,7 +114,7 @@ internal constructor(
         throw MissingTransactionException
       }
 
-      if (jsonResponse.network_passphrase != cfg.stellar.network.networkPassphrase) {
+      if (jsonResponse.networkPassphrase != cfg.stellar.network.networkPassphrase) {
         throw NetworkMismatchException
       }
 
@@ -130,7 +128,6 @@ internal constructor(
    *
    * @param challengeResponse challenge transaction and network passphrase returned from the auth
    * endpoint
-   *
    * @return signed transaction
    */
   private fun sign(
@@ -141,7 +138,7 @@ internal constructor(
     var challengeTxn =
       Transaction.fromEnvelopeXdr(
         challengeResponse.transaction,
-        Network(challengeResponse.network_passphrase)
+        Network(challengeResponse.networkPassphrase)
       ) as Transaction
 
     val clientDomainOperation =
@@ -153,7 +150,7 @@ internal constructor(
       challengeTxn =
         walletSigner.signWithDomainAccount(
           challengeResponse.transaction,
-          challengeResponse.network_passphrase,
+          challengeResponse.networkPassphrase,
           account
         )
     }
@@ -167,13 +164,11 @@ internal constructor(
    * Send signed transaction to the auth endpoint to get JWT token.
    *
    * @param signedTransaction signed transaction
-   *
    * @return transaction as Base64 encoded TransactionEnvelope XDR string
-   *
    * @throws [ServerRequestFailedException] when request fails
    * @throws [MissingTokenException] when request JSON response does not contain `token`
    */
-  private suspend fun getToken(signedTransaction: Transaction): String {
+  private suspend fun getToken(signedTransaction: Transaction): AuthToken {
     val signedChallengeTxnXdr = signedTransaction.toEnvelopeXdrBase64()
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
     val tokenRequest = OkHttpUtils.makePostRequest(webAuthEndpoint, tokenRequestParams)
@@ -181,13 +176,13 @@ internal constructor(
     httpClient.newCall(tokenRequest).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
-      val jsonResponse: AuthToken = response.toJson()
+      val jsonResponse: AuthTokenResponse = response.toJson()
 
-      if (jsonResponse.token.isBlank()) {
+      if (jsonResponse.token.toString().isBlank()) {
         throw MissingTokenException
       }
 
-      log.debug { "Auth token: ${jsonResponse.token.take(8)}..." }
+      log.debug { "Auth token: ${jsonResponse.token.prettify()}..." }
 
       return jsonResponse.token
     }

@@ -29,9 +29,7 @@ internal constructor(
    *
    * @param accountAddress Stellar address of the account whose master key to lock
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
-   *
    * @return transaction
-   *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun lockAccountMasterKey(
@@ -73,9 +71,7 @@ internal constructor(
    * @param startingBalance optional Starting account balance in XLM. Minimum for non-sponsored
    * accounts is 1 XLM, sponsored accounts can leave it at 0 XLM. Default value is 1.
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
-   *
    * @return transaction
-   *
    * @throws [InvalidStartingBalanceException] when starting balance is less than 1 XLM for
    * non-sponsored account
    */
@@ -120,15 +116,14 @@ internal constructor(
    * @param asset Target asset
    * @param trustLimit optional The limit of the trustline. Default value is maximum supported.
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
-   *
    * @return transaction
-   *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun addAssetSupport(
     sourceAddress: String,
     asset: IssuedAssetId,
-    trustLimit: String = Long.MAX_VALUE.toBigDecimal().movePointLeft(7).toPlainString(),
+    trustLimit: String =
+      Long.MAX_VALUE.toBigDecimal().movePointLeft(DECIMAL_POINT_PRECISION).toPlainString(),
     sponsorAddress: String = ""
   ): Transaction {
     val isSponsored = sponsorAddress.isNotBlank()
@@ -145,7 +140,8 @@ internal constructor(
       }
 
     log.debug {
-      "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, asset=$asset, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
+      "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, " +
+        "asset=$asset, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
     }
 
     return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
@@ -156,9 +152,7 @@ internal constructor(
    *
    * @param sourceAddress Stellar address of the account that is opting-out of the asset
    * @param assetId Target asset
-   *
    * @return transaction
-   *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun removeAssetSupport(sourceAddress: String, assetId: IssuedAssetId): Transaction {
@@ -175,9 +169,7 @@ internal constructor(
    * @param signerAddress Stellar address of the signer that is added
    * @param signerWeight Signer weight
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
-   *
    * @return transaction
-   *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun addAccountSigner(
@@ -201,8 +193,9 @@ internal constructor(
       }
 
     log.debug {
-      "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = $sourceAddress, signerAddress = " +
-        "$signerAddress, signerWeight = $signerWeight, sponsorAddress = $sponsorAddress"
+      "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = " +
+        "$sourceAddress, signerAddress = $signerAddress, signerWeight = $signerWeight, " +
+        "sponsorAddress = $sponsorAddress"
     }
 
     return buildTransaction(sourceAddress, maxBaseFeeInStroops, server, network, operations)
@@ -213,9 +206,7 @@ internal constructor(
    *
    * @param sourceAddress Stellar address of the account that is removing the signer
    * @param signerAddress Stellar address of the signer that is removed
-   *
    * @return transaction
-   *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun removeAccountSigner(sourceAddress: String, signerAddress: String): Transaction {
@@ -232,7 +223,6 @@ internal constructor(
    * @param assetId: Target asset id
    * @param amount amount of asset to transfer
    * @param memo optional memo
-   *
    * @return formed transfer transaction
    */
   private suspend fun transfer(
@@ -260,9 +250,6 @@ internal constructor(
    * to move asset between accounts.
    *
    * @param transaction anchor withdrawal transaction
-   * @param assetIssuer issuer of asset to transfer
-   * @param assetCode code of asset to transfer
-   *
    * @return formed transfer transaction
    * @throws IncorrectTransactionStatusException if transaction can't be sent due to having
    * incorrect state

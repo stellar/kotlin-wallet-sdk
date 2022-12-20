@@ -20,8 +20,10 @@ class Wallet(
   internal val cfg = Config(stellarConfiguration, applicationConfiguration)
 
   init {
-    if (applicationConfiguration.useHttp && stellarConfiguration.network == Network.PUBLIC) {
-      throw IllegalArgumentException("Using http is not allowed with main Stellar network (pubnet)")
+    if (applicationConfiguration.useHttp) {
+      require(stellarConfiguration.network != Network.PUBLIC) {
+        "Using http is not allowed with main Stellar network (pubnet)"
+      }
     }
   }
 
@@ -50,10 +52,8 @@ data class StellarConfiguration(
 ) {
   var server: Server =
     if (horizonClient != null) {
-      if (submitClient == null) {
-        throw IllegalArgumentException(
-          "Horizon and submit client must be both initialized or set to null"
-        )
+      requireNotNull(submitClient) {
+        "Horizon and submit client must be both initialized or set to null"
       }
       Server(horizonUrl, horizonClient, submitClient)
     } else {
@@ -73,13 +73,13 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
 /**
  * Application configuration
  *
+ * @constructor Create empty Application configuration
  * @property defaultSigner default signer implementation to be used across application
  * @property base64Decoder Base64 decoder. Default [java.util.Base64] decoder works with Android API
  * 23+. To support Android API older than API 23, custom base64Decoder needs to be provided. For
  * example, `android.util.Base64`.
  * @property useHttp when enabled, switch from https to http scheme. Only allowed when network is
  * not [Network.PUBLIC] for security reasons
- * @constructor Create empty Application configuration
  */
 data class ApplicationConfiguration(
   val defaultSigner: WalletSigner = WalletSigner.Default,
@@ -89,7 +89,7 @@ data class ApplicationConfiguration(
 
 typealias Base64Decoder = ((String) -> ByteArray)
 
-internal val defaultBase64Decoder: Base64Decoder = { it: String -> Base64.getDecoder().decode(it) }
+internal val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }
 
 internal val Config.scheme: String
   get() {

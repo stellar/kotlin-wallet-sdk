@@ -13,3 +13,9 @@ val XLM_ASSET_DEFAULT =
     assetCode = "XLM",
     assetIssuer = "Native",
   )
+
+const val XLM_PRECISION = 1e7
+const val DECIMAL_POINT_PRECISION = 7
+const val STRING_TRIM_LENGTH = 8
+const val HORIZON_LIMIT_MAX = 200
+const val HORIZON_LIMIT_DEFAULT = 10

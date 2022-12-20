@@ -15,17 +15,17 @@ private val myKey =
   System.getenv("STELLAR_KEY") ?: "SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I"
 private val myAccount = SigningKeyPair.fromSecret(myKey)
 
-private const val useLocal = false
-private val SRT = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
+private const val IS_LOCAL = false
+//private val SRT = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
 private val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 private val USDC_ANCHOR_PLATFORM =
   IssuedAssetId("USDC", "GDQOE23CFSUMSVQK4Y5JHPPYK73VYCNHZHA7ENKCV37P6SUEO6XQBKPP")
-private val asset = if (useLocal) USDC_ANCHOR_PLATFORM else USDC
-private val homeDomain = if (useLocal) "localhost:8080" else "testanchor.stellar.org"
-private val scheme = if (useLocal) "http" else "https"
+private val asset = if (IS_LOCAL) USDC_ANCHOR_PLATFORM else USDC
+private val homeDomain = if (IS_LOCAL) "localhost:8080" else "testanchor.stellar.org"
+private val scheme = if (IS_LOCAL) "http" else "https"
 
 suspend fun main() {
-  val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = useLocal))
+  val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = IS_LOCAL))
 
   // Create instance of stellar, account and transaction services
   val stellar = wallet.stellar()

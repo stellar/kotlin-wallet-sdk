@@ -60,7 +60,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
 
     log.debug {
       "Recovery server signature request: accountAddress = $accountAddress, " +
-        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.take(8)}..."
+        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.prettify()}..."
     }
 
     return client.newCall(request).execute().use { response ->
@@ -107,7 +107,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
 
       log.debug {
         "Recovery server enroll request: accountAddress = ${account.address}, homeDomain =" +
-          " ${it.homeDomain}, authToken = ${authToken.take(8)}..."
+          " ${it.homeDomain}, authToken = ${authToken.prettify()}..."
       }
 
       client.newCall(request).execute().use { response ->
@@ -178,7 +178,6 @@ class Recovery internal constructor(private val cfg: Config, private val client:
    *
    * This transaction can be sponsored.
    *
-   * @param accountAddress Stellar address of the account that is registering
    * @param accountSigner A list of account signers and their weights
    * @param accountThreshold Low, medium, and high thresholds to set on the account
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction

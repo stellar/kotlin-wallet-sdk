@@ -10,6 +10,7 @@ import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.auth.Auth
+import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
@@ -62,7 +63,7 @@ internal constructor(
 
     return Auth(
       cfg,
-      toml.services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported(),
+      toml.services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
       homeDomain,
       httpClient
     )
@@ -127,11 +128,11 @@ internal constructor(
    */
   suspend fun getTransactionStatus(
     transactionId: String,
-    authToken: String,
+    authToken: AuthToken,
     toml: TomlInfo
   ): AnchorTransaction {
     val transferServerEndpoint =
-      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported()
+      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -158,16 +159,16 @@ internal constructor(
    */
   suspend fun getAllTransactionStatus(
     assetCode: String,
-    authToken: String,
+    authToken: AuthToken,
     toml: TomlInfo
   ): List<AnchorTransaction> {
     val transferServerEndpoint =
-      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported()
+      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
     log.debug {
-      "Anchor account's all transactions request: assetCode = $assetCode, authToken = ${authToken.take(8)}"
+      "Anchor account's all transactions request: assetCode = $assetCode, authToken = ${authToken.prettify()}"
     }
 
     return httpClient.newCall(request).execute().use { response ->
@@ -191,21 +192,24 @@ internal constructor(
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
+  @Suppress("LongParameterList")
   suspend fun getHistory(
     assetId: IssuedAssetId,
-    authToken: String,
+    authToken: AuthToken,
     toml: TomlInfo,
     limit: Int? = null,
     pagingId: String? = null,
     noOlderThan: String? = null,
     lang: String? = null
   ): List<WalletOperation<AnchorTransaction>> {
-    val anchorCurrency =
-      toml.currencies?.find { it.assetId == assetId } ?: throw AssetNotSupportedException(assetId)
+    if (toml.currencies?.find { it.assetId == assetId } == null) {
+      throw AssetNotSupportedException(assetId)
+    }
+
     val asset = assetId.toAsset()
 
     val transferServerEndpoint =
-      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported()
+      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointHttpUrl = transferServerEndpoint.toHttpUrl()
     val endpointUrl = HttpUrl.Builder().scheme("https").host(endpointHttpUrl.host)
 
@@ -230,7 +234,7 @@ internal constructor(
 
     log.debug {
       "Anchor account's formatted history request: asset = $asset, authToken = " +
-        "${authToken.take(8)}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
+        "${authToken.prettify()}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
         "lang = $lang"
     }
 

@@ -24,7 +24,8 @@ class TransactionSubmitFailedException(
   val response: SubmitTransactionResponse,
 ) :
   StellarException(
-    "Submit transaction failed with code ${response.resultCode ?: "<unknown>"}.${response.operationsResultCodes ?. run { " Operation result codes: $this" } ?: ""}"
+    "Submit transaction failed with code ${response.resultCode ?: "<unknown>"}" +
+      ".${response.operationsResultCodes ?. run { " Operation result codes: $this" } ?: ""}"
   ) {
   val transactionResultCode = response.resultCode
   val operationsResultCodes = response.operationsResultCodes
@@ -42,7 +43,8 @@ class InvalidSponsorOperationTypeException(
   allowedOperations: Collection<KClass<out Operation>>
 ) :
   StellarException(
-    "${operationType.map { it::class.simpleName }} cannot be sponsored. Allowed operations are: ${allowedOperations.map { it.simpleName }}}."
+    "${operationType.map { it::class.simpleName }} cannot be sponsored. " +
+      "Allowed operations are: ${allowedOperations.map { it.simpleName }}}."
   )
 
 class OperationsLimitExceededException : StellarException("Maximum limit is 200 operations")

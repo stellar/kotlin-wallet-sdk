@@ -16,6 +16,7 @@ import org.stellar.walletsdk.exception.InvalidJsonException
 
 internal object AnchorTransactionSerializer :
   JsonContentPolymorphicSerializer<AnchorTransaction>(AnchorTransaction::class) {
+  @Suppress("NestedBlockDepth")
   override fun selectDeserializer(
     element: JsonElement
   ): DeserializationStrategy<out AnchorTransaction> {
@@ -51,6 +52,7 @@ internal object AssetIdSerializer : KSerializer<AssetId> {
 
   override fun serialize(encoder: Encoder, value: AssetId) = encoder.encodeString(value.toString())
 
+  @Suppress("ReturnCount")
   override fun deserialize(decoder: Decoder): AssetId {
     val str = decoder.decodeString()
 

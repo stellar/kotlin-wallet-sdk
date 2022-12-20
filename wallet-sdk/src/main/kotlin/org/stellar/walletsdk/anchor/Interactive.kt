@@ -6,6 +6,7 @@ import okhttp3.internal.toImmutableMap
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
@@ -49,7 +50,7 @@ internal constructor(
   suspend fun withdraw(
     accountAddress: String,
     assetId: IssuedAssetId,
-    authToken: String,
+    authToken: AuthToken,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
@@ -76,7 +77,7 @@ internal constructor(
   suspend fun deposit(
     accountAddress: String,
     assetId: IssuedAssetId,
-    authToken: String,
+    authToken: AuthToken,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
@@ -99,10 +100,11 @@ internal constructor(
    * string)
    * [documentation](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md#request)
    */
+  @Suppress("LongParameterList", "ThrowsCount")
   private suspend fun flow(
     accountAddress: String,
     assetId: IssuedAssetId,
-    authToken: String,
+    authToken: AuthToken,
     extraFields: Map<String, String>?,
     fundsAccountAddress: String?,
     type: String,
@@ -113,9 +115,9 @@ internal constructor(
 
     // Check if SEP-24 and SEP-10 are configured
     if (tomlInfo.services.sep24 == null) {
-      throw AnchorInteractiveFlowNotSupported()
+      throw AnchorInteractiveFlowNotSupported
     } else if (!tomlInfo.services.sep24.hasAuth) {
-      throw AnchorAuthNotSupported()
+      throw AnchorAuthNotSupported
     }
 
     val transferServerEndpoint = tomlInfo.services.sep24.transferServerSep24

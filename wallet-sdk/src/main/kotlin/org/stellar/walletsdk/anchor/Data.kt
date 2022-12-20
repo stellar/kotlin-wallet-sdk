@@ -9,14 +9,17 @@ import org.stellar.walletsdk.util.Util.isHex
 @Serializable
 data class AnchorServiceAsset(
   val enabled: Boolean,
-  val min_amount: Double? = null,
-  val max_amount: Double? = null,
-  val fee_fixed: Double? = null,
-  val fee_percent: Double? = null
+  @SerialName("min_amount") val minAmount: Double? = null,
+  @SerialName("max_amount") val maxAmount: Double? = null,
+  @SerialName("fee_fixed") val feeFixed: Double? = null,
+  @SerialName("fee_percent") val feePercent: Double? = null
 )
 
 @Serializable
-data class AnchorServiceFeatures(val account_creation: Boolean, val claimable_balances: Boolean)
+data class AnchorServiceFeatures(
+  @SerialName("account_creation") val accountCreation: Boolean,
+  @SerialName("claimable_balances") val claimableBalances: Boolean
+)
 
 @Serializable data class AnchorServiceFee(val enabled: Boolean)
 

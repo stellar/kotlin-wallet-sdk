@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.toml
 
+@Suppress("LongMethod")
 fun parseToml(toml: Map<String, Any>): TomlInfo {
   // Organization documentation
   val infoDoc = (toml["DOCUMENTATION"] as? HashMap<*, *>)

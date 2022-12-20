@@ -33,13 +33,14 @@ class InProcessWalletSigner : WalletSigner {
 
       val jsonResponse = response.toJson<ChallengeResponse>()
 
+      @Suppress("TooGenericExceptionThrown")
       if (jsonResponse.transaction.isBlank()) {
         throw Exception("The response did not contain a transaction")
       }
 
       return Transaction.fromEnvelopeXdr(
         jsonResponse.transaction,
-        Network(jsonResponse.network_passphrase)
+        Network(jsonResponse.networkPassphrase)
       ) as Transaction
     }
   }
