@@ -3,7 +3,6 @@ package org.stellar.walletsdk.account
 import io.mockk.spyk
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.ChangeTrustOperation
@@ -13,7 +12,6 @@ import org.stellar.walletsdk.ASSET_USDC
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
 
-@DisplayName("addRemoveAsset")
 internal class AddRemoveAssetTest {
   private val server = spyk(Server(HORIZON_URL))
   private val wallet = TestWallet.also { it.cfg.stellar.server = server }

@@ -1,13 +1,11 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
 
-@DisplayName("operation")
 internal class OperationTest {
   @Test
   fun `generates add signer operation`() {

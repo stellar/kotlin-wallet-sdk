@@ -1,12 +1,10 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Asset
 import org.stellar.walletsdk.WalletAsset
 
-@DisplayName("formatAsset")
 internal class FormatAssetTest {
   @Test
   fun `native asset`() {

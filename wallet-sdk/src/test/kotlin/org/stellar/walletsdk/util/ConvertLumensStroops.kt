@@ -1,10 +1,8 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@DisplayName("convertLumensStroops")
 internal class ConvertLumensStroops {
   @Test
   fun `converted stroops to lumens`() {

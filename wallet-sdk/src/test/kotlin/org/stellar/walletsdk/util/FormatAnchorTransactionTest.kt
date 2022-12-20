@@ -1,13 +1,11 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Asset
 import org.stellar.walletsdk.WalletOperationType
 import org.stellar.walletsdk.helpers.sdkObjectFromJsonFile
 
-@DisplayName("formatAnchorTransaction")
 internal class FormatAnchorTransactionTest {
   private val anchorTransactions =
     sdkObjectFromJsonFile<AnchorTransactionsJson>("anchor_transactions.json")

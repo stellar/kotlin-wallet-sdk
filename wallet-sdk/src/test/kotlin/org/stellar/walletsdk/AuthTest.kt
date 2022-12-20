@@ -3,12 +3,10 @@ package org.stellar.walletsdk
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.stellar.walletsdk.auth.Auth
 
-@DisplayName("auth")
 internal class AuthTest : SuspendTest() {
   private val cfg = TestWallet.cfg
 

@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Server
@@ -14,7 +13,6 @@ import org.stellar.walletsdk.ADDRESS_INACTIVE
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
 
-@DisplayName("createAndFund")
 internal class CreateAndFundTest {
   private val server = spyk(Server(HORIZON_URL))
   private val wallet = TestWallet.also { it.cfg.stellar.server = server }

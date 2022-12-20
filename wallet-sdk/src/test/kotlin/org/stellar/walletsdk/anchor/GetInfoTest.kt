@@ -2,7 +2,6 @@ package org.stellar.walletsdk.anchor
 
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -12,7 +11,6 @@ import org.stellar.walletsdk.TestWallet
 import org.stellar.walletsdk.helpers.mapFromTomlFile
 import org.stellar.walletsdk.toml.parseToml
 
-@DisplayName("getInfo")
 internal class GetInfoTest {
   private val wallet = TestWallet
   private val anchor = wallet.anchor(AUTH_HOME_DOMAIN)

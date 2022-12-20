@@ -2,12 +2,10 @@ package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
 import okhttp3.OkHttpClient
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.toml.StellarToml
 
-@DisplayName("stellarToml")
 internal class StellarTomlTest {
   val stellarToml = StellarToml("https", ADDRESS_ACTIVE.address, OkHttpClient())
 

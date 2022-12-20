@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.spyk
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
@@ -14,7 +13,6 @@ import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
-@DisplayName("getInfo")
 internal class GetInfoTest {
   private val server = spyk(Server(HORIZON_URL))
   private val wallet = TestWallet.also { it.cfg.stellar.server = server }

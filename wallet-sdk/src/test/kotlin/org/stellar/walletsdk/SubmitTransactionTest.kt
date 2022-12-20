@@ -8,14 +8,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.responses.SubmitTransactionResponse
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 
-@DisplayName("submitTransaction")
 internal class SubmitTransactionTest {
   private val server = spyk(Server(HORIZON_URL))
   private val wallet = TestWallet.also { it.cfg.stellar.server = server }

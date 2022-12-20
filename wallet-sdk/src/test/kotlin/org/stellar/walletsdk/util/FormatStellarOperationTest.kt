@@ -1,7 +1,6 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.responses.operations.*
 import org.stellar.walletsdk.WalletAsset
@@ -20,7 +19,6 @@ data class StellarOperationsJson(
   val claimClaimableBalance: ClaimClaimableBalanceOperationResponse
 )
 
-@DisplayName("formatStellarOperation")
 internal class FormatStellarOperationTest {
   private val stellarOperations =
     stellarObjectFromJsonFile<StellarOperationsJson>("stellar_operations.json")
