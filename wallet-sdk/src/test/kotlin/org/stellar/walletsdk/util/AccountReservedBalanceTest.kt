@@ -1,13 +1,11 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.extension.reservedBalance
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
-@DisplayName("accountReservedBalance")
 internal class AccountReservedBalanceTest {
   @Test
   fun `basic funded account`() {

@@ -3,14 +3,12 @@ package org.stellar.walletsdk.util
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.ADDRESS_INACTIVE
 import org.stellar.walletsdk.OP_CLAIM_CLAIMABLE_BALANCE
 import org.stellar.walletsdk.OP_CREATE_ACCOUNT
 
-@DisplayName("sponsorOperation")
 internal class SponsorOperationTest {
   @Test
   fun `is wrapped in Begin and End SponsoringFutureReservesOperation`() {

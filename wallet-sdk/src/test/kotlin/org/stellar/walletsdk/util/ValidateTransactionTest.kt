@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Network
@@ -19,7 +18,6 @@ import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.extension.validateSufficientBalance
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
-@DisplayName("validateTransaction")
 internal class ValidateTransactionTest : SuspendTest() {
   private val server = spyk(Server(HORIZON_URL))
   private val network = spyk(Network(Network.TESTNET.toString()))

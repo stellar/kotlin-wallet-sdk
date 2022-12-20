@@ -1,7 +1,6 @@
 package org.stellar.walletsdk.util
 
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.stellar.sdk.xdr.DecoratedSignature
@@ -9,7 +8,6 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.defaultBase64Decoder
 import org.stellar.walletsdk.recovery.createDecoratedSignature
 
-@DisplayName("createDecoratedSignature")
 internal class CreateDecoratedSignatureTest {
   private val publicKey = ADDRESS_ACTIVE
   private val signatureBase64String =

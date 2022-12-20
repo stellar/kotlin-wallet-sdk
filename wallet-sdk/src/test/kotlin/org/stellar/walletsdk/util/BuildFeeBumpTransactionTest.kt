@@ -5,7 +5,6 @@ import io.mockk.spyk
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.*
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Network
@@ -21,7 +20,6 @@ import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.extension.buildFeeBumpTransaction
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
-@DisplayName("buildFeeBumpTransaction")
 internal class BuildFeeBumpTransactionTest : SuspendTest() {
   private val server = spyk(Server(HORIZON_URL))
   private val network = spyk(Network(Network.TESTNET.toString()))
