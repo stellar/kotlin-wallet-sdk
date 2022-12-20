@@ -18,7 +18,6 @@ private val log = KotlinLogging.logger {}
  *
  * @property server Horizon [Server] instance
  * @property network Stellar [Network] instance
- * @property maxBaseFeeInStroops maximum base fee in stroops
  */
 class AccountService
 internal constructor(
@@ -26,8 +25,6 @@ internal constructor(
 ) {
   private val server: Server = cfg.stellar.server
   private val network: Network = cfg.stellar.network
-  @Suppress("UnusedPrivateMember")
-  private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
 
   /**
    * Generate new account keypair (public and secret key). This key pair can be used to create a
@@ -44,9 +41,7 @@ internal constructor(
    *
    * @param accountAddress Stellar address of the account
    * @param serverInstance optional Horizon server instance when default doesn't work
-   *
    * @return formatted account information
-   *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
@@ -73,9 +68,7 @@ internal constructor(
    * @param order optional data order, ascending or descending, defaults to descending
    * @param cursor optional cursor to specify a starting point
    * @param includeFailed optional flag to include failed operations, defaults to false
-   *
    * @return a list of formatted operations
-   *
    * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
