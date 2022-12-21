@@ -3,10 +3,10 @@ package org.stellar.example.exampleBasic01
 
 import org.stellar.walletsdk.*
 
-fun main() {
+fun main() { 
 
   val wallet = Wallet(StellarConfiguration.Testnet)
 
   val newKeyPair = wallet.stellar().account().createKeyPair()
   println(newKeyPair)
-}
+}    

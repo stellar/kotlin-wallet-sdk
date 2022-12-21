@@ -6,13 +6,10 @@ plugins {
   alias(libs.plugins.detekt)
 }
 
-buildscript {
-  dependencies {
-    classpath("org.jetbrains.kotlinx:kotlinx-knit:0.4.0")
-  }
-}
+buildscript { dependencies { classpath(libs.knit) } }
 
 apply(plugin = "base")
+
 apply(plugin = "kotlinx-knit")
 
 val jvmVersion = JavaVersion.VERSION_1_8
@@ -23,6 +20,8 @@ allprojects {
 }
 
 subprojects {
+  val subProject = this
+
   apply(plugin = "com.diffplug.spotless")
   apply(plugin = "kotlin")
   apply(plugin = "io.gitlab.arturbosch.detekt")
@@ -33,30 +32,35 @@ subprojects {
     maven { url = uri("https://jitpack.io") }
   }
 
-  spotless {
-    val javaVersion = JavaVersion.current()
+  // Do not apply spotless and detekt to auto-generated files
+  if (subProject.name != "documentation") {
+    spotless {
+      val javaVersion = JavaVersion.current()
 
-    if (javaVersion >= JavaVersion.VERSION_17) {
-      logger.warn("!!! WARNING !!!")
-      logger.warn("=================")
-      logger.warn(
+      if (javaVersion >= JavaVersion.VERSION_17) {
+        logger.warn("!!! WARNING !!!")
+        logger.warn("=================")
+        logger.warn(
           "    You are running Java version:[{}]. Spotless may not work well with JDK 17.",
-          javaVersion)
-      logger.warn(
-          "    In IntelliJ, go to [File -> Build -> Execution, Build, Deployment -> Gradle] and check Gradle JVM")
+          javaVersion
+        )
+        logger.warn(
+          "    In IntelliJ, go to [File -> Build -> Execution, Build, Deployment -> Gradle] and check Gradle JVM"
+        )
+      }
+
+      if (javaVersion < JavaVersion.VERSION_11) {
+        throw GradleException("Java 11 or greater is required for spotless Gradle plugin.")
+      }
+
+      kotlin { ktfmt("0.39").googleStyle() }
     }
 
-    if (javaVersion < JavaVersion.VERSION_11) {
-      throw GradleException("Java 11 or greater is required for spotless Gradle plugin.")
+    detekt {
+      toolVersion = "1.22.0"
+      config = files("$rootDir/config/detekt/detekt.yml")
+      buildUponDefaultConfig = true
     }
-
-    kotlin { ktfmt("0.39").googleStyle() }
-  }
-
-  detekt {
-    toolVersion = "1.22.0"
-    config = files("$rootDir/config/detekt/detekt.yml")
-    buildUponDefaultConfig = true
   }
 
   dependencies {
@@ -65,13 +69,14 @@ subprojects {
 
   tasks {
     compileKotlin {
-      dependsOn("spotlessKotlinApply")
+      // Ignore spotless for auto-generated files
+      if (subProject.name != "documentation") {
+        dependsOn("spotlessKotlinApply")
+      }
       kotlinOptions.jvmTarget = jvmVersion.toString()
     }
 
-    test {
-      useJUnitPlatform()
-    }
+    test { useJUnitPlatform() }
   }
 
   tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
@@ -85,7 +90,4 @@ subprojects {
   }
 }
 
-tasks.register("printVersionName") {
-  println(rootProject.version.toString())
-}
-
+tasks.register("printVersionName") { println(rootProject.version.toString()) }
