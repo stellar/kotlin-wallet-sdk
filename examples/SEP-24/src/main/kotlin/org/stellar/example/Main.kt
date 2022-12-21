@@ -1,7 +1,10 @@
-package org.stellar.walletsdk
+package org.stellar.example
 
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import org.stellar.walletsdk.ApplicationConfiguration
+import org.stellar.walletsdk.StellarConfiguration
+import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
@@ -16,7 +19,8 @@ private val myKey =
 private val myAccount = SigningKeyPair.fromSecret(myKey)
 
 private const val IS_LOCAL = false
-//private val SRT = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
+// private val SRT = IssuedAssetId("SRT",
+// "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
 private val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 private val USDC_ANCHOR_PLATFORM =
   IssuedAssetId("USDC", "GDQOE23CFSUMSVQK4Y5JHPPYK73VYCNHZHA7ENKCV37P6SUEO6XQBKPP")

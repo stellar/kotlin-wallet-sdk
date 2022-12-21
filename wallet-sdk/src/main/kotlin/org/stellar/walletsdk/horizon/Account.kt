@@ -16,7 +16,10 @@ sealed interface AccountKeyPair {
     get() = keyPair.publicKey
 }
 
-@JvmInline value class PublicKeyPair(override val keyPair: KeyPair) : AccountKeyPair
+@JvmInline
+value class PublicKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
+  override fun toString() = "${PublicKeyPair::class.simpleName}(address=$address)"
+}
 
 @JvmInline
 value class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
@@ -36,6 +39,8 @@ value class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
       return SigningKeyPair(KeyPair.fromSecretSeed(secret))
     }
   }
+
+  override fun toString() = "${SigningKeyPair::class.simpleName}(address=$address)"
 }
 
 fun <T : AbstractTransaction> T.sign(keyPair: SigningKeyPair): T {
