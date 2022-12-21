@@ -8,6 +8,5 @@ fun main() {
   val wallet = Wallet(StellarConfiguration.Testnet)
 
   val newKeyPair = wallet.stellar().account().createKeyPair()
-
   println(newKeyPair)
 }

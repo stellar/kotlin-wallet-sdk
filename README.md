@@ -32,7 +32,7 @@ import org.stellar.walletsdk.*
 fun main() { 
 -->
 <!--- SUFFIX .*basic.*
-
+  println(newKeyPair)
 }    
 -->
 
