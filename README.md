@@ -26,12 +26,12 @@ implementation("org.stellar:wallet-sdk:0.3.0")
 
 ## Introduction
 
-<!--- INCLUDE .*basic.*
+<!--- INCLUDE .*readme.*
 import org.stellar.walletsdk.*
 
 fun main() { 
 -->
-<!--- SUFFIX .*basic.*
+<!--- SUFFIX .*readme.*
   println(newKeyPair)
 }    
 -->
@@ -49,7 +49,7 @@ created using it.
   val newKeyPair = wallet.stellar().account().createKeyPair()
 ```
 
-> You can get the full code [here](examples/documentation/src/example-basic-01.kt).
+> You can get the full code [here](examples/documentation/src/example-readme-01.kt).
 
 Read [full wallet guide](docs/WalletGuide.md) for more info
 
