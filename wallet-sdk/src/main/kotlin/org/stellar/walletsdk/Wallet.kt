@@ -14,8 +14,8 @@ import shadow.okhttp3.OkHttpClient
  * network.
  */
 class Wallet(
-  private val stellarConfiguration: StellarConfiguration,
-  private val applicationConfiguration: ApplicationConfiguration
+  stellarConfiguration: StellarConfiguration,
+  applicationConfiguration: ApplicationConfiguration = ApplicationConfiguration()
 ) {
   internal val cfg = Config(stellarConfiguration, applicationConfiguration)
 

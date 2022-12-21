@@ -6,6 +6,15 @@ plugins {
   alias(libs.plugins.detekt)
 }
 
+buildscript {
+  dependencies {
+    classpath("org.jetbrains.kotlinx:kotlinx-knit:0.4.0")
+  }
+}
+
+apply(plugin = "base")
+apply(plugin = "kotlinx-knit")
+
 val jvmVersion = JavaVersion.VERSION_1_8
 
 allprojects {
