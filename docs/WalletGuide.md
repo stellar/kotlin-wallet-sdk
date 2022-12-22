@@ -49,17 +49,6 @@ val walletCustom = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration
 val wallet = Wallet(StellarConfiguration.Testnet)
 -->
 
-<!--- INCLUDE .*stellar.*
-import org.stellar.walletsdk.*
-import org.stellar.walletsdk.asset.IssuedAssetId
-import org.stellar.walletsdk.horizon.sign
-
-suspend fun main() { 
--->
-<!--- SUFFIX .*stellar.*
-}    
--->
-
 ## Build on Stellar
 
 Once the Wallet is configured, you can use the following:
@@ -69,6 +58,15 @@ Once the Wallet is configured, you can use the following:
 - submit a signed transaction to Stellar network.
 
 ### Account service
+
+<!--- INCLUDE .*account.*
+import org.stellar.walletsdk.*
+
+suspend fun main() { 
+-->
+<!--- SUFFIX .*account.*
+}    
+-->
 
 Generate new account keypair (public and secret keys).
 
@@ -92,10 +90,27 @@ Get account history (all operations) from the Stellar network.
 val accountHistory = account.getHistory(accountKeyPair.address)
 ```
 
+> You can get the full code [here](../examples/documentation/src/example-account-01.kt).
+
 ### Transaction builder
 
 Transaction builder allows you to create various transactions that can be signed and submitted to the Stellar network.
 Some transactions can be sponsored.
+
+<!--- INCLUDE .*transaction.*
+import org.stellar.walletsdk.*
+import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.horizon.sign
+
+suspend fun main() {
+  val wallet = Wallet(StellarConfiguration.Testnet)
+  val account = wallet
+    .stellar()
+    .account()
+-->
+<!--- SUFFIX .*transaction.*
+}    
+-->
 
 ```kotlin
 val sourceAccountKeyPair = account.createKeyPair()
@@ -159,4 +174,4 @@ val submitTxn = wallet
     .submitTransaction(signedTxn)
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-stellar-01.kt).
+> You can get the full code [here](../examples/documentation/src/example-transaction-01.kt).

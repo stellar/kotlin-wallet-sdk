@@ -1,23 +1,15 @@
 // This file was automatically generated from WalletGuide.md by Knit tool. Do not edit.
-package org.stellar.example.exampleStellar01
+package org.stellar.example.exampleTransaction01
 
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.sign
 
-suspend fun main() { 
-
-val wallet = Wallet(StellarConfiguration.Testnet)
-
-val account = wallet
+suspend fun main() {
+  val wallet = Wallet(StellarConfiguration.Testnet)
+  val account = wallet
     .stellar()
     .account()
-
-val accountKeyPair = account.createKeyPair()
-
-val accountInfo = account.getInfo(accountKeyPair.address)
-
-val accountHistory = account.getHistory(accountKeyPair.address)
 
 val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
