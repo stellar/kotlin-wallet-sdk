@@ -60,34 +60,40 @@ Once the Wallet is configured, you can use the following:
 ### Account service
 
 <!--- INCLUDE .*account.*
+import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
-
-suspend fun main() { 
 -->
 <!--- SUFFIX .*account.*
-}    
+suspend fun main() {
+  val info = getAccountInfo()
+  println(info)
+
+  val history = getAccountHistory()
+  println(history)
+}
 -->
 
 Generate new account keypair (public and secret keys).
 
 ```kotlin
-val account = wallet
-    .stellar()
-    .account()
-
+val account = wallet.stellar().account()
 val accountKeyPair = account.createKeyPair()
 ```
 
 Get account information from the Stellar network (assets, liquidity pools, and reserved native balance).
 
 ```kotlin
-val accountInfo = account.getInfo(accountKeyPair.address)
+suspend fun getAccountInfo(): AccountInfo {
+    return account.getInfo(accountKeyPair.address)
+}
 ```
 
 Get account history (all operations) from the Stellar network.
 
 ```kotlin
-val accountHistory = account.getHistory(accountKeyPair.address)
+suspend fun getAccountHistory(): List<WalletOperation<OperationResponse>> {
+    return account.getHistory(accountKeyPair.address)
+}
 ```
 
 > You can get the full code [here](../examples/documentation/src/example-account-01.kt).
