@@ -10,11 +10,8 @@ import org.stellar.walletsdk.util.*
 
 private val log = KotlinLogging.logger {}
 
-@Suppress("MaxLineLength")
 /**
  * Key store for Stellar accounts
- *
- * [Learn about Stellar network fees](https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies)
  *
  * @property server Horizon [Server] instance
  * @property network Stellar [Network] instance
