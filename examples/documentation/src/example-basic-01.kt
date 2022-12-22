@@ -1,12 +1,12 @@
-// This file was automatically generated from README.md by Knit tool. Do not edit.
+// This file was automatically generated from WalletGuide.md by Knit tool. Do not edit.
 package org.stellar.example.exampleBasic01
+
+import org.stellar.sdk.Network
 
 import org.stellar.walletsdk.*
 
-fun main() { 
+val wallet = Wallet(StellarConfiguration.Testnet)
 
-  val wallet = Wallet(StellarConfiguration.Testnet)
+val walletMainnet = Wallet(StellarConfiguration(Network.PUBLIC, "https://horizon.stellar.org"))
 
-  val newKeyPair = wallet.stellar().account().createKeyPair()
-  println(newKeyPair)
-}    
+val walletCustom = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = true))
