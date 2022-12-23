@@ -104,18 +104,37 @@ Transaction builder allows you to create various transactions that can be signed
 Some transactions can be sponsored.
 
 <!--- INCLUDE .*transaction.*
+import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.sign
 
-suspend fun main() {
-  val wallet = Wallet(StellarConfiguration.Testnet)
-  val account = wallet
-    .stellar()
-    .account()
+val wallet = Wallet(StellarConfiguration.Testnet)
+val account = wallet.stellar().account()
 -->
 <!--- SUFFIX .*transaction.*
-}    
+suspend fun main() {
+  val fundTxn = fund()
+  println(fundTxn)
+
+  val lockMasterKeyTxn = lockMasterKey()
+  println(lockMasterKeyTxn)
+
+  val addAssetTxn = addAsset()
+  println(addAssetTxn)
+
+  val removeAssetTxn = removeAsset()
+  println(removeAssetTxn)
+
+  val addSignerTxn = addSigner()
+  println(addSignerTxn)
+
+  val removeSignerTxn = removeSigner()
+  println(removeSignerTxn)
+
+  val signAndSubmitTxn = signAndSubmit()
+  println(signAndSubmitTxn)
+}
 -->
 
 ```kotlin
@@ -130,7 +149,9 @@ Fund account transaction activates/creates an account with a starting balance (b
 can be sponsored.
 
 ```kotlin
-val fundTxn = txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
+suspend fun fund(): Transaction {
+    return txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
+}
 ```
 
 Lock the master key of the account (set its weight to 0). Use caution when locking the account's master key. Make sure
@@ -138,20 +159,27 @@ you have set the correct signers and weights. Otherwise, you will lock the accou
 sponsored.
 
 ```kotlin
-val lockMasterKeyTxn = txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
+suspend fun lockMasterKey(): Transaction {
+    return txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
+}
 ```
 
 Add an asset (trustline) to the account. This transaction can be sponsored.
 
 ```kotlin
 val asset = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
-val addAssetTxn = txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
+
+suspend fun addAsset(): Transaction {
+    return txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
+}
 ```
 
 Remove an asset from the account (the balance must be 0)
 
 ```kotlin
-val removeAssetTxn = txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
+suspend fun removeAsset(): Transaction {
+    return txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
+}
 ```
 
 Add a new signer to the account. Use caution when adding new signers. Make sure you set the correct signer weight.
@@ -159,13 +187,18 @@ Otherwise, you will lock the account irreversibly. This transaction can be spons
 
 ```kotlin
 val newSignerKeyPair = account.createKeyPair()
-val addSignerTxn = txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
+
+suspend fun addSigner(): Transaction {
+    return txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
+}
 ```
 
 Remove a signer from the account.
 
 ```kotlin
-val removeSignerTxn = txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
+suspend fun removeSigner(): Transaction {
+    return txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
+}
 ```
 
 ### Submit transaction
@@ -174,10 +207,10 @@ Submit a signed transaction to the Stellar network. A sponsored transaction must
 sponsor.
 
 ```kotlin
-val signedTxn = fundTxn.sign(sourceAccountKeyPair)
-val submitTxn = wallet
-    .stellar()
-    .submitTransaction(signedTxn)
+suspend fun signAndSubmit(): Boolean {
+    val signedTxn = fund().sign(sourceAccountKeyPair)
+    return wallet.stellar().submitTransaction(signedTxn)
+}
 ```
 
 > You can get the full code [here](../examples/documentation/src/example-transaction-01.kt).
