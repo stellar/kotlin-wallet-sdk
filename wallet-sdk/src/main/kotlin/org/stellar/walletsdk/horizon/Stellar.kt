@@ -25,9 +25,7 @@ internal constructor(
    * Submit transaction to the Stellar network.
    *
    * @param signedTransaction Signed transaction that is submitted
-   *
    * @return `true` if submitted successfully
-   *
    * @throws [TransactionSubmitFailedException] when submission failed
    */
   suspend fun submitTransaction(

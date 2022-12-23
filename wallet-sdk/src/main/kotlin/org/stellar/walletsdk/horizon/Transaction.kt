@@ -151,12 +151,12 @@ internal constructor(
    * Remove an asset (trustline) from the account.
    *
    * @param sourceAddress Stellar address of the account that is opting-out of the asset
-   * @param assetId Target asset
+   * @param asset Target asset
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  suspend fun removeAssetSupport(sourceAddress: String, assetId: IssuedAssetId): Transaction {
-    return addAssetSupport(sourceAddress, assetId, "0")
+  suspend fun removeAssetSupport(sourceAddress: String, asset: IssuedAssetId): Transaction {
+    return addAssetSupport(sourceAddress, asset, "0")
   }
 
   /**
