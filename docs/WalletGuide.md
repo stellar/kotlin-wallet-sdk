@@ -7,6 +7,7 @@
   * [Account service](#account-service)
   * [Transaction builder](#transaction-builder)
   * [Submit transaction](#submit-transaction)
+* [Anchor](#anchor)
 
 <!--- END -->
 
@@ -84,7 +85,7 @@ Get account information from the Stellar network (assets, liquidity pools, and r
 
 ```kotlin
 suspend fun getAccountInfo(): AccountInfo {
-    return account.getInfo(accountKeyPair.address)
+  return account.getInfo(accountKeyPair.address)
 }
 ```
 
@@ -92,7 +93,7 @@ Get account history (all operations) from the Stellar network.
 
 ```kotlin
 suspend fun getAccountHistory(): List<WalletOperation<OperationResponse>> {
-    return account.getHistory(accountKeyPair.address)
+  return account.getHistory(accountKeyPair.address)
 }
 ```
 
@@ -141,8 +142,8 @@ suspend fun main() {
 val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
 val txnBuilder = wallet
-    .stellar()
-    .transaction()
+  .stellar()
+  .transaction()
 ```
 
 Fund account transaction activates/creates an account with a starting balance (by default, it's 1 XLM). This transaction
@@ -150,7 +151,7 @@ can be sponsored.
 
 ```kotlin
 suspend fun fund(): Transaction {
-    return txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
+  return txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
 }
 ```
 
@@ -160,7 +161,7 @@ sponsored.
 
 ```kotlin
 suspend fun lockMasterKey(): Transaction {
-    return txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
+  return txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
 }
 ```
 
@@ -170,7 +171,7 @@ Add an asset (trustline) to the account. This transaction can be sponsored.
 val asset = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
 suspend fun addAsset(): Transaction {
-    return txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
+  return txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
 }
 ```
 
@@ -178,7 +179,7 @@ Remove an asset from the account (the balance must be 0)
 
 ```kotlin
 suspend fun removeAsset(): Transaction {
-    return txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
+  return txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
 }
 ```
 
@@ -189,7 +190,7 @@ Otherwise, you will lock the account irreversibly. This transaction can be spons
 val newSignerKeyPair = account.createKeyPair()
 
 suspend fun addSigner(): Transaction {
-    return txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
+  return txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
 }
 ```
 
@@ -197,7 +198,7 @@ Remove a signer from the account.
 
 ```kotlin
 suspend fun removeSigner(): Transaction {
-    return txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
+  return txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
 }
 ```
 
@@ -208,9 +209,110 @@ sponsor.
 
 ```kotlin
 suspend fun signAndSubmit(): Boolean {
-    val signedTxn = fund().sign(sourceAccountKeyPair)
-    return wallet.stellar().submitTransaction(signedTxn)
+  val signedTxn = fund().sign(sourceAccountKeyPair)
+  return wallet.stellar().submitTransaction(signedTxn)
 }
 ```
 
 > You can get the full code [here](../examples/documentation/src/example-transaction-01.kt).
+
+## Anchor
+
+<!--- INCLUDE .*anchor.*
+import org.stellar.walletsdk.*
+import org.stellar.walletsdk.anchor.AnchorServiceInfo
+import org.stellar.walletsdk.anchor.AnchorTransaction
+import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.auth.AuthToken
+import org.stellar.walletsdk.toml.TomlInfo
+
+val wallet = Wallet(StellarConfiguration.Testnet)
+val accountKeyPair = wallet.stellar().account().createKeyPair()
+-->
+<!--- SUFFIX .*anchor.*
+suspend fun main() {
+  val anchorInfo = anchorToml()
+  println(anchorInfo)
+
+  val authToken = getAuthToken()
+  println(authToken)
+
+  val anchorServices = getAnchorServices()
+  println(anchorServices)
+
+  val depositUrl = interactiveDeposit()
+  println(depositUrl)
+
+  val withdrawalUrl = interactiveWithdrawal()
+  println(withdrawalUrl)
+
+  val transactionInfo = anchorTransaction()
+  println(transactionInfo)
+
+  val history = accountHistory()
+  println(history)
+}
+-->
+
+Build on and off ramps with anchors for deposits and withdrawals.
+
+```kotlin
+val anchor = wallet.anchor("testanchor.stellar.org")
+```
+
+Get anchor information from a TOML file.
+
+```kotlin
+suspend fun anchorToml(): TomlInfo {
+  return anchor.getInfo()
+}
+```
+
+Authenticate an account with the anchor using SEP-10.
+
+```kotlin
+suspend fun getAuthToken(): AuthToken {
+  return anchor.auth(anchorToml()).authenticate(accountKeyPair)
+}
+```
+
+Available anchor services and information about them. For example, interactive deposit/withdrawal limits, currency,
+fees, payment methods.
+
+```kotlin
+suspend fun getAnchorServices(): AnchorServiceInfo? {
+  return anchorToml().services.sep24?.let { anchor.getServicesInfo(it.transferServerSep24) }
+}
+```
+
+Interactive deposit and withdrawal.
+
+```kotlin
+val asset = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
+
+suspend fun interactiveDeposit(): String {
+  return anchor.interactive().deposit(accountKeyPair.address, asset, getAuthToken()).url
+}
+
+suspend fun interactiveWithdrawal(): String {
+  return anchor.interactive().withdraw(accountKeyPair.address, asset, getAuthToken()).url
+}
+```
+
+Get single transaction's current status and details.
+
+```kotlin
+suspend fun anchorTransaction(): AnchorTransaction {
+  return anchor.getTransactionStatus("12345", getAuthToken(), anchorToml())
+}
+```
+
+Get account transactions for specified asset.
+
+```kotlin
+suspend fun accountHistory(): List<WalletOperation<AnchorTransaction>> {
+  return anchor.getHistory(asset, getAuthToken(), anchorToml())
+}
+```
+
+> You can get the full code [here](../examples/documentation/src/example-anchor-01.kt).
