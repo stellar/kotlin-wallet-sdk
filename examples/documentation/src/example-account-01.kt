@@ -10,11 +10,11 @@ val account = wallet.stellar().account()
 val accountKeyPair = account.createKeyPair()
 
 suspend fun getAccountInfo(): AccountInfo {
-    return account.getInfo(accountKeyPair.address)
+  return account.getInfo(accountKeyPair.address)
 }
 
 suspend fun getAccountHistory(): List<WalletOperation<OperationResponse>> {
-    return account.getHistory(accountKeyPair.address)
+  return account.getHistory(accountKeyPair.address)
 }
 suspend fun main() {
   val info = getAccountInfo()

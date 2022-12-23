@@ -12,40 +12,40 @@ val account = wallet.stellar().account()
 val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
 val txnBuilder = wallet
-    .stellar()
-    .transaction()
+  .stellar()
+  .transaction()
 
 suspend fun fund(): Transaction {
-    return txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
+  return txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
 }
 
 suspend fun lockMasterKey(): Transaction {
-    return txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
+  return txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
 }
 
 val asset = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
 suspend fun addAsset(): Transaction {
-    return txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
+  return txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
 }
 
 suspend fun removeAsset(): Transaction {
-    return txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
+  return txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
 }
 
 val newSignerKeyPair = account.createKeyPair()
 
 suspend fun addSigner(): Transaction {
-    return txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
+  return txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
 }
 
 suspend fun removeSigner(): Transaction {
-    return txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
+  return txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
 }
 
 suspend fun signAndSubmit(): Boolean {
-    val signedTxn = fund().sign(sourceAccountKeyPair)
-    return wallet.stellar().submitTransaction(signedTxn)
+  val signedTxn = fund().sign(sourceAccountKeyPair)
+  return wallet.stellar().submitTransaction(signedTxn)
 }
 suspend fun main() {
   val fundTxn = fund()
