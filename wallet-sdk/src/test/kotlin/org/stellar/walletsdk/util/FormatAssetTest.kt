@@ -3,17 +3,16 @@ package org.stellar.walletsdk.util
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.Asset
-import org.stellar.walletsdk.WalletAsset
+import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.asset.NativeAssetId
+import org.stellar.walletsdk.asset.toAssetId
 
 internal class FormatAssetTest {
   @Test
   fun `native asset`() {
     val asset = Asset.create("native")
 
-    assertEquals(
-      formatAsset(asset),
-      WalletAsset(id = "XLM:Native", code = "XLM", issuer = "Native")
-    )
+    assertEquals(asset.toAssetId(), NativeAssetId)
   }
 
   @Test
@@ -26,9 +25,8 @@ internal class FormatAssetTest {
       )
 
     assertEquals(
-      formatAsset(asset),
-      WalletAsset(
-        id = "SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B",
+      asset.toAssetId(),
+      IssuedAssetId(
         code = "SRT",
         issuer = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
       )
@@ -45,9 +43,8 @@ internal class FormatAssetTest {
       )
 
     assertEquals(
-      formatAsset(asset),
-      WalletAsset(
-        id = "STELLAR:GC62NIRU3XI5HI3O3X5JH2YDG2YNXVYVPDGS3THUJ4BVWOOOO2ZJDDLO",
+      asset.toAssetId(),
+      IssuedAssetId(
         code = "STELLAR",
         issuer = "GC62NIRU3XI5HI3O3X5JH2YDG2YNXVYVPDGS3THUJ4BVWOOOO2ZJDDLO"
       )

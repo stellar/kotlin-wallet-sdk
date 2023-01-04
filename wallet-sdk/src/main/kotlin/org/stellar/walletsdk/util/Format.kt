@@ -191,7 +191,7 @@ fun formatStellarOperation(
             operation.from
           }
         )
-        .asset(listOf(operation.asset.toAssetId(), operation.sourceAsset.toAssetId()))
+        .asset(listOf(operation.sourceAsset.toAssetId(), operation.asset.toAssetId()))
         .type(
           if (isSender) {
             if (isSwap) {
@@ -302,7 +302,6 @@ internal fun <T : AnchorTransaction> WalletOperationBuilder<T>.fromTransaction(
   this.asset = listOf(asset.toAssetId())
   this.rawOperation = transaction
 }
-
 
 /**
  * Format amount to consistent string.
