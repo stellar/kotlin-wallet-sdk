@@ -187,7 +187,7 @@ internal constructor(
    * @param pagingId optional return transactions prior to this ID
    * @param noOlderThan optional return transactions starting on or after this date and time
    * @param lang optional language code specified using
-   *   [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
+   * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
    * @return a list of formatted operations
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor

@@ -2,6 +2,7 @@ package org.stellar.walletsdk
 
 import kotlinx.serialization.Serializable
 import org.stellar.sdk.requests.RequestBuilder
+import org.stellar.walletsdk.asset.AssetId
 
 data class AccountInfo(
   val publicKey: String,
@@ -99,14 +100,12 @@ data class NativeAssetDefault(
   val assetIssuer: String,
 )
 
-data class WalletAsset(val id: String, val code: String, val issuer: String)
-
 data class WalletOperation<T>(
   val id: String,
   val date: String,
   val amount: String,
   val account: String,
-  val asset: List<WalletAsset>,
+  val asset: List<AssetId>,
   val type: WalletOperationType,
   val rawOperation: T,
 )

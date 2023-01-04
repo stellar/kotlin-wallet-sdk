@@ -3,8 +3,8 @@ package org.stellar.walletsdk.util
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 import org.stellar.sdk.responses.operations.*
-import org.stellar.walletsdk.WalletAsset
 import org.stellar.walletsdk.WalletOperationType
+import org.stellar.walletsdk.asset.StellarAssetId
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
 data class StellarOperationsJson(
@@ -35,7 +35,7 @@ internal class FormatStellarOperationTest {
     assertEquals(operation.date, "2022-09-14T21:19:29Z")
     assertEquals(operation.amount, "10000.0000000")
     assertEquals(operation.account, "GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR")
-    assertEquals(operation.asset[0].id, "XLM:Native")
+    assertEquals(operation.asset[0].id, "native")
     assertEquals(operation.type, WalletOperationType.SEND)
   }
 
@@ -51,7 +51,7 @@ internal class FormatStellarOperationTest {
     assertEquals(operation.date, "2022-09-14T21:19:29Z")
     assertEquals(operation.amount, "10000.0000000")
     assertEquals(operation.account, "GAMQTINWD3YPP3GLTQZ4M6FKCCSRGROQLIIRVECIFC6VEGL5F64CND22")
-    assertEquals(operation.asset[0].id, "XLM:Native")
+    assertEquals(operation.asset[0].id, "native")
     assertEquals(operation.type, WalletOperationType.RECEIVE)
   }
 
@@ -67,7 +67,7 @@ internal class FormatStellarOperationTest {
     assertEquals(operation.date, "2021-10-28T18:35:53Z")
     assertEquals(operation.amount, "0.0100000")
     assertEquals(operation.account, "GCOK6S3AUTVOEBSTFFDRMMFBWVH7BIWC56U5HUW7OH5EF5YE75WKVL42")
-    assertEquals(operation.asset[0].id, "XLM:Native")
+    assertEquals(operation.asset[0].id, "native")
     assertEquals(operation.type, WalletOperationType.SEND)
   }
 
@@ -83,7 +83,7 @@ internal class FormatStellarOperationTest {
     assertEquals(operation.date, "2021-10-28T18:35:53Z")
     assertEquals(operation.amount, "0.0100000")
     assertEquals(operation.account, "GAKEBVZB3RQO5GOFMLKATWKIQ2Z7SAPBG6E3LY7MELNRREYFV43MG7FQ")
-    assertEquals(operation.asset[0].id, "XLM:Native")
+    assertEquals(operation.asset[0].id, "native")
     assertEquals(operation.type, WalletOperationType.RECEIVE)
   }
 
@@ -275,7 +275,7 @@ internal class FormatStellarOperationTest {
     assertEquals(operation.date, "2021-10-28T19:50:44Z")
     assertEquals(operation.amount, "")
     assertEquals(operation.account, "")
-    assertEquals(operation.asset, listOf<WalletAsset>())
+    assertEquals(operation.asset, listOf<StellarAssetId>())
     assertEquals(operation.type, WalletOperationType.OTHER)
   }
 
@@ -291,7 +291,7 @@ internal class FormatStellarOperationTest {
     assertEquals(operation.date, "2021-10-29T10:51:44Z")
     assertEquals(operation.amount, "")
     assertEquals(operation.account, "")
-    assertEquals(operation.asset, listOf<WalletAsset>())
+    assertEquals(operation.asset, listOf<StellarAssetId>())
     assertEquals(operation.type, WalletOperationType.OTHER)
   }
 }
