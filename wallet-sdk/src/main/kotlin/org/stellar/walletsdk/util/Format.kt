@@ -12,6 +12,9 @@ import org.stellar.sdk.responses.operations.PathPaymentBaseOperationResponse
 import org.stellar.sdk.responses.operations.PaymentOperationResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.*
+import org.stellar.walletsdk.asset.AssetId
+import org.stellar.walletsdk.asset.NativeAssetId
+import org.stellar.walletsdk.asset.toAssetId
 import org.stellar.walletsdk.extension.liquidityPoolInfo
 import org.stellar.walletsdk.extension.reservedBalance
 
@@ -152,7 +155,7 @@ fun formatStellarOperation(
       return opBuilder
         .amount(operation.startingBalance)
         .account(if (isCreator) operation.account else operation.funder)
-        .asset(formatNativeAsset())
+        .asset(listOf(NativeAssetId))
         .type(if (isCreator) WalletOperationType.SEND else WalletOperationType.RECEIVE)
         .build()
     }
@@ -165,7 +168,7 @@ fun formatStellarOperation(
       return opBuilder
         .amount(operation.amount)
         .account(if (isSender) operation.to else operation.from)
-        .asset(formatWalletAsset(operation))
+        .asset(listOf(operation.asset.toAssetId()))
         .type(if (isSender) WalletOperationType.SEND else WalletOperationType.RECEIVE)
         .build()
     }
@@ -188,7 +191,7 @@ fun formatStellarOperation(
             operation.from
           }
         )
-        .asset(formatWalletAsset(operation))
+        .asset(listOf(operation.asset.toAssetId(), operation.sourceAsset.toAssetId()))
         .type(
           if (isSender) {
             if (isSwap) {
@@ -250,7 +253,7 @@ internal class WalletOperationBuilder<T : Any> {
   lateinit var date: String
   lateinit var amount: String
   lateinit var account: String
-  lateinit var asset: List<WalletAsset>
+  lateinit var asset: List<AssetId>
   lateinit var type: WalletOperationType
   lateinit var rawOperation: T
 
@@ -264,7 +267,7 @@ internal class WalletOperationBuilder<T : Any> {
   fun date(date: String) = apply { this.date = date }
   fun amount(amount: String) = apply { this.amount = amount }
   fun account(account: String) = apply { this.account = account }
-  fun asset(asset: List<WalletAsset>) = apply { this.asset = asset }
+  fun asset(asset: List<AssetId>) = apply { this.asset = asset }
   fun type(type: WalletOperationType) = apply { this.type = type }
   fun rawOperation(rawOperation: T) = apply { this.rawOperation = rawOperation }
 
@@ -296,53 +299,10 @@ internal fun <T : AnchorTransaction> WalletOperationBuilder<T>.fromTransaction(
   this.defaults()
   this.id = transaction.id
   this.date = transaction.startedAt
-  this.asset = listOf(formatAsset(asset))
+  this.asset = listOf(asset.toAssetId())
   this.rawOperation = transaction
 }
 
-fun formatNativeAsset(): List<WalletAsset> {
-  val asset = formatAsset()
-
-  return listOf(asset)
-}
-
-fun formatWalletAsset(operation: PaymentOperationResponse): List<WalletAsset> {
-  val asset = formatAsset(operation.asset)
-
-  return listOf(asset)
-}
-
-fun formatWalletAsset(operation: PathPaymentBaseOperationResponse): List<WalletAsset> {
-  val asset = formatAsset(operation.asset)
-  val sourceAsset = formatAsset(operation.sourceAsset)
-
-  return listOf(sourceAsset, asset)
-}
-
-fun formatAsset(asset: Asset? = null): WalletAsset {
-  val assetType = asset?.type ?: "native"
-  var assetCode = ""
-  var assetIssuer = ""
-
-  when (assetType) {
-    "native" -> {
-      assetCode = "XLM"
-      assetIssuer = "Native"
-    }
-    "credit_alphanum4",
-    "credit_alphanum12" -> {
-      val assetString = asset.toString().split(":")
-
-      assetCode = assetString[0]
-      assetIssuer = assetString[1]
-    }
-    else -> {
-      // TODO: add this when we add support for liquidity pools
-    }
-  }
-
-  return WalletAsset("$assetCode:$assetIssuer", assetCode, assetIssuer)
-}
 
 /**
  * Format amount to consistent string.
