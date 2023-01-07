@@ -11,18 +11,19 @@ import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.exception.*
-import org.stellar.walletsdk.extension.createTransactionBuilder
 import org.stellar.walletsdk.horizon.AccountKeyPair
+import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.*
 
 private val log = KotlinLogging.logger {}
 
-class Recovery internal constructor(private val cfg: Config, private val client: OkHttpClient) {
-  private val server: Server = cfg.stellar.server
-  private val network: Network = cfg.stellar.network
-  private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
-
+class Recovery
+internal constructor(
+  private val cfg: Config,
+  private val stellar: Stellar,
+  private val client: OkHttpClient
+) {
   /**
    * Sign transaction with recovery servers. It is used to recover an account using
    * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
@@ -30,9 +31,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
    * @param transaction Transaction with new signer to be signed by recovery servers
    * @param accountAddress Stellar address of the account that is recovered
    * @param recoveryServers List of recovery servers to use
-   *
    * @return transaction with recovery server signatures
-   *
    * @throws [ServerRequestFailedException] when request fails
    * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
    */
@@ -80,9 +79,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
    * @param accountAddress Stellar address of the account that is registering
    * @param accountIdentity A list of account identities to be registered with the recovery servers
    * @param walletSigner [WalletSigner] interface to sign transaction with the account
-   *
    * @return a list of recovery servers' signatures
-   *
    * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
    */
@@ -142,9 +139,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
    * Uses [enrollWithRecoveryServer] and [registerRecoveryServerSigners] internally.
    *
    * @param config: RecoverableWalletConfig
-   *
    * @return transaction
-   *
    * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
    * @throws [HorizonRequestFailedException] for Horizon exceptions
@@ -181,9 +176,7 @@ class Recovery internal constructor(private val cfg: Config, private val client:
    * @param accountSigner A list of account signers and their weights
    * @param accountThreshold Low, medium, and high thresholds to set on the account
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
-   *
    * @return transaction
-   *
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   // TODO: can be private?
@@ -193,27 +186,12 @@ class Recovery internal constructor(private val cfg: Config, private val client:
     accountThreshold: AccountThreshold,
     sponsorAddress: String? = null
   ): Transaction {
-    val transactionBuilder =
-      createTransactionBuilder(
-        sourceAddress = account.address,
-        maxBaseFeeInStroops = maxBaseFeeInStroops,
-        server = server,
-        network = network,
-      )
+    val builder = stellar.transaction(account, defaultSponsorAddress = sponsorAddress)
 
-    val setOptionsOp = accountSigner.map { signer -> addSignerOperation(signer) }.toMutableList()
-    setOptionsOp.add(setThresholdsOperation(accountThreshold))
+    accountSigner.forEach { builder.addAccountSigner(it.address, it.weight) }
+    builder.setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
 
-    val operations: List<Operation> =
-      if (sponsorAddress != null) {
-        sponsorOperation(sponsorAddress, account.address, setOptionsOp)
-      } else {
-        setOptionsOp
-      }
-
-    transactionBuilder.addOperations(operations)
-
-    return transactionBuilder.build()
+    return builder.build()
   }
 }
 

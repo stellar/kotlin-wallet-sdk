@@ -1,9 +1,12 @@
 package org.stellar.walletsdk.horizon
 
 import mu.KotlinLogging
-import org.stellar.sdk.*
-import org.stellar.walletsdk.*
-import org.stellar.walletsdk.exception.*
+import org.stellar.sdk.Server
+import org.stellar.sdk.Transaction
+import org.stellar.walletsdk.Config
+import org.stellar.walletsdk.anchor.MemoType
+import org.stellar.walletsdk.exception.TransactionSubmitFailedException
+import org.stellar.walletsdk.extension.accountByAddress
 
 private val log = KotlinLogging.logger {}
 
@@ -17,8 +20,23 @@ internal constructor(
     return AccountService(cfg)
   }
 
-  fun transaction(): TransactionBuilder {
-    return TransactionBuilder(cfg)
+  /**
+   * Creates builder that allows to form Stellar transaction, adding Stellar's
+   * [operations](https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment)
+   *
+   * @param sourceAddress Stellar address of account initiating a transaction
+   * @param defaultSponsorAddress Stellar address of account sponsoring operations inside this
+   * transaction
+   * @param memo optional memo
+   * @return transaction builder
+   */
+  suspend fun transaction(
+    sourceAddress: AccountKeyPair,
+    memo: Pair<MemoType, String>? = null,
+    defaultSponsorAddress: String? = null
+  ): TransactionBuilder {
+    val sourceAccount = server.accountByAddress(sourceAddress.address)
+    return TransactionBuilder(cfg, sourceAccount, memo, defaultSponsorAddress)
   }
 
   /**
@@ -30,7 +48,7 @@ internal constructor(
    */
   suspend fun submitTransaction(
     signedTransaction: Transaction,
-  ): Boolean {
+  ) {
     log.debug {
       "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
         "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
@@ -40,10 +58,8 @@ internal constructor(
 
     val response = server.submitTransaction(signedTransaction)
 
-    if (response.isSuccess) {
-      return true
+    if (!response.isSuccess) {
+      throw TransactionSubmitFailedException(response)
     }
-
-    throw TransactionSubmitFailedException(response)
   }
 }

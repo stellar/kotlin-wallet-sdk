@@ -1,6 +1,5 @@
 package org.stellar.example
 
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.walletsdk.ApplicationConfiguration
 import org.stellar.walletsdk.StellarConfiguration
@@ -10,6 +9,8 @@ import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
+import org.stellar.walletsdk.horizon.toTransferTransaction
+import kotlin.time.Duration.Companion.seconds
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -34,15 +35,14 @@ suspend fun main() {
   // Create instance of stellar, account and transaction services
   val stellar = wallet.stellar()
   val account = wallet.stellar().account()
-  val transactionBuilder = wallet.stellar().transaction()
   // Generate new (user) account and fund it with 10 XLM from main account
   val keypair = account.createKeyPair()
-  val tx = transactionBuilder.fund(myAccount.address, keypair.address, "10")
+  val tx = stellar.transaction(myAccount).fund(keypair.address, "10").build()
 
   // Sign with your main account's key and send transaction to the network
   println("Registering new account")
   tx.sign(myAccount)
-  assert(stellar.submitTransaction(tx))
+  stellar.submitTransaction(tx)
 
   val anchor = wallet.anchor(homeDomain)
 
@@ -57,12 +57,12 @@ suspend fun main() {
 
   // Create add trustline transaction for an asset. This allows user account to receive trusted
   // asset.
-  val addTrustline = transactionBuilder.addAssetSupport(keypair.address, asset)
+  val addTrustline = stellar.transaction(keypair).addAssetSupport(asset).build()
 
   // Sign and send transaction
   println("Adding trustline...")
   addTrustline.sign(keypair)
-  assert(stellar.submitTransaction(addTrustline))
+  stellar.submitTransaction(addTrustline)
 
   // Authorizing
   val token = anchor.auth(info).authenticate(keypair)
@@ -108,11 +108,7 @@ suspend fun main() {
   } while (transaction.status != "pending_user_transfer_start")
 
   // Send transaction with transfer
-  val transfer =
-    transactionBuilder.transfer(
-      transaction as WithdrawalTransaction,
-      asset,
-    )
+  val transfer = (transaction as WithdrawalTransaction).toTransferTransaction(stellar, asset)
 
   transfer.sign(keypair)
 

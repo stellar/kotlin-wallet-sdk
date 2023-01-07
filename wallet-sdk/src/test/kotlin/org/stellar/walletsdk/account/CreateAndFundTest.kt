@@ -1,9 +1,6 @@
 package org.stellar.walletsdk.account
 
 import io.mockk.spyk
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -12,11 +9,14 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.ADDRESS_INACTIVE
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 internal class CreateAndFundTest {
   private val server = spyk(Server(HORIZON_URL))
   private val wallet = TestWallet.also { it.cfg.stellar.server = server }
-  private val transactions = wallet.stellar().transaction()
+  private val stellar = wallet.stellar()
 
   @Test
   fun `generates Stellar public and secret keys`() {
@@ -35,9 +35,8 @@ internal class CreateAndFundTest {
 
   @Test
   fun `fund defaults work`() {
-    val transaction = runBlocking {
-      wallet.stellar().transaction().fund(ADDRESS_ACTIVE.address, ADDRESS_INACTIVE)
-    }
+    val transaction =
+      runBlocking { stellar.transaction(ADDRESS_ACTIVE).fund(ADDRESS_INACTIVE) }.build()
 
     assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
   }
@@ -48,7 +47,9 @@ internal class CreateAndFundTest {
 
     val exception =
       assertFailsWith<Exception>(
-        block = { runBlocking { transactions.fund(ADDRESS_ACTIVE.address, ADDRESS_INACTIVE, "0") } }
+        block = {
+          runBlocking { stellar.transaction(ADDRESS_ACTIVE).fund(ADDRESS_INACTIVE, "0") }.build()
+        }
       )
 
     assertTrue(exception.toString().contains(errorMessage))
@@ -56,20 +57,21 @@ internal class CreateAndFundTest {
 
   @Test
   fun `there is 1 operation in non-sponsored transaction`() {
-    val transaction = runBlocking { transactions.fund(ADDRESS_ACTIVE.address, ADDRESS_INACTIVE) }
+    val transaction =
+      runBlocking { stellar.transaction(ADDRESS_ACTIVE).fund(ADDRESS_INACTIVE) }.build()
 
     assertEquals(transaction.operations.size, 1)
   }
 
   @Test
   fun `there are 3 operations in sponsored transaction`() {
-    val transaction = runBlocking {
-      transactions.fund(
-        ADDRESS_ACTIVE.address,
-        ADDRESS_INACTIVE,
-        sponsorAddress = ADDRESS_ACTIVE.address
-      )
-    }
+    val transaction =
+      runBlocking {
+          stellar
+            .transaction(ADDRESS_ACTIVE)
+            .fund(ADDRESS_INACTIVE, sponsorAddress = ADDRESS_ACTIVE.address)
+        }
+        .build()
 
     assertEquals(transaction.operations.size, 3)
   }

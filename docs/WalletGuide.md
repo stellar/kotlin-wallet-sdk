@@ -141,9 +141,7 @@ suspend fun main() {
 ```kotlin
 val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
-val txnBuilder = wallet
-  .stellar()
-  .transaction()
+val stellar = wallet.stellar()
 ```
 
 Fund account transaction activates/creates an account with a starting balance (by default, it's 1 XLM). This transaction
@@ -151,7 +149,7 @@ can be sponsored.
 
 ```kotlin
 suspend fun fund(): Transaction {
-  return txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
+  return stellar.transaction(sourceAccountKeyPair).fund(destinationAccountKeyPair.address).build()
 }
 ```
 
@@ -161,17 +159,17 @@ sponsored.
 
 ```kotlin
 suspend fun lockMasterKey(): Transaction {
-  return txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
+  return stellar.transaction(sourceAccountKeyPair).lockAccountMasterKey().build()
 }
 ```
 
-Add an asset (trustline) to the account. This transaction can be sponsored.
+Add an asset (trustline) to the account. This allows account to receive the asset. This transaction can be sponsored.
 
 ```kotlin
 val asset = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
 suspend fun addAsset(): Transaction {
-  return txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
+  return stellar.transaction(sourceAccountKeyPair).addAssetSupport(asset).build()
 }
 ```
 
@@ -179,7 +177,7 @@ Remove an asset from the account (the balance must be 0)
 
 ```kotlin
 suspend fun removeAsset(): Transaction {
-  return txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
+  return stellar.transaction(sourceAccountKeyPair).removeAssetSupport(asset).build()
 }
 ```
 
@@ -190,7 +188,7 @@ Otherwise, you will lock the account irreversibly. This transaction can be spons
 val newSignerKeyPair = account.createKeyPair()
 
 suspend fun addSigner(): Transaction {
-  return txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
+  return stellar.transaction(sourceAccountKeyPair).addAccountSigner(newSignerKeyPair.address, 10).build()
 }
 ```
 
@@ -198,7 +196,15 @@ Remove a signer from the account.
 
 ```kotlin
 suspend fun removeSigner(): Transaction {
-  return txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
+  return stellar.transaction(sourceAccountKeyPair).removeAccountSigner(newSignerKeyPair.address).build()
+}
+```
+
+Modify account thresholds (usefully with multiple signers assigned to the account). Allows to restrict access to certain 
+operations when limit is not reached.
+```kotlin
+suspend fun setThreshold(): Transaction {
+  return stellar.transaction(sourceAccountKeyPair).setThreshold(low = 1, medium = 10, high = 30).build()
 }
 ```
 
@@ -208,9 +214,9 @@ Submit a signed transaction to the Stellar network. A sponsored transaction must
 sponsor.
 
 ```kotlin
-suspend fun signAndSubmit(): Boolean {
+suspend fun signAndSubmit() {
   val signedTxn = fund().sign(sourceAccountKeyPair)
-  return wallet.stellar().submitTransaction(signedTxn)
+  wallet.stellar().submitTransaction(signedTxn)
 }
 ```
 
