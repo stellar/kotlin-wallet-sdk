@@ -2,8 +2,7 @@
 package org.stellar.example.exampleTransaction01
 
 import org.stellar.sdk.Transaction
-import org.stellar.walletsdk.StellarConfiguration
-import org.stellar.walletsdk.Wallet
+import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.sign
 
