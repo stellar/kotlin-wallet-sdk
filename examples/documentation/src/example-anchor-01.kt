@@ -18,11 +18,11 @@ suspend fun anchorToml(): TomlInfo {
 }
 
 suspend fun getAuthToken(): AuthToken {
-  return anchor.auth(anchorToml()).authenticate(accountKeyPair)
+  return anchor.auth().authenticate(accountKeyPair)
 }
 
-suspend fun getAnchorServices(): AnchorServiceInfo? {
-  return anchorToml().services.sep24?.let { anchor.getServicesInfo(it.transferServerSep24) }
+suspend fun getAnchorServices(): AnchorServiceInfo {
+  return anchor.getServicesInfo()
 }
 
 val asset = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
@@ -36,11 +36,11 @@ suspend fun interactiveWithdrawal(): String {
 }
 
 suspend fun anchorTransaction(): AnchorTransaction {
-  return anchor.getTransactionStatus("12345", getAuthToken(), anchorToml())
+  return anchor.getTransactionStatus("12345", getAuthToken())
 }
 
 suspend fun accountHistory(): List<WalletOperation<AnchorTransaction>> {
-  return anchor.getHistory(asset, getAuthToken(), anchorToml())
+  return anchor.getHistory(asset, getAuthToken())
 }
 suspend fun main() {
   val anchorInfo = anchorToml()

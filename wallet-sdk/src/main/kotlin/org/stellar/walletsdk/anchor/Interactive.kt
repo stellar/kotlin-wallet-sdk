@@ -122,7 +122,7 @@ internal constructor(
 
     val transferServerEndpoint = tomlInfo.services.sep24.transferServerSep24
 
-    val serviceInfo = anchor.getServicesInfo(transferServerEndpoint)
+    val serviceInfo = anchor.getServicesInfo()
 
     // Check if deposit/withdraw is enabled for the asset
 

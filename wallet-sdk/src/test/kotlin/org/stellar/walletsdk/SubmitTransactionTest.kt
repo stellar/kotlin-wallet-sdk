@@ -4,6 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -11,9 +14,6 @@ import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.responses.SubmitTransactionResponse
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 internal class SubmitTransactionTest {
   private val server = spyk(Server(HORIZON_URL))

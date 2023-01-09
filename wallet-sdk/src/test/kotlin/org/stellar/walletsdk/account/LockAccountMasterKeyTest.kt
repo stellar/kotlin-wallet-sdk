@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.account
 
 import io.mockk.spyk
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -9,7 +10,6 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
-import kotlin.test.assertEquals
 
 internal class LockAccountMasterKeyTest {
   private val server = spyk(Server(HORIZON_URL))

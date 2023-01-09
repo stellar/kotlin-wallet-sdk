@@ -1,12 +1,12 @@
 package org.stellar.walletsdk.recovery
 
 import io.mockk.spyk
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
-import kotlin.test.assertEquals
 
 internal class RegisterSignersTest {
   private val server = spyk(Server(HORIZON_URL))

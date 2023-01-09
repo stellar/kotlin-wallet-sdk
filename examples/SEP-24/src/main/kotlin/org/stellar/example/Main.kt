@@ -1,5 +1,6 @@
 package org.stellar.example
 
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.walletsdk.ApplicationConfiguration
 import org.stellar.walletsdk.StellarConfiguration
@@ -10,7 +11,6 @@ import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
 import org.stellar.walletsdk.horizon.toTransferTransaction
-import kotlin.time.Duration.Companion.seconds
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -27,7 +27,6 @@ private val USDC_ANCHOR_PLATFORM =
   IssuedAssetId("USDC", "GDQOE23CFSUMSVQK4Y5JHPPYK73VYCNHZHA7ENKCV37P6SUEO6XQBKPP")
 private val asset = if (IS_LOCAL) USDC_ANCHOR_PLATFORM else USDC
 private val homeDomain = if (IS_LOCAL) "localhost:8080" else "testanchor.stellar.org"
-private val scheme = if (IS_LOCAL) "http" else "https"
 
 suspend fun main() {
   val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = IS_LOCAL))
@@ -50,7 +49,7 @@ suspend fun main() {
   val info = anchor.getInfo()
 
   // Get SEP-24 info
-  val servicesInfo = anchor.getServicesInfo("$scheme://$homeDomain/sep24")
+  val servicesInfo = anchor.getServicesInfo()
 
   println("Info from anchor server: $info")
   println("SEP-24 info from anchor server: $servicesInfo")
@@ -65,7 +64,7 @@ suspend fun main() {
   stellar.submitTransaction(addTrustline)
 
   // Authorizing
-  val token = anchor.auth(info).authenticate(keypair)
+  val token = anchor.auth().authenticate(keypair)
 
   // Start interactive deposit
   val deposit = anchor.interactive().deposit(keypair.address, asset, authToken = token)
@@ -80,7 +79,7 @@ suspend fun main() {
   // Optional step: wait for token to appear on user account
   do {
     // Get transaction info
-    val transaction = anchor.getTransactionStatus(deposit.id, token, info)
+    val transaction = anchor.getTransactionStatus(deposit.id, token)
 
     if (status != transaction.status) {
       status = transaction.status
@@ -103,7 +102,7 @@ suspend fun main() {
   // Wait for user input
   do {
     // Get transaction info
-    transaction = anchor.getTransactionStatus(withdrawal.id, token, info)
+    transaction = anchor.getTransactionStatus(withdrawal.id, token)
     delay(5.seconds)
   } while (transaction.status != "pending_user_transfer_start")
 
@@ -115,7 +114,7 @@ suspend fun main() {
   stellar.submitTransaction(transfer)
 
   do {
-    transaction = anchor.getTransactionStatus(withdrawal.id, token, info) as WithdrawalTransaction
+    transaction = anchor.getTransactionStatus(withdrawal.id, token) as WithdrawalTransaction
 
     if (status != transaction.status) {
       status = transaction.status
