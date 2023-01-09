@@ -278,7 +278,7 @@ Authenticate an account with the anchor using SEP-10.
 
 ```kotlin
 suspend fun getAuthToken(): AuthToken {
-  return anchor.auth(anchorToml()).authenticate(accountKeyPair)
+  return anchor.auth().authenticate(accountKeyPair)
 }
 ```
 
@@ -286,8 +286,8 @@ Available anchor services and information about them. For example, interactive d
 fees, payment methods.
 
 ```kotlin
-suspend fun getAnchorServices(): AnchorServiceInfo? {
-  return anchorToml().services.sep24?.let { anchor.getServicesInfo(it.transferServerSep24) }
+suspend fun getAnchorServices(): AnchorServiceInfo {
+  return anchor.getServicesInfo()
 }
 ```
 
@@ -309,7 +309,7 @@ Get single transaction's current status and details.
 
 ```kotlin
 suspend fun anchorTransaction(): AnchorTransaction {
-  return anchor.getTransactionStatus("12345", getAuthToken(), anchorToml())
+  return anchor.getTransactionStatus("12345", getAuthToken())
 }
 ```
 
@@ -317,7 +317,7 @@ Get account transactions for specified asset.
 
 ```kotlin
 suspend fun accountHistory(): List<WalletOperation<AnchorTransaction>> {
-  return anchor.getHistory(asset, getAuthToken(), anchorToml())
+  return anchor.getHistory(asset, getAuthToken())
 }
 ```
 

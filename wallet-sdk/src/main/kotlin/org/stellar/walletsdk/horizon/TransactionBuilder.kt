@@ -2,6 +2,7 @@ package org.stellar.walletsdk.horizon
 
 import mu.KotlinLogging
 import org.stellar.sdk.*
+import org.stellar.sdk.TransactionBuilder as SdkBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.MemoType
@@ -12,7 +13,6 @@ import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.util.*
-import org.stellar.sdk.TransactionBuilder as SdkBuilder
 
 private val log = KotlinLogging.logger {}
 

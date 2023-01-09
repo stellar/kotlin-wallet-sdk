@@ -16,7 +16,7 @@ internal class GetInteractiveFlowTest {
   @Test
   fun `get interactive deposit URL`() {
     val depositResponse = runBlocking {
-      val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
+      val authToken = anchor.auth().authenticate(ADDRESS_ACTIVE)
 
       anchor
         .interactive()
@@ -33,7 +33,7 @@ internal class GetInteractiveFlowTest {
   @Test
   fun `get interactive deposit URL with different funds account`() {
     val depositResponse = runBlocking {
-      val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
+      val authToken = anchor.auth().authenticate(ADDRESS_ACTIVE)
 
       anchor
         .interactive()
@@ -51,7 +51,7 @@ internal class GetInteractiveFlowTest {
   @Test
   fun `get interactive withdrawal URL`() {
     val depositResponse = runBlocking {
-      val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
+      val authToken = anchor.auth().authenticate(ADDRESS_ACTIVE)
 
       anchor
         .interactive()
@@ -68,7 +68,7 @@ internal class GetInteractiveFlowTest {
   @Test
   fun `get interactive withdrawal URL with different funds account`() {
     val depositResponse = runBlocking {
-      val authToken = anchor.auth(toml = toml).authenticate(ADDRESS_ACTIVE)
+      val authToken = anchor.auth().authenticate(ADDRESS_ACTIVE)
 
       anchor
         .interactive()

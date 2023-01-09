@@ -37,15 +37,24 @@ internal constructor(
   private val server = cfg.stellar.server
   private val network = cfg.stellar.network
 
+  // This 2 variables are lazy and shouldn't be used directly. Call getInfo() and getServiceInfo()
+  // instead
+  private lateinit var info: TomlInfo
+  private lateinit var serviceInfo: AnchorServiceInfo
+
   /**
    * Get anchor information from a TOML file.
    *
    * @return TOML file content
    */
   suspend fun getInfo(): TomlInfo {
-    val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
+    if (!::info.isInitialized) {
+      val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
 
-    return parseToml(toml.getToml())
+      info = parseToml(toml.getToml())
+    }
+
+    return info
   }
 
   /**
@@ -55,15 +64,12 @@ internal constructor(
    * @return auth object
    * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
    */
-  suspend fun auth(
-    toml: TomlInfo,
-  ): Auth {
-    // TODO: get toml automatically
+  suspend fun auth(): Auth {
     // TODO: provide wallet signer as parameter to Anchor class
 
     return Auth(
       cfg,
-      toml.services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
+      getInfo().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
       homeDomain,
       httpClient
     )
@@ -78,31 +84,32 @@ internal constructor(
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
-  suspend fun getServicesInfo(serviceUrl: String): AnchorServiceInfo {
-    val url: HttpUrl
+  suspend fun getServicesInfo(): AnchorServiceInfo {
+    if (!::serviceInfo.isInitialized) {
+      val url =
+        getInfo().services.sep24?.transferServerSep24?.toHttpUrl()
+          ?: throw AnchorInteractiveFlowNotSupported
 
-    try {
-      url = serviceUrl.toHttpUrl()
-    } catch (e: IllegalArgumentException) {
-      throw InvalidAnchorServiceUrl(e)
+      val urlBuilder = HttpUrl.Builder().scheme(url.scheme).host(url.host).port(url.port)
+
+      url.pathSegments.forEach { urlBuilder.addPathSegment(it) }
+      urlBuilder.addPathSegment("info")
+
+      val infoUrl = urlBuilder.build().toString()
+
+      log.debug { "Anchor services /info request: serviceUrl = $url" }
+
+      val request = Request.Builder().url(infoUrl).build()
+
+      serviceInfo =
+        httpClient.newCall(request).execute().use { response ->
+          if (!response.isSuccessful) throw ServerRequestFailedException(response)
+
+          response.toJson()
+        }
     }
 
-    val urlBuilder = HttpUrl.Builder().scheme(url.scheme).host(url.host).port(url.port)
-
-    url.pathSegments.forEach { urlBuilder.addPathSegment(it) }
-    urlBuilder.addPathSegment("info")
-
-    val infoUrl = urlBuilder.build().toString()
-
-    log.debug { "Anchor services /info request: serviceUrl = $serviceUrl" }
-
-    val request = Request.Builder().url(infoUrl).build()
-
-    return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-      response.toJson<AnchorServiceInfo>()
-    }
+    return serviceInfo
   }
 
   /**
@@ -126,13 +133,9 @@ internal constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
-  suspend fun getTransactionStatus(
-    transactionId: String,
-    authToken: AuthToken,
-    toml: TomlInfo
-  ): AnchorTransaction {
+  suspend fun getTransactionStatus(transactionId: String, authToken: AuthToken): AnchorTransaction {
     val transferServerEndpoint =
-      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
+      getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -159,11 +162,10 @@ internal constructor(
    */
   suspend fun getAllTransactionStatus(
     assetCode: String,
-    authToken: AuthToken,
-    toml: TomlInfo
+    authToken: AuthToken
   ): List<AnchorTransaction> {
     val transferServerEndpoint =
-      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
+      getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
@@ -196,20 +198,19 @@ internal constructor(
   suspend fun getHistory(
     assetId: IssuedAssetId,
     authToken: AuthToken,
-    toml: TomlInfo,
     limit: Int? = null,
     pagingId: String? = null,
     noOlderThan: String? = null,
     lang: String? = null
   ): List<WalletOperation<AnchorTransaction>> {
-    if (toml.currencies?.find { it.assetId == assetId } == null) {
+    if (getInfo().currencies?.find { it.assetId == assetId } == null) {
       throw AssetNotSupportedException(assetId)
     }
 
     val asset = assetId.toAsset()
 
     val transferServerEndpoint =
-      toml.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
+      getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointHttpUrl = transferServerEndpoint.toHttpUrl()
     val endpointUrl = HttpUrl.Builder().scheme("https").host(endpointHttpUrl.host)
 

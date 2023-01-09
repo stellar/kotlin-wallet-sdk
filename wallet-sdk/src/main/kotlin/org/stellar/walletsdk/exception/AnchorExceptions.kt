@@ -3,7 +3,9 @@ package org.stellar.walletsdk.exception
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 
-sealed class AnchorAssetException(message: String) : WalletException(message)
+sealed class AnchorException(message: String) : WalletException(message)
+
+sealed class AnchorAssetException(message: String) : AnchorException(message)
 
 class AssetNotAcceptedForDepositException(assetCode: IssuedAssetId) :
   AnchorAssetException("Asset $assetCode is not accepted for deposits")
@@ -30,7 +32,7 @@ class IncorrectTransactionStatusException(
   )
 
 object AnchorAuthNotSupported :
-  AnchorAssetException("Anchor does not have SEP-10 auth configured in TOML file")
+  AnchorException("Anchor does not have SEP-10 auth configured in TOML file")
 
 object AnchorInteractiveFlowNotSupported :
-  AnchorAssetException("Anchor does not have SEP-24 interactive flow configured in TOML file")
+  AnchorException("Anchor does not have SEP-24 interactive flow configured in TOML file")

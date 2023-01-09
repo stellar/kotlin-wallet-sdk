@@ -1,6 +1,9 @@
 package org.stellar.walletsdk.account
 
 import io.mockk.spyk
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -9,9 +12,6 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.ADDRESS_INACTIVE
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 internal class CreateAndFundTest {
   private val server = spyk(Server(HORIZON_URL))
