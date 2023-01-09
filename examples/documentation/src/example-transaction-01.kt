@@ -11,41 +11,43 @@ val account = wallet.stellar().account()
 
 val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
-val txnBuilder = wallet
-  .stellar()
-  .transaction()
+val stellar = wallet.stellar()
 
 suspend fun fund(): Transaction {
-  return txnBuilder.fund(sourceAccountKeyPair.address, destinationAccountKeyPair.address)
+  return stellar.transaction(sourceAccountKeyPair).fund(destinationAccountKeyPair.address).build()
 }
 
 suspend fun lockMasterKey(): Transaction {
-  return txnBuilder.lockAccountMasterKey(destinationAccountKeyPair.address)
+  return stellar.transaction(sourceAccountKeyPair).lockAccountMasterKey().build()
 }
 
 val asset = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
 suspend fun addAsset(): Transaction {
-  return txnBuilder.addAssetSupport(sourceAccountKeyPair.address, asset)
+  return stellar.transaction(sourceAccountKeyPair).addAssetSupport(asset).build()
 }
 
 suspend fun removeAsset(): Transaction {
-  return txnBuilder.removeAssetSupport(sourceAccountKeyPair.address, asset)
+  return stellar.transaction(sourceAccountKeyPair).removeAssetSupport(asset).build()
 }
 
 val newSignerKeyPair = account.createKeyPair()
 
 suspend fun addSigner(): Transaction {
-  return txnBuilder.addAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address, 10)
+  return stellar.transaction(sourceAccountKeyPair).addAccountSigner(newSignerKeyPair.address, 10).build()
 }
 
 suspend fun removeSigner(): Transaction {
-  return txnBuilder.removeAccountSigner(sourceAccountKeyPair.address, newSignerKeyPair.address)
+  return stellar.transaction(sourceAccountKeyPair).removeAccountSigner(newSignerKeyPair.address).build()
 }
 
-suspend fun signAndSubmit(): Boolean {
+suspend fun setThreshold(): Transaction {
+  return stellar.transaction(sourceAccountKeyPair).setThreshold(low = 1, medium = 10, high = 30).build()
+}
+
+suspend fun signAndSubmit() {
   val signedTxn = fund().sign(sourceAccountKeyPair)
-  return wallet.stellar().submitTransaction(signedTxn)
+  wallet.stellar().submitTransaction(signedTxn)
 }
 suspend fun main() {
   val fundTxn = fund()

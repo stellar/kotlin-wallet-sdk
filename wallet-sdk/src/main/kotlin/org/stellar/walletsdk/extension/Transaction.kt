@@ -107,6 +107,7 @@ suspend fun buildTransaction(
  *
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
+@Deprecated("To be removed")
 suspend fun createTransactionBuilder(
   sourceAddress: String,
   maxBaseFeeInStroops: Int,

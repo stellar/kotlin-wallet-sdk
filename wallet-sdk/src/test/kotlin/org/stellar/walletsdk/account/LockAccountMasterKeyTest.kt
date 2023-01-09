@@ -1,7 +1,6 @@
 package org.stellar.walletsdk.account
 
 import io.mockk.spyk
-import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -10,6 +9,7 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
+import kotlin.test.assertEquals
 
 internal class LockAccountMasterKeyTest {
   private val server = spyk(Server(HORIZON_URL))
@@ -17,9 +17,8 @@ internal class LockAccountMasterKeyTest {
 
   @Test
   fun `defaults work`() {
-    val transaction = runBlocking {
-      wallet.stellar().transaction().lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE.address)
-    }
+    val transaction =
+      runBlocking { wallet.stellar().transaction(ADDRESS_ACTIVE).lockAccountMasterKey() }.build()
 
     assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
   }
@@ -27,7 +26,7 @@ internal class LockAccountMasterKeyTest {
   @Test
   fun `there is 1 operation in non-sponsored transaction`() {
     val transaction = runBlocking {
-      wallet.stellar().transaction().lockAccountMasterKey(accountAddress = ADDRESS_ACTIVE.address)
+      wallet.stellar().transaction(ADDRESS_ACTIVE).lockAccountMasterKey().build()
     }
 
     assertEquals(transaction.operations.size, 1)
@@ -35,12 +34,14 @@ internal class LockAccountMasterKeyTest {
 
   @Test
   fun `there are 3 operations in sponsored transaction`() {
-    val transaction = runBlocking {
-      wallet
-        .stellar()
-        .transaction()
-        .lockAccountMasterKey(ADDRESS_ACTIVE.address, sponsorAddress = ADDRESS_ACTIVE_TWO)
-    }
+    val transaction =
+      runBlocking {
+          wallet
+            .stellar()
+            .transaction(ADDRESS_ACTIVE)
+            .lockAccountMasterKey(sponsorAddress = ADDRESS_ACTIVE_TWO)
+        }
+        .build()
 
     assertEquals(transaction.operations.size, 3)
   }

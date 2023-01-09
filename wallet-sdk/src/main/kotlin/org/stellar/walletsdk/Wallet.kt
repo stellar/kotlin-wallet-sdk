@@ -1,6 +1,5 @@
 package org.stellar.walletsdk
 
-import java.util.*
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.anchor.Anchor
@@ -8,6 +7,7 @@ import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.recovery.Recovery
 import shadow.okhttp3.OkHttpClient
+import java.util.*
 
 /**
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
@@ -39,7 +39,7 @@ class Wallet(
   }
 
   fun recovery(httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()): Recovery {
-    return Recovery(cfg, httpClient)
+    return Recovery(cfg, stellar(), httpClient)
   }
 }
 
