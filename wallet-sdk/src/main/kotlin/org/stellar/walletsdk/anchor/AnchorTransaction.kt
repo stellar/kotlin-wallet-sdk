@@ -48,11 +48,11 @@ data class DepositTransaction(
   @SerialName("amount_fee") override val amountFee: String,
   @SerialName("started_at") override val startedAt: String,
   @SerialName("completed_at") override val completedAt: String? = null,
-  @SerialName("stellar_transaction_id") override val stellarTransactionId: String?,
+  @SerialName("stellar_transaction_id") override val stellarTransactionId: String? = null,
   @SerialName("external_transaction_id") override val externalTransactionId: String? = null,
   override val message: String? = null,
   override val refunds: Refunds? = null,
-  val from: String?,
+  val from: String? = null,
   val to: String,
   @SerialName("deposit_memo") val depositMemo: String? = null,
   @SerialName("deposit_memo_type") val depositMemoType: MemoType? = null,
@@ -74,12 +74,12 @@ data class WithdrawalTransaction(
   @SerialName("amount_fee") override val amountFee: String,
   @SerialName("started_at") override val startedAt: String,
   @SerialName("completed_at") override val completedAt: String? = null,
-  @SerialName("stellar_transaction_id") override val stellarTransactionId: String?,
+  @SerialName("stellar_transaction_id") override val stellarTransactionId: String? = null,
   @SerialName("external_transaction_id") override val externalTransactionId: String? = null,
   override val message: String? = null,
   override val refunds: Refunds? = null,
   val from: String,
-  val to: String?,
+  val to: String? = null,
   @SerialName("withdraw_memo") val withdrawalMemo: String,
   @SerialName("withdraw_memo_type") val withdrawalMemoType: MemoType,
   @SerialName("withdraw_anchor_account") val withdrawAnchorAccount: String
@@ -105,4 +105,15 @@ data class IncompleteDepositTransaction(
   @SerialName("started_at") override val startedAt: String,
   override val message: String? = null,
   val to: String,
+) : IncompleteAnchorTransaction
+
+@Serializable
+data class ErrorTransaction(
+  override val id: String,
+  val kind: String,
+  override val status: String,
+  @SerialName("more_info_url") override val moreInfoUrl: String,
+  @SerialName("started_at") override val startedAt: String,
+  override val message: String? = null,
+  val from: String,
 ) : IncompleteAnchorTransaction

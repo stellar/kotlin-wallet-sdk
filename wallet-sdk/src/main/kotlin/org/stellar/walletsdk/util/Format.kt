@@ -238,6 +238,7 @@ fun formatAnchorTransaction(
         is WithdrawalTransaction -> WalletOperationType.WITHDRAW
         is IncompleteDepositTransaction -> WalletOperationType.DEPOSIT
         is IncompleteWithdrawalTransaction -> WalletOperationType.WITHDRAW
+        is ErrorTransaction -> WalletOperationType.ERROR
       }
     )
     .build()

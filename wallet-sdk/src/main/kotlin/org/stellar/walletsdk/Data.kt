@@ -116,5 +116,6 @@ enum class WalletOperationType {
   DEPOSIT,
   WITHDRAW,
   SWAP,
-  OTHER
+  OTHER,
+  ERROR
 }

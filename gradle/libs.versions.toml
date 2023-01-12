@@ -6,6 +6,7 @@ java-stellar-sdk = "0.34.2"
 kotlin = "1.7.20"
 kotlinx-json = "1.4.1"
 knit = "0.4.0"
+ktor = "2.2.1"
 mockk = "1.12.2"
 okhttp3 = "4.9.3"
 kotlin-logging = "3.0.2"
@@ -24,6 +25,8 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-json" }
 knit = { module = "org.jetbrains.kotlinx:kotlinx-knit", version.ref = "knit" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp3" }
 okhttp3-mockserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp3" }
