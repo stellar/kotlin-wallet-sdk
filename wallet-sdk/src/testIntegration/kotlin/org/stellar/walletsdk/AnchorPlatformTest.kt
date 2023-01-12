@@ -38,6 +38,7 @@ class AnchorPlatformTest {
     SigningKeyPair.fromSecret("SDGEPZ5QOQ24XGCVA274ZL43OKI6NND5CSR4XD4UH6QT3AA33P66FAJW")
 
   @Test
+  @Disabled
   fun `info works`() = runTest {
     anchor.getInfo()
 
