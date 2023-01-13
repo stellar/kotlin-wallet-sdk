@@ -37,6 +37,9 @@ dependencies {
   testImplementation(libs.okhttp3.mockserver)
   testImplementation(libs.google.gson)
   testImplementation(libs.logback.classic)
+
+  testIntegrationImplementation(libs.ktor.client.core)
+  testIntegrationImplementation(libs.ktor.client.okhttp)
 }
 
 idea.module {

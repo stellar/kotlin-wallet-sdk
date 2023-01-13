@@ -61,5 +61,7 @@ internal constructor(
     if (!response.isSuccess) {
       throw TransactionSubmitFailedException(response)
     }
+
+    log.debug { "Transaction submitted with hash ${response.hash}" }
   }
 }

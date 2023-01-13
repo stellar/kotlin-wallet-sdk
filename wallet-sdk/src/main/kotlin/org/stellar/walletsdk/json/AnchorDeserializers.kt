@@ -28,12 +28,14 @@ internal object AnchorTransactionSerializer :
           "withdrawal" -> {
             when (status.content) {
               "incomplete" -> IncompleteWithdrawalTransaction.serializer()
+              "error" -> ErrorTransaction.serializer()
               else -> WithdrawalTransaction.serializer()
             }
           }
           "deposit" -> {
             when (status.content) {
               "incomplete" -> IncompleteDepositTransaction.serializer()
+              "error" -> ErrorTransaction.serializer()
               else -> DepositTransaction.serializer()
             }
           }
