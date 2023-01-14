@@ -3,7 +3,6 @@
 package org.stellar.walletsdk.util
 
 import java.math.BigDecimal
-import org.stellar.sdk.Asset
 import org.stellar.sdk.Server
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.operations.CreateAccountOperationResponse
@@ -213,38 +212,6 @@ fun formatStellarOperation(
 }
 
 /**
- * Format anchor transactions to make them consistent.
- *
- * @param transaction anchor transaction to format
- * @param asset transaction asset
- * @return formatted transaction
- */
-fun formatAnchorTransaction(
-  transaction: AnchorTransaction,
-  asset: Asset
-): WalletOperation<AnchorTransaction> {
-  val opBuilder = WalletOperationBuilder<AnchorTransaction>().fromTransaction(transaction, asset)
-
-  return opBuilder
-    .amount(
-      when (transaction) {
-        is ProcessingAnchorTransaction -> transaction.amountOut
-        else -> ""
-      }
-    )
-    .type(
-      when (transaction) {
-        is DepositTransaction -> WalletOperationType.DEPOSIT
-        is WithdrawalTransaction -> WalletOperationType.WITHDRAW
-        is IncompleteDepositTransaction -> WalletOperationType.DEPOSIT
-        is IncompleteWithdrawalTransaction -> WalletOperationType.WITHDRAW
-        is ErrorTransaction -> WalletOperationType.ERROR
-      }
-    )
-    .build()
-}
-
-/**
  * Helper class to format wallet operation from Stellar operation or anchor transaction.
  *
  * @param T type of operation or transaction
@@ -291,17 +258,6 @@ internal fun <T : OperationResponse> WalletOperationBuilder<T>.fromOperation(ope
   this.date = operation.createdAt
   this.asset = listOf()
   this.rawOperation = operation
-}
-
-internal fun <T : AnchorTransaction> WalletOperationBuilder<T>.fromTransaction(
-  transaction: T,
-  asset: Asset
-) = apply {
-  this.defaults()
-  this.id = transaction.id
-  this.date = transaction.startedAt
-  this.asset = listOf(asset.toAssetId())
-  this.rawOperation = transaction
 }
 
 /**

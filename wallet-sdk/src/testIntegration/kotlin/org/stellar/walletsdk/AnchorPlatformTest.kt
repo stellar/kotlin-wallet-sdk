@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
@@ -55,15 +56,15 @@ class AnchorPlatformTest {
       val deposit =
         anchor.interactive().deposit(keypair.address, asset, token, mapOf("amount" to "10"))
 
-      val transaction = anchor.getTransactionStatus(deposit.id, token)
+      val transaction = anchor.getTransaction(deposit.id, token)
 
-      assertEquals("incomplete", transaction.status)
+      assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
       val resp = client.get(deposit.url)
 
       assertEquals(200, resp.status.value)
 
-      waitStatus(deposit.id, "completed", token)
+      waitStatus(deposit.id, TransactionStatus.COMPLETED, token)
     }
   }
 
@@ -77,34 +78,34 @@ class AnchorPlatformTest {
       val withdrawal =
         anchor.interactive().withdraw(keypair.address, asset, token, mapOf("amount" to "10"))
 
-      val transaction = anchor.getTransactionStatus(withdrawal.id, token)
+      val transaction = anchor.getTransaction(withdrawal.id, token)
 
-      assertEquals("incomplete", transaction.status)
+      assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
       val resp = client.get(withdrawal.url)
 
       assertEquals(200, resp.status.value)
 
-      waitStatus(withdrawal.id, "pending_user_transfer_start", token)
+      waitStatus(withdrawal.id, TransactionStatus.PENDING_USER_TRANSFER_START, token)
 
       val transfer =
-        (anchor.getTransactionStatus(withdrawal.id, token) as WithdrawalTransaction)
+        (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction)
           .toTransferTransaction(wallet.stellar(), asset)
 
       transfer.sign(keypair)
 
       wallet.stellar().submitTransaction(transfer)
 
-      waitStatus(withdrawal.id, "completed", token)
+      waitStatus(withdrawal.id, TransactionStatus.COMPLETED, token)
     }
   }
 
-  suspend fun waitStatus(id: String, expectedStatus: String, token: AuthToken) {
-    var status = ""
+  suspend fun waitStatus(id: String, expectedStatus: TransactionStatus, token: AuthToken) {
+    var status: TransactionStatus? = null
 
     for (i in 0..maxTries) {
       // Get transaction info
-      val transaction = anchor.getTransactionStatus(id, token)
+      val transaction = anchor.getTransaction(id, token)
 
       if (status != transaction.status) {
         status = transaction.status

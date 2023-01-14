@@ -7,8 +7,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.asset.IssuedAssetId
-import org.stellar.walletsdk.asset.toAsset
+import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
@@ -60,13 +59,10 @@ internal constructor(
   /**
    * Create new auth object to authenticate account with the anchor using SEP-10.
    *
-   * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
    * @return auth object
    * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
    */
   suspend fun auth(): Auth {
-    // TODO: provide wallet signer as parameter to Anchor class
-
     return Auth(
       cfg,
       getInfo().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
@@ -79,7 +75,6 @@ internal constructor(
    * Available anchor services and information about them. For example, limits, currency, fees,
    * payment methods.
    *
-   * @param serviceUrl URL where `/info` endpoint is hosted
    * @return a list of available anchor services
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
@@ -128,12 +123,11 @@ internal constructor(
    *
    * @param transactionId transaction ID
    * @param authToken auth token of the account authenticated with the anchor
-   * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
-  suspend fun getTransactionStatus(transactionId: String, authToken: AuthToken): AnchorTransaction {
+  suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
     val transferServerEndpoint =
       getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
@@ -153,24 +147,23 @@ internal constructor(
   /**
    * Get all account's transactions by specified asset.
    *
-   * @param assetCode asset's code
+   * @param asset target asset to query for
    * @param authToken auth token of the account authenticated with the anchor
-   * @param toml Anchor's stellar.toml file containing `WEB_AUTH_ENDPOINT`
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
-  suspend fun getAllTransactionStatus(
-    assetCode: String,
+  suspend fun getTransactionsForAsset(
+    asset: AssetId,
     authToken: AuthToken
   ): List<AnchorTransaction> {
     val transferServerEndpoint =
       getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
-    val endpointUrl = "$transferServerEndpoint/transactions?asset_code=$assetCode"
+    val endpointUrl = "$transferServerEndpoint/transactions?asset_code=${asset.sep38}"
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
 
     log.debug {
-      "Anchor account's all transactions request: assetCode = $assetCode, authToken = ${authToken.prettify()}"
+      "Anchor account's all transactions request: assetCode = ${asset.sep38}, authToken = ${authToken.prettify()}"
     }
 
     return httpClient.newCall(request).execute().use { response ->
@@ -181,10 +174,11 @@ internal constructor(
   }
 
   /**
-   * Get account transactions for specified asset. Optional field implementation depends on anchor.
+   * Get all successfully finished (either completed or refunded) account transactions for specified
+   * asset. Optional field implementation depends on anchor.
    *
    * @param authToken auth token of the account authenticated with the anchor
-   * @param toml Anchor's stellar.toml file containing `CURRENCIES` list of supported assets
+   * @param assetId asset to make a query for
    * @param limit optional how many transactions to fetch
    * @param pagingId optional return transactions prior to this ID
    * @param noOlderThan optional return transactions starting on or after this date and time
@@ -196,18 +190,16 @@ internal constructor(
    */
   @Suppress("LongParameterList")
   suspend fun getHistory(
-    assetId: IssuedAssetId,
+    assetId: AssetId,
     authToken: AuthToken,
     limit: Int? = null,
     pagingId: String? = null,
     noOlderThan: String? = null,
     lang: String? = null
-  ): List<WalletOperation<AnchorTransaction>> {
+  ): List<AnchorTransaction> {
     if (getInfo().currencies?.find { it.assetId == assetId } == null) {
       throw AssetNotSupportedException(assetId)
     }
-
-    val asset = assetId.toAsset()
 
     val transferServerEndpoint =
       getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
@@ -222,7 +214,7 @@ internal constructor(
 
     // Add query params
     val queryParams = mutableMapOf<String, String>()
-    queryParams["asset_code"] = assetId.code
+    queryParams["asset_code"] = assetId.sep38
     limit?.run { queryParams["limit"] = this.toString() }
     pagingId?.run { queryParams["paging_id"] = this }
     noOlderThan?.run { queryParams["no_older_than"] = this }
@@ -231,10 +223,10 @@ internal constructor(
     queryParams.forEach { endpointUrl.addQueryParameter(it.key, it.value) }
 
     val request = OkHttpUtils.buildStringGetRequest(endpointUrl.build().toString(), authToken)
-    val finalStatusList = listOf("completed", "refunded")
+    val finalStatusList = listOf(TransactionStatus.COMPLETED, TransactionStatus.REFUNDED)
 
     log.debug {
-      "Anchor account's formatted history request: asset = $asset, authToken = " +
+      "Anchor account's formatted history request: asset = $assetId, authToken = " +
         "${authToken.prettify()}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
         "lang = $lang"
     }
@@ -242,11 +234,9 @@ internal constructor(
     return httpClient.newCall(request).execute().use { response ->
       if (!response.isSuccessful) throw ServerRequestFailedException(response)
 
-      response
-        .toJson<AnchorAllTransactionsResponse>()
-        .transactions
-        .filter { finalStatusList.contains(it.status) }
-        .map { formatAnchorTransaction(it, asset) }
+      response.toJson<AnchorAllTransactionsResponse>().transactions.filter {
+        finalStatusList.contains(it.status)
+      }
     }
   }
 }

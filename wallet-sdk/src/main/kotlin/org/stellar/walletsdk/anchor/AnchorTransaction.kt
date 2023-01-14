@@ -1,18 +1,26 @@
-@file:UseSerializers(AssetIdSerializer::class)
+@file:UseSerializers(
+  AssetIdSerializer::class,
+  AccountAsStringSerializer::class,
+  InstantIso8601Serializer::class
+)
 
 package org.stellar.walletsdk.anchor
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.serializers.InstantIso8601Serializer
 import kotlinx.serialization.*
 import org.stellar.walletsdk.asset.AssetId
+import org.stellar.walletsdk.horizon.PublicKeyPair
+import org.stellar.walletsdk.json.AccountAsStringSerializer
 import org.stellar.walletsdk.json.AnchorTransactionSerializer
 import org.stellar.walletsdk.json.AssetIdSerializer
 
 @Serializable(AnchorTransactionSerializer::class)
 sealed interface AnchorTransaction {
   val id: String
-  val status: String
+  val status: TransactionStatus
   val moreInfoUrl: String
-  val startedAt: String
+  val startedAt: Instant
   val message: String?
 }
 
@@ -25,7 +33,7 @@ sealed interface ProcessingAnchorTransaction : AnchorTransaction {
   val amountOut: String
   val amountFeeAsset: AssetId?
   val amountFee: String
-  val completedAt: String?
+  val completedAt: Instant?
   val stellarTransactionId: String?
   val externalTransactionId: String?
   val refunds: Refunds?
@@ -36,7 +44,7 @@ sealed interface IncompleteAnchorTransaction : AnchorTransaction
 @Serializable
 data class DepositTransaction(
   override val id: String,
-  override val status: String,
+  override val status: TransactionStatus,
   @SerialName("status_eta") override val statusEta: String? = null,
   @SerialName("kyc_verified") override val kycVerified: Boolean? = null,
   @SerialName("more_info_url") override val moreInfoUrl: String,
@@ -46,14 +54,14 @@ data class DepositTransaction(
   @SerialName("amount_out") override val amountOut: String,
   @SerialName("amount_fee_asset") override val amountFeeAsset: AssetId? = null,
   @SerialName("amount_fee") override val amountFee: String,
-  @SerialName("started_at") override val startedAt: String,
-  @SerialName("completed_at") override val completedAt: String? = null,
+  @SerialName("started_at") override val startedAt: Instant,
+  @SerialName("completed_at") override val completedAt: Instant? = null,
   @SerialName("stellar_transaction_id") override val stellarTransactionId: String? = null,
   @SerialName("external_transaction_id") override val externalTransactionId: String? = null,
   override val message: String? = null,
   override val refunds: Refunds? = null,
-  val from: String? = null,
-  val to: String,
+  val from: PublicKeyPair? = null,
+  val to: PublicKeyPair,
   @SerialName("deposit_memo") val depositMemo: String? = null,
   @SerialName("deposit_memo_type") val depositMemoType: MemoType? = null,
   @SerialName("claimable_balance_id") val claimableBalanceId: String? = null
@@ -62,7 +70,7 @@ data class DepositTransaction(
 @Serializable
 data class WithdrawalTransaction(
   override val id: String,
-  override val status: String,
+  override val status: TransactionStatus,
   @SerialName("status_eta") override val statusEta: String? = null,
   @SerialName("kyc_verified") override val kycVerified: Boolean? = null,
   @SerialName("more_info_url") override val moreInfoUrl: String,
@@ -72,14 +80,14 @@ data class WithdrawalTransaction(
   @SerialName("amount_out") override val amountOut: String,
   @SerialName("amount_fee_asset") override val amountFeeAsset: AssetId? = null,
   @SerialName("amount_fee") override val amountFee: String,
-  @SerialName("started_at") override val startedAt: String,
-  @SerialName("completed_at") override val completedAt: String? = null,
+  @SerialName("started_at") override val startedAt: Instant,
+  @SerialName("completed_at") override val completedAt: Instant? = null,
   @SerialName("stellar_transaction_id") override val stellarTransactionId: String? = null,
   @SerialName("external_transaction_id") override val externalTransactionId: String? = null,
   override val message: String? = null,
   override val refunds: Refunds? = null,
-  val from: String,
-  val to: String? = null,
+  val from: PublicKeyPair,
+  val to: PublicKeyPair? = null,
   @SerialName("withdraw_memo") val withdrawalMemo: String,
   @SerialName("withdraw_memo_type") val withdrawalMemoType: MemoType,
   @SerialName("withdraw_anchor_account") val withdrawAnchorAccount: String
@@ -88,32 +96,51 @@ data class WithdrawalTransaction(
 @Serializable
 data class IncompleteWithdrawalTransaction(
   override val id: String,
-  val kind: String,
-  override val status: String,
+  override val status: TransactionStatus,
   @SerialName("more_info_url") override val moreInfoUrl: String,
-  @SerialName("started_at") override val startedAt: String,
+  @SerialName("started_at") override val startedAt: Instant,
   override val message: String? = null,
-  val from: String,
+  val from: PublicKeyPair,
 ) : IncompleteAnchorTransaction
 
 @Serializable
 data class IncompleteDepositTransaction(
   override val id: String,
-  val kind: String,
-  override val status: String,
+  override val status: TransactionStatus,
   @SerialName("more_info_url") override val moreInfoUrl: String,
-  @SerialName("started_at") override val startedAt: String,
+  @SerialName("started_at") override val startedAt: Instant,
   override val message: String? = null,
-  val to: String,
+  val to: PublicKeyPair,
 ) : IncompleteAnchorTransaction
 
 @Serializable
 data class ErrorTransaction(
   override val id: String,
   val kind: String,
-  override val status: String,
+  override val status: TransactionStatus,
   @SerialName("more_info_url") override val moreInfoUrl: String,
-  @SerialName("started_at") override val startedAt: String,
+  @SerialName("started_at") override val startedAt: Instant,
   override val message: String? = null,
-  val from: String,
-) : IncompleteAnchorTransaction
+
+  // Fields from withdrawal/deposit transactions that may present in error transaction
+  @SerialName("status_eta") val statusEta: String? = null,
+  @SerialName("kyc_verified") val kycVerified: Boolean? = null,
+  @SerialName("amount_in_asset") val amountInAsset: AssetId? = null,
+  @SerialName("amount_in") val amountIn: String? = null,
+  @SerialName("amount_out_asset") val amountOutAsset: AssetId? = null,
+  @SerialName("amount_out") val amountOut: String? = null,
+  @SerialName("amount_fee_asset") val amountFeeAsset: AssetId? = null,
+  @SerialName("amount_fee") val amountFee: String? = null,
+  @SerialName("completed_at") val completedAt: String? = null,
+  @SerialName("stellar_transaction_id") val stellarTransactionId: String? = null,
+  @SerialName("external_transaction_id") val externalTransactionId: String? = null,
+  val refunds: Refunds? = null,
+  val from: PublicKeyPair? = null,
+  val to: PublicKeyPair? = null,
+  @SerialName("deposit_memo") val depositMemo: String? = null,
+  @SerialName("deposit_memo_type") val depositMemoType: MemoType? = null,
+  @SerialName("claimable_balance_id") val claimableBalanceId: String? = null,
+  @SerialName("withdraw_memo") val withdrawalMemo: String? = null,
+  @SerialName("withdraw_memo_type") val withdrawalMemoType: MemoType? = null,
+  @SerialName("withdraw_anchor_account") val withdrawAnchorAccount: String? = null
+) : AnchorTransaction

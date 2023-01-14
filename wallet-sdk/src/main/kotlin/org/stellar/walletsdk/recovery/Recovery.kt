@@ -9,7 +9,6 @@ import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.auth.Auth
-import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
@@ -76,9 +75,7 @@ internal constructor(
    * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
    *
    * @param recoveryServers A list of recovery servers to register with
-   * @param accountAddress Stellar address of the account that is registering
    * @param accountIdentity A list of account identities to be registered with the recovery servers
-   * @param walletSigner [WalletSigner] interface to sign transaction with the account
    * @return a list of recovery servers' signatures
    * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers

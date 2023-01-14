@@ -47,6 +47,6 @@ fun <T : AbstractTransaction> T.sign(keyPair: SigningKeyPair): T {
   return this.also { this.sign(keyPair.keyPair) }
 }
 
-fun String.toPublicKeyPair(): AccountKeyPair {
+fun String.toPublicKeyPair(): PublicKeyPair {
   return PublicKeyPair(KeyPair.fromAccountId(this))
 }

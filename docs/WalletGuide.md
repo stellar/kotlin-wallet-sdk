@@ -309,14 +309,14 @@ Get single transaction's current status and details.
 
 ```kotlin
 suspend fun anchorTransaction(): AnchorTransaction {
-  return anchor.getTransactionStatus("12345", getAuthToken())
+  return anchor.getTransaction("12345", getAuthToken())
 }
 ```
 
 Get account transactions for specified asset.
 
 ```kotlin
-suspend fun accountHistory(): List<WalletOperation<AnchorTransaction>> {
+suspend fun accountHistory(): List<AnchorTransaction> {
   return anchor.getHistory(asset, getAuthToken())
 }
 ```

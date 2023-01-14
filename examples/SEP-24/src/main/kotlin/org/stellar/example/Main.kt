@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.anchor.AnchorTransaction
+import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
@@ -70,12 +71,12 @@ suspend fun main() {
 
   println("Waiting for tokens...")
 
-  var status = ""
+  var status: TransactionStatus? = null
 
   // Optional step: wait for token to appear on user account
   do {
     // Get transaction info
-    val transaction = anchor.getTransactionStatus(deposit.id, token)
+    val transaction = anchor.getTransaction(deposit.id, token)
 
     if (status != transaction.status) {
       status = transaction.status
@@ -83,7 +84,7 @@ suspend fun main() {
     }
 
     delay(5.seconds)
-  } while (transaction.status != "completed")
+  } while (transaction.status != TransactionStatus.COMPLETED)
 
   println("Successful deposit")
 
@@ -95,12 +96,14 @@ suspend fun main() {
 
   var transaction: AnchorTransaction
 
+  status = null
+
   // Wait for user input
   do {
     // Get transaction info
-    transaction = anchor.getTransactionStatus(withdrawal.id, token)
+    transaction = anchor.getTransaction(withdrawal.id, token)
     delay(5.seconds)
-  } while (transaction.status != "pending_user_transfer_start")
+  } while (transaction.status != TransactionStatus.PENDING_USER_TRANSFER_START)
 
   // Send transaction with transfer
   val transfer = (transaction as WithdrawalTransaction).toTransferTransaction(stellar, asset)
@@ -110,7 +113,7 @@ suspend fun main() {
   stellar.submitTransaction(transfer)
 
   do {
-    transaction = anchor.getTransactionStatus(withdrawal.id, token) as WithdrawalTransaction
+    transaction = anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction
 
     if (status != transaction.status) {
       status = transaction.status
@@ -118,7 +121,7 @@ suspend fun main() {
     }
 
     delay(5.seconds)
-  } while (transaction.status != "completed")
+  } while (transaction.status != TransactionStatus.COMPLETED)
 
   println("Successful withdrawal")
 }
