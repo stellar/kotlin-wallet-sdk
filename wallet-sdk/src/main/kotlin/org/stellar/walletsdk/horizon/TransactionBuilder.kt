@@ -6,6 +6,7 @@ import org.stellar.sdk.TransactionBuilder as SdkBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.MemoType
+import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.asset.StellarAssetId
@@ -230,13 +231,10 @@ suspend fun WithdrawalTransaction.toTransferTransaction(
   stellar: Stellar,
   assetId: StellarAssetId
 ): Transaction {
-  this.requireStatus("pending_user_transfer_start")
+  this.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
 
   return stellar
-    .transaction(
-      this.from.toPublicKeyPair(),
-      this.withdrawalMemo.let { this.withdrawalMemoType to it }
-    )
+    .transaction(this.from, this.withdrawalMemo.let { this.withdrawalMemoType to it })
     .transfer(this.withdrawAnchorAccount, assetId, this.amountIn)
     .build()
 }

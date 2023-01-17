@@ -5,6 +5,7 @@ google-gson = "2.8.9"
 java-stellar-sdk = "0.34.2"
 kotlin = "1.7.20"
 kotlinx-json = "1.4.1"
+kotlinx-datetime = "0.4.0"
 knit = "0.4.0"
 ktor = "2.2.1"
 mockk = "1.12.2"
@@ -24,6 +25,7 @@ java-stellar-sdk = { module = "com.github.stellar:java-stellar-sdk", version.ref
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-json" }
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 knit = { module = "org.jetbrains.kotlinx:kotlinx-knit", version.ref = "knit" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

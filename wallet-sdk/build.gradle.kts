@@ -28,6 +28,7 @@ dependencies {
   api(libs.coroutines.core)
   api(libs.java.stellar.sdk)
   api(libs.kotlin.serialization.json)
+  api(libs.kotlin.datetime)
   api(libs.okhttp3)
   api(libs.kotlin.logging)
 

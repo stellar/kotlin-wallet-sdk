@@ -36,10 +36,10 @@ suspend fun interactiveWithdrawal(): String {
 }
 
 suspend fun anchorTransaction(): AnchorTransaction {
-  return anchor.getTransactionStatus("12345", getAuthToken())
+  return anchor.getTransaction("12345", getAuthToken())
 }
 
-suspend fun accountHistory(): List<WalletOperation<AnchorTransaction>> {
+suspend fun accountHistory(): List<AnchorTransaction> {
   return anchor.getHistory(asset, getAuthToken())
 }
 suspend fun main() {

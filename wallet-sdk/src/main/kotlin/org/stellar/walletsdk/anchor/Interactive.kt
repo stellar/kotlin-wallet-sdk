@@ -3,7 +3,6 @@ package org.stellar.walletsdk.anchor
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import okhttp3.internal.toImmutableMap
-import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
@@ -19,7 +18,6 @@ private val log = KotlinLogging.logger {}
  * Interactive flow for deposit and withdrawal using SEP-24.
  *
  * @param anchor instance of the [Anchor]
- * @param server Horizon [Server] instance
  * @param httpClient HTTP client
  * @return response object from the anchor
  * @throws [AnchorAssetException] if asset was refused by the anchor
@@ -40,7 +38,7 @@ internal constructor(
    * for depositing or withdrawing funds
    * @param fundsAccountAddress optional Stellar address of the account for depositing or
    * withdrawing funds, if different from the account address
-   * @param assetCode Asset code to deposit or withdraw
+   * @param assetId Asset code to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
    * @return response object from the anchor
@@ -67,7 +65,7 @@ internal constructor(
    * for depositing or withdrawing funds
    * @param fundsAccountAddress optional Stellar address of the account for depositing or
    * withdrawing funds, if different from the account address
-   * @param assetCode Asset code to deposit or withdraw
+   * @param assetId Asset code to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
    * @return response object from the anchor
