@@ -47,6 +47,36 @@ class AnchorPlatformTest {
   }
 
   @Test
+  @Disabled
+  fun `deposit url works`() = runTest {
+    val token = anchor.auth().authenticate(keypair)
+
+    // Start interactive deposit
+    val deposit = anchor.interactive().deposit(keypair.address, asset, token)
+
+    val transaction = anchor.getTransaction(deposit.id, token)
+
+    assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
+
+    println(deposit.url)
+  }
+
+  @Test
+  @Disabled
+  fun `withdrawal url works`() = runTest {
+    val token = anchor.auth().authenticate(keypair)
+
+    // Start interactive withdrawal
+    val withdrawal = anchor.interactive().withdraw(keypair.address, asset, token)
+
+    val transaction = anchor.getTransaction(withdrawal.id, token)
+
+    assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
+
+    println(withdrawal.url)
+  }
+
+  @Test
   @Disabled // TODO: enable using docker
   fun `test SEP-24 deposit`() {
     runBlocking {
@@ -74,7 +104,7 @@ class AnchorPlatformTest {
     runBlocking {
       val token = anchor.auth().authenticate(keypair)
 
-      // Start interactive deposit
+      // Start interactive withdrawal
       val withdrawal =
         anchor.interactive().withdraw(keypair.address, asset, token, mapOf("amount" to "10"))
 
