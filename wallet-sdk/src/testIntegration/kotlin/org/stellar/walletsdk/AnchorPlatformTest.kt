@@ -66,14 +66,14 @@ class AnchorPlatformTest {
   fun `withdrawal url works`() = runTest {
     val token = anchor.auth().authenticate(keypair)
 
-    // Start interactive deposit
-    val deposit = anchor.interactive().deposit(keypair.address, asset, token)
+    // Start interactive withdrawal
+    val withdrawal = anchor.interactive().withdraw(keypair.address, asset, token)
 
-    val transaction = anchor.getTransaction(deposit.id, token)
+    val transaction = anchor.getTransaction(withdrawal.id, token)
 
     assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
-    println(deposit.url)
+    println(withdrawal.url)
   }
 
   @Test
@@ -104,7 +104,7 @@ class AnchorPlatformTest {
     runBlocking {
       val token = anchor.auth().authenticate(keypair)
 
-      // Start interactive deposit
+      // Start interactive withdrawal
       val withdrawal =
         anchor.interactive().withdraw(keypair.address, asset, token, mapOf("amount" to "10"))
 
