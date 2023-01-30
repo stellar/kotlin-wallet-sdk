@@ -2,6 +2,7 @@ package org.stellar.example
 
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import org.stellar.walletsdk.ApplicationConfiguration
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.anchor.AnchorTransaction
@@ -23,10 +24,11 @@ private val myAccount = SigningKeyPair.fromSecret(myKey)
 // "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
 private val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 private val asset = USDC
-private const val DOMAIN = "testanchor.stellar.org"
+// private const val DOMAIN = "testanchor.stellar.org"
+private const val DOMAIN = "localhost:8080"
 
 suspend fun main() {
-  val wallet = Wallet(StellarConfiguration.Testnet)
+  val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = true))
 
   // Create instance of stellar, account and transaction services
   val stellar = wallet.stellar()
@@ -62,6 +64,8 @@ suspend fun main() {
 
   // Authorizing
   val token = anchor.auth().authenticate(keypair)
+
+  println("Token: $token")
 
   // Start interactive deposit
   val deposit = anchor.interactive().deposit(keypair.address, asset, authToken = token)

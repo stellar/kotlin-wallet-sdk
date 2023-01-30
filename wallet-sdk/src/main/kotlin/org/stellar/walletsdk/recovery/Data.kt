@@ -14,9 +14,9 @@ import org.stellar.walletsdk.auth.WalletSigner
  *
  * @constructor Create empty Recovery server
  * @property endpoint main endpoint (root domain) of SEP-30 recovery server. E.g.
- *   `https://testanchor.stellar.org`
+ * `https://testanchor.stellar.org`
  * @property authEndpoint SEP-10 auth endpoint to be used. Should be in format
- *   `<https://domain/auth>`. E.g. `https://testanchor.stellar.org/auth`)
+ * `<https://domain/auth>`. E.g. `https://testanchor.stellar.org/auth`)
  * @property homeDomain is a SEP-10 home domain. E.g. `testanchor.stellar.org`
  * @property walletSigner optional [WalletSigner] used to sign authentication
  */
