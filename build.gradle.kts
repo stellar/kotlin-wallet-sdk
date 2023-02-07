@@ -2,7 +2,7 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   alias(libs.plugins.spotless)
-  alias(libs.plugins.kotlin.jvm)
+  alias(libs.plugins.kotlin.multiplatform) apply false
   alias(libs.plugins.detekt)
 }
 
@@ -23,7 +23,7 @@ subprojects {
   val subProject = this
 
   apply(plugin = "com.diffplug.spotless")
-  apply(plugin = "kotlin")
+//  apply(plugin = "kotlin")
   apply(plugin = "io.gitlab.arturbosch.detekt")
 
   repositories {
@@ -63,21 +63,17 @@ subprojects {
     }
   }
 
-  dependencies {
-    // Define common dependencies here
-  }
-
-  tasks {
-    compileKotlin {
-      // Ignore spotless for auto-generated files
-      if (subProject.name != "documentation") {
-        dependsOn("spotlessKotlinApply")
-      }
-      kotlinOptions.jvmTarget = jvmVersion.toString()
-    }
-
-    test { useJUnitPlatform() }
-  }
+//  tasks {
+//    compileKotlin {
+//      // Ignore spotless for auto-generated files
+//      if (subProject.name != "documentation") {
+//        dependsOn("spotlessKotlinApply")
+//      }
+//      kotlinOptions.jvmTarget = jvmVersion.toString()
+//    }
+//
+//    test { useJUnitPlatform() }
+//  }
 
   tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {

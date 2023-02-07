@@ -10,5 +10,5 @@ fun example(name: String) {
 }
 
 /** examples */
-example("SEP-24")
-example("documentation")
+//example("SEP-24")
+//example("documentation")

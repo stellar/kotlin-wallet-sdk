@@ -6,64 +6,85 @@ plugins {
   signing
   alias(libs.plugins.kotlin.serialization)
   idea
+  alias(libs.plugins.kotlin.multiplatform)
 }
 
-fun DependencyHandler.testIntegrationImplementation(dependencyNotation: Any): Dependency? =
-  add("testIntegrationImplementation", dependencyNotation)
+// fun DependencyHandler.testIntegrationImplementation(dependencyNotation: Any): Dependency? =
+//  add("testIntegrationImplementation", dependencyNotation)
+//
+// sourceSets {
+//  val testIntegration by creating {
+//    compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+//    runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+//  }
+// }
+//
+// configurations {
+//  val testIntegrationImplementation by getting {
+//    extendsFrom(configurations.testImplementation.get())
+//  }
+// }
 
-sourceSets {
-  val testIntegration by creating {
-    compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-    runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+kotlin {
+  jvm {
+    compilations.all { kotlinOptions.jvmTarget = "1.8" }
+    withJava()
+    testRuns["test"].executionTask.configure { useJUnitPlatform() }
+  }
+  js(BOTH) { browser { commonWebpackConfig { cssSupport.enabled = true } } }
+
+  sourceSets {
+    val commonMain by getting {
+      dependencies {
+        api(libs.coroutines.core)
+        api(libs.kotlin.serialization.json)
+        api(libs.kotlin.datetime)
+        api(libs.kotlin.logging)
+      }
+    }
+    val commonTest by getting {}
+    val jvmMain by getting {
+      dependencies {
+        api(libs.java.stellar.sdk)
+        api(libs.okhttp3)
+      }
+    }
+    val jvmTest by getting {
+      dependencies {
+        implementation(libs.coroutines.test)
+        implementation(libs.kotlin.junit)
+        implementation(libs.mockk)
+        implementation(libs.okhttp3.mockserver)
+        implementation(libs.google.gson)
+        implementation(libs.logback.classic)
+      }
+    }
+    val jsMain by getting
+    val jsTest by getting
   }
 }
 
-configurations {
-  val testIntegrationImplementation by getting {
-    extendsFrom(configurations.testImplementation.get())
-  }
-}
-
-dependencies {
-  api(libs.coroutines.core)
-  api(libs.java.stellar.sdk)
-  api(libs.kotlin.serialization.json)
-  api(libs.kotlin.datetime)
-  api(libs.okhttp3)
-  api(libs.kotlin.logging)
-
-  testImplementation(libs.coroutines.test)
-  testImplementation(libs.kotlin.junit)
-  testImplementation(libs.mockk)
-  testImplementation(libs.okhttp3.mockserver)
-  testImplementation(libs.google.gson)
-  testImplementation(libs.logback.classic)
-
-  testIntegrationImplementation(libs.ktor.client.core)
-  testIntegrationImplementation(libs.ktor.client.okhttp)
-}
-
-idea.module {
-  val testSources = testSourceDirs
-
-  testSources.addAll(project.sourceSets.getByName("testIntegration").kotlin.srcDirs)
-  testSources.addAll(project.sourceSets.getByName("testIntegration").resources.srcDirs)
-
-  testSourceDirs = testSources
-}
-
-val testIntegration by
-  tasks.register<Test>("integrationTest") {
-    useJUnitPlatform()
-
-    testClassesDirs = sourceSets.getByName("testIntegration").output.classesDirs
-    classpath = sourceSets.getByName("testIntegration").runtimeClasspath
-
-    mustRunAfter(tasks.test)
-  }
-
-tasks.check.get().dependsOn += testIntegration
-
+// idea.module {
+//  val testSources = testSourceDirs
+//
+//  testSources.addAll(project.sourceSets.getByName("testIntegration").kotlin.srcDirs)
+//  testSources.addAll(project.sourceSets.getByName("testIntegration").resources.srcDirs)
+//
+//  testSourceDirs = testSources
+// }
+//
+// val testIntegration by
+//  tasks.register<Test>("integrationTest") {
+//    useJUnitPlatform()
+//
+//    testClassesDirs = sourceSets.getByName("testIntegration").output.classesDirs
+//    classpath = sourceSets.getByName("testIntegration").runtimeClasspath
+//
+//    mustRunAfter(tasks.test)
+//  }
+//
+// tasks.check.get().dependsOn += testIntegration
+//
 val dokkaOutputDir = buildDir.resolve("dokka")
 
 tasks.dokkaHtml { outputDirectory.set(dokkaOutputDir) }
@@ -78,11 +99,11 @@ val javadocJar =
     from(dokkaOutputDir)
   }
 
-val sourcesJar by
-  tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(kotlin.sourceSets.main.get().kotlin)
-  }
+// val sourcesJar by
+//  tasks.registering(Jar::class) {
+//    archiveClassifier.set("sources")
+//    from(kotlin.sourceSets["jvmMain"].kotlin)
+//  }
 
 publishing {
   repositories {
@@ -105,7 +126,7 @@ publishing {
 
       from(components["java"])
       artifact(javadocJar)
-      artifact(sourcesJar)
+      //      artifact(sourcesJar)
 
       pom {
         name.set("Stellar Wallet SDK")
