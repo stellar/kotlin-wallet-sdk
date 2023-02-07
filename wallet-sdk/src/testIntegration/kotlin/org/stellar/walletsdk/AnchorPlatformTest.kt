@@ -48,7 +48,7 @@ class AnchorPlatformTest {
 
   @Test
   @Disabled
-  fun `deposit url works`() = runTest {
+  fun `deposit url works`() = runBlocking {
     val token = anchor.auth().authenticate(keypair)
 
     // Start interactive deposit
@@ -63,7 +63,7 @@ class AnchorPlatformTest {
 
   @Test
   @Disabled
-  fun `withdrawal url works`() = runTest {
+  fun `withdrawal url works`() = runBlocking {
     val token = anchor.auth().authenticate(keypair)
 
     // Start interactive withdrawal
@@ -74,6 +74,20 @@ class AnchorPlatformTest {
     assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
     println(withdrawal.url)
+
+    waitStatus(withdrawal.id, TransactionStatus.PENDING_USER_TRANSFER_START, token)
+
+    val transfer =
+      (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction).toTransferTransaction(
+        wallet.stellar(),
+        asset
+      )
+
+    transfer.sign(keypair)
+
+    wallet.stellar().submitTransaction(transfer)
+
+    waitStatus(withdrawal.id, TransactionStatus.COMPLETED, token)
   }
 
   @Test
