@@ -1,11 +1,24 @@
+// The alias call in plugins scope produces IntelliJ false error which is suppressed here.
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   application
+  alias(libs.plugins.kotlin.multiplatform)
 }
 
-dependencies {
-  implementation(project(":wallet-sdk"))
-  // To use in your project
-  // implementation("org.stellar:wallet-sdk:0.1.0")
+kotlin {
+  jvm {
+    compilations.all { kotlinOptions.jvmTarget = "1.8" }
+    withJava()
+    testRuns["test"].executionTask.configure { useJUnitPlatform() }
+  }
+
+  sourceSets {
+    val jvmMain by getting {
+      dependencies {
+         implementation(project(":wallet-sdk"))
+      }
+    }
+  }
 }
 
 application { mainClass.set("org.stellar.walletsdk.MainKt") }
