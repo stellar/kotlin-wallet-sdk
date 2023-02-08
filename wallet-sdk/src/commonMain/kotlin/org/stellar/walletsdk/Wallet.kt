@@ -1,9 +1,12 @@
+@file:JsExport
+
 package org.stellar.walletsdk
 
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.recovery.Recovery
+import kotlin.js.JsExport
 
 /**
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
@@ -40,10 +43,6 @@ class Wallet(
   }
 }
 
-expect class StellarConfiguration {
-  fun isPublic(): Boolean
-}
-
 internal data class Config(val stellar: StellarConfiguration, val app: ApplicationConfiguration)
 
 // TODO: provide a default WalletSignerImpl
@@ -65,8 +64,6 @@ data class ApplicationConfiguration(
 )
 
 typealias Base64Decoder = ((String) -> ByteArray)
-
-internal expect val defaultBase64Decoder: Base64Decoder
 
 internal val Config.scheme: String
   get() {

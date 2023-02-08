@@ -1,9 +1,10 @@
-package org.stellar.walletsdk
+@file:JsExport
 
+package org.stellar.walletsdk
 actual class StellarConfiguration {
-    actual fun isPublic(): Boolean {
-        TODO("Not yet implemented")
-    }
+  actual fun isPublic(): Boolean {
+    TODO("Not yet implemented")
+  }
 }
 
 internal actual val defaultBase64Decoder: Base64Decoder = { TODO("") }

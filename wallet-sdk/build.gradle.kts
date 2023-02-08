@@ -31,9 +31,18 @@ kotlin {
     withJava()
     testRuns["test"].executionTask.configure { useJUnitPlatform() }
   }
-  js(BOTH) { browser { commonWebpackConfig { cssSupport.enabled = true } } }
+  js(IR) {
+    moduleName = "kotlin-wallet-sdk"
+    nodejs()
+    binaries.library()
+  }
 
   sourceSets {
+    all {
+      languageSettings.apply {
+        optIn("kotlin.js.ExperimentalJsExport")
+      }
+    }
     val commonMain by getting {
       dependencies {
         api(libs.coroutines.core)

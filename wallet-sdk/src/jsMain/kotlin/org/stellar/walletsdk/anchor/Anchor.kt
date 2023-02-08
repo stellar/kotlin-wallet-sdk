@@ -1,3 +1,5 @@
+@file:JsExport
+
 package org.stellar.walletsdk.anchor
 
 import org.stellar.walletsdk.Config
@@ -5,6 +7,7 @@ import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.toml.TomlInfo
+import kotlin.js.Promise
 
 /** Build on/off ramps with anchors. */
 actual class Anchor internal actual constructor(cfg: Config, homeDomain: String) {
@@ -24,7 +27,7 @@ actual class Anchor internal actual constructor(cfg: Config, homeDomain: String)
      *
      * @return TOML file content
      */
-    actual suspend fun getInfo(): TomlInfo {
+    fun getInfo(): Promise<TomlInfo> {
         TODO("Not yet implemented")
     }
 
@@ -34,7 +37,7 @@ actual class Anchor internal actual constructor(cfg: Config, homeDomain: String)
      * @return auth object
      * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
      */
-    actual suspend fun auth(): Auth {
+    fun auth(): Promise<Auth> {
         TODO("Not yet implemented")
     }
 
@@ -46,7 +49,7 @@ actual class Anchor internal actual constructor(cfg: Config, homeDomain: String)
      * @throws [ServerRequestFailedException] if network request fails
      * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
      */
-    actual suspend fun getServicesInfo(): AnchorServiceInfo {
+     fun getServicesInfo(): Promise<AnchorServiceInfo> {
         TODO("Not yet implemented")
     }
 
@@ -55,7 +58,7 @@ actual class Anchor internal actual constructor(cfg: Config, homeDomain: String)
      *
      * @return interactive flow service
      */
-    actual fun interactive(): Interactive {
+    fun interactive(): Promise<Interactive> {
         TODO("Not yet implemented")
     }
 
@@ -68,10 +71,10 @@ actual class Anchor internal actual constructor(cfg: Config, homeDomain: String)
      * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
      * @throws [ServerRequestFailedException] if network request fails
      */
-    actual suspend fun getTransaction(
+    fun getTransaction(
         transactionId: String,
         authToken: AuthToken
-    ): AnchorTransaction {
+    ): Promise<AnchorTransaction> {
         TODO("Not yet implemented")
     }
 
@@ -84,10 +87,10 @@ actual class Anchor internal actual constructor(cfg: Config, homeDomain: String)
      * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
      * @throws [ServerRequestFailedException] if network request fails
      */
-    actual suspend fun getTransactionsForAsset(
+    fun getTransactionsForAsset(
         asset: AssetId,
         authToken: AuthToken
-    ): List<AnchorTransaction> {
+    ): Promise<List<AnchorTransaction>> {
         TODO("Not yet implemented")
     }
 
@@ -107,15 +110,18 @@ actual class Anchor internal actual constructor(cfg: Config, homeDomain: String)
      * @throws [AssetNotSupportedException] if asset is not supported by the anchor
      */
     @Suppress("LongParameterList")
-    actual suspend fun getHistory(
+     fun getHistory(
         assetId: AssetId,
         authToken: AuthToken,
         limit: Int?,
         pagingId: String?,
         noOlderThan: String?,
         lang: String?
-    ): List<AnchorTransaction> {
+    ): Promise<List<AnchorTransaction>> {
         TODO("Not yet implemented")
     }
+}
 
+fun Anchor.testJsFunction(): String {
+    return "Hello"
 }

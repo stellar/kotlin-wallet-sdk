@@ -46,7 +46,7 @@ internal actual constructor(
    *
    * @return TOML file content
    */
-  actual suspend fun getInfo(): TomlInfo {
+   suspend fun getInfo(): TomlInfo {
     if (!::info.isInitialized) {
       val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
 
@@ -62,7 +62,7 @@ internal actual constructor(
    * @return auth object
    * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
    */
-  actual suspend fun auth(): Auth {
+   suspend fun auth(): Auth {
     return Auth(
       cfg,
       getInfo().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
@@ -78,7 +78,7 @@ internal actual constructor(
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
-  actual suspend fun getServicesInfo(): AnchorServiceInfo {
+   suspend fun getServicesInfo(): AnchorServiceInfo {
     if (!::serviceInfo.isInitialized) {
       val url =
         getInfo().services.sep24?.transferServerSep24?.toHttpUrl()
@@ -111,7 +111,7 @@ internal actual constructor(
    *
    * @return interactive flow service
    */
-  actual fun interactive(): Interactive {
+   fun interactive(): Interactive {
     return Interactive(homeDomain, this, cfg)
   }
 
@@ -126,7 +126,7 @@ internal actual constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
-  actual suspend fun getTransaction(
+   suspend fun getTransaction(
     transactionId: String,
     authToken: AuthToken
   ): AnchorTransaction {
@@ -155,7 +155,7 @@ internal actual constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
-  actual suspend fun getTransactionsForAsset(
+   suspend fun getTransactionsForAsset(
     asset: AssetId,
     authToken: AuthToken
   ): List<AnchorTransaction> {
@@ -191,7 +191,7 @@ internal actual constructor(
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
   @Suppress("LongParameterList")
-  actual suspend fun getHistory(
+   suspend fun getHistory(
     assetId: AssetId,
     authToken: AuthToken,
     limit: Int?,
