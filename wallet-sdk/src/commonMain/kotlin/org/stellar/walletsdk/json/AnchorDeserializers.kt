@@ -50,7 +50,7 @@ internal object AnchorTransactionSerializer :
 
 internal object AssetIdSerializer : KSerializer<AssetId> {
   override val descriptor =
-    PrimitiveSerialDescriptor(AssetId::class.qualifiedName!!, PrimitiveKind.STRING)
+    PrimitiveSerialDescriptor(AssetId::class.simpleName!!, PrimitiveKind.STRING)
 
   override fun serialize(encoder: Encoder, value: AssetId) = encoder.encodeString(value.toString())
 

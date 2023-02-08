@@ -1,13 +1,9 @@
 package org.stellar.walletsdk
 
-import java.util.*
-import org.stellar.sdk.Network
-import org.stellar.sdk.Server
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.recovery.Recovery
-import shadow.okhttp3.OkHttpClient
 
 /**
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
@@ -21,50 +17,31 @@ class Wallet(
 
   init {
     if (applicationConfiguration.useHttp) {
-      require(stellarConfiguration.network != Network.PUBLIC) {
+      require(stellarConfiguration.isPublic()) {
         "Using http is not allowed with main Stellar network (pubnet)"
       }
     }
   }
 
+  // TODO: make client configurable again
   fun anchor(
-    homeDomain: String,
-    httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()
+    homeDomain: String
   ): Anchor {
-    return Anchor(cfg, homeDomain, httpClient)
+    return Anchor(cfg, homeDomain)
   }
 
   fun stellar(): Stellar {
     return Stellar(cfg)
   }
 
-  fun recovery(httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()): Recovery {
-    return Recovery(cfg, stellar(), httpClient)
+  // TODO: make client configurable again
+  fun recovery(): Recovery {
+    return Recovery(cfg, stellar())
   }
 }
 
-data class StellarConfiguration(
-  val network: Network,
-  val horizonUrl: String,
-  val maxBaseFeeStroops: UInt = 100u,
-  val horizonClient: OkHttpClient? = null,
-  val submitClient: OkHttpClient? = null
-) {
-  var server: Server =
-    if (horizonClient != null) {
-      requireNotNull(submitClient) {
-        "Horizon and submit client must be both initialized or set to null"
-      }
-      Server(horizonUrl, horizonClient, submitClient)
-    } else {
-      Server(horizonUrl)
-    }
-    // Only used for tests
-    internal set
-
-  companion object {
-    val Testnet = StellarConfiguration(Network.TESTNET, "https://horizon-testnet.stellar.org")
-  }
+expect class StellarConfiguration {
+  fun isPublic(): Boolean
 }
 
 internal data class Config(val stellar: StellarConfiguration, val app: ApplicationConfiguration)
@@ -89,7 +66,7 @@ data class ApplicationConfiguration(
 
 typealias Base64Decoder = ((String) -> ByteArray)
 
-internal val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }
+internal expect val defaultBase64Decoder: Base64Decoder
 
 internal val Config.scheme: String
   get() {

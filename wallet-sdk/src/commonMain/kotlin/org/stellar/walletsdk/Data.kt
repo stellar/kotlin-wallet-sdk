@@ -1,7 +1,6 @@
 package org.stellar.walletsdk
 
 import kotlinx.serialization.Serializable
-import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.walletsdk.asset.AssetId
 
 data class AccountInfo(
@@ -70,9 +69,9 @@ data class InteractiveFlowResponse(
   val type: String,
 )
 
-enum class Order(internal val builderEnum: RequestBuilder.Order) {
-  ASC(RequestBuilder.Order.ASC),
-  DESC(RequestBuilder.Order.DESC)
+enum class Order {
+  ASC,
+  DESC
 }
 
 data class LiquidityPoolInfo(

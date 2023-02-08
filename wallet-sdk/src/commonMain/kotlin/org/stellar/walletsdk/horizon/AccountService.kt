@@ -1,12 +1,10 @@
+@file:JvmName("AccountServiceJvm")
 package org.stellar.walletsdk.horizon
 
 import mu.KotlinLogging
-import org.stellar.sdk.*
-import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.*
-import org.stellar.walletsdk.extension.*
-import org.stellar.walletsdk.util.*
+import kotlin.jvm.JvmName
 
 private val log = KotlinLogging.logger {}
 
@@ -16,12 +14,9 @@ private val log = KotlinLogging.logger {}
  * @property server Horizon [Server] instance
  * @property network Stellar [Network] instance
  */
-class AccountService
-internal constructor(
-  private val cfg: Config,
+expect class AccountService internal constructor(
+  cfg: Config,
 ) {
-  private val server: Server = cfg.stellar.server
-  private val network: Network = cfg.stellar.network
 
   /**
    * Generate new account keypair (public and secret key). This key pair can be used to create a
@@ -29,9 +24,7 @@ internal constructor(
    *
    * @return public key and secret key
    */
-  fun createKeyPair(): SigningKeyPair {
-    return SigningKeyPair(KeyPair.random())
-  }
+  fun createKeyPair(): SigningKeyPair
 
   /**
    * Get account information from the Stellar network.
@@ -41,21 +34,7 @@ internal constructor(
    * @return formatted account information
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
-    val account = serverInstance.accountByAddress(accountAddress)
-    val balances = formatAccountBalances(account, serverInstance)
-
-    log.debug { "Account info: accountAddress = $accountAddress" }
-
-    // TODO: add accountDetails
-
-    return AccountInfo(
-      publicKey = account.accountId,
-      assets = balances.assets,
-      liquidityPools = balances.liquidityPools,
-      reservedNativeBalance = account.reservedBalance()
-    )
-  }
+  suspend fun getInfo(accountAddress: String): AccountInfo
 
   /**
    * Get account operations for the specified Stellar address.
@@ -70,19 +49,12 @@ internal constructor(
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun getHistory(
-    accountAddress: String,
-    limit: Int? = null,
-    order: Order? = Order.DESC,
-    cursor: String? = null,
-    includeFailed: Boolean? = null
-  ): List<WalletOperation<OperationResponse>> {
-    log.debug {
-      "Account history: accountAddress = $accountAddress, limit = $limit, order" +
-        " = $order, cursor = $cursor, includeFailed = $includeFailed"
-    }
-
-    return server.accountOperations(accountAddress, limit, order, cursor, includeFailed).map {
-      formatStellarOperation(accountAddress, it)
-    }
-  }
+      accountAddress: String,
+      limit: Int? = null,
+      order: Order? = Order.DESC,
+      cursor: String? = null,
+      includeFailed: Boolean? = null
+  ): List<WalletOperation<OperationResponse>>
 }
+
+expect abstract class OperationResponse

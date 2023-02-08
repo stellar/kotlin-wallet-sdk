@@ -28,9 +28,9 @@ data class RecoveryServer(
 )
 
 data class RecoveryServerAuth(
-  val endpoint: String,
-  val signerAddress: String,
-  val authToken: AuthToken,
+    val endpoint: String,
+    val signerAddress: String,
+    val authToken: AuthToken,
 )
 
 @Serializable

@@ -9,6 +9,7 @@ import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.exception.OperationsLimitExceededException
+import org.stellar.walletsdk.util.Util.builderEnum
 import org.stellar.walletsdk.util.formatAmount
 
 @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")

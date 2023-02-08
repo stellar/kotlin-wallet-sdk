@@ -7,10 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.ChangeTrustOperation
 import org.stellar.sdk.Server
-import org.stellar.walletsdk.ADDRESS_ACTIVE
-import org.stellar.walletsdk.ASSET_USDC
-import org.stellar.walletsdk.HORIZON_URL
-import org.stellar.walletsdk.TestWallet
+import org.stellar.walletsdk.*
 
 internal class AddRemoveAssetTest {
   private val server = spyk(Server(HORIZON_URL))

@@ -8,10 +8,10 @@ import org.stellar.walletsdk.helpers.sdkObjectFromJsonFile
 
 @Serializable
 data class AnchorTransactionsJson(
-  val deposit: AnchorTransaction,
-  val withdrawal: AnchorTransaction,
-  val incompleteDeposit: AnchorTransaction,
-  val incompleteWithdrawal: AnchorTransaction
+    val deposit: AnchorTransaction,
+    val withdrawal: AnchorTransaction,
+    val incompleteDeposit: AnchorTransaction,
+    val incompleteWithdrawal: AnchorTransaction
 )
 
 internal class DeserializeAnchorTransactionTest {

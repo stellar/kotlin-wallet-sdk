@@ -1,122 +1,93 @@
 package org.stellar.walletsdk.toml
 
 import org.stellar.walletsdk.asset.IssuedAssetId
-import shadow.com.google.gson.annotations.SerializedName
 
-data class TomlInfo(
-  @SerializedName("VERSION") val version: String?,
-  @SerializedName("NETWORK_PASSPHRASE") val networkPassphrase: String?,
-  @SerializedName("FEDERATION_SERVER") val federationServer: String?,
-  @SerializedName("AUTH_SERVER") val authServer: String?,
-  @SerializedName("TRANSFER_SERVER") val transferServer: String?,
-  @SerializedName("TRANSFER_SERVER_SEP0024") val transferServerSep24: String?,
-  @SerializedName("KYC_SERVER") val kycServer: String?,
-  @SerializedName("WEB_AUTH_ENDPOINT") val webAuthEndpoint: String?,
-  @SerializedName("SIGNING_KEY") val signingKey: String?,
-  @SerializedName("HORIZON_URL") val horizonUrl: String?,
-  @SerializedName("ACCOUNTS") val accounts: List<String>?,
-  @SerializedName("URI_REQUEST_SIGNING_KEY") val uriRequestSigningKey: String?,
-  @SerializedName("DIRECT_PAYMENT_SERVER") val directPaymentServer: String?,
-  @SerializedName("ANCHOR_QUOTE_SERVER") val anchorQuoteServer: String?,
-  @SerializedName("DOCUMENTATION") val documentation: InfoDocumentation?,
-  @SerializedName("PRINCIPALS") val principals: List<InfoContact>?,
-  @SerializedName("CURRENCIES") val currencies: List<InfoCurrency>?,
-  @SerializedName("VALIDATORS") val validators: List<InfoValidator>?
-) {
+expect class TomlInfo {
   // Supported services (SEPs)
-  private val hasAuth = webAuthEndpoint != null && signingKey != null
-  val services: InfoServices =
-    InfoServices(
-      sep6 =
-        if (transferServer != null) {
-          Sep6(transferServer, anchorQuoteServer)
-        } else {
-          null
-        },
-      sep10 =
-        if (hasAuth) {
-          Sep10(webAuthEndpoint.toString(), signingKey.toString())
-        } else {
-          null
-        },
-      sep24 =
-        if (transferServerSep24 != null) {
-          Sep24(transferServerSep24, hasAuth)
-        } else {
-          null
-        },
-      sep31 =
-        if (directPaymentServer != null) {
-          Sep31(directPaymentServer, hasAuth, kycServer, anchorQuoteServer)
-        } else {
-          null
-        }
-    )
+  val services: InfoServices
+  val version: String?
+  val networkPassphrase: String?
+  val federationServer: String?
+  val authServer: String?
+  val transferServer: String?
+  val transferServerSep24: String?
+  val kycServer: String?
+  val webAuthEndpoint: String?
+  val signingKey: String?
+  val horizonUrl: String?
+  val accounts: List<String>?
+  val uriRequestSigningKey: String?
+  val directPaymentServer: String?
+  val anchorQuoteServer: String?
+  val documentation: InfoDocumentation?
+  val principals: List<InfoContact>?
+  val currencies: List<InfoCurrency>?
+  val validators: List<InfoValidator>?
 }
 
 data class InfoDocumentation(
-  @SerializedName("ORG_NAME") val orgName: String?,
-  @SerializedName("ORG_DBA") val orgDba: String?,
-  @SerializedName("ORG_URL") val orgUrl: String?,
-  @SerializedName("ORG_LOGO") val orgLogo: String?,
-  @SerializedName("ORG_DESCRIPTION") val orgDescription: String?,
-  @SerializedName("ORG_PHYSICAL_ADDRESS") val orgPhysicalAddress: String?,
-  @SerializedName("ORG_PHYSICAL_ADDRESS_ATTESTATION") val orgPhysicalAddressAttestation: String?,
-  @SerializedName("ORG_PHONE_NUMBER") val orgPhoneNumber: String?,
-  @SerializedName("ORG_PHONE_NUMBER_ATTESTATION") val orgPhoneNumberAttestation: String?,
-  @SerializedName("ORG_KEYBASE") val orgKeybase: String?,
-  @SerializedName("ORG_TWITTER") val orgTwitter: String?,
-  @SerializedName("ORG_GITHUB") val orgGithub: String?,
-  @SerializedName("ORG_OFFICIAL_EMAIL") val orgOfficialEmail: String?,
-  @SerializedName("ORG_SUPPORT_EMAIL") val orgSupportEmail: String?,
-  @SerializedName("ORG_LICENSING_AUTHORITY") val orgLicensingAuthority: String?,
-  @SerializedName("ORG_LICENSE_TYPE") val orgLicenseType: String?,
-  @SerializedName("ORG_LICENSE_NUMBER") val orgLicenseNumber: String?
+  val orgName: String?,
+  val orgDba: String?,
+  val orgUrl: String?,
+  val orgLogo: String?,
+  val orgDescription: String?,
+  val orgPhysicalAddress: String?,
+  val orgPhysicalAddressAttestation: String?,
+  val orgPhoneNumber: String?,
+  val orgPhoneNumberAttestation: String?,
+  val orgKeybase: String?,
+  val orgTwitter: String?,
+  val orgGithub: String?,
+  val orgOfficialEmail: String?,
+  val orgSupportEmail: String?,
+  val orgLicensingAuthority: String?,
+  val orgLicenseType: String?,
+  val orgLicenseNumber: String?
 )
 
 data class InfoContact(
-  @SerializedName("name") val name: String?,
-  @SerializedName("email") val email: String?,
-  @SerializedName("keybase") val keybase: String?,
-  @SerializedName("telegram") val telegram: String?,
-  @SerializedName("twitter") val twitter: String?,
-  @SerializedName("github") val github: String?,
-  @SerializedName("id_photo_hash") val idPhotoHash: String?,
-  @SerializedName("verification_photo_hash") val verificationPhotoHash: String?
+  val name: String?,
+  val email: String?,
+  val keybase: String?,
+  val telegram: String?,
+  val twitter: String?,
+  val github: String?,
+  val idPhotoHash: String?,
+  val verificationPhotoHash: String?
 )
 
 data class InfoValidator(
-  @SerializedName("ALIAS") val alias: String?,
-  @SerializedName("DISPLAY_NAME") val displayName: String?,
-  @SerializedName("PUBLIC_KEY") val publicKey: String?,
-  @SerializedName("HOST") val host: String?,
-  @SerializedName("HISTORY") val history: String?
+  val alias: String?,
+  val displayName: String?,
+  val publicKey: String?,
+  val host: String?,
+  val history: String?
 )
 
 data class InfoCurrency(
-  @SerializedName("code") val code: String,
-  @SerializedName("issuer") val issuer: String,
-  @SerializedName("code_template") val codeTemplate: String?,
-  @SerializedName("status") val status: String?,
-  @SerializedName("display_decimals") val displayDecimals: Int?,
-  @SerializedName("name") val name: String?,
-  @SerializedName("desc") val desc: String?,
-  @SerializedName("conditions") val conditions: String?,
-  @SerializedName("image") val image: String?,
-  @SerializedName("fixed_number") val fixedNumber: Int?,
-  @SerializedName("max_number") val maxNumber: Int?,
-  @SerializedName("is_unlimited") val isUnlimited: Boolean?,
-  @SerializedName("is_asset_anchored") val isAssetAnchored: Boolean?,
-  @SerializedName("anchor_asset_type") val anchorAssetType: String?,
-  @SerializedName("anchor_asset") val anchorAsset: String?,
-  @SerializedName("attestation_of_reserve") val attestationOfReserve: String?,
-  @SerializedName("redemption_instructions") val redemptionInstructions: String?,
-  @SerializedName("collateral_addresses") val collateralAddresses: List<String>?,
-  @SerializedName("collateral_address_messages") val collateralAddressMessages: List<String>?,
-  @SerializedName("collateral_address_signatures") val collateralAddressSignatures: List<String>?,
-  @SerializedName("regulated") val regulated: Boolean?,
-  @SerializedName("approval_server") val approvalServer: String?,
-  @SerializedName("approval_criteria") val approvalCriteria: String?
+  val code: String,
+  val issuer: String,
+  val codeTemplate: String?,
+  val status: String?,
+  val displayDecimals: Int?,
+  val name: String?,
+  val desc: String?,
+  val conditions: String?,
+  val image: String?,
+  val fixedNumber: Int?,
+  val maxNumber: Int?,
+  val isUnlimited: Boolean?,
+  val isAssetAnchored: Boolean?,
+  val anchorAssetType: String?,
+  val anchorAsset: String?,
+  val attestationOfReserve: String?,
+  val redemptionInstructions: String?,
+  val collateralAddresses: List<String>?,
+  val collateralAddressMessages: List<String>?,
+  val collateralAddressSignatures: List<String>?,
+  val regulated: Boolean?,
+  val approvalServer: String?,
+  val approvalCriteria: String?
 ) {
   private val myCode = code
   private val myIssuer = issuer
@@ -137,7 +108,7 @@ data class InfoServices(
  *
  * @property transferServer anchor's deposit and withdrawal server URL
  * @property anchorQuoteServer optional anchor's quote server URL if it supports
- * [SEP-38](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
+ *   [SEP-38](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
  */
 data class Sep6(val transferServer: String, val anchorQuoteServer: String?)
 
@@ -159,8 +130,8 @@ data class Sep10(
  *
  * @property transferServerSep24 anchor's deposit and withdrawal server URL
  * @property hasAuth anchor must support
- * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
- * authentication
+ *   [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
+ *   authentication
  */
 data class Sep24(val transferServerSep24: String, val hasAuth: Boolean)
 
@@ -170,11 +141,11 @@ data class Sep24(val transferServerSep24: String, val hasAuth: Boolean)
  *
  * @property directPaymentServer anchor's cross-border payments server URL
  * @property hasAuth anchor must support
- * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
- * authentication
+ *   [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
+ *   authentication
  * @property kycServer optional anchor's KYC server URL
  * @property anchorQuoteServer optional anchor's quote server URL if it supports [SEP-38]
- * (https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
+ *   (https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
  */
 data class Sep31(
   val directPaymentServer: String,

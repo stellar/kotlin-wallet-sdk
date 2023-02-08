@@ -1,24 +1,18 @@
+@file:JvmName("StellarJvm")
 package org.stellar.walletsdk.horizon
 
 import mu.KotlinLogging
-import org.stellar.sdk.Server
-import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.anchor.MemoType
-import org.stellar.walletsdk.exception.TransactionSubmitFailedException
-import org.stellar.walletsdk.extension.accountByAddress
+import kotlin.jvm.JvmName
 
 private val log = KotlinLogging.logger {}
 
-class Stellar
+expect class Stellar
 internal constructor(
-  private val cfg: Config,
+  cfg: Config,
 ) {
-  val server: Server = cfg.stellar.server
-
-  fun account(): AccountService {
-    return AccountService(cfg)
-  }
+  fun account(): AccountService
 
   /**
    * Creates builder that allows to form Stellar transaction, adding Stellar's
@@ -26,7 +20,7 @@ internal constructor(
    *
    * @param sourceAddress Stellar address of account initiating a transaction
    * @param defaultSponsorAddress Stellar address of account sponsoring operations inside this
-   * transaction
+   *   transaction
    * @param memo optional memo
    * @return transaction builder
    */
@@ -34,10 +28,7 @@ internal constructor(
     sourceAddress: AccountKeyPair,
     memo: Pair<MemoType, String>? = null,
     defaultSponsorAddress: String? = null
-  ): TransactionBuilder {
-    val sourceAccount = server.accountByAddress(sourceAddress.address)
-    return TransactionBuilder(cfg, sourceAccount, memo, defaultSponsorAddress)
-  }
+  ): TransactionBuilder
 
   /**
    * Submit transaction to the Stellar network.
@@ -48,20 +39,5 @@ internal constructor(
    */
   suspend fun submitTransaction(
     signedTransaction: Transaction,
-  ) {
-    log.debug {
-      "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
-        "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
-        "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
-                        .signatures.size}"
-    }
-
-    val response = server.submitTransaction(signedTransaction)
-
-    if (!response.isSuccess) {
-      throw TransactionSubmitFailedException(response)
-    }
-
-    log.debug { "Transaction submitted with hash ${response.hash}" }
-  }
+  )
 }

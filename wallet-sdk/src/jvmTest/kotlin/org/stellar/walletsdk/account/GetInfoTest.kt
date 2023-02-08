@@ -24,7 +24,7 @@ internal class GetInfoTest {
 
     every { server.accounts().account(ADDRESS_BASIC) } returns accountResponse
 
-    val accountInfo = runBlocking { accounts.getInfo(ADDRESS_BASIC, server) }
+    val accountInfo = runBlocking { accounts.getInfo(ADDRESS_BASIC) }
 
     assertEquals(ADDRESS_BASIC, accountInfo.publicKey)
     assertEquals("1.0000000", accountInfo.reservedNativeBalance)
@@ -38,7 +38,7 @@ internal class GetInfoTest {
 
     every { server.accounts().account(ADDRESS_FULL) } returns accountResponse
 
-    val accountInfo = runBlocking { accounts.getInfo(ADDRESS_FULL, server) }
+    val accountInfo = runBlocking { accounts.getInfo(ADDRESS_FULL) }
 
     assertEquals(ADDRESS_FULL, accountInfo.publicKey)
     assertEquals("6.5000000", accountInfo.reservedNativeBalance)
