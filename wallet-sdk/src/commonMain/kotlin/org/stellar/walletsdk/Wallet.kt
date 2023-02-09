@@ -20,7 +20,7 @@ class Wallet(
 
   init {
     if (applicationConfiguration.useHttp) {
-      require(stellarConfiguration.isPublic()) {
+      require(!stellarConfiguration.isPublic()) {
         "Using http is not allowed with main Stellar network (pubnet)"
       }
     }
