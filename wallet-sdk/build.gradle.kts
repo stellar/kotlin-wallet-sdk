@@ -34,6 +34,7 @@ kotlin {
   js(IR) {
     moduleName = "kotlin-wallet-sdk"
     nodejs()
+    browser()
     binaries.library()
   }
 

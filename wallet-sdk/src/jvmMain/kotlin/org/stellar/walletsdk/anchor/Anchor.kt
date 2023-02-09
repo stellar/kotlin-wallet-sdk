@@ -194,10 +194,10 @@ internal actual constructor(
    suspend fun getHistory(
     assetId: AssetId,
     authToken: AuthToken,
-    limit: Int?,
-    pagingId: String?,
-    noOlderThan: String?,
-    lang: String?
+    limit: Int? = null,
+    pagingId: String? = null,
+    noOlderThan: String? = null,
+    lang: String? = null
   ): List<AnchorTransaction> {
     if (getInfo().currencies?.find { it.assetId == assetId } == null) {
       throw AssetNotSupportedException(assetId)
