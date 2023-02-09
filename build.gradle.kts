@@ -2,7 +2,7 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   alias(libs.plugins.spotless)
-  alias(libs.plugins.kotlin.jvm)
+  alias(libs.plugins.kotlin.multiplatform) apply false
   alias(libs.plugins.detekt)
 }
 
@@ -23,7 +23,7 @@ subprojects {
   val subProject = this
 
   apply(plugin = "com.diffplug.spotless")
-  apply(plugin = "kotlin")
+  apply(plugin = "org.jetbrains.kotlin.multiplatform")
   apply(plugin = "io.gitlab.arturbosch.detekt")
 
   repositories {
@@ -53,7 +53,10 @@ subprojects {
         throw GradleException("Java 11 or greater is required for spotless Gradle plugin.")
       }
 
-      kotlin { ktfmt("0.39").googleStyle() }
+      kotlin {
+        target("src/*/kotlin/**/*.kt")
+        ktfmt("0.39").googleStyle()
+      }
     }
 
     detekt {
@@ -63,20 +66,10 @@ subprojects {
     }
   }
 
-  dependencies {
-    // Define common dependencies here
-  }
-
   tasks {
-    compileKotlin {
-      // Ignore spotless for auto-generated files
-      if (subProject.name != "documentation") {
-        dependsOn("spotlessKotlinApply")
-      }
-      kotlinOptions.jvmTarget = jvmVersion.toString()
+    if (subProject.name != "documentation") {
+      named("check").get().dependsOn("spotlessKotlinApply")
     }
-
-    test { useJUnitPlatform() }
   }
 
   tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
