@@ -57,11 +57,11 @@ internal constructor(
    *
    * @param destinationAddress Stellar address of the account that is being funded
    * @param startingBalance optional Starting account balance in XLM. Minimum for non-sponsored
-   *   accounts is 1 XLM, sponsored accounts can leave it at 0 XLM. Default value is 1.
+   * accounts is 1 XLM, sponsored accounts can leave it at 0 XLM. Default value is 1.
    * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    * @return transaction
    * @throws [InvalidStartingBalanceException] when starting balance is less than 1 XLM for
-   *   non-sponsored account
+   * non-sponsored account
    */
   actual fun fund(destinationAddress: String, startingBalance: String, sponsorAddress: String?) =
     building(sponsorAddress) {
@@ -90,11 +90,7 @@ internal constructor(
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  actual fun addAssetSupport(
-    asset: IssuedAssetId,
-    trustLimit: String,
-    sponsorAddress: String?
-  ) =
+  actual fun addAssetSupport(asset: IssuedAssetId, trustLimit: String, sponsorAddress: String?) =
     building(sponsorAddress) {
       log.debug {
         "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, " +

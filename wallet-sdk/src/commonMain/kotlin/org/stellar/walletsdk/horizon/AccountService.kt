@@ -1,10 +1,11 @@
 @file:JvmName("AccountServiceJvm")
+
 package org.stellar.walletsdk.horizon
 
+import kotlin.jvm.JvmName
 import mu.KotlinLogging
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.*
-import kotlin.jvm.JvmName
 
 private val log = KotlinLogging.logger {}
 
@@ -14,7 +15,8 @@ private val log = KotlinLogging.logger {}
  * @property server Horizon [Server] instance
  * @property network Stellar [Network] instance
  */
-expect class AccountService internal constructor(
+expect class AccountService
+internal constructor(
   cfg: Config,
 ) {
 
@@ -49,11 +51,11 @@ expect class AccountService internal constructor(
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun getHistory(
-      accountAddress: String,
-      limit: Int? = null,
-      order: Order? = Order.DESC,
-      cursor: String? = null,
-      includeFailed: Boolean? = null
+    accountAddress: String,
+    limit: Int? = null,
+    order: Order? = Order.DESC,
+    cursor: String? = null,
+    includeFailed: Boolean? = null
   ): List<WalletOperation<OperationResponse>>
 }
 

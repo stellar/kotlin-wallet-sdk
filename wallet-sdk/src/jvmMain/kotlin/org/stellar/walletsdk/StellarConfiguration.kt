@@ -1,9 +1,9 @@
 package org.stellar.walletsdk
 
+import java.util.*
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import shadow.okhttp3.OkHttpClient
-import java.util.*
 
 actual data class StellarConfiguration(
   val network: Network,

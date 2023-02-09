@@ -17,10 +17,8 @@ import org.stellar.walletsdk.util.*
 
 private val log = KotlinLogging.logger {}
 
-actual class Recovery internal actual constructor(
-  private val cfg: Config,
-  private val stellar: Stellar
-) {
+actual class Recovery
+internal actual constructor(private val cfg: Config, private val stellar: Stellar) {
   private val client = OkHttpClient()
   /**
    * Sign transaction with recovery servers. It is used to recover an account using
@@ -140,7 +138,7 @@ actual class Recovery internal actual constructor(
    * @throws [RecoveryException] when error happens working with recovery servers
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
- actual suspend fun createRecoverableWallet(config: RecoverableWalletConfig): Transaction {
+  actual suspend fun createRecoverableWallet(config: RecoverableWalletConfig): Transaction {
     val recoverySigners =
       enrollWithRecoveryServer(
         config.recoveryServers,
@@ -176,11 +174,11 @@ actual class Recovery internal actual constructor(
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   // TODO: can be private?
- actual suspend fun registerRecoveryServerSigners(
-      account: AccountKeyPair,
-      accountSigner: List<AccountSigner>,
-      accountThreshold: AccountThreshold,
-      sponsorAddress: String?
+  actual suspend fun registerRecoveryServerSigners(
+    account: AccountKeyPair,
+    accountSigner: List<AccountSigner>,
+    accountThreshold: AccountThreshold,
+    sponsorAddress: String?
   ): Transaction {
     val builder = stellar.transaction(account, defaultSponsorAddress = sponsorAddress)
 

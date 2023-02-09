@@ -1,6 +1,8 @@
 @file:JvmName("TransactionBuilderJvm")
+
 package org.stellar.walletsdk.horizon
 
+import kotlin.jvm.JvmName
 import mu.KotlinLogging
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.TransactionStatus
@@ -9,7 +11,6 @@ import org.stellar.walletsdk.anchor.requireStatus
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.asset.StellarAssetId
 import org.stellar.walletsdk.exception.*
-import kotlin.jvm.JvmName
 
 private val log = KotlinLogging.logger {}
 
@@ -79,7 +80,11 @@ expect class TransactionBuilder {
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun addAccountSigner(signerAddress: String, signerWeight: Int, sponsorAddress: String? = null) : TransactionBuilder
+  fun addAccountSigner(
+    signerAddress: String,
+    signerWeight: Int,
+    sponsorAddress: String? = null
+  ): TransactionBuilder
 
   /**
    * Remove signer from the account.
@@ -88,10 +93,7 @@ expect class TransactionBuilder {
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun removeAccountSigner(
-    signerAddress: String,
-    sponsorAddress: String? = null
-  ): TransactionBuilder
+  fun removeAccountSigner(signerAddress: String, sponsorAddress: String? = null): TransactionBuilder
 
   /**
    * Creates transaction transferring asset, using Stellar's [payment operation]
@@ -110,7 +112,12 @@ expect class TransactionBuilder {
     sponsorAddress: String? = null
   ): TransactionBuilder
 
-  fun setThreshold(low: Int, medium: Int, high: Int, sponsorAddress: String? = null): TransactionBuilder
+  fun setThreshold(
+    low: Int,
+    medium: Int,
+    high: Int,
+    sponsorAddress: String? = null
+  ): TransactionBuilder
 
   fun build(): Transaction
 }

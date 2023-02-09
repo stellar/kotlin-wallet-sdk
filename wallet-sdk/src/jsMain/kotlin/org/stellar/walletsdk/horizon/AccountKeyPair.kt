@@ -6,21 +6,21 @@ package org.stellar.walletsdk.horizon
  * to public key pair via calling [toPublicKeyPair] helper function.
  */
 actual sealed interface AccountKeyPair {
-    actual val address: String
-        get() = TODO("Not yet implemented")
-    actual val publicKey: ByteArray
-        get() = TODO("Not yet implemented")
+  actual val address: String
+    get() = TODO("Not yet implemented")
+  actual val publicKey: ByteArray
+    get() = TODO("Not yet implemented")
 }
 
 actual class PublicKeyPair : AccountKeyPair
+
 actual class SigningKeyPair : AccountKeyPair {
-    actual val secretKey: String
-        get() = TODO("Not yet implemented")
+  actual val secretKey: String
+    get() = TODO("Not yet implemented")
 
-    actual fun <T : Transaction> sign(transaction: T): T {
-        TODO("Not yet implemented")
-    }
-
+  actual fun <T : Transaction> sign(transaction: T): T {
+    TODO("Not yet implemented")
+  }
 }
 
 actual open class Transaction

@@ -2,11 +2,11 @@
 
 package org.stellar.walletsdk
 
+import kotlin.js.JsExport
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.recovery.Recovery
-import kotlin.js.JsExport
 
 /**
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
@@ -27,9 +27,7 @@ class Wallet(
   }
 
   // TODO: make client configurable again
-  fun anchor(
-    homeDomain: String
-  ): Anchor {
+  fun anchor(homeDomain: String): Anchor {
     return Anchor(cfg, homeDomain)
   }
 

@@ -108,7 +108,7 @@ data class InfoServices(
  *
  * @property transferServer anchor's deposit and withdrawal server URL
  * @property anchorQuoteServer optional anchor's quote server URL if it supports
- *   [SEP-38](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
+ * [SEP-38](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
  */
 data class Sep6(val transferServer: String, val anchorQuoteServer: String?)
 
@@ -130,8 +130,8 @@ data class Sep10(
  *
  * @property transferServerSep24 anchor's deposit and withdrawal server URL
  * @property hasAuth anchor must support
- *   [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
- *   authentication
+ * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
+ * authentication
  */
 data class Sep24(val transferServerSep24: String, val hasAuth: Boolean)
 
@@ -141,11 +141,11 @@ data class Sep24(val transferServerSep24: String, val hasAuth: Boolean)
  *
  * @property directPaymentServer anchor's cross-border payments server URL
  * @property hasAuth anchor must support
- *   [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
- *   authentication
+ * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
+ * authentication
  * @property kycServer optional anchor's KYC server URL
  * @property anchorQuoteServer optional anchor's quote server URL if it supports [SEP-38]
- *   (https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
+ * (https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
  */
 data class Sep31(
   val directPaymentServer: String,

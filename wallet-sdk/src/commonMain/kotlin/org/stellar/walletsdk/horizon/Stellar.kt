@@ -1,10 +1,11 @@
 @file:JvmName("StellarJvm")
+
 package org.stellar.walletsdk.horizon
 
+import kotlin.jvm.JvmName
 import mu.KotlinLogging
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.anchor.MemoType
-import kotlin.jvm.JvmName
 
 private val log = KotlinLogging.logger {}
 
@@ -20,7 +21,7 @@ internal constructor(
    *
    * @param sourceAddress Stellar address of account initiating a transaction
    * @param defaultSponsorAddress Stellar address of account sponsoring operations inside this
-   *   transaction
+   * transaction
    * @param memo optional memo
    * @return transaction builder
    */

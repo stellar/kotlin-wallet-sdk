@@ -132,9 +132,9 @@ internal actual constructor(
    * @return signed transaction
    */
   private fun sign(
-      account: AccountKeyPair,
-      challengeResponse: ChallengeResponse,
-      walletSigner: WalletSigner
+    account: AccountKeyPair,
+    challengeResponse: ChallengeResponse,
+    walletSigner: WalletSigner
   ): Transaction {
     var challengeTxn =
       Transaction.fromEnvelopeXdr(

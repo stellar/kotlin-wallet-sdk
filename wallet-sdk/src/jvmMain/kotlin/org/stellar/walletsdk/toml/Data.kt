@@ -1,6 +1,5 @@
 package org.stellar.walletsdk.toml
 
-import org.stellar.walletsdk.asset.IssuedAssetId
 import shadow.com.google.gson.annotations.SerializedName
 
 actual data class TomlInfo(
@@ -53,5 +52,3 @@ actual data class TomlInfo(
         }
     )
 }
-
-

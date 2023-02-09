@@ -15,7 +15,8 @@ private val log = KotlinLogging.logger {}
  * @property server Horizon [Server] instance
  * @property network Stellar [Network] instance
  */
-actual class AccountService internal actual constructor(
+actual class AccountService
+internal actual constructor(
   cfg: Config,
 ) {
   private val server: Server = cfg.stellar.server
@@ -68,11 +69,11 @@ actual class AccountService internal actual constructor(
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   actual suspend fun getHistory(
-      accountAddress: String,
-      limit: Int? ,
-      order: Order? ,
-      cursor: String?,
-      includeFailed: Boolean?
+    accountAddress: String,
+    limit: Int?,
+    order: Order?,
+    cursor: String?,
+    includeFailed: Boolean?
   ): List<WalletOperation<OperationResponse>> {
     log.debug {
       "Account history: accountAddress = $accountAddress, limit = $limit, order" +
@@ -86,4 +87,3 @@ actual class AccountService internal actual constructor(
 }
 
 actual typealias OperationResponse = org.stellar.sdk.responses.operations.OperationResponse
-

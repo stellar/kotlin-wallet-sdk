@@ -25,13 +25,13 @@ private val log = KotlinLogging.logger {}
  */
 actual class Interactive
 actual internal constructor(
-    internal actual val homeDomain: String,
-    internal actual val anchor: Anchor,
-    internal actual val cfg: Config,
+  internal actual val homeDomain: String,
+  internal actual val anchor: Anchor,
+  internal actual val cfg: Config,
 ) {
-    private val httpClient = OkHttpClient()
+  private val httpClient = OkHttpClient()
 
-    /**
+  /**
    * Initiates interactive withdrawal using
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
    *
@@ -47,11 +47,11 @@ actual internal constructor(
    * @throws [ServerRequestFailedException] if network request fails
    */
   actual suspend fun withdraw(
-      accountAddress: String,
-      assetId: IssuedAssetId,
-      authToken: AuthToken,
-      extraFields: Map<String, String>? ,
-      fundsAccountAddress: String? ,
+    accountAddress: String,
+    assetId: IssuedAssetId,
+    authToken: AuthToken,
+    extraFields: Map<String, String>?,
+    fundsAccountAddress: String?,
   ): InteractiveFlowResponse {
     return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "withdraw") {
       it.withdraw[assetId.code]
@@ -73,12 +73,12 @@ actual internal constructor(
    * @throws [AnchorAssetException] if asset was refused by the anchor
    * @throws [ServerRequestFailedException] if network request fails
    */
- actual suspend fun deposit(
-      accountAddress: String,
-      assetId: IssuedAssetId,
-      authToken: AuthToken,
-      extraFields: Map<String, String>? ,
-      fundsAccountAddress: String? ,
+  actual suspend fun deposit(
+    accountAddress: String,
+    assetId: IssuedAssetId,
+    authToken: AuthToken,
+    extraFields: Map<String, String>?,
+    fundsAccountAddress: String?,
   ): InteractiveFlowResponse {
     return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "deposit") {
       it.deposit[assetId.code]
@@ -101,13 +101,13 @@ actual internal constructor(
    */
   @Suppress("LongParameterList", "ThrowsCount")
   private suspend fun flow(
-      accountAddress: String,
-      assetId: IssuedAssetId,
-      authToken: AuthToken,
-      extraFields: Map<String, String>?,
-      fundsAccountAddress: String?,
-      type: String,
-      assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
+    accountAddress: String,
+    assetId: IssuedAssetId,
+    authToken: AuthToken,
+    extraFields: Map<String, String>?,
+    fundsAccountAddress: String?,
+    type: String,
+    assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
   ): InteractiveFlowResponse {
     val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
     val tomlInfo = parseToml(toml.getToml())

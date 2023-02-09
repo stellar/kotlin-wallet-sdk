@@ -1,10 +1,10 @@
 package org.stellar.walletsdk.auth
 
+import kotlin.jvm.JvmInline
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.stellar.walletsdk.STRING_TRIM_LENGTH
-import kotlin.jvm.JvmInline
 
 @Serializable
 data class ChallengeResponse(

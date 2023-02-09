@@ -2,7 +2,6 @@ package org.stellar.walletsdk
 
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.stellar.walletsdk.auth.Auth
@@ -47,8 +46,7 @@ internal class AuthTest : SuspendTest() {
   fun `throw exception if Memo ID is not a positive integer`() {
     assertThrows<Exception> {
       runBlocking {
-        Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN)
-          .authenticate(ADDRESS_ACTIVE, memoId = "abc")
+        Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN).authenticate(ADDRESS_ACTIVE, memoId = "abc")
       }
     }
   }

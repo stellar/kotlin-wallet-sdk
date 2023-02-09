@@ -2,7 +2,6 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   application
-  alias(libs.plugins.kotlin.multiplatform)
 }
 
 kotlin {

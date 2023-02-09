@@ -16,37 +16,33 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
  * signing methods
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
-actual class Auth internal actual constructor(
-    cfg: Config,
-    webAuthEndpoint: String,
-    homeDomain: String
-) {
-    internal actual val cfg: Config
-        get() = TODO("Not yet implemented")
-    internal actual val webAuthEndpoint: String
-        get() = TODO("Not yet implemented")
-    internal actual val homeDomain: String
-        get() = TODO("Not yet implemented")
+actual class Auth
+internal actual constructor(cfg: Config, webAuthEndpoint: String, homeDomain: String) {
+  internal actual val cfg: Config
+    get() = TODO("Not yet implemented")
+  internal actual val webAuthEndpoint: String
+    get() = TODO("Not yet implemented")
+  internal actual val homeDomain: String
+    get() = TODO("Not yet implemented")
 
-    /**
-     * Authenticates to an external server.
-     *
-     * @param accountAddress Stellar address of the account authenticating
-     * @param walletSigner overriding [Auth.defaultSigner] to use in this authentication
-     * @param memoId optional memo ID to distinguish the account
-     * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
-     * @return authentication token (JWT)
-     * @throws [ValidationException] when some of the request arguments are not valid
-     * @throws [ServerRequestFailedException] when request fails
-     * @throws [InvalidResponseException] when JSON response is malformed
-     */
-    actual suspend fun authenticate(
-        accountAddress: AccountKeyPair,
-        walletSigner: WalletSigner?,
-        memoId: String?,
-        clientDomain: String?
-    ): AuthToken {
-        TODO("Not yet implemented")
-    }
-
+  /**
+   * Authenticates to an external server.
+   *
+   * @param accountAddress Stellar address of the account authenticating
+   * @param walletSigner overriding [Auth.defaultSigner] to use in this authentication
+   * @param memoId optional memo ID to distinguish the account
+   * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
+   * @return authentication token (JWT)
+   * @throws [ValidationException] when some of the request arguments are not valid
+   * @throws [ServerRequestFailedException] when request fails
+   * @throws [InvalidResponseException] when JSON response is malformed
+   */
+  actual suspend fun authenticate(
+    accountAddress: AccountKeyPair,
+    walletSigner: WalletSigner?,
+    memoId: String?,
+    clientDomain: String?
+  ): AuthToken {
+    TODO("Not yet implemented")
+  }
 }

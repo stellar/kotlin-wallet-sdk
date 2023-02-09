@@ -46,7 +46,7 @@ internal actual constructor(
    *
    * @return TOML file content
    */
-   suspend fun getInfo(): TomlInfo {
+  suspend fun getInfo(): TomlInfo {
     if (!::info.isInitialized) {
       val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
 
@@ -62,7 +62,7 @@ internal actual constructor(
    * @return auth object
    * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
    */
-   suspend fun auth(): Auth {
+  suspend fun auth(): Auth {
     return Auth(
       cfg,
       getInfo().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
@@ -78,7 +78,7 @@ internal actual constructor(
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
-   suspend fun getServicesInfo(): AnchorServiceInfo {
+  suspend fun getServicesInfo(): AnchorServiceInfo {
     if (!::serviceInfo.isInitialized) {
       val url =
         getInfo().services.sep24?.transferServerSep24?.toHttpUrl()
@@ -111,7 +111,7 @@ internal actual constructor(
    *
    * @return interactive flow service
    */
-   fun interactive(): Interactive {
+  fun interactive(): Interactive {
     return Interactive(homeDomain, this, cfg)
   }
 
@@ -126,10 +126,7 @@ internal actual constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
-   suspend fun getTransaction(
-    transactionId: String,
-    authToken: AuthToken
-  ): AnchorTransaction {
+  suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
     val transferServerEndpoint =
       getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
     val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
@@ -155,7 +152,7 @@ internal actual constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
-   suspend fun getTransactionsForAsset(
+  suspend fun getTransactionsForAsset(
     asset: AssetId,
     authToken: AuthToken
   ): List<AnchorTransaction> {
@@ -185,13 +182,13 @@ internal actual constructor(
    * @param pagingId optional return transactions prior to this ID
    * @param noOlderThan optional return transactions starting on or after this date and time
    * @param lang optional language code specified using
-   *   [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
+   * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
    * @return a list of formatted operations
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
   @Suppress("LongParameterList")
-   suspend fun getHistory(
+  suspend fun getHistory(
     assetId: AssetId,
     authToken: AuthToken,
     limit: Int? = null,

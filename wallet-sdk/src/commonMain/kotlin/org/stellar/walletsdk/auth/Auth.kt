@@ -18,9 +18,9 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
  */
 expect class Auth
 internal constructor(
-    cfg: Config,
-    webAuthEndpoint: String,
-    homeDomain: String,
+  cfg: Config,
+  webAuthEndpoint: String,
+  homeDomain: String,
 ) {
   internal val cfg: Config
   internal val webAuthEndpoint: String

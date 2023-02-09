@@ -26,10 +26,10 @@ internal class FormatAssetTest {
 
     assertEquals(
       asset.toAssetId(),
-        IssuedAssetId(
-            code = "SRT",
-            issuer = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
-        )
+      IssuedAssetId(
+        code = "SRT",
+        issuer = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B"
+      )
     )
   }
 
@@ -44,10 +44,10 @@ internal class FormatAssetTest {
 
     assertEquals(
       asset.toAssetId(),
-        IssuedAssetId(
-            code = "STELLAR",
-            issuer = "GC62NIRU3XI5HI3O3X5JH2YDG2YNXVYVPDGS3THUJ4BVWOOOO2ZJDDLO"
-        )
+      IssuedAssetId(
+        code = "STELLAR",
+        issuer = "GC62NIRU3XI5HI3O3X5JH2YDG2YNXVYVPDGS3THUJ4BVWOOOO2ZJDDLO"
+      )
     )
   }
 }

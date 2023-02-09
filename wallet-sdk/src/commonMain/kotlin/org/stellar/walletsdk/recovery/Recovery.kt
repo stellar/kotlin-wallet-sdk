@@ -1,6 +1,8 @@
 @file:JvmName("RecoveryJvm")
+
 package org.stellar.walletsdk.recovery
 
+import kotlin.jvm.JvmName
 import mu.KotlinLogging
 import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
@@ -9,7 +11,6 @@ import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.horizon.Transaction
-import kotlin.jvm.JvmName
 
 private val log = KotlinLogging.logger {}
 

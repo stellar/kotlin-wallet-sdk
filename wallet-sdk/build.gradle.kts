@@ -6,7 +6,6 @@ plugins {
   signing
   alias(libs.plugins.kotlin.serialization)
   idea
-  alias(libs.plugins.kotlin.multiplatform)
 }
 
 // fun DependencyHandler.testIntegrationImplementation(dependencyNotation: Any): Dependency? =

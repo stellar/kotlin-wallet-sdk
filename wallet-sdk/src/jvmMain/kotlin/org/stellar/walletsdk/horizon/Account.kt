@@ -25,7 +25,7 @@ actual class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
     require(keyPair.canSign()) { "This keypair doesn't have private key and can't sign" }
   }
 
-  actual val secretKey =keyPair.secretSeed.concatToString()
+  actual val secretKey = keyPair.secretSeed.concatToString()
 
   actual fun <T : Transaction> sign(transaction: T): T {
     return transaction.sign(this)
