@@ -14,3 +14,5 @@ function basicWallet() {
 }
 
 basicWallet();
+
+// Run in Node `npm run basic`
