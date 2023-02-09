@@ -1,3 +1,13 @@
-dependencies { implementation(project(":wallet-sdk")) }
+// The alias call in plugins scope produces IntelliJ false error which is suppressed here.
+@Suppress("DSL_SCOPE_VIOLATION") plugins { alias(libs.plugins.kotlin.multiplatform) }
 
-sourceSets.main { java.srcDirs("src") }
+kotlin {
+  jvm {
+    compilations.all { kotlinOptions.jvmTarget = "1.8" }
+    withJava()
+  }
+
+  sourceSets {
+    val jvmMain by getting { dependencies { implementation(project(":wallet-sdk")) } }
+  }
+}

@@ -31,6 +31,6 @@ jobs:
         if: success() || failure()
         run: |
           echo "\n\n*** Wallet SDK test report ***\n"
-          cat /home/runner/work/kotlin-wallet-sdk/kotlin-wallet-sdk/wallet-sdk/build/reports/tests/test/index.html
+          cat /home/runner/work/kotlin-wallet-sdk/kotlin-wallet-sdk/wallet-sdk/build/reports/tests/allTests/index.html
 
 
