@@ -4,7 +4,7 @@ package org.stellar.example.exampleTransaction01
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
-import org.stellar.walletsdk.horizon.sign
+import org.stellar.walletsdk.horizon.*
 
 val wallet = Wallet(StellarConfiguration.Testnet)
 val account = wallet.stellar().account()

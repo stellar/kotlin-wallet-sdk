@@ -7,6 +7,7 @@
   * [Account service](#account-service)
   * [Transaction builder](#transaction-builder)
   * [Submit transaction](#submit-transaction)
+* [Transaction builder (extra)](#transaction-builder-extra)
 * [Anchor](#anchor)
 
 <!--- END -->
@@ -108,12 +109,12 @@ Some transactions can be sponsored.
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
-import org.stellar.walletsdk.horizon.sign
+import org.stellar.walletsdk.horizon.*
 
 val wallet = Wallet(StellarConfiguration.Testnet)
 val account = wallet.stellar().account()
 -->
-<!--- SUFFIX .*transaction.*
+<!--- SUFFIX .*transaction-01.*
 suspend fun main() {
   val fundTxn = fund()
   println(fundTxn)
@@ -221,6 +222,53 @@ suspend fun signAndSubmit() {
 ```
 
 > You can get the full code [here](../examples/documentation/src/example-transaction-01.kt).
+
+
+## Transaction builder (extra)
+In some more cases private key may not be known prior to forming a transaction. For example, creating new account requires it to be funded.
+Wallet may not have a key of an account with funds and may request such transaction to be sponsored by third-party.  
+Let's walk through that flow:
+```kotlin
+// Third-party key that will sponsor creating new account
+val externalKeyPair = "MySponsorAddress".toPublicKeyPair()
+val newKeyPair = account.createKeyPair()
+val stellar = wallet.stellar()
+```
+First, account must be funded
+```kotlin
+suspend fun makeFundTx(): Transaction {
+  return stellar.transaction(externalKeyPair).fund(newKeyPair.address).build()
+}
+```
+This transaction must be sent to external signer (holder of `externalKeyPair`) to be signed. Signed transaction can 
+be submitted by wallet 
+```kotlin
+suspend fun submitFundTx(signedFundTx: Transaction) {
+  wallet.stellar().submitTransaction(signedFundTx)
+}
+```
+Now, after account is created, it can perform operations. For example, we can disable master key pair 
+and replace it with a new one (let's call it device key pair).
+```kotlin
+suspend fun addDeviceKeyPair() {
+  val deviceKeyPair = account.createKeyPair()
+
+  val modifyAccountTransaction =
+    stellar
+      .transaction(newKeyPair)
+      .addAccountSigner(
+        deviceKeyPair.address,
+        signerWeight = 1,
+      )
+      .lockAccountMasterKey()
+      .build()
+      .sign(newKeyPair)
+
+  wallet.stellar().submitTransaction(modifyAccountTransaction)
+}
+```
+
+> You can get the full code [here](../examples/documentation/src/example-transaction-02.kt).
 
 ## Anchor
 
