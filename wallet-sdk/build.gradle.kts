@@ -47,7 +47,7 @@ project.kotlin {
   js(IR) {
     moduleName = "kotlin-wallet-sdk"
     nodejs()
-    browser()
+    browser { testTask { useKarma { useFirefox() } } }
     binaries.library()
   }
 
@@ -78,8 +78,17 @@ project.kotlin {
         implementation(libs.logback.classic)
       }
     }
-    val jsMain by getting
-    val jsTest by getting
+    val jsMain by getting {
+      dependencies {
+        implementation(npm("stellar-sdk", "10.4.1"))
+        implementation("org.jetbrains.kotlin-wrappers:kotlin-typescript:4.7.4-pre.376")
+      }
+    }
+    val jsTest by getting {
+      dependencies {
+        implementation(kotlin("test-js"))
+      }
+    }
   }
   task("testAll") {
     description = "Run unit AND integration tests"
