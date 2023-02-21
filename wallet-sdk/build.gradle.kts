@@ -80,6 +80,7 @@ project.kotlin {
     }
     val jsMain by getting {
       dependencies {
+        implementation(libs.coroutines.test)
         implementation(npm("stellar-sdk", "10.4.1"))
         implementation("org.jetbrains.kotlin-wrappers:kotlin-typescript:4.7.4-pre.376")
       }
