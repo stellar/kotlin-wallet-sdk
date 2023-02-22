@@ -101,9 +101,7 @@ external object Operation {
     var offerId: String
   }
 
-  fun manageSellOffer(
-    options: OperationOptions.ManageSellOffer
-  ): Operation2<ManageSellOffer>
+  fun manageSellOffer(options: OperationOptions.ManageSellOffer): Operation2<ManageSellOffer>
 
   interface ManageBuyOffer : BaseOperation<String /* "manageBuyOffer" */> {
     var selling: Asset
@@ -115,8 +113,7 @@ external object Operation {
 
   fun manageBuyOffer(options: OperationOptions.ManageBuyOffer): Operation2<ManageBuyOffer>
 
-  interface PathPaymentStrictReceive :
-    BaseOperation<String /* "pathPaymentStrictReceive" */> {
+  interface PathPaymentStrictReceive : BaseOperation<String /* "pathPaymentStrictReceive" */> {
     var sendAsset: Asset
     var sendMax: String
     var destination: String
@@ -220,12 +217,9 @@ external object Operation {
     options: OperationOptions.BeginSponsoringFutureReserves
   ): Operation2<BeginSponsoringFutureReserves>
 
-  interface EndSponsoringFutureReserves :
-    BaseOperation<String /* "endSponsoringFutureReserves" */>
+  interface EndSponsoringFutureReserves : BaseOperation<String /* "endSponsoringFutureReserves" */>
 
-  fun endSponsoringFutureReserves(
-    options: BaseOptions
-  ): Operation2<EndSponsoringFutureReserves>
+  fun endSponsoringFutureReserves(options: BaseOptions): Operation2<EndSponsoringFutureReserves>
 
   interface RevokeAccountSponsorship : BaseOperation<String /* "revokeSponsorship" */> {
     var account: String
@@ -264,8 +258,7 @@ external object Operation {
     options: OperationOptions.RevokeDataSponsorship
   ): Operation2<RevokeDataSponsorship>
 
-  interface RevokeClaimableBalanceSponsorship :
-    BaseOperation<String /* "revokeSponsorship" */> {
+  interface RevokeClaimableBalanceSponsorship : BaseOperation<String /* "revokeSponsorship" */> {
     var balanceId: String
   }
 
@@ -273,8 +266,7 @@ external object Operation {
     options: OperationOptions.RevokeClaimableBalanceSponsorship
   ): Operation2<RevokeClaimableBalanceSponsorship>
 
-  interface RevokeLiquidityPoolSponsorship :
-    BaseOperation<String /* "revokeSponsorship" */> {
+  interface RevokeLiquidityPoolSponsorship : BaseOperation<String /* "revokeSponsorship" */> {
     var liquidityPoolId: String
   }
 
@@ -302,8 +294,7 @@ external object Operation {
 
   fun clawback(options: OperationOptions.Clawback): Operation2<Clawback>
 
-  interface ClawbackClaimableBalance :
-    BaseOperation<String /* "clawbackClaimableBalance" */> {
+  interface ClawbackClaimableBalance : BaseOperation<String /* "clawbackClaimableBalance" */> {
     var balanceId: String
   }
 
@@ -317,9 +308,7 @@ external object Operation {
     var flags: `T$100`
   }
 
-  fun setTrustLineFlags(
-    options: OperationOptions.SetTrustLineFlags
-  ): Operation2<SetTrustLineFlags>
+  fun setTrustLineFlags(options: OperationOptions.SetTrustLineFlags): Operation2<SetTrustLineFlags>
 
   interface LiquidityPoolDeposit : BaseOperation<String /* "liquidityPoolDeposit" */> {
     var liquidityPoolId: String

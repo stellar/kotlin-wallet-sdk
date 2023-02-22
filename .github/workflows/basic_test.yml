@@ -25,7 +25,14 @@ jobs:
         run: ./gradlew detekt
 
       - name: Test and build
-        run: ./gradlew clean build
+        id: setup-firefox
+        uses: browser-actions/setup-firefox@v1
+        with:
+          firefox-version: 'latest'
+      - run: |
+          echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
+          firefox --version
+          ./gradlew clean build
 
       - name: Print test results
         if: success() || failure()
