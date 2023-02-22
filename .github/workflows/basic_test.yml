@@ -18,13 +18,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      - name: Check code formatting
-        run: ./gradlew spotlessCheck || echo "❌ Your code is not properly formatted. You can run './gradlew spotlessApply' to format it. 👀"
-
-      - name: Detekt
-        run: ./gradlew detekt
-
-      - name: Test and build
+      - name: Setup firefox
         id: setup-firefox
         uses: browser-actions/setup-firefox@v1
         with:
@@ -32,7 +26,15 @@ jobs:
       - run: |
           echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
           firefox --version
-          ./gradlew clean build
+
+      - name: Check code formatting
+        run: ./gradlew spotlessCheck || echo "❌ Your code is not properly formatted. You can run './gradlew spotlessApply' to format it. 👀"
+
+      - name: Detekt
+        run: ./gradlew detekt
+
+      - name: Test and build
+        run: FIREFOX_BIN=$(which firefox) ./gradlew clean build
 
       - name: Print test results
         if: success() || failure()
