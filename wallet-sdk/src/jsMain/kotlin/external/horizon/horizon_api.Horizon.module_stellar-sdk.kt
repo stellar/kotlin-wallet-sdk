@@ -6,8 +6,9 @@
   "CONFLICTING_OVERLOADS"
 )
 
-package external
+package external.horizon
 
+import external.Buffer
 import kotlin.js.*
 import org.khronos.webgl.*
 import org.w3c.dom.*

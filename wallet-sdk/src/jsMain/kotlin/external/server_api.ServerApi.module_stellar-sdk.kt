@@ -8,6 +8,10 @@
 
 package external
 
+import external.horizon.AccountThresholds
+import external.horizon.Flags
+import external.horizon.LiquidityPoolType
+import external.horizon.Reserve
 import kotlin.js.*
 import org.khronos.webgl.*
 import org.w3c.dom.*

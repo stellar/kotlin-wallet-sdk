@@ -9,6 +9,10 @@
 
 package external
 
+import external.xdr.ChangeTrustAsset
+import external.xdr.ClaimPredicate
+import external.xdr.TransactionEnvelope
+import external.xdr.TrustLineAsset
 import kotlin.js.Date
 
 external open class Account(accountId: String, sequence: String) {
@@ -33,67 +37,66 @@ external open class MuxedAccount(account: Account, sequence: String) {
   }
 }
 
-// external open class Asset(code: String, issuer: String = definedExternally) {
-//  open fun getCode(): String
-//  open fun getIssuer(): String
-//  open fun getAssetType():
-//    String /* "native" | "credit_alphanum4" | "credit_alphanum12" | "liquidity_pool_shares" */
-//  open fun isNative(): Boolean
-//  open fun equals(other: Asset): Boolean
-//  open fun toXDRObject(): xdr.Asset
-//  open fun toChangeTrustXDRObject(): ChangeTrustAsset
-//  open fun toTrustLineXDRObject(): TrustLineAsset
-//  open var code: String
-//  open var issuer: String
-//
-//  companion object {
-//    fun native(): Asset
-//    fun fromOperation(xdr: xdr.Asset): Asset
-//    fun compare(assetA: Asset, assetB: Asset): dynamic /* "-1" | 0 | 1 */
-//  }
-// }
+external open class Asset(code: String, issuer: String = definedExternally) {
+  open fun getCode(): String
+  open fun getIssuer(): String
+  open fun getAssetType():
+    String /* "native" | "credit_alphanum4" | "credit_alphanum12" | "liquidity_pool_shares" */
+  open fun isNative(): Boolean
+  open fun equals(other: Asset): Boolean
+  open fun toXDRObject(): external.xdr.Asset
+  open fun toChangeTrustXDRObject(): ChangeTrustAsset
+  open fun toTrustLineXDRObject(): TrustLineAsset
+  open var code: String
+  open var issuer: String
 
-// external open class LiquidityPoolAsset(assetA: Asset, assetB: Asset, fee: Number) {
-//  open fun toXDRObject(): ChangeTrustAsset
-//  open fun getLiquidityPoolParameters(): ConstantProduct
-//  open fun getAssetType(): String /* "liquidity_pool_shares" */
-//  open fun equals(other: LiquidityPoolAsset): Boolean
-//  open var assetA: Asset
-//  open var assetB: Asset
-//  open var fee: Number
-//
-//  companion object {
-//    fun fromOperation(xdr: ChangeTrustAsset): LiquidityPoolAsset
-//  }
-// }
+  companion object {
+    fun native(): Asset
+    fun fromOperation(xdr: external.xdr.Asset): Asset
+    fun compare(assetA: Asset, assetB: Asset): dynamic /* "-1" | 0 | 1 */
+  }
+}
 
-// external open class LiquidityPoolId(liquidityPoolId: String) {
-//  open fun toXDRObject(): TrustLineAsset
-//  open fun getLiquidityPoolId(): String
-//  open fun equals(other: LiquidityPoolId): Boolean
-//  open var liquidityPoolId: String
-//
-//  companion object {
-//    fun fromOperation(xdr: TrustLineAsset): LiquidityPoolId
-//  }
-// }
+external open class LiquidityPoolAsset(assetA: Asset, assetB: Asset, fee: Number) {
+  open fun toXDRObject(): ChangeTrustAsset
+  //  open fun getLiquidityPoolParameters(): ConstantProduct
+  open fun getAssetType(): String /* "liquidity_pool_shares" */
+  open fun equals(other: LiquidityPoolAsset): Boolean
+  open var assetA: Asset
+  open var assetB: Asset
+  open var fee: Number
 
-// external open class Claimant(destination: String, predicate: ClaimPredicate = definedExternally)
-// {
-//  open var destination: String
-//  open var predicate: ClaimPredicate
-//  open fun toXDRObject(): xdr.Claimant
-//
-//  companion object {
-//    fun fromXDR(claimantXdr: xdr.Claimant): Claimant
-//    fun predicateUnconditional(): ClaimPredicate
-//    fun predicateAnd(left: ClaimPredicate, right: ClaimPredicate): ClaimPredicate
-//    fun predicateOr(left: ClaimPredicate, right: ClaimPredicate): ClaimPredicate
-//    fun predicateNot(predicate: ClaimPredicate): ClaimPredicate
-//    fun predicateBeforeAbsoluteTime(absBefore: String): ClaimPredicate
-//    fun predicateBeforeRelativeTime(seconds: String): ClaimPredicate
-//  }
-// }
+  companion object {
+    fun fromOperation(xdr: ChangeTrustAsset): LiquidityPoolAsset
+  }
+}
+
+external open class LiquidityPoolId(liquidityPoolId: String) {
+  open fun toXDRObject(): TrustLineAsset
+  open fun getLiquidityPoolId(): String
+  open fun equals(other: LiquidityPoolId): Boolean
+  open var liquidityPoolId: String
+
+  companion object {
+    fun fromOperation(xdr: TrustLineAsset): LiquidityPoolId
+  }
+}
+
+external open class Claimant(destination: String, predicate: ClaimPredicate = definedExternally) {
+  open var destination: String
+  open var predicate: ClaimPredicate
+  open fun toXDRObject(): external.xdr.Claimant
+
+  companion object {
+    fun fromXDR(claimantXdr: external.xdr.Claimant): Claimant
+    fun predicateUnconditional(): ClaimPredicate
+    fun predicateAnd(left: ClaimPredicate, right: ClaimPredicate): ClaimPredicate
+    fun predicateOr(left: ClaimPredicate, right: ClaimPredicate): ClaimPredicate
+    fun predicateNot(predicate: ClaimPredicate): ClaimPredicate
+    fun predicateBeforeAbsoluteTime(absBefore: String): ClaimPredicate
+    fun predicateBeforeRelativeTime(seconds: String): ClaimPredicate
+  }
+}
 
 external var FastSigning: Boolean
 
@@ -252,8 +255,8 @@ external open class TransactionBuilder(
   sourceAccount: Account,
   options: TransactionBuilderOptions = definedExternally
 ) {
-  open fun addOperation(operation: dynamic): TransactionBuilder /* this */
-  //  open fun addOperation(operation: Operation2__0): TransactionBuilder /* this */
+  //  open fun addOperation(operation: dynamic): TransactionBuilder /* this */
+  open fun addOperation(operation: Operation2__0): TransactionBuilder /* this */
   open fun addMemo(memo: Memo<Any>): TransactionBuilder /* this */
   open fun setTimeout(timeoutInSeconds: Number): TransactionBuilder /* this */
   open fun setTimebounds(min: Date, max: Date): TransactionBuilder /* this */
@@ -311,42 +314,46 @@ external open class TransactionBuilder(
       set(value) = definedExternally
   }
 
-  //  companion object {
-  //    fun buildFeeBumpTransaction(
-  //      feeSource: Keypair,
-  //      baseFee: String,
-  //      innerTx: Transaction__0,
-  //      networkPassphrase: String
-  //    ): FeeBumpTransaction
-  //    fun buildFeeBumpTransaction(
-  //      feeSource: String,
-  //      baseFee: String,
-  //      innerTx: Transaction__0,
-  //      networkPassphrase: String
-  //    ): FeeBumpTransaction
-  //    fun fromXDR(
-  //      envelope: String,
-  //      networkPassphrase: String
-  //    ): dynamic /* Transaction__0 | FeeBumpTransaction */
-  //    fun fromXDR(
-  //      envelope: TransactionEnvelope,
-  //      networkPassphrase: String
-  //    ): dynamic /* Transaction__0 | FeeBumpTransaction */
-  //  }
+  companion object {
+    fun buildFeeBumpTransaction(
+      feeSource: Keypair,
+      baseFee: String,
+      innerTx: Transaction__0,
+      networkPassphrase: String
+    ): FeeBumpTransaction
+    fun buildFeeBumpTransaction(
+      feeSource: String,
+      baseFee: String,
+      innerTx: Transaction__0,
+      networkPassphrase: String
+    ): FeeBumpTransaction
+    fun fromXDR(
+      envelope: String,
+      networkPassphrase: String
+    ): dynamic /* Transaction__0 | FeeBumpTransaction */
+    fun fromXDR(
+      envelope: TransactionEnvelope,
+      networkPassphrase: String
+    ): dynamic /* Transaction__0 | FeeBumpTransaction */
+  }
 }
 
-// external fun hash(data: Buffer): Buffer
-//
-// external fun sign(data: Buffer, rawSecret: Buffer): Buffer
-//
-// external fun verify(data: Buffer, signature: Buffer, rawPublicKey: Buffer): Boolean
-//
-// external fun decodeAddressToMuxedAccount(address: String, supportMuxing: Boolean):
-// xdr.MuxedAccount
-//
-// external fun encodeMuxedAccountToAddress(account: xdr.MuxedAccount, supportMuxing: Boolean):
-// String
-//
-// external fun encodeMuxedAccount(gAddress: String, id: String): xdr.MuxedAccount
-//
-// external fun extractBaseAddress(address: String): String
+external fun hash(data: Buffer): Buffer
+
+external fun sign(data: Buffer, rawSecret: Buffer): Buffer
+
+external fun verify(data: Buffer, signature: Buffer, rawPublicKey: Buffer): Boolean
+
+external fun decodeAddressToMuxedAccount(
+  address: String,
+  supportMuxing: Boolean
+): external.xdr.MuxedAccount
+
+external fun encodeMuxedAccountToAddress(
+  account: external.xdr.MuxedAccount,
+  supportMuxing: Boolean
+): String
+
+external fun encodeMuxedAccount(gAddress: String, id: String): external.xdr.MuxedAccount
+
+external fun extractBaseAddress(address: String): String

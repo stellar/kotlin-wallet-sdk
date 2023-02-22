@@ -9,6 +9,9 @@
 
 package external
 
+import external.horizon.AccountResponse
+import external.horizon.FeeStatsResponse
+import external.horizon.SubmitTransactionResponse
 import kotlin.js.*
 import org.khronos.webgl.*
 import org.w3c.dom.*

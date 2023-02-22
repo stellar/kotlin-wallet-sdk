@@ -1,7 +1,12 @@
-@file:Suppress("INTERFACE_WITH_SUPERCLASS", "OVERRIDING_FINAL_MEMBER", "RETURN_TYPE_MISMATCH_ON_OVERRIDE", "CONFLICTING_OVERLOADS")
-
+@file:Suppress(
+  "INTERFACE_WITH_SUPERCLASS",
+  "OVERRIDING_FINAL_MEMBER",
+  "RETURN_TYPE_MISMATCH_ON_OVERRIDE",
+  "CONFLICTING_OVERLOADS"
+)
 @file:JsModule("stellar-sdk")
 @file:JsNonModule
+
 package external
 
 import kotlin.js.*
@@ -18,10 +23,8 @@ import org.w3c.performance.*
 import org.w3c.workers.*
 import org.w3c.xhr.*
 
-
 external open class NotFoundError(message: String, response: Any)
 
 external open class BadRequestError(message: String, response: Any)
 
 external open class BadResponseError(message: String, response: Any)
-

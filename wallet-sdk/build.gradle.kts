@@ -46,8 +46,20 @@ project.kotlin {
   }
   js(IR) {
     moduleName = "kotlin-wallet-sdk"
-    nodejs()
-    browser { testTask { useKarma { useFirefox() } } }
+    nodejs {
+      testTask {
+        useMocha {
+          timeout = "15s"
+        }
+      }
+    }
+    browser {
+      testTask {
+        useKarma {
+          useFirefox()
+        }
+      }
+    }
     binaries.library()
   }
 
@@ -85,11 +97,7 @@ project.kotlin {
         implementation("org.jetbrains.kotlin-wrappers:kotlin-typescript:4.7.4-pre.376")
       }
     }
-    val jsTest by getting {
-      dependencies {
-        implementation(kotlin("test-js"))
-      }
-    }
+    val jsTest by getting { dependencies { implementation(kotlin("test-js")) } }
   }
   task("testAll") {
     description = "Run unit AND integration tests"

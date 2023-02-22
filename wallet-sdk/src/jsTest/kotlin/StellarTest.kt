@@ -1,8 +1,10 @@
+import OperationOptions.CreateAccount
 import external.*
+import external.operation.Operation
 import kotlin.test.Test
+import kotlin.test.fail
 import kotlinx.coroutines.await
 import kotlinx.coroutines.test.runTest
-import kotlin.test.fail
 
 class StellarTest {
   @Test
@@ -23,6 +25,14 @@ class StellarTest {
         )
         .setTimeout(0)
         .addMemo(Memo.text("test"))
+        .addOperation(
+          Operation.createAccount(
+            object : OperationOptions.CreateAccount {
+              override var destination: String = Keypair.random().publicKey()
+              override var startingBalance = "1"
+            }
+          )
+        )
         .build()
 
     tx.sign(key)
@@ -30,7 +40,7 @@ class StellarTest {
     try {
       val res = server.submitTransaction(tx).await()
 
-      println(res)
+      println(res.hash)
     } catch (e: Throwable) {
       val resultCodes = JSON.stringify(e.asDynamic().response?.data?.extras?.result_codes)
       val message = e.message
