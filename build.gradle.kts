@@ -1,3 +1,5 @@
+import kotlinx.knit.KnitTask
+
 // The alias call in plugins scope produces IntelliJ false error which is suppressed here.
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -11,6 +13,18 @@ buildscript { dependencies { classpath(libs.knit) } }
 apply(plugin = "base")
 
 apply(plugin = "kotlinx-knit")
+
+tasks.withType<KnitTask>().configureEach {
+  this.files =
+    fileTree(project.rootDir) {
+      include("**/*.md")
+      include("**/*.kt")
+      include("**/*.kts")
+      exclude("**/build/**")
+      exclude("**/.gradle/**")
+      exclude("**/node_modules/**")
+    }
+}
 
 val jvmVersion = JavaVersion.VERSION_1_8
 
