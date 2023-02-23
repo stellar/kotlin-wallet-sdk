@@ -1,5 +1,3 @@
-@file:JsExport
-
 package org.stellar.walletsdk
 actual class StellarConfiguration {
   actual fun isPublic(): Boolean {

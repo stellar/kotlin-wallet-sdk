@@ -1,8 +1,5 @@
-@file:JsExport
-
 package org.stellar.walletsdk
 
-import kotlin.js.JsExport
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar

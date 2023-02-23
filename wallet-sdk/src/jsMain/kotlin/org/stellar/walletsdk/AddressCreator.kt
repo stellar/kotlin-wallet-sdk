@@ -4,8 +4,9 @@ import external.*
 import external.operation.Operation
 import kotlinx.coroutines.await
 
+// @KustomExport
 class AddressCreator(private val secretKey: String) {
-  suspend fun create() {
+  suspend fun create(newAcc: Keypair): Result {
     val key = Keypair.fromSecret(secretKey)
 
     val server = Server("https://horizon-testnet.stellar.org")
@@ -25,7 +26,7 @@ class AddressCreator(private val secretKey: String) {
         .addOperation(
           Operation.createAccount(
             object : OperationOptions.CreateAccount {
-              override var destination: String = Keypair.random().publicKey()
+              override var destination: String = newAcc.publicKey()
               override var startingBalance = "1"
             }
           )
@@ -37,7 +38,7 @@ class AddressCreator(private val secretKey: String) {
     try {
       val res = server.submitTransaction(tx).await()
 
-      println(res.hash)
+      return Result(res.hash, newAcc)
     } catch (e: Throwable) {
       val resultCodes = JSON.stringify(e.asDynamic().response?.data?.extras?.result_codes)
       val message = e.message
@@ -46,3 +47,5 @@ class AddressCreator(private val secretKey: String) {
     }
   }
 }
+
+data class Result(val hash: String, val keypair: Keypair)

@@ -16,6 +16,7 @@ import external.xdr.Asset
 import external.xdr.Claimant
 import external.xdr.hidden.Operation
 import external.xdr.hidden.Operation2
+import kotlin.js.*
 import org.khronos.webgl.*
 import org.w3c.dom.*
 import org.w3c.dom.events.*
@@ -28,7 +29,6 @@ import org.w3c.notifications.*
 import org.w3c.performance.*
 import org.w3c.workers.*
 import org.w3c.xhr.*
-import kotlin.js.*
 
 external object Operation {
   interface BaseOperation<T : String> {
