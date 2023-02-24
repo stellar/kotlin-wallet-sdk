@@ -16,6 +16,7 @@
     "buffer": "^6.0.3",
     "events": "^1.0.0",
     "expo": "~47.0.12",
+    "expo-random": "~13.0.0",
     "expo-status-bar": "~1.4.2",
     "https-browserify": "^1.0.0",
     "kotlin-wallet-sdk": "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0e.tgz",

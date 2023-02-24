@@ -5,7 +5,7 @@ import AddressCreator = org.stellar.walletsdk.js.AddressCreator;
 import {useState} from "react";
 import Greeter = org.stellar.walletsdk.js.Greeter;
 import {Keypair} from 'stellar-sdk';
-
+import * as Random from 'expo-random';
 
 export default function App() {
     const [res, setRes] = useState("Press button to create account")
@@ -30,11 +30,11 @@ const styles = StyleSheet.create({
 });
 
 async function test(setRes: React.Dispatch<React.SetStateAction<string>>) {
-    // const randomBytes = Random.getRandomBytes(32);
     try {
         const controller = new AbortController()
         const creator = new AddressCreator("SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I")
-        const kp = Keypair.fromSecret("SDJYH364ZYXV6RWVPHJ7YXRS6VNPFLEAZIT3S6LPCKTFJPMAWBJ5LV55");
+        const bytes = Random.getRandomBytes(32)
+        const kp = Keypair.fromRawEd25519Seed(Buffer.from(bytes));
 
         console.log("Creating account")
 
@@ -42,7 +42,6 @@ async function test(setRes: React.Dispatch<React.SetStateAction<string>>) {
 
         setRes(JSON.stringify(res))
     } catch (e) {
-        console.log(e)
+        console.error(e)
     }
-
 }
