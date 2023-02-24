@@ -1,10 +1,9 @@
-import "./shim";
 import {Button, StyleSheet, Text, View} from 'react-native';
 import {org} from "kotlin-wallet-sdk";
-// import AddressCreator = org.stellar.walletsdk.js.AddressCreator;
+import AddressCreator = org.stellar.walletsdk.js.AddressCreator;
 import {useState} from "react";
 import Greeter = org.stellar.walletsdk.js.Greeter;
-// import {Keypair} from 'stellar-sdk';
+import {Keypair} from 'stellar-sdk';
 
 
 export default function App() {
@@ -30,14 +29,12 @@ const styles = StyleSheet.create({
 });
 
 async function test(setRes: React.Dispatch<React.SetStateAction<string>>) {
-    // const controller = new AbortController()
-    // const creator = new AddressCreator("SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I")
-    // // const randomBytes = Random.getRandomBytes(32);
-    // const kp = Keypair.fromSecret("SDBQCGUDMHQXZ55QPGL5CDAYDT7B6UOVSLZUUSSP74QTVT3DBLCVCGYE");
-    //
-    // const res = await creator.create(kp, controller.signal)
-    //
-    // setRes(  JSON.stringify(res))
-    const g = new Greeter()
-    setRes(g.greet())
+    const controller = new AbortController()
+    const creator = new AddressCreator("SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I")
+    // const randomBytes = Random.getRandomBytes(32);
+    const kp = Keypair.fromSecret("SB4RYHN2A3D3LDOVO5AESCQDXCYO4HHXMAM63C4S6RGQ3I5HOFYD6TNV");
+
+    const res = await creator.create(kp, controller.signal)
+
+    setRes(  JSON.stringify(res))
 }

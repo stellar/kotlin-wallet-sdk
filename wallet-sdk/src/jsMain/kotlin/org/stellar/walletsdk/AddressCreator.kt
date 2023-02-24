@@ -1,10 +1,11 @@
 package org.stellar.walletsdk
 
+import deezer.kustomexport.KustomExport
 import external.*
 import external.operation.Operation
 import kotlinx.coroutines.await
 
-// @KustomExport
+@KustomExport
 class AddressCreator(private val secretKey: String) {
   suspend fun create(newAcc: Keypair): Result {
     val key = Keypair.fromSecret(secretKey)
