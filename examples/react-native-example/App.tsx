@@ -1,9 +1,8 @@
 if (typeof Buffer === 'undefined') global.Buffer = require('buffer').Buffer
+import AddressCreator = org.stellar.walletsdk.AddressCreator;
 import {Button, StyleSheet, Text, View} from 'react-native';
 import {org} from "kotlin-wallet-sdk";
-import AddressCreator = org.stellar.walletsdk.js.AddressCreator;
 import {useState} from "react";
-import Greeter = org.stellar.walletsdk.js.Greeter;
 import {Keypair} from 'stellar-sdk';
 import * as Random from 'expo-random';
 
@@ -31,14 +30,13 @@ const styles = StyleSheet.create({
 
 async function test(setRes: React.Dispatch<React.SetStateAction<string>>) {
     try {
-        const controller = new AbortController()
         const creator = new AddressCreator("SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I")
         const bytes = Random.getRandomBytes(32)
         const kp = Keypair.fromRawEd25519Seed(Buffer.from(bytes));
 
         console.log("Creating account")
 
-        const res = await creator.create(kp, controller.signal)
+        const res = await creator.create(kp)
 
         setRes(`Account created. \nTransaction hash: ${res.hash}. \nAddress: ${(res.keypair as Keypair).publicKey()}`)
     } catch (e) {

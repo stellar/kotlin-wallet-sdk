@@ -6464,7 +6464,7 @@ kleur@^3.0.3:
 
 kotlin-wallet-sdk@../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0.tgz:
   version "0.4.0"
-  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0.tgz#777695d1273ca244d01a0ba7a0e5830a7e17350e"
+  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0.tgz#7707d39ee5be8184dd091fa2f1dcca59d517f92d"
   dependencies:
     "@js-joda/core" "3.2.0"
     stellar-sdk "10.4.1"
