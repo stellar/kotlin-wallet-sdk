@@ -1,3 +1,4 @@
+if (typeof Buffer === 'undefined') global.Buffer = require('buffer').Buffer
 import {Button, StyleSheet, Text, View} from 'react-native';
 import {org} from "kotlin-wallet-sdk";
 import AddressCreator = org.stellar.walletsdk.js.AddressCreator;
@@ -7,14 +8,14 @@ import {Keypair} from 'stellar-sdk';
 
 
 export default function App() {
-    const [res, setRes] = useState("Loading...")
+    const [res, setRes] = useState("Press button to create account")
 
     return (
         <View style={styles.container}>
             <Text>{res}</Text>
             <Button onPress={async () => {
                 await test(setRes)
-            }} title={"Test"}></Button>
+            }} title={"Create account"}></Button>
         </View>
     );
 }
@@ -29,12 +30,19 @@ const styles = StyleSheet.create({
 });
 
 async function test(setRes: React.Dispatch<React.SetStateAction<string>>) {
-    const controller = new AbortController()
-    const creator = new AddressCreator("SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I")
     // const randomBytes = Random.getRandomBytes(32);
-    const kp = Keypair.fromSecret("SB4RYHN2A3D3LDOVO5AESCQDXCYO4HHXMAM63C4S6RGQ3I5HOFYD6TNV");
+    try {
+        const controller = new AbortController()
+        const creator = new AddressCreator("SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I")
+        const kp = Keypair.fromSecret("SDJYH364ZYXV6RWVPHJ7YXRS6VNPFLEAZIT3S6LPCKTFJPMAWBJ5LV55");
 
-    const res = await creator.create(kp, controller.signal)
+        console.log("Creating account")
 
-    setRes(  JSON.stringify(res))
+        const res = await creator.create(kp, controller.signal).catch(reason => console.error(reason))
+
+        setRes(JSON.stringify(res))
+    } catch (e) {
+        console.log(e)
+    }
+
 }
