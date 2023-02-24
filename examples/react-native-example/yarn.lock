@@ -6462,9 +6462,9 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-kotlin-wallet-sdk@../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0e.tgz:
+kotlin-wallet-sdk@../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0.tgz:
   version "0.4.0"
-  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0e.tgz#f7ad875ad2c023eab95bb27318a557b267acfe7d"
+  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0.tgz#777695d1273ca244d01a0ba7a0e5830a7e17350e"
   dependencies:
     "@js-joda/core" "3.2.0"
     stellar-sdk "10.4.1"

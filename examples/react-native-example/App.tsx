@@ -38,9 +38,9 @@ async function test(setRes: React.Dispatch<React.SetStateAction<string>>) {
 
         console.log("Creating account")
 
-        const res = await creator.create(kp, controller.signal).catch(reason => console.error(reason))
+        const res = await creator.create(kp, controller.signal)
 
-        setRes(JSON.stringify(res))
+        setRes(`Account created. \nTransaction hash: ${res.hash}. \nAddress: ${(res.keypair as Keypair).publicKey()}`)
     } catch (e) {
         console.error(e)
     }

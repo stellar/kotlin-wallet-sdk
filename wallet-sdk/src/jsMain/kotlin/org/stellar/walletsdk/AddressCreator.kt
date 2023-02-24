@@ -49,4 +49,4 @@ class AddressCreator(private val secretKey: String) {
   }
 }
 
-data class Result(val hash: String, val keypair: Keypair)
+@KustomExport data class Result(val hash: String, val keypair: Keypair)
