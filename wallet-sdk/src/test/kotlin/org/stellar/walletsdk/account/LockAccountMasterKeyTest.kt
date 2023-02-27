@@ -10,6 +10,7 @@ import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
 import org.stellar.walletsdk.HORIZON_URL
 import org.stellar.walletsdk.TestWallet
+import org.stellar.walletsdk.horizon.toPublicKeyPair
 
 internal class LockAccountMasterKeyTest {
   private val server = spyk(Server(HORIZON_URL))
@@ -39,7 +40,9 @@ internal class LockAccountMasterKeyTest {
           wallet
             .stellar()
             .transaction(ADDRESS_ACTIVE)
-            .lockAccountMasterKey(sponsorAddress = ADDRESS_ACTIVE_TWO)
+            .startSponsoring(ADDRESS_ACTIVE_TWO.toPublicKeyPair())
+            .lockAccountMasterKey()
+            .stopSponsoring()
         }
         .build()
 

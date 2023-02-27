@@ -8,10 +8,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.stellar.sdk.Server
 import org.stellar.sdk.SetOptionsOperation
-import org.stellar.walletsdk.ADDRESS_ACTIVE
-import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
-import org.stellar.walletsdk.HORIZON_URL
-import org.stellar.walletsdk.TestWallet
+import org.stellar.walletsdk.*
 
 internal class AddRemoveSignerTest {
   private val server = spyk(Server(HORIZON_URL))
@@ -42,7 +39,9 @@ internal class AddRemoveSignerTest {
       runBlocking {
           stellar
             .transaction(ADDRESS_ACTIVE)
-            .addAccountSigner(ADDRESS_ACTIVE_TWO, 10, sponsorAddress = ADDRESS_ACTIVE.address)
+            .startSponsoring(ADDRESS_ACTIVE)
+            .addAccountSigner(ADDRESS_ACTIVE_TWO, 10)
+            .stopSponsoring()
         }
         .build()
 

@@ -32,9 +32,22 @@ internal constructor(
   // TODO: make timeout configurable
   private val builder =
     SdkBuilder(sourceAccount, network).setBaseFee(maxBaseFeeInStroops).setTimeout(180)
+  private var isSponsoring = false
 
   init {
     memo?.also { builder.addMemo(it.first.mapper(it.second, cfg.app)) }
+  }
+
+  fun startSponsoring(sponsorAccount: AccountKeyPair) = building {
+    isSponsoring = true
+    BeginSponsoringFutureReservesOperation.Builder(sourceAddress)
+      .setSourceAccount(sponsorAccount.address)
+      .build()
+  }
+
+  fun stopSponsoring() = building {
+    isSponsoring = false
+    EndSponsoringFutureReservesOperation(sourceAddress)
   }
 
   /**
@@ -42,56 +55,45 @@ internal constructor(
    * master key. Make sure you have set the correct signers and weights. Otherwise, you might lock
    * the account irreversibly.
    *
-   * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun lockAccountMasterKey(sponsorAddress: String? = null) =
-    building(sponsorAddress) {
-      log.debug { "Lock master key tx: accountAddress = $sourceAccount" }
+  fun lockAccountMasterKey() = building {
+    log.debug { "Lock master key tx: accountAddress = $sourceAccount" }
 
-      SetOptionsOperation.Builder().setMasterKeyWeight(0).build()
-    }
+    SetOptionsOperation.Builder().setMasterKeyWeight(0).build()
+  }
 
   /**
-   * Fund an account to activate it. This transaction can be sponsored.
+   * Create an account in the network.
    *
-   * @param destinationAddress Stellar address of the account that is being funded
+   * @param newAccount Key pair of an account to be created.
    * @param startingBalance optional Starting account balance in XLM. Minimum for non-sponsored
    * accounts is 1 XLM, sponsored accounts can leave it at 0 XLM. Default value is 1.
-   * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    * @return transaction
    * @throws [InvalidStartingBalanceException] when starting balance is less than 1 XLM for
    * non-sponsored account
    */
-  fun fund(
-    destinationAddress: String,
-    startingBalance: String = "1",
-    sponsorAddress: String? = null
-  ) =
-    building(sponsorAddress) {
-      val isSponsored = getSponsor(sponsorAddress) != null
-
-      if (!isSponsored && startingBalance.toInt() < 1 || startingBalance.toInt() < 0) {
-        throw InvalidStartingBalanceException
-      }
-
-      log.debug {
-        "Fund tx: sourceAddress = $sourceAddress, destinationAddress = $destinationAddress, " +
-          "startBalance = $startingBalance"
-      }
-
-      CreateAccountOperation.Builder(destinationAddress, startingBalance)
-        .setSourceAccount(sourceAddress)
-        .build()
+  fun createAccount(newAccount: AccountKeyPair, startingBalance: String = "1") = building {
+    if (!isSponsoring && startingBalance.toInt() < 1 || startingBalance.toInt() < 0) {
+      throw InvalidStartingBalanceException
     }
+
+    log.debug {
+      "Fund tx: sourceAddress = $sourceAddress, destinationAddress = ${newAccount.address}, " +
+        "startBalance = $startingBalance"
+    }
+
+    CreateAccountOperation.Builder(newAccount.address, startingBalance)
+      .setSourceAccount(sourceAddress)
+      .build()
+  }
 
   /**
    * Add an asset (trustline) to the account. This transaction can be sponsored.
    *
    * @param asset Target asset
    * @param trustLimit optional The limit of the trustline. Default value is maximum supported.
-   * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
@@ -100,17 +102,16 @@ internal constructor(
     trustLimit: String =
       Long.MAX_VALUE.toBigDecimal().movePointLeft(DECIMAL_POINT_PRECISION).toPlainString(),
     sponsorAddress: String? = null
-  ) =
-    building(sponsorAddress) {
-      log.debug {
-        "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, " +
-          "asset=$asset, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
-      }
-
-      val stellarAsset = ChangeTrustAsset.createNonNativeAsset(asset.code, asset.issuer)
-
-      ChangeTrustOperation.Builder(stellarAsset, trustLimit).setSourceAccount(sourceAddress).build()
+  ) = building {
+    log.debug {
+      "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, " +
+        "asset=$asset, trustLimit = $trustLimit, sponsorAddress = $sponsorAddress"
     }
+
+    val stellarAsset = ChangeTrustAsset.createNonNativeAsset(asset.code, asset.issuer)
+
+    ChangeTrustOperation.Builder(stellarAsset, trustLimit).setSourceAccount(sourceAddress).build()
+  }
 
   /**
    * Remove an asset (trustline) from the account.
@@ -131,26 +132,23 @@ internal constructor(
    *
    * @param signerAddress Stellar address of the signer that is added
    * @param signerWeight Signer weight
-   * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun addAccountSigner(signerAddress: String, signerWeight: Int, sponsorAddress: String? = null) =
-    building(sponsorAddress) {
-      log.debug {
-        "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = " +
-          "$sourceAddress, signerAddress = $signerAddress, signerWeight = $signerWeight, " +
-          "sponsorAddress = $sponsorAddress"
-      }
-
-      val keyPair = KeyPair.fromAccountId(signerAddress)
-      val signer = Signer.ed25519PublicKey(keyPair)
-
-      SetOptionsOperation.Builder()
-        .setSourceAccount(sourceAddress)
-        .setSigner(signer, signerWeight)
-        .build()
+  fun addAccountSigner(signerAddress: String, signerWeight: Int) = building {
+    log.debug {
+      "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = " +
+        "$sourceAddress, signerAddress = $signerAddress, signerWeight = $signerWeight"
     }
+
+    val keyPair = KeyPair.fromAccountId(signerAddress)
+    val signer = Signer.ed25519PublicKey(keyPair)
+
+    SetOptionsOperation.Builder()
+      .setSourceAccount(sourceAddress)
+      .setSigner(signer, signerWeight)
+      .build()
+  }
 
   /**
    * Remove signer from the account.
@@ -159,15 +157,12 @@ internal constructor(
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun removeAccountSigner(
-    signerAddress: String,
-    sponsorAddress: String? = null
-  ): TransactionBuilder {
+  fun removeAccountSigner(signerAddress: String): TransactionBuilder {
     require(signerAddress != sourceAddress) {
       "This method can't be used to remove master signer key, call ${this::lockAccountMasterKey.name} method instead"
     }
 
-    return addAccountSigner(signerAddress, 0, sponsorAddress)
+    return addAccountSigner(signerAddress, 0)
   }
 
   /**
@@ -180,24 +175,17 @@ internal constructor(
    * @param amount amount of asset to transfer
    * @return formed transfer transaction
    */
-  fun transfer(
-    destinationAddress: String,
-    assetId: StellarAssetId,
-    amount: String,
-    sponsorAddress: String? = null
-  ) =
-    building(sponsorAddress) {
-      PaymentOperation.Builder(destinationAddress, assetId.toAsset(), amount).build()
-    }
+  fun transfer(destinationAddress: String, assetId: StellarAssetId, amount: String) = building {
+    PaymentOperation.Builder(destinationAddress, assetId.toAsset(), amount).build()
+  }
 
-  fun setThreshold(low: Int, medium: Int, high: Int, sponsorAddress: String? = null) =
-    building(sponsorAddress) {
-      SetOptionsOperation.Builder()
-        .setLowThreshold(low)
-        .setMediumThreshold(medium)
-        .setHighThreshold(high)
-        .build()
-    }
+  fun setThreshold(low: Int, medium: Int, high: Int) = building {
+    SetOptionsOperation.Builder()
+      .setLowThreshold(low)
+      .setMediumThreshold(medium)
+      .setHighThreshold(high)
+      .build()
+  }
 
   /**
    * Creates transaction
@@ -207,27 +195,8 @@ internal constructor(
   fun build(): Transaction {
     return builder.build()
   }
-
-  private fun getSponsor(sponsorAddress: String?): String? {
-    return sponsorAddress ?: defaultSponsorAddress
-  }
-
-  private fun List<Operation>.sponsor(sponsorAddress: String?): List<Operation> {
-    val sponsor = getSponsor(sponsorAddress)
-
-    if (sponsor != null) {
-      return sponsorOperation(sponsor, sourceAccount.accountId, this)
-    }
-
-    return this
-  }
-
-  private fun Operation.sponsor(sponsorAddress: String?): List<Operation> {
-    return listOf(this).sponsor(sponsorAddress)
-  }
-
-  private inline fun building(sponsorAddress: String?, body: () -> Operation): TransactionBuilder {
-    builder.addOperations(body().sponsor(sponsorAddress))
+  private inline fun building(body: () -> Operation): TransactionBuilder {
+    builder.addOperation(body())
     return this
   }
 }

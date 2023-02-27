@@ -14,7 +14,7 @@ val destinationAccountKeyPair = account.createKeyPair()
 val stellar = wallet.stellar()
 
 suspend fun fund(): Transaction {
-  return stellar.transaction(sourceAccountKeyPair).fund(destinationAccountKeyPair.address).build()
+  return stellar.transaction(sourceAccountKeyPair).createAccount(destinationAccountKeyPair.address).build()
 }
 
 suspend fun lockMasterKey(): Transaction {

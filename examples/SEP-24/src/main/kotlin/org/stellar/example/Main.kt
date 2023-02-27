@@ -33,7 +33,7 @@ suspend fun main() {
   val account = wallet.stellar().account()
   // Generate new (user) account and fund it with 10 XLM from main account
   val keypair = account.createKeyPair()
-  val tx = stellar.transaction(myAccount).fund(keypair.address, "10").build()
+  val tx = stellar.transaction(myAccount).createAccount(keypair.address, "10").build()
 
   // Sign with your main account's key and send transaction to the network
   println("Registering new account")
