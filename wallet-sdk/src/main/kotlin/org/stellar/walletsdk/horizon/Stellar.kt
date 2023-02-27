@@ -71,7 +71,8 @@ internal constructor(
       }
       is FeeBumpTransaction -> {
         log.debug {
-          "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: ${signedTransaction.innerTransaction.hashHex()}."
+          "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
+                  "${signedTransaction.innerTransaction.hashHex()}."
         }
 
         val response = server.submitTransaction(signedTransaction)
@@ -82,7 +83,7 @@ internal constructor(
 
         log.debug { "Transaction submitted with hash ${response.hash}" }
       }
-      else -> throw IllegalStateException("Unknown transaction type")
+      else -> error("Unknown transaction type")
     }
   }
 }
