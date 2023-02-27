@@ -49,8 +49,8 @@ class Wallet(
  * @constructor Create empty Stellar configuration
  * @property network network to be used
  * @property horizonUrl URL of the Horizons server.
- * @property baseFee default
- *   [base fee](https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
+ * @property baseFee default [base fee]
+ *   (https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
  *   to be used
  * @property horizonClient optional HTTP client configuration to be used for Horizon calls.
  * @property submitClient optional HTTP client configuration to be used for transaction submission.
@@ -59,7 +59,8 @@ data class StellarConfiguration(
   val network: Network,
   val horizonUrl: String,
   /**
-   * [Default base fee](https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
+   * [Default base fee]
+   * (https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
    */
   val baseFee: UInt = 100u,
   val horizonClient: OkHttpClient? = null,
