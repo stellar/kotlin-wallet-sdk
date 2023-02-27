@@ -43,10 +43,25 @@ class Wallet(
   }
 }
 
+/**
+ * Configuration for all Stellar-related activity.
+ *
+ * @constructor Create empty Stellar configuration
+ * @property network network to be used
+ * @property horizonUrl URL of the Horizons server.
+ * @property baseFee default
+ *   [base fee](https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
+ *   to be used
+ * @property horizonClient optional HTTP client configuration to be used for Horizon calls.
+ * @property submitClient optional HTTP client configuration to be used for transaction submission.
+ */
 data class StellarConfiguration(
   val network: Network,
   val horizonUrl: String,
-  val maxBaseFeeStroops: UInt = 100u,
+  /**
+   * [Default base fee](https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
+   */
+  val baseFee: UInt = 100u,
   val horizonClient: OkHttpClient? = null,
   val submitClient: OkHttpClient? = null
 ) {
@@ -76,10 +91,10 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
  * @constructor Create empty Application configuration
  * @property defaultSigner default signer implementation to be used across application
  * @property base64Decoder Base64 decoder. Default [java.util.Base64] decoder works with Android API
- * 23+. To support Android API older than API 23, custom base64Decoder needs to be provided. For
- * example, `android.util.Base64`.
+ *   23+. To support Android API older than API 23, custom base64Decoder needs to be provided. For
+ *   example, `android.util.Base64`.
  * @property useHttp when enabled, switch from https to http scheme. Only allowed when network is
- * not [Network.PUBLIC] for security reasons
+ *   not [Network.PUBLIC] for security reasons
  */
 data class ApplicationConfiguration(
   val defaultSigner: WalletSigner = WalletSigner.Default,
