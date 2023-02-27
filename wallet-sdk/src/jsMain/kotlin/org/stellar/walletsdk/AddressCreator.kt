@@ -6,7 +6,7 @@ import kotlin.js.Promise
 import kotlinx.coroutines.*
 
 @JsExport
-class AddressCreator(private val secretKey: String) {
+class AddressCreator(private val secretKey: String, private val signer: Signer) {
   fun create(newAcc: Keypair): Promise<Result> =
     CoroutineScope(Dispatchers.Main).promise {
       val key = Keypair.fromSecret(secretKey)
@@ -35,7 +35,7 @@ class AddressCreator(private val secretKey: String) {
           )
           .build()
 
-      tx.sign(key)
+      signer.sign(tx, key)
 
       try {
         val res = server.submitTransaction(tx).await()
@@ -48,6 +48,11 @@ class AddressCreator(private val secretKey: String) {
         throw Exception("$message $resultCodes")
       }
     }
+}
+
+@JsExport
+external interface Signer {
+  fun sign(t: Transaction<*, *>, k: Keypair): Transaction<*, *>
 }
 
 @JsExport data class Result(val hash: String, val keypair: Keypair)

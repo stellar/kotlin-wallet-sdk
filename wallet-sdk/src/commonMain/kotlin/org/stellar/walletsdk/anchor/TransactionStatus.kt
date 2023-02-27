@@ -1,9 +1,11 @@
 package org.stellar.walletsdk.anchor
 
+import kotlin.js.JsExport
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@JsExport
 enum class TransactionStatus {
   /**
    * There is not yet enough information for this transaction to be initiated. Perhaps the user has
