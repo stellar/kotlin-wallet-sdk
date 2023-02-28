@@ -1,12 +1,12 @@
 package org.stellar.walletsdk.horizon
 
-import kotlin.IllegalStateException
 import mu.KotlinLogging
 import org.stellar.sdk.AbstractTransaction
 import org.stellar.sdk.FeeBumpTransaction
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
+import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.anchor.MemoType
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.extension.accountByAddress
@@ -43,6 +43,27 @@ internal constructor(
   }
 
   /**
+   * Creates
+   * [Fee Bump transaction](https://developers.stellar.org/docs/encyclopedia/fee-bump-transactions)
+   *
+   * @param feeAddress address that will pay for the transaction's fee
+   * @param transaction transaction for which fee should be paid (inner transaction)
+   * @param baseFee optional base fee for the transaction. If not specified,
+   *   [StellarConfiguration.baseFee] will be used
+   * @return **unsigned** fee bump transaction
+   */
+  suspend fun makeFeeBump(
+    feeAddress: AccountKeyPair,
+    transaction: Transaction,
+    baseFee: UInt? = null
+  ): FeeBumpTransaction {
+    return FeeBumpTransaction.Builder(transaction)
+      .setBaseFee((baseFee ?: cfg.stellar.baseFee).toLong())
+      .setFeeAccount(feeAddress.address)
+      .build()
+  }
+
+  /**
    * Submit transaction to the Stellar network.
    *
    * @param signedTransaction Signed transaction that is submitted
@@ -72,7 +93,7 @@ internal constructor(
       is FeeBumpTransaction -> {
         log.debug {
           "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
-                  "${signedTransaction.innerTransaction.hashHex()}."
+            "${signedTransaction.innerTransaction.hashHex()}."
         }
 
         val response = server.submitTransaction(signedTransaction)

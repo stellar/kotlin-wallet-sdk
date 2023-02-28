@@ -28,7 +28,7 @@ internal constructor(
 ) {
   private val sourceAddress = sourceAccount.accountId
   private val network: Network = cfg.stellar.network
-  private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
+  private val maxBaseFeeInStroops: Int = cfg.stellar.baseFee.toInt()
   // TODO: make timeout configurable
   private val builder =
     SdkBuilder(sourceAccount, network).setBaseFee(maxBaseFeeInStroops).setTimeout(180)
@@ -199,6 +199,11 @@ internal constructor(
         .build()
     }
 
+  /**
+   * Creates transaction
+   *
+   * @return **unsigned** transaction
+   */
   fun build(): Transaction {
     return builder.build()
   }
