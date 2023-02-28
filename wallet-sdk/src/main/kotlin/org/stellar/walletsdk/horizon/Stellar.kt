@@ -1,6 +1,9 @@
 package org.stellar.walletsdk.horizon
 
+import kotlin.IllegalStateException
 import mu.KotlinLogging
+import org.stellar.sdk.AbstractTransaction
+import org.stellar.sdk.FeeBumpTransaction
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
@@ -26,7 +29,7 @@ internal constructor(
    *
    * @param sourceAddress Stellar address of account initiating a transaction
    * @param defaultSponsorAddress Stellar address of account sponsoring operations inside this
-   * transaction
+   *   transaction
    * @param memo optional memo
    * @return transaction builder
    */
@@ -47,21 +50,40 @@ internal constructor(
    * @throws [TransactionSubmitFailedException] when submission failed
    */
   suspend fun submitTransaction(
-    signedTransaction: Transaction,
+    signedTransaction: AbstractTransaction,
   ) {
-    log.debug {
-      "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
-        "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
-        "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
-                        .signatures.size}"
+    when (signedTransaction) {
+      is Transaction -> {
+        log.debug {
+          "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
+            "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
+            "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
+                    .signatures.size}"
+        }
+
+        val response = server.submitTransaction(signedTransaction)
+
+        if (!response.isSuccess) {
+          throw TransactionSubmitFailedException(response)
+        }
+
+        log.debug { "Transaction submitted with hash ${response.hash}" }
+      }
+      is FeeBumpTransaction -> {
+        log.debug {
+          "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
+                  "${signedTransaction.innerTransaction.hashHex()}."
+        }
+
+        val response = server.submitTransaction(signedTransaction)
+
+        if (!response.isSuccess) {
+          throw TransactionSubmitFailedException(response)
+        }
+
+        log.debug { "Transaction submitted with hash ${response.hash}" }
+      }
+      else -> error("Unknown transaction type")
     }
-
-    val response = server.submitTransaction(signedTransaction)
-
-    if (!response.isSuccess) {
-      throw TransactionSubmitFailedException(response)
-    }
-
-    log.debug { "Transaction submitted with hash ${response.hash}" }
   }
 }
