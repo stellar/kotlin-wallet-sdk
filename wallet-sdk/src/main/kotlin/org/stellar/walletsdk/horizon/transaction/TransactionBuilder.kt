@@ -88,6 +88,11 @@ internal constructor(
    */
   fun addOperation(operation: Operation) = building { operation }
 
+  /**
+   * Creates transaction
+   *
+   * @return **unsigned** transaction
+   */
   fun build(): Transaction {
     operations.forEach { builder.addOperation(it) }
     return builder.build()
