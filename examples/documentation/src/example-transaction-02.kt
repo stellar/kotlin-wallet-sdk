@@ -3,6 +3,7 @@ package org.stellar.example.exampleTransaction02
 
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.*
 
 val wallet = Wallet(StellarConfiguration.Testnet)
@@ -13,12 +14,12 @@ val externalKeyPair = "MySponsorAddress".toPublicKeyPair()
 val newKeyPair = account.createKeyPair()
 val stellar = wallet.stellar()
 
-suspend fun makeFundTx(): Transaction {
-  return stellar.transaction(externalKeyPair).createAccount(newKeyPair.address).build()
+suspend fun makeCreateTx(): Transaction {
+  return stellar.transaction(externalKeyPair).createAccount(newKeyPair).build()
 }
 
-suspend fun submitFundTx(signedFundTx: Transaction) {
-  wallet.stellar().submitTransaction(signedFundTx)
+suspend fun submitCreateTx(signedCreateTx: Transaction) {
+  wallet.stellar().submitTransaction(signedCreateTx)
 }
 
 suspend fun addDeviceKeyPair() {

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.horizon.toPublicKeyPair
 
 internal class RegisterSignersTest {
   private val server = spyk(Server(HORIZON_URL))
@@ -51,11 +52,10 @@ internal class RegisterSignersTest {
           ADDRESS_ACTIVE,
           accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
-          sponsorAddress = ADDRESS_ACTIVE_TWO
+          sponsorAddress = ADDRESS_ACTIVE_TWO.toPublicKeyPair()
         )
     }
 
-    // TODO: should be 4, see TODO in org.stellar.walletsdk.util.OperationKt.sponsorOperation
-    assertEquals(transaction.operations.size, 6)
+    assertEquals(transaction.operations.size, 4)
   }
 }

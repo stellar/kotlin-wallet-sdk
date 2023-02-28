@@ -181,12 +181,19 @@ internal constructor(
     account: AccountKeyPair,
     accountSigner: List<AccountSigner>,
     accountThreshold: AccountThreshold,
-    sponsorAddress: String? = null
+    sponsorAddress: AccountKeyPair? = null
   ): Transaction {
-    val builder = stellar.transaction(account, defaultSponsorAddress = sponsorAddress)
+    val builder = stellar.transaction(account)
 
-    accountSigner.forEach { builder.addAccountSigner(it.address, it.weight) }
-    builder.setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
+    if (sponsorAddress != null) {
+      builder.sponsoring(sponsorAddress) {
+        accountSigner.forEach { this.addAccountSigner(it.address, it.weight) }
+        setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
+      }
+    } else {
+      accountSigner.forEach { builder.addAccountSigner(it.address, it.weight) }
+      builder.setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
+    }
 
     return builder.build()
   }
@@ -210,7 +217,7 @@ data class RecoverableWalletConfig(
   val accountIdentity: List<RecoveryAccountIdentity>,
   val recoveryServers: List<RecoveryServer>,
   val signerWeight: SignerWeight,
-  val sponsorAddress: String? = null
+  val sponsorAddress: AccountKeyPair? = null
 )
 
 internal fun createDecoratedSignature(

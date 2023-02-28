@@ -10,6 +10,7 @@ import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.anchor.MemoType
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.extension.accountByAddress
+import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
 
 private val log = KotlinLogging.logger {}
 
@@ -28,18 +29,15 @@ internal constructor(
    * [operations](https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment)
    *
    * @param sourceAddress Stellar address of account initiating a transaction
-   * @param defaultSponsorAddress Stellar address of account sponsoring operations inside this
-   *   transaction
    * @param memo optional memo
    * @return transaction builder
    */
   suspend fun transaction(
     sourceAddress: AccountKeyPair,
     memo: Pair<MemoType, String>? = null,
-    defaultSponsorAddress: String? = null
   ): TransactionBuilder {
     val sourceAccount = server.accountByAddress(sourceAddress.address)
-    return TransactionBuilder(cfg, sourceAccount, memo, defaultSponsorAddress)
+    return TransactionBuilder(cfg, sourceAccount, memo)
   }
 
   /**

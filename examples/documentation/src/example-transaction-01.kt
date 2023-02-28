@@ -13,8 +13,8 @@ val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
 val stellar = wallet.stellar()
 
-suspend fun fund(): Transaction {
-  return stellar.transaction(sourceAccountKeyPair).createAccount(destinationAccountKeyPair.address).build()
+suspend fun createAccount(): Transaction {
+  return stellar.transaction(sourceAccountKeyPair).createAccount(destinationAccountKeyPair).build()
 }
 
 suspend fun lockMasterKey(): Transaction {
@@ -46,11 +46,11 @@ suspend fun setThreshold(): Transaction {
 }
 
 suspend fun signAndSubmit() {
-  val signedTxn = fund().sign(sourceAccountKeyPair)
+  val signedTxn = createAccount().sign(sourceAccountKeyPair)
   wallet.stellar().submitTransaction(signedTxn)
 }
 suspend fun main() {
-  val fundTxn = fund()
+  val fundTxn = createAccount()
   println(fundTxn)
 
   val lockMasterKeyTxn = lockMasterKey()

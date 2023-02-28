@@ -37,11 +37,9 @@ internal class AddRemoveSignerTest {
   fun `there are 3 operations in sponsored transaction`() {
     val transaction =
       runBlocking {
-          stellar
-            .transaction(ADDRESS_ACTIVE)
-            .startSponsoring(ADDRESS_ACTIVE)
-            .addAccountSigner(ADDRESS_ACTIVE_TWO, 10)
-            .stopSponsoring()
+          stellar.transaction(ADDRESS_ACTIVE).sponsoring(ADDRESS_ACTIVE) {
+            addAccountSigner(ADDRESS_ACTIVE_TWO, 10)
+          }
         }
         .build()
 

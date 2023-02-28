@@ -8,6 +8,7 @@
   * [Transaction builder](#transaction-builder)
   * [Submit transaction](#submit-transaction)
 * [Transaction builder (extra)](#transaction-builder-extra)
+* [Transaction builder (sponsoring)](#transaction-builder-sponsoring)
 * [Anchor](#anchor)
 
 <!--- END -->
@@ -116,7 +117,7 @@ val account = wallet.stellar().account()
 -->
 <!--- SUFFIX .*transaction-01.*
 suspend fun main() {
-  val fundTxn = fund()
+  val fundTxn = createAccount()
   println(fundTxn)
 
   val lockMasterKeyTxn = lockMasterKey()
@@ -145,12 +146,12 @@ val destinationAccountKeyPair = account.createKeyPair()
 val stellar = wallet.stellar()
 ```
 
-Fund account transaction activates/creates an account with a starting balance (by default, it's 1 XLM). This transaction
+Create account transaction activates/creates an account with a starting balance (by default, it's 1 XLM). This transaction
 can be sponsored.
 
 ```kotlin
-suspend fun fund(): Transaction {
-  return stellar.transaction(sourceAccountKeyPair).fund(destinationAccountKeyPair.address).build()
+suspend fun createAccount(): Transaction {
+  return stellar.transaction(sourceAccountKeyPair).createAccount(destinationAccountKeyPair).build()
 }
 ```
 
@@ -216,7 +217,7 @@ sponsor.
 
 ```kotlin
 suspend fun signAndSubmit() {
-  val signedTxn = fund().sign(sourceAccountKeyPair)
+  val signedTxn = createAccount().sign(sourceAccountKeyPair)
   wallet.stellar().submitTransaction(signedTxn)
 }
 ```
@@ -234,17 +235,17 @@ val externalKeyPair = "MySponsorAddress".toPublicKeyPair()
 val newKeyPair = account.createKeyPair()
 val stellar = wallet.stellar()
 ```
-First, account must be funded
+First, account must be created
 ```kotlin
-suspend fun makeFundTx(): Transaction {
-  return stellar.transaction(externalKeyPair).fund(newKeyPair.address).build()
+suspend fun makeCreateTx(): Transaction {
+  return stellar.transaction(externalKeyPair).createAccount(newKeyPair).build()
 }
 ```
 This transaction must be sent to external signer (holder of `externalKeyPair`) to be signed. Signed transaction can 
 be submitted by wallet 
 ```kotlin
-suspend fun submitFundTx(signedFundTx: Transaction) {
-  wallet.stellar().submitTransaction(signedFundTx)
+suspend fun submitCreateTx(signedCreateTx: Transaction) {
+  wallet.stellar().submitTransaction(signedCreateTx)
 }
 ```
 Now, after account is created, it can perform operations. For example, we can disable master key pair 
@@ -269,6 +270,11 @@ suspend fun addDeviceKeyPair() {
 ```
 
 > You can get the full code [here](../examples/documentation/src/example-transaction-02.kt).
+
+## Transaction builder (sponsoring)
+TODO
+
+> You can get the full code [here](../examples/documentation/src/example-transaction-03.kt).
 
 ## Anchor
 

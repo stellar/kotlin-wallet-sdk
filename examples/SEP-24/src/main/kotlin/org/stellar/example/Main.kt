@@ -10,7 +10,7 @@ import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
-import org.stellar.walletsdk.horizon.toTransferTransaction
+import org.stellar.walletsdk.horizon.transaction.toTransferTransaction
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -33,7 +33,7 @@ suspend fun main() {
   val account = wallet.stellar().account()
   // Generate new (user) account and fund it with 10 XLM from main account
   val keypair = account.createKeyPair()
-  val tx = stellar.transaction(myAccount).createAccount(keypair.address, "10").build()
+  val tx = stellar.transaction(myAccount).createAccount(keypair, 10u).build()
 
   // Sign with your main account's key and send transaction to the network
   println("Registering new account")

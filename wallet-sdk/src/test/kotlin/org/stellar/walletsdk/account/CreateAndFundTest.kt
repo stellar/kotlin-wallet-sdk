@@ -7,11 +7,9 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.stellar.sdk.Server
-import org.stellar.walletsdk.ADDRESS_ACTIVE
-import org.stellar.walletsdk.ADDRESS_INACTIVE
-import org.stellar.walletsdk.HORIZON_URL
-import org.stellar.walletsdk.TestWallet
+import org.stellar.walletsdk.*
 
 internal class CreateAndFundTest {
   private val server = spyk(Server(HORIZON_URL))
@@ -48,7 +46,7 @@ internal class CreateAndFundTest {
     val exception =
       assertFailsWith<Exception>(
         block = {
-          runBlocking { stellar.transaction(ADDRESS_ACTIVE).createAccount(ADDRESS_INACTIVE, "0") }
+          runBlocking { stellar.transaction(ADDRESS_ACTIVE).createAccount(ADDRESS_INACTIVE, 0u) }
             .build()
         }
       )
@@ -68,14 +66,25 @@ internal class CreateAndFundTest {
   fun `there are 3 operations in sponsored transaction`() {
     val transaction =
       runBlocking {
-          stellar
-            .transaction(ADDRESS_ACTIVE)
-            .startSponsoring(ADDRESS_ACTIVE)
-            .createAccount(ADDRESS_INACTIVE)
-            .stopSponsoring()
+          stellar.transaction(ADDRESS_ACTIVE).sponsoring(ADDRESS_ACTIVE) {
+            createAccount(ADDRESS_INACTIVE)
+          }
         }
         .build()
 
     assertEquals(transaction.operations.size, 3)
+  }
+
+  @Test
+  fun `throw exception if sponsoring something except create account`() {
+    assertThrows<Exception> {
+      runBlocking {
+          stellar.transaction(ADDRESS_ACTIVE).sponsoring(ADDRESS_ACTIVE) {
+            createAccount(ADDRESS_INACTIVE)
+            addAssetSupport(ASSET_USDC)
+          }
+        }
+        .build()
+    }
   }
 }

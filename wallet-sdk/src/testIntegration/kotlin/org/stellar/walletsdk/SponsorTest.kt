@@ -1,55 +1,54 @@
 package org.stellar.walletsdk
 
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
 
 class SponsorTest {
-  val wallet = Wallet(StellarConfiguration.Testnet)
-  val account = wallet.stellar().account()
-  val sponsoringKey =
+  private val wallet = Wallet(StellarConfiguration.Testnet)
+  private val stellar = wallet.stellar()
+  private val account = wallet.stellar().account()
+  private val sponsoringKey =
     SigningKeyPair.fromSecret("SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I")
 
+  @Test @Order(0) fun testSponsorNewAccount(): Unit = runBlocking { createAccount(0u) }
+
   @Test
-  fun testSponsorNewAccount() = runBlocking {
+  @Order(1)
+  fun testReplaceMasterKey() = runBlocking {
+    val newKeyPair = createAccount(1u)
+
+    val replaceWith = account.createKeyPair()
+
+    val modifyAccountTransaction =
+      stellar
+        .transaction(newKeyPair)
+        .sponsoring(sponsoringKey) {
+          addAccountSigner(replaceWith.address, 1)
+          lockAccountMasterKey()
+        }
+        .build()
+        .sign(newKeyPair)
+        .sign(sponsoringKey)
+
+    wallet.stellar().submitTransaction(modifyAccountTransaction)
+  }
+
+  private suspend fun createAccount(startingBalance: UInt): SigningKeyPair {
     val newKeyPair = wallet.stellar().account().createKeyPair()
-    val stellar = wallet.stellar()
 
     val fundTx =
       stellar
         .transaction(sponsoringKey)
-        .startSponsoring(sponsoringKey)
-        .createAccount(newKeyPair, "0")
-        .stopSponsoring()
+        .sponsoring(sponsoringKey) { createAccount(newKeyPair, startingBalance) }
         .build()
 
     val signedFundTx = fundTx.sign(sponsoringKey).sign(newKeyPair)
 
     wallet.stellar().submitTransaction(signedFundTx)
 
-    //    val deviceKeyPair = account.createKeyPair()
-    //
-    //    val modifyAccountTransaction =
-    //      stellar
-    //        .transaction(newKeyPair)
-    //        .addAccountSigner(
-    //          deviceKeyPair.address,
-    //          signerWeight = 1,
-    //          sponsorAddress = sponsoringKey.address
-    //        )
-    //        .lockAccountMasterKey(sponsorAddress = sponsoringKey.address)
-    //        .build()
-    //        .sign(newKeyPair)
-    //        .sign(sponsoringKey)
-    //
-    //    val feeBump =
-    //      FeeBumpTransaction.Builder(modifyAccountTransaction)
-    //        .setFeeAccount(sponsoringKey.address)
-    //        .setBaseFee(1000)
-    //        .build()
-    //        .sign(sponsoringKey)
-    //
-    //    server.submitTransaction(feeBump)
+    return newKeyPair
   }
 }

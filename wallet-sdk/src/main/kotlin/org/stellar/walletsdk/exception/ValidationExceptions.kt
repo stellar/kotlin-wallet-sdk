@@ -1,6 +1,6 @@
 package org.stellar.walletsdk.exception
 
-sealed class ValidationException : WalletException {
+open class ValidationException : WalletException {
   constructor(message: String) : super(message)
   constructor(message: String, cause: Exception) : super(message, cause)
 }
@@ -15,6 +15,11 @@ object InvalidMemoIdException : ValidationException("Memo ID must be a positive 
 
 object InvalidStartingBalanceException :
   ValidationException("Starting balance must be at least 1 XLM for non-sponsored accounts")
+
+object InvalidSponsoredAccountException :
+  ValidationException(
+    "No other operations are allowed with create account operation per sponsoring block"
+  )
 
 // Invalid response from server
 sealed class InvalidResponseException(message: String) : WalletException(message)
