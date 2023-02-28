@@ -24,7 +24,7 @@ internal constructor(
   memo: Pair<MemoType, String>?
 ) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount) {
   private val network: Network = cfg.stellar.network
-  private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
+  private val maxBaseFeeInStroops: Int = cfg.stellar.baseFee.toInt()
   override val operations: MutableList<Operation> = mutableListOf()
 
   // TODO: make timeout configurable
