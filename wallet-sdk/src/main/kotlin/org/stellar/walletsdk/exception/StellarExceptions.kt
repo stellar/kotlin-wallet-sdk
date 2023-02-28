@@ -38,10 +38,4 @@ private val SubmitTransactionResponse.operationsResultCodes: List<String>?
   get() =
     this.extras?.resultCodes?.operationsResultCodes?.run { if (this.isEmpty()) null else this }
 
-class InvalidSponsorOperationTypeException(operationType: Operation) :
-  StellarException(
-    "${operationType::class.simpleName} cannot be sponsored. " +
-      "Allowed operations are: ${SponsoringBuilder.allowedSponsoredOperations.map { it.simpleName }}}."
-  )
-
 class OperationsLimitExceededException : StellarException("Maximum limit is 200 operations")

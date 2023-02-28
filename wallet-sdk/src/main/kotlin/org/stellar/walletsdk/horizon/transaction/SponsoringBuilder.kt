@@ -2,7 +2,6 @@ package org.stellar.walletsdk.horizon.transaction
 
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.AccountResponse
-import org.stellar.walletsdk.exception.InvalidSponsorOperationTypeException
 import org.stellar.walletsdk.exception.InvalidSponsoredAccountException
 import org.stellar.walletsdk.horizon.AccountKeyPair
 
@@ -12,18 +11,6 @@ internal constructor(
   private val sponsorAccount: AccountKeyPair,
   override val operations: MutableList<Operation>,
 ) : CommonTransactionBuilder<SponsoringBuilder>(sourceAccount) {
-  companion object {
-    internal val allowedSponsoredOperations =
-      setOf(
-        ChangeTrustOperation::class,
-        CreateAccountOperation::class,
-        ManageDataOperation::class,
-        ManageBuyOfferOperation::class,
-        ManageSellOfferOperation::class,
-        SetOptionsOperation::class
-      )
-  }
-
   private var accountCreated: AccountKeyPair? = null
 
   init {
@@ -84,11 +71,23 @@ internal constructor(
    *
    * @param operation operation that can be created using SDK
    */
-  fun addOperation(operation: Operation) = building {
-    if (!allowedSponsoredOperations.contains(operation::class)) {
-      throw InvalidSponsorOperationTypeException(operation)
-    }
-
-    operation
-  }
+  fun addOperation(operation: ManageDataOperation) = building { operation }
+  /**
+   * Adds operation to this builder
+   *
+   * @param operation operation that can be created using SDK
+   */
+  fun addOperation(operation: ManageBuyOfferOperation) = building { operation }
+  /**
+   * Adds operation to this builder
+   *
+   * @param operation operation that can be created using SDK
+   */
+  fun addOperation(operation: ManageSellOfferOperation) = building { operation }
+  /**
+   * Adds operation to this builder
+   *
+   * @param operation operation that can be created using SDK
+   */
+  fun addOperation(operation: SetOptionsOperation) = building { operation }
 }
