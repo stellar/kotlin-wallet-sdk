@@ -1,18 +1,14 @@
 package org.stellar.walletsdk.horizon.transaction
 
 import org.stellar.sdk.*
-import org.stellar.sdk.responses.AccountResponse
-import org.stellar.walletsdk.exception.InvalidSponsoredAccountException
 import org.stellar.walletsdk.horizon.AccountKeyPair
 
 class SponsoringBuilder
 internal constructor(
-  sourceAccount: AccountResponse,
+  sourceAccount: String,
   private val sponsorAccount: AccountKeyPair,
   override val operations: MutableList<Operation>,
 ) : CommonTransactionBuilder<SponsoringBuilder>(sourceAccount) {
-  private var accountCreated: AccountKeyPair? = null
-
   init {
     startSponsoring(sourceAddress)
   }
@@ -26,18 +22,7 @@ internal constructor(
    */
   fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt = 0u): SponsoringBuilder =
     building {
-      // Because sponsoring is different for new account creation, it's required to remove default
-      // sponsoring operation from the list and replace it with a "special" sponsoring operation for
-      // account creation.
-      if (operations.removeLast() !is BeginSponsoringFutureReservesOperation) {
-        throw InvalidSponsoredAccountException
-      }
-
-      accountCreated = newAccount
-
-      startSponsoring(newAccount.address)
-
-      doCreateAccount(newAccount, startingBalance)
+      doCreateAccount(newAccount, startingBalance, sponsorAccount.address)
     }
 
   private fun startSponsoring(address: String) = building {
@@ -46,25 +31,7 @@ internal constructor(
       .build()
   }
 
-  internal fun stopSponsoring() = building {
-    val created = accountCreated
-    // Because of special sponsoring operation unique to account creation, other types of operations
-    // are prohibited in the sponsoring block.
-    if (created != null) {
-      val last = operations.last()
-      val secondLast = operations[operations.size - 2]
-
-      if (
-        last !is CreateAccountOperation && secondLast !is BeginSponsoringFutureReservesOperation
-      ) {
-        throw InvalidSponsoredAccountException
-      }
-
-      EndSponsoringFutureReservesOperation(created.address)
-    } else {
-      EndSponsoringFutureReservesOperation(sourceAddress)
-    }
-  }
+  internal fun stopSponsoring() = building { EndSponsoringFutureReservesOperation(sourceAddress) }
 
   /**
    * Adds operation to this builder

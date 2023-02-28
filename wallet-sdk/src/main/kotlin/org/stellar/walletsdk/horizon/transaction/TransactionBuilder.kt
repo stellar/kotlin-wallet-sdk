@@ -20,9 +20,9 @@ import org.stellar.walletsdk.util.*
 class TransactionBuilder
 internal constructor(
   private val cfg: Config,
-  private val sourceAccount: AccountResponse,
+  sourceAccount: AccountResponse,
   memo: Pair<MemoType, String>?
-) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount) {
+) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount.accountId) {
   private val network: Network = cfg.stellar.network
   private val maxBaseFeeInStroops: Int = cfg.stellar.baseFee.toInt()
   override val operations: MutableList<Operation> = mutableListOf()
@@ -38,16 +38,21 @@ internal constructor(
   /**
    * Start a sponsoring block
    *
-   * @param sponsorAccount account that will be used to sponsor
+   * @param sponsorAccount account that will be used to sponsor all operations inside the block
+   * @param sponsoredAccount account that is sponsored and will be used as a source account of all
+   * operations inside the block. If not specified, defaults to builder's sourceAddress.
    * @param body main code block, that contains logic of operations sponsoring
    * @return [TransactionBuilder]
    * @receiver [SponsoringBuilder]
    */
   fun sponsoring(
     sponsorAccount: AccountKeyPair,
+    sponsoredAccount: AccountKeyPair? = null,
     body: SponsoringBuilder.() -> SponsoringBuilder
   ): TransactionBuilder {
-    SponsoringBuilder(sourceAccount, sponsorAccount, operations).body().stopSponsoring()
+    SponsoringBuilder(sponsoredAccount?.address ?: sourceAddress, sponsorAccount, operations)
+      .body()
+      .stopSponsoring()
     return this
   }
 
@@ -64,7 +69,7 @@ internal constructor(
       throw InvalidStartingBalanceException
     }
 
-    doCreateAccount(newAccount, startingBalance)
+    doCreateAccount(newAccount, startingBalance, sourceAddress)
   }
 
   /**

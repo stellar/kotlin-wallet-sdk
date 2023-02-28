@@ -1,9 +1,7 @@
 package org.stellar.walletsdk.exception
 
 import java.math.BigDecimal
-import org.stellar.sdk.Operation
 import org.stellar.sdk.responses.SubmitTransactionResponse
-import org.stellar.walletsdk.horizon.transaction.SponsoringBuilder
 
 sealed class StellarException : WalletException {
   constructor(message: String) : super(message)

@@ -8,7 +8,9 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.anchor.MemoType
+import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
+import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.extension.accountByAddress
 import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
 
@@ -36,7 +38,15 @@ internal constructor(
     sourceAddress: AccountKeyPair,
     memo: Pair<MemoType, String>? = null,
   ): TransactionBuilder {
-    val sourceAccount = server.accountByAddress(sourceAddress.address)
+    val sourceAccount =
+      try {
+        server.accountByAddress(sourceAddress.address)
+      } catch (e: HorizonRequestFailedException) {
+        if (e.errorCode == 404) {
+          throw ValidationException("Source account $sourceAddress doesn't exist in the network")
+        }
+        throw e
+      }
     return TransactionBuilder(cfg, sourceAccount, memo)
   }
 
@@ -47,10 +57,10 @@ internal constructor(
    * @param feeAddress address that will pay for the transaction's fee
    * @param transaction transaction for which fee should be paid (inner transaction)
    * @param baseFee optional base fee for the transaction. If not specified,
-   *   [StellarConfiguration.baseFee] will be used
+   * [StellarConfiguration.baseFee] will be used
    * @return **unsigned** fee bump transaction
    */
-  suspend fun makeFeeBump(
+  fun makeFeeBump(
     feeAddress: AccountKeyPair,
     transaction: Transaction,
     baseFee: UInt? = null
@@ -104,5 +114,15 @@ internal constructor(
       }
       else -> error("Unknown transaction type")
     }
+  }
+
+  /**
+   * Decode transaction from XDR
+   *
+   * @param xdr base64 XDR string
+   * @return decoded transaction
+   */
+  fun decodeTransaction(xdr: String): AbstractTransaction {
+    return Transaction.fromEnvelopeXdr(xdr, cfg.stellar.network)
   }
 }

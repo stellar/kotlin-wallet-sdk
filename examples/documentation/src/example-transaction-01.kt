@@ -8,10 +8,10 @@ import org.stellar.walletsdk.horizon.*
 
 val wallet = Wallet(StellarConfiguration.Testnet)
 val account = wallet.stellar().account()
+val stellar = wallet.stellar()
 
 val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
-val stellar = wallet.stellar()
 
 suspend fun createAccount(): Transaction {
   return stellar.transaction(sourceAccountKeyPair).createAccount(destinationAccountKeyPair).build()
@@ -34,11 +34,11 @@ suspend fun removeAsset(): Transaction {
 val newSignerKeyPair = account.createKeyPair()
 
 suspend fun addSigner(): Transaction {
-  return stellar.transaction(sourceAccountKeyPair).addAccountSigner(newSignerKeyPair.address, 10).build()
+  return stellar.transaction(sourceAccountKeyPair).addAccountSigner(newSignerKeyPair, 10).build()
 }
 
 suspend fun removeSigner(): Transaction {
-  return stellar.transaction(sourceAccountKeyPair).removeAccountSigner(newSignerKeyPair.address).build()
+  return stellar.transaction(sourceAccountKeyPair).removeAccountSigner(newSignerKeyPair).build()
 }
 
 suspend fun setThreshold(): Transaction {

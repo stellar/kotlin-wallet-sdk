@@ -7,8 +7,12 @@
   * [Account service](#account-service)
   * [Transaction builder](#transaction-builder)
   * [Submit transaction](#submit-transaction)
-* [Transaction builder (extra)](#transaction-builder-extra)
-* [Transaction builder (sponsoring)](#transaction-builder-sponsoring)
+  * [Transaction builder (extra)](#transaction-builder-extra)
+  * [Transaction builder (sponsoring)](#transaction-builder-sponsoring)
+  * [Sponsoring account creation](#sponsoring-account-creation)
+  * [Sponsoring account creation and modification](#sponsoring-account-creation-and-modification)
+  * [Fee bump transaction](#fee-bump-transaction)
+  * [Using XDR to exchange transaction data between server and client](#using-xdr-to-exchange-transaction-data-between-server-and-client)
 * [Anchor](#anchor)
 
 <!--- END -->
@@ -114,6 +118,7 @@ import org.stellar.walletsdk.horizon.*
 
 val wallet = Wallet(StellarConfiguration.Testnet)
 val account = wallet.stellar().account()
+val stellar = wallet.stellar()
 -->
 <!--- SUFFIX .*transaction-01.*
 suspend fun main() {
@@ -143,7 +148,6 @@ suspend fun main() {
 ```kotlin
 val sourceAccountKeyPair = account.createKeyPair()
 val destinationAccountKeyPair = account.createKeyPair()
-val stellar = wallet.stellar()
 ```
 
 Create account transaction activates/creates an account with a starting balance (by default, it's 1 XLM). This transaction
@@ -190,7 +194,7 @@ Otherwise, you will lock the account irreversibly. This transaction can be spons
 val newSignerKeyPair = account.createKeyPair()
 
 suspend fun addSigner(): Transaction {
-  return stellar.transaction(sourceAccountKeyPair).addAccountSigner(newSignerKeyPair.address, 10).build()
+  return stellar.transaction(sourceAccountKeyPair).addAccountSigner(newSignerKeyPair, 10).build()
 }
 ```
 
@@ -198,7 +202,7 @@ Remove a signer from the account.
 
 ```kotlin
 suspend fun removeSigner(): Transaction {
-  return stellar.transaction(sourceAccountKeyPair).removeAccountSigner(newSignerKeyPair.address).build()
+  return stellar.transaction(sourceAccountKeyPair).removeAccountSigner(newSignerKeyPair).build()
 }
 ```
 
@@ -225,7 +229,7 @@ suspend fun signAndSubmit() {
 > You can get the full code [here](../examples/documentation/src/example-transaction-01.kt).
 
 
-## Transaction builder (extra)
+### Transaction builder (extra)
 In some more cases private key may not be known prior to forming a transaction. For example, creating new account requires it to be funded.
 Wallet may not have a key of an account with funds and may request such transaction to be sponsored by third-party.  
 Let's walk through that flow:
@@ -233,7 +237,6 @@ Let's walk through that flow:
 // Third-party key that will sponsor creating new account
 val externalKeyPair = "MySponsorAddress".toPublicKeyPair()
 val newKeyPair = account.createKeyPair()
-val stellar = wallet.stellar()
 ```
 First, account must be created
 ```kotlin
@@ -258,7 +261,7 @@ suspend fun addDeviceKeyPair() {
     stellar
       .transaction(newKeyPair)
       .addAccountSigner(
-        deviceKeyPair.address,
+        deviceKeyPair,
         signerWeight = 1,
       )
       .lockAccountMasterKey()
@@ -271,10 +274,178 @@ suspend fun addDeviceKeyPair() {
 
 > You can get the full code [here](../examples/documentation/src/example-transaction-02.kt).
 
-## Transaction builder (sponsoring)
-TODO
+### Transaction builder (sponsoring)
+<!--- INCLUDE .*transaction-\d.*
+val sponsorKeyPair = SigningKeyPair.fromSecret("MySecred")
+-->
+
+<!--- INCLUDE .*transaction-03.*
+val asset = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
+val sponsoredKeyPair = SigningKeyPair.fromSecret("Sponsored")
+-->
+
+Some operations, that modify account reserves can be 
+[sponsored](https://developers.stellar.org/docs/encyclopedia/sponsored-reserves#sponsored-reserves-operations). For 
+sponsored operations, sponsoring account will be paying for reserves, instead of the account that being sponsored.  
+This allows to do some operations, even if account doesn't have enough funds to perform such operations.  
+To sponsor a transaction, simply start `sponsoring` block:
+
+```kotlin
+suspend fun sponsorOperation() {
+  val transaction =
+    stellar
+      .transaction(sponsoredKeyPair)
+      .sponsoring(sponsorKeyPair) { addAssetSupport(asset) }
+      .build()
+
+  transaction.sign(sponsorKeyPair).sign(sponsoredKeyPair)
+}
+```
+Only some operations can be sponsored, and sponsoring block has a slightly different set of functions available, 
+compared to regular `TransactionBuilder`.  
+Note, that transaction must be signed by both sponsor account (`sponsoringKeyPair`) and account being 
+sponsored (`sponsoredKeyPair`)
 
 > You can get the full code [here](../examples/documentation/src/example-transaction-03.kt).
+
+### Sponsoring account creation
+One of things that can be done via sponsoring is to create account having 0 starting balance. This account creation can
+be created simply writing:
+```kotlin
+suspend fun sponsorAccountCreation() {
+  val newKeyPair = account.createKeyPair()
+
+  val transaction =
+    stellar
+      .transaction(sponsorKeyPair)
+      .sponsoring(sponsorKeyPair, sponsoredAccount = newKeyPair) { createAccount(newKeyPair) }
+      .build()
+
+  transaction.sign(sponsorKeyPair).sign(newKeyPair)
+}
+```
+Note how transaction source account should be set to `sponsorKeyPair`. This time, we need to pass sponsored account.
+In the example above, it was omitted and was default to the transaction source account (`sponsoredKey`). However, this 
+time sponsored account (freshly created) is different from the transaction source account. Therefore, it's necessary to
+specify it. Otherwise, transaction will contain malformed operation. As before, transaction must be signed by 
+both keys.  
+
+> You can get the full code [here](../examples/documentation/src/example-transaction-04.kt).
+
+### Sponsoring account creation and modification
+If you want to create account and modify it in one transaction, it's possible to do so with passing `sponsoredAccount` 
+optional argument to the sponsored block. If this argument is present, all operations inside sponsored block will be 
+sourced by `sponsoredAccount`. (Except account creation, which is always sourced by sponsor).
+
+```kotlin
+suspend fun sponsorAccountCreationAndModification() {
+  val newKeyPair = account.createKeyPair()
+  val replaceWith = account.createKeyPair()
+
+  val transaction =
+    stellar
+        .transaction(sponsorKeyPair)
+        .sponsoring(sponsorKeyPair, newKeyPair) {
+          createAccount(newKeyPair)
+          addAccountSigner(replaceWith, 1)
+          lockAccountMasterKey()
+        }
+        .build()
+
+  transaction.sign(sponsorKeyPair).sign(newKeyPair)
+}
+```
+
+> You can get the full code [here](../examples/documentation/src/example-transaction-05.kt).
+> 
+### Fee bump transaction
+<!--- INCLUDE .*transaction-06.*
+val sponsoredKeyPair = SigningKeyPair.fromSecret("Sponsored")
+
+suspend fun sponsorAccountModification() {
+-->
+
+<!--- SUFFIX .*transaction-06.*
+}
+-->
+
+If you wish to modify newly created account with 0 balance, it's also possible to do so via `FeeBump`. It can be combined 
+with sponsoring block to achieve the same result as in the example above. However, with `FeeBump` it's also possible to add 
+more operations (not sponsored), such as transfer.
+
+First, let's create a transaction that will replace master key of an account with a new key pair.
+```kotlin
+  val replaceWith = account.createKeyPair()
+
+  val transaction =
+    stellar
+      .transaction(sponsoredKeyPair)
+      .sponsoring(sponsorKeyPair) {
+        lockAccountMasterKey()
+        addAccountSigner(replaceWith, signerWeight = 1)
+      }
+      .build()
+```
+Second, sign transaction with both keys
+```kotlin
+  transaction.sign(sponsoredKeyPair).sign(sponsorKeyPair)
+```
+Next, create a fee bump, targeting the transaction
+```kotlin
+  val feeBump = stellar.makeFeeBump(sponsorKeyPair, transaction)
+  feeBump.sign(sponsorKeyPair)
+```
+Finally, submit a fee bump transaction. Executing this transaction will be fully covered by `sponsorKeyPair` and 
+`sponsoredKeyPair` may not even have any XLM funds on its account.
+```kotlin
+  wallet.stellar().submitTransaction(feeBump)
+```
+
+> You can get the full code [here](../examples/documentation/src/example-transaction-06.kt).
+
+### Using XDR to exchange transaction data between server and client
+Note, that wallet may not have a signing key for `sponsorKeyPair`. In that case, it's necessary to convert transaction
+to XDR, send it to the server, containing `sponsorKey` and return signed transaction back to the wallet.  
+Let's use previous example of sponsoring account creation, but this time with sponsor key not being known to the wallet.  
+First step would be defining public key of sponsor key pair:
+```kotlin
+val sponsorKeyPair = "SponsorAddress".toPublicKeyPair()
+```
+Next, create an account in the same manner as before. Sign it with `newKeyPair`. This time, convert transaction to XDR:
+```kotlin
+suspend fun sponsorAccountCreation(): String {
+  val newKeyPair = account.createKeyPair()
+
+  return stellar
+    .transaction(sponsorKeyPair)
+    .sponsoring(sponsorKeyPair) { createAccount(newKeyPair) }
+    .build()
+    .sign(newKeyPair)
+    .toEnvelopeXdrBase64()
+}
+
+```
+It can now be sent to the server. On the server, sign with a private key for sponsor address:
+```kotlin
+// On the server
+fun signTransaction(xdrString: String): String {
+  val sponsorPrivateKey = SigningKeyPair.fromSecret("MySecred")
+
+  val signedTransaction = stellar.decodeTransaction(xdrString).sign(sponsorPrivateKey)
+
+  return signedTransaction.toEnvelopeXdrBase64()
+}
+```
+When client receives fully signed transaction, it can be decoded and sent to the Stellar network:
+```kotlin
+suspend fun recoverSigned(xdrString: String) {
+  val signedTransaction = stellar.decodeTransaction(xdrString)
+
+  stellar.submitTransaction(signedTransaction)
+}
+```
+
+> You can get the full code [here](../examples/documentation/src/example-transaction-xdr-01.kt).
 
 ## Anchor
 

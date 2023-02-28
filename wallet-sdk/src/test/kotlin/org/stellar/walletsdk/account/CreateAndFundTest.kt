@@ -7,7 +7,6 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.*
 
@@ -73,18 +72,5 @@ internal class CreateAndFundTest {
         .build()
 
     assertEquals(transaction.operations.size, 3)
-  }
-
-  @Test
-  fun `throw exception if sponsoring something except create account`() {
-    assertThrows<Exception> {
-      runBlocking {
-          stellar.transaction(ADDRESS_ACTIVE).sponsoring(ADDRESS_ACTIVE) {
-            createAccount(ADDRESS_INACTIVE)
-            addAssetSupport(ASSET_USDC)
-          }
-        }
-        .build()
-    }
   }
 }

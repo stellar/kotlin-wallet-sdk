@@ -82,7 +82,7 @@ internal class AddRemoveSignerTest {
   fun `can't remove master key`() {
     assertThrows<IllegalArgumentException> {
       runBlocking {
-        stellar.transaction(ADDRESS_ACTIVE).removeAccountSigner(ADDRESS_ACTIVE.address).build()
+        stellar.transaction(ADDRESS_ACTIVE).removeAccountSigner(ADDRESS_ACTIVE).build()
       }
     }
   }

@@ -2,7 +2,6 @@ package org.stellar.walletsdk.horizon.transaction
 
 import mu.KotlinLogging
 import org.stellar.sdk.*
-import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.DECIMAL_POINT_PRECISION
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.exception.HorizonRequestFailedException
@@ -10,9 +9,7 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
 
 private val log = KotlinLogging.logger {}
 
-abstract class CommonTransactionBuilder<T>(sourceAccount: AccountResponse) {
-  protected val sourceAddress: String = sourceAccount.accountId
-
+abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) {
   abstract val operations: MutableList<Operation>
 
   @Suppress("UNCHECKED_CAST")
@@ -32,14 +29,13 @@ abstract class CommonTransactionBuilder<T>(sourceAccount: AccountResponse) {
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun addAccountSigner(signerAddress: String, signerWeight: Int) = building {
+  fun addAccountSigner(signerAddress: AccountKeyPair, signerWeight: Int) = building {
     log.debug {
       "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = " +
         "$sourceAddress, signerAddress = $signerAddress, signerWeight = $signerWeight"
     }
 
-    val keyPair = KeyPair.fromAccountId(signerAddress)
-    val signer = Signer.ed25519PublicKey(keyPair)
+    val signer = Signer.ed25519PublicKey(signerAddress.keyPair)
 
     SetOptionsOperation.Builder()
       .setSourceAccount(sourceAddress)
@@ -54,8 +50,8 @@ abstract class CommonTransactionBuilder<T>(sourceAccount: AccountResponse) {
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun removeAccountSigner(signerAddress: String): T {
-    require(signerAddress != sourceAddress) {
+  fun removeAccountSigner(signerAddress: AccountKeyPair): T {
+    require(signerAddress.address != sourceAddress) {
       "This method can't be used to remove master signer key, " +
         "call ${this::lockAccountMasterKey.name} method instead"
     }
@@ -74,7 +70,7 @@ abstract class CommonTransactionBuilder<T>(sourceAccount: AccountResponse) {
   fun lockAccountMasterKey() = building {
     log.debug { "Lock master key tx: accountAddress = $sourceAddress" }
 
-    SetOptionsOperation.Builder().setMasterKeyWeight(0).build()
+    SetOptionsOperation.Builder().setSourceAccount(sourceAddress).setMasterKeyWeight(0).build()
   }
 
   /**
@@ -113,6 +109,7 @@ abstract class CommonTransactionBuilder<T>(sourceAccount: AccountResponse) {
 
   fun setThreshold(low: Int, medium: Int, high: Int) = building {
     SetOptionsOperation.Builder()
+      .setSourceAccount(sourceAddress)
       .setLowThreshold(low)
       .setMediumThreshold(medium)
       .setHighThreshold(high)
@@ -121,7 +118,8 @@ abstract class CommonTransactionBuilder<T>(sourceAccount: AccountResponse) {
 
   protected fun doCreateAccount(
     newAccount: AccountKeyPair,
-    startingBalance: UInt
+    startingBalance: UInt,
+    sourceAddress: String
   ): CreateAccountOperation {
     log.debug {
       "Fund tx: sourceAddress = $sourceAddress, destinationAddress = ${newAccount.address}, " +

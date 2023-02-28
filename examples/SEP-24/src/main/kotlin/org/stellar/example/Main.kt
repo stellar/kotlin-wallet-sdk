@@ -16,7 +16,7 @@ import org.stellar.walletsdk.horizon.transaction.toTransferTransaction
 // testnet tokens at
 // https://laboratory.stellar.org/#account-creator?network=test
 private val myKey =
-  System.getenv("STELLAR_KEY") ?: "SDYGC4TW5HHR5JA6CB2XLTTBF2DZRH2KDPBDPV3D5TXM6GF7FBPRZF3I"
+  System.getenv("STELLAR_KEY") ?: "SAHXRL7XY2RMUETMIRORXSQ7JJ73FOOF4OMLDSCJW22HRPMULKY4M7KP"
 private val myAccount = SigningKeyPair.fromSecret(myKey)
 
 // private val SRT = IssuedAssetId("SRT",
