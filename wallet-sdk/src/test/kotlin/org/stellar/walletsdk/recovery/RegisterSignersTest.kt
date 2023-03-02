@@ -19,7 +19,7 @@ internal class RegisterSignersTest {
         .recovery()
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
         )
     }
@@ -34,7 +34,7 @@ internal class RegisterSignersTest {
         .recovery()
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
         )
     }
@@ -49,13 +49,12 @@ internal class RegisterSignersTest {
         .recovery()
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
           sponsorAddress = ADDRESS_ACTIVE_TWO
         )
     }
 
-    // TODO: should be 4, see TODO in org.stellar.walletsdk.util.OperationKt.sponsorOperation
-    assertEquals(transaction.operations.size, 6)
+    assertEquals(transaction.operations.size, 4)
   }
 }

@@ -8,10 +8,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.stellar.sdk.Server
 import org.stellar.sdk.SetOptionsOperation
-import org.stellar.walletsdk.ADDRESS_ACTIVE
-import org.stellar.walletsdk.ADDRESS_ACTIVE_TWO
-import org.stellar.walletsdk.HORIZON_URL
-import org.stellar.walletsdk.TestWallet
+import org.stellar.walletsdk.*
 
 internal class AddRemoveSignerTest {
   private val server = spyk(Server(HORIZON_URL))
@@ -40,9 +37,9 @@ internal class AddRemoveSignerTest {
   fun `there are 3 operations in sponsored transaction`() {
     val transaction =
       runBlocking {
-          stellar
-            .transaction(ADDRESS_ACTIVE)
-            .addAccountSigner(ADDRESS_ACTIVE_TWO, 10, sponsorAddress = ADDRESS_ACTIVE.address)
+          stellar.transaction(ADDRESS_ACTIVE).sponsoring(ADDRESS_ACTIVE) {
+            addAccountSigner(ADDRESS_ACTIVE_TWO, 10)
+          }
         }
         .build()
 
@@ -85,7 +82,7 @@ internal class AddRemoveSignerTest {
   fun `can't remove master key`() {
     assertThrows<IllegalArgumentException> {
       runBlocking {
-        stellar.transaction(ADDRESS_ACTIVE).removeAccountSigner(ADDRESS_ACTIVE.address).build()
+        stellar.transaction(ADDRESS_ACTIVE).removeAccountSigner(ADDRESS_ACTIVE).build()
       }
     }
   }

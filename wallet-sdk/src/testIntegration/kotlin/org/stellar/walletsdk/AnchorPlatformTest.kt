@@ -19,7 +19,7 @@ import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
-import org.stellar.walletsdk.horizon.toTransferTransaction
+import org.stellar.walletsdk.horizon.transaction.toTransferTransaction
 
 class AnchorPlatformTest {
   private val USDC =

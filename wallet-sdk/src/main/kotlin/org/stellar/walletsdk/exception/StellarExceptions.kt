@@ -1,8 +1,6 @@
 package org.stellar.walletsdk.exception
 
 import java.math.BigDecimal
-import kotlin.reflect.KClass
-import org.stellar.sdk.Operation
 import org.stellar.sdk.responses.SubmitTransactionResponse
 
 sealed class StellarException : WalletException {
@@ -37,14 +35,5 @@ private val SubmitTransactionResponse.resultCode: String?
 private val SubmitTransactionResponse.operationsResultCodes: List<String>?
   get() =
     this.extras?.resultCodes?.operationsResultCodes?.run { if (this.isEmpty()) null else this }
-
-class InvalidSponsorOperationTypeException(
-  operationType: Collection<Operation>,
-  allowedOperations: Collection<KClass<out Operation>>
-) :
-  StellarException(
-    "${operationType.map { it::class.simpleName }} cannot be sponsored. " +
-      "Allowed operations are: ${allowedOperations.map { it.simpleName }}}."
-  )
 
 class OperationsLimitExceededException : StellarException("Maximum limit is 200 operations")

@@ -90,7 +90,7 @@ class RecoveryTest {
     val tx: Transaction =
       stellarService
         .transaction(masterPair)
-        .addAccountSigner(devicePair.address, 1)
+        .addAccountSigner(devicePair, 1)
         .lockAccountMasterKey()
         .build()
     println("addDeviceKey tx: ${tx.hashHex()}")

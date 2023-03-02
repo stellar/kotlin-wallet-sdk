@@ -36,10 +36,9 @@ internal class LockAccountMasterKeyTest {
   fun `there are 3 operations in sponsored transaction`() {
     val transaction =
       runBlocking {
-          wallet
-            .stellar()
-            .transaction(ADDRESS_ACTIVE)
-            .lockAccountMasterKey(sponsorAddress = ADDRESS_ACTIVE_TWO)
+          wallet.stellar().transaction(ADDRESS_ACTIVE).sponsoring(ADDRESS_ACTIVE_TWO) {
+            lockAccountMasterKey()
+          }
         }
         .build()
 

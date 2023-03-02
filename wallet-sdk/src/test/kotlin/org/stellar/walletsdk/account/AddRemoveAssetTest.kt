@@ -40,19 +40,7 @@ internal class AddRemoveAssetTest {
     val transaction = runBlocking {
       stellar
         .transaction(ADDRESS_ACTIVE)
-        .addAssetSupport(ASSET_USDC, sponsorAddress = ADDRESS_ACTIVE.address)
-        .build()
-    }
-
-    assertEquals(transaction.operations.size, 3)
-  }
-
-  @Test
-  fun `there are 3 operations in default sponsored transaction`() {
-    val transaction = runBlocking {
-      stellar
-        .transaction(ADDRESS_ACTIVE, defaultSponsorAddress = ADDRESS_ACTIVE.address)
-        .addAssetSupport(ASSET_USDC)
+        .sponsoring(ADDRESS_ACTIVE) { addAssetSupport(ASSET_USDC) }
         .build()
     }
 

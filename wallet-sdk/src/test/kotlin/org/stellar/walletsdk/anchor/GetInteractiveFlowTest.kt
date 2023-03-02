@@ -39,7 +39,7 @@ internal class GetInteractiveFlowTest {
         .interactive()
         .deposit(
           accountAddress = ADDRESS_ACTIVE.address,
-          fundsAccountAddress = ADDRESS_ACTIVE_TWO,
+          fundsAccountAddress = ADDRESS_ACTIVE_TWO.address,
           assetId = ASSET_SRT,
           authToken = authToken,
         )
@@ -74,7 +74,7 @@ internal class GetInteractiveFlowTest {
         .interactive()
         .deposit(
           accountAddress = ADDRESS_ACTIVE.address,
-          fundsAccountAddress = ADDRESS_ACTIVE_TWO,
+          fundsAccountAddress = ADDRESS_ACTIVE_TWO.address,
           assetId = ASSET_SRT,
           authToken = authToken,
         )

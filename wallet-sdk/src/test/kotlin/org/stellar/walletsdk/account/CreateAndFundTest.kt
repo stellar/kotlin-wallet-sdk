@@ -8,10 +8,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Server
-import org.stellar.walletsdk.ADDRESS_ACTIVE
-import org.stellar.walletsdk.ADDRESS_INACTIVE
-import org.stellar.walletsdk.HORIZON_URL
-import org.stellar.walletsdk.TestWallet
+import org.stellar.walletsdk.*
 
 internal class CreateAndFundTest {
   private val server = spyk(Server(HORIZON_URL))
@@ -36,7 +33,7 @@ internal class CreateAndFundTest {
   @Test
   fun `fund defaults work`() {
     val transaction =
-      runBlocking { stellar.transaction(ADDRESS_ACTIVE).fund(ADDRESS_INACTIVE) }.build()
+      runBlocking { stellar.transaction(ADDRESS_ACTIVE).createAccount(ADDRESS_INACTIVE) }.build()
 
     assertDoesNotThrow { transaction.toEnvelopeXdrBase64() }
   }
@@ -48,7 +45,8 @@ internal class CreateAndFundTest {
     val exception =
       assertFailsWith<Exception>(
         block = {
-          runBlocking { stellar.transaction(ADDRESS_ACTIVE).fund(ADDRESS_INACTIVE, "0") }.build()
+          runBlocking { stellar.transaction(ADDRESS_ACTIVE).createAccount(ADDRESS_INACTIVE, 0u) }
+            .build()
         }
       )
 
@@ -58,7 +56,7 @@ internal class CreateAndFundTest {
   @Test
   fun `there is 1 operation in non-sponsored transaction`() {
     val transaction =
-      runBlocking { stellar.transaction(ADDRESS_ACTIVE).fund(ADDRESS_INACTIVE) }.build()
+      runBlocking { stellar.transaction(ADDRESS_ACTIVE).createAccount(ADDRESS_INACTIVE) }.build()
 
     assertEquals(transaction.operations.size, 1)
   }
@@ -67,9 +65,9 @@ internal class CreateAndFundTest {
   fun `there are 3 operations in sponsored transaction`() {
     val transaction =
       runBlocking {
-          stellar
-            .transaction(ADDRESS_ACTIVE)
-            .fund(ADDRESS_INACTIVE, sponsorAddress = ADDRESS_ACTIVE.address)
+          stellar.transaction(ADDRESS_ACTIVE).sponsoring(ADDRESS_ACTIVE) {
+            createAccount(ADDRESS_INACTIVE)
+          }
         }
         .build()
 
