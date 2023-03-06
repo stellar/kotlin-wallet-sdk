@@ -1,5 +1,3 @@
-@file:JsExport
-
 package org.stellar.walletsdk
 
 import io.ktor.client.*

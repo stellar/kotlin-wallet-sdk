@@ -5,6 +5,11 @@ plugins {
   alias(libs.plugins.dokka)
   signing
   alias(libs.plugins.kotlin.serialization)
+  id("com.google.devtools.ksp") version "1.8.10-1.0.9"
+}
+
+repositories {
+  maven(url = "https://raw.githubusercontent.com/Deezer/KustomExport/mvn-repo")
 }
 
 project.kotlin {
@@ -46,8 +51,20 @@ project.kotlin {
   }
   js(IR) {
     moduleName = "kotlin-wallet-sdk"
-    nodejs()
-    browser()
+    nodejs {
+      testTask {
+        useMocha {
+          timeout = "15s"
+        }
+      }
+    }
+    browser {
+      testTask {
+        useKarma {
+          useFirefoxHeadless()
+        }
+      }
+    }
     binaries.library()
   }
 
@@ -80,14 +97,26 @@ project.kotlin {
         implementation(libs.logback.classic)
       }
     }
-    val jsMain by getting
-    val jsTest by getting
+    val jsMain by getting {
+      dependencies {
+        implementation(libs.coroutines.test)
+        implementation(npm("stellar-sdk", "10.4.1"))
+        implementation("org.jetbrains.kotlin-wrappers:kotlin-typescript:4.7.4-pre.376")
+        implementation("deezer.kustomexport:lib:0.8.1")
+        implementation("deezer.kustomexport:lib-coroutines:0.8.1")
+      }
+    }
+    val jsTest by getting { dependencies { implementation(kotlin("test-js")) } }
   }
   task("testAll") {
     description = "Run unit AND integration tests"
     dependsOn("test")
     dependsOn("testIntegration")
   }
+}
+
+dependencies {
+  add("kspJs", "deezer.kustomexport:compiler:0.8.1")
 }
 
 val dokkaOutputDir = buildDir.resolve("dokka")

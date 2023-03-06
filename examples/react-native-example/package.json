@@ -1,0 +1,40 @@
+{
+  "name": "react-native-example",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@expo/webpack-config": "^0.17.2",
+    "@tradle/react-native-http": "^2.0.1",
+    "@types/react": "~18.0.24",
+    "@types/react-native": "~0.70.6",
+    "buffer": "^6.0.3",
+    "events": "^1.0.0",
+    "expo": "~47.0.12",
+    "expo-random": "~13.0.0",
+    "expo-status-bar": "~1.4.2",
+    "https-browserify": "^1.0.0",
+    "kotlin-wallet-sdk": "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0.tgz",
+    "process": "^0.11.0",
+    "react": "18.1.0",
+    "react-dom": "18.1.0",
+    "react-native": "0.70.5",
+    "react-native-web": "~0.18.9",
+    "readable-stream": "^4.3.0",
+    "url": "~0.10.1",
+    "util": "~0.10.3",
+    "vm-browserify": "0.0.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "rn-nodeify": "^10.3.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "private": true
+}
