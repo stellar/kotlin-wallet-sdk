@@ -98,7 +98,7 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
  * not [Network.PUBLIC] for security reasons
  */
 data class ApplicationConfiguration(
-  val defaultSigner: WalletSigner = WalletSigner.Default,
+  val defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
   val base64Decoder: Base64Decoder = defaultBase64Decoder,
   val useHttp: Boolean = false
 )

@@ -14,6 +14,8 @@
   * [Fee bump transaction](#fee-bump-transaction)
   * [Using XDR to exchange transaction data between server and client](#using-xdr-to-exchange-transaction-data-between-server-and-client)
 * [Anchor](#anchor)
+  * [Add client domain signing](#add-client-domain-signing)
+    * [Example](#example)
 
 <!--- END -->
 
@@ -547,3 +549,102 @@ suspend fun accountHistory(): List<AnchorTransaction> {
 ```
 
 > You can get the full code [here](../examples/documentation/src/example-anchor-01.kt).
+
+### Add client domain signing
+
+One of the features being supported
+by [SEP-10 Authentication](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
+is verifying client domain. This enables anchor to recognize that user request was made using a specific client.
+
+Functionality of signing with client domain is enabled
+by [WalletSigner](../wallet-sdk/src/main/kotlin/org/stellar/walletsdk/auth/WalletSigner.kt). You can use a `DefaultSigner`
+class as a baseline for your implementation. The main method that needs to be implemented is `signWithDomainAccount`.
+Implementation should make a request to backend server containing client domain private key. Server returns signed
+transaction, finishing the flow.
+
+For your wallet signer to be used, it's required to pass it to SDK. It's recommended to set it globally via `ApplicationConfiguration` `defaultSigner`
+[option](https://javadoc.io/doc/org.stellar/wallet-sdk/latest/wallet-sdk/org.stellar.walletsdk/-application-configuration/index.html).
+Alternatively, it can be passed per `authenticate` call of `Auth` class.
+
+#### Example
+<!--- INCLUDE
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.*
+import org.stellar.example.exampleAnchor01.*
+import org.stellar.sdk.*
+import org.stellar.walletsdk.*
+import org.stellar.walletsdk.auth.*
+import org.stellar.walletsdk.horizon.AccountKeyPair
+
+val client = HttpClient() { install(ContentNegotiation) { json() } }
+-->
+In the example below, [Stellar demo wallet](https://demo-wallet.stellar.org) will be used as a client domain. Server-side
+implementation, responsible for signing transaction can be found [here](https://github.com/stellar/stellar-demo-wallet/tree/master/packages/demo-wallet-server).  
+First, add definition of request/response object for server requests:
+```kotlin
+@Serializable
+data class SigningData(
+  val transaction: String,
+  @SerialName("network_passphrase") val networkPassphrase: String
+)
+```
+Next, create a class extending `DefaultSigner`
+
+```kotlin
+class DemoWalletSigner: WalletSigner.DefaultSigner()
+```
+<!--- INCLUDE
+{
+-->
+After that add implementation for `signWithDomainAccount` function
+```kotlin
+  override suspend fun signWithDomainAccount(
+    transactionXDR: String,
+    networkPassPhrase: String,
+    account: AccountKeyPair
+  ): Transaction {
+    val response: SigningData =
+      client
+        .post("https://demo-wallet-server.stellar.org/sign") {
+          contentType(ContentType.Application.Json)
+          setBody(SigningData(transactionXDR, networkPassPhrase))
+        }
+        .body()
+
+    return Transaction.fromEnvelopeXdr(response.transaction, Network(networkPassPhrase)) as Transaction
+  }
+```
+<!--- INCLUDE
+}
+-->
+Wallet can now use this class:
+```kotlin
+val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(DemoWalletSigner()))
+```
+<!--- INCLUDE
+private val anchor = wallet.anchor("testanchor.stellar.org")
+-->
+It can now be used for autentication with client domain:
+```kotlin
+suspend fun authenticate(): AuthToken {
+  return anchor
+    .auth()
+    .authenticate(
+      wallet.stellar().account().createKeyPair(),
+      clientDomain = "demo-wallet-server.stellar.org"
+    )
+}
+```
+
+<!--- INCLUDE
+suspend fun main() {
+  println("Token for auth with client domain: ${authenticate()}")
+  client.close()
+}
+-->
+> You can get the full code [here](../examples/documentation/src/example-client-domain-01.kt).

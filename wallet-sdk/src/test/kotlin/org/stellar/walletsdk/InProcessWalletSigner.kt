@@ -16,14 +16,14 @@ class InProcessWalletSigner : WalletSigner {
     return (account as SigningKeyPair).sign(txn)
   }
 
-  override fun signWithDomainAccount(
-    transactionString: String,
+  override suspend fun signWithDomainAccount(
+    transactionXDR: String,
     networkPassPhrase: String,
     account: AccountKeyPair
   ): Transaction {
     val okHttpClient = OkHttpClient()
 
-    val clientDomainRequestParams = ChallengeResponse(transactionString, networkPassPhrase)
+    val clientDomainRequestParams = ChallengeResponse(transactionXDR, networkPassPhrase)
 
     val clientDomainRequest =
       OkHttpUtils.makePostRequest(AUTH_CLIENT_DOMAIN_URL, clientDomainRequestParams)

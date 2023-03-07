@@ -10,13 +10,13 @@ import org.stellar.walletsdk.horizon.sign
 interface WalletSigner {
   fun signWithClientAccount(txn: Transaction, account: AccountKeyPair): Transaction
 
-  fun signWithDomainAccount(
-    transactionString: String,
+  suspend fun signWithDomainAccount(
+    transactionXDR: String,
     networkPassPhrase: String,
     account: AccountKeyPair
   ): Transaction
 
-  companion object Default : WalletSigner {
+  open class DefaultSigner : WalletSigner {
     override fun signWithClientAccount(txn: Transaction, account: AccountKeyPair): Transaction {
       return when (account) {
         is SigningKeyPair -> txn.sign(account)
@@ -25,8 +25,8 @@ interface WalletSigner {
       }
     }
 
-    override fun signWithDomainAccount(
-      transactionString: String,
+    override suspend fun signWithDomainAccount(
+      transactionXDR: String,
       networkPassPhrase: String,
       account: AccountKeyPair
     ): Transaction {

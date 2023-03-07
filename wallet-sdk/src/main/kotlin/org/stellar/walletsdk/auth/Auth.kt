@@ -130,7 +130,7 @@ internal constructor(
    * endpoint
    * @return signed transaction
    */
-  private fun sign(
+  private suspend fun sign(
     account: AccountKeyPair,
     challengeResponse: ChallengeResponse,
     walletSigner: WalletSigner
@@ -147,6 +147,8 @@ internal constructor(
       }
 
     if (clientDomainOperation != null) {
+      log.debug { "Authenticating with client domain" }
+
       challengeTxn =
         walletSigner.signWithDomainAccount(
           challengeResponse.transaction,
