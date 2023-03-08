@@ -27,10 +27,10 @@ configurations {
 dependencies {
   api(libs.coroutines.core)
   api(libs.java.stellar.sdk)
-  api(libs.kotlin.serialization.json)
   api(libs.kotlin.datetime)
-  api(libs.okhttp3)
-  api(libs.kotlin.logging)
+  implementation(libs.bundles.ktor.client)
+  implementation(libs.kotlin.serialization.json)
+  implementation(libs.kotlin.logging)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)

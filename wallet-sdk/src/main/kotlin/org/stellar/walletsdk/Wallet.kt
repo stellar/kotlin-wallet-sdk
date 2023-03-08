@@ -1,11 +1,20 @@
 package org.stellar.walletsdk
 
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.core.*
 import java.util.*
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
+import org.stellar.walletsdk.json.defaultJson
 import org.stellar.walletsdk.recovery.Recovery
 import shadow.okhttp3.OkHttpClient
 
@@ -16,30 +25,44 @@ import shadow.okhttp3.OkHttpClient
 class Wallet(
   stellarConfiguration: StellarConfiguration,
   applicationConfiguration: ApplicationConfiguration = ApplicationConfiguration()
-) {
+) : Closeable {
   internal val cfg = Config(stellarConfiguration, applicationConfiguration)
 
-  init {
-    if (applicationConfiguration.useHttp) {
-      require(stellarConfiguration.network != Network.PUBLIC) {
-        "Using http is not allowed with main Stellar network (pubnet)"
-      }
-    }
+  private val clients = mutableListOf(cfg.app.defaultClient)
+
+  @Deprecated("To be removed in 0.7", ReplaceWith("anchor(httpClient) { host = homeDomain }"))
+  fun anchor(homeDomain: String, httpClientConfig: (OkHttpConfig.() -> Unit)? = null): Anchor {
+    return anchor(httpClientConfig) { host = homeDomain }
   }
 
   fun anchor(
-    homeDomain: String,
-    httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()
+    httpClientConfig: (OkHttpConfig.() -> Unit)? = null,
+    url: URLBuilder.() -> Unit
   ): Anchor {
-    return Anchor(cfg, homeDomain, httpClient)
+    val builder = URLBuilder().also { it.url() }
+
+    return Anchor(cfg, builder, getClient(httpClientConfig))
   }
 
   fun stellar(): Stellar {
     return Stellar(cfg)
   }
 
-  fun recovery(httpClient: okhttp3.OkHttpClient = okhttp3.OkHttpClient()): Recovery {
-    return Recovery(cfg, stellar(), httpClient)
+  fun recovery(httpClientConfig: (OkHttpConfig.() -> Unit)? = null): Recovery {
+    return Recovery(cfg, stellar(), getClient(httpClientConfig))
+  }
+
+  override fun close() {
+    clients.forEach { it.close() }
+  }
+
+  private fun getClient(httpClientConfig: (OkHttpConfig.() -> Unit)?): HttpClient {
+    val httpClient =
+      httpClientConfig?.run {
+        cfg.app.defaultClient.config { engine { (this as OkHttpConfig).httpClientConfig() } }
+      }
+    httpClient?.also { clients.add(it) }
+    return httpClient ?: cfg.app.defaultClient
   }
 }
 
@@ -85,7 +108,6 @@ data class StellarConfiguration(
 
 internal data class Config(val stellar: StellarConfiguration, val app: ApplicationConfiguration)
 
-// TODO: provide a default WalletSignerImpl
 /**
  * Application configuration
  *
@@ -96,22 +118,44 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
  * example, `android.util.Base64`.
  * @property useHttp when enabled, switch from https to http scheme. Only allowed when network is
  * not [Network.PUBLIC] for security reasons
+ * @property defaultClientConfig configuration for default client used across the app.
  */
 data class ApplicationConfiguration(
   val defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
   val base64Decoder: Base64Decoder = defaultBase64Decoder,
-  val useHttp: Boolean = false
-)
+  val defaultClientConfig: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
+) {
+  @Suppress("MaxLineLength")
+  @Deprecated(
+    "Can be configured using defaultClientConfig",
+    replaceWith =
+      ReplaceWith(
+        "ApplicationConfiguration(defaultSigner, base64Decoder) { defaultRequest { url { protocol = URLProtocol.HTTP } } }",
+        "io.ktor.client.plugins.defaultRequest",
+        "io.ktor.http.URLProtocol"
+      )
+  )
+  constructor(
+    defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
+    base64Decoder: Base64Decoder = defaultBase64Decoder,
+    useHttp: Boolean
+  ) : this(
+    defaultSigner,
+    base64Decoder,
+    {
+      if (useHttp) {
+        defaultRequest { url { protocol = URLProtocol.HTTP } }
+      }
+    }
+  )
+
+  val defaultClient =
+    HttpClient(OkHttp) {
+      install(ContentNegotiation) { json(defaultJson) }
+      defaultClientConfig()
+    }
+}
 
 typealias Base64Decoder = ((String) -> ByteArray)
 
 internal val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }
-
-internal val Config.scheme: String
-  get() {
-    return if (this.app.useHttp) {
-      "http"
-    } else {
-      "https"
-    }
-  }

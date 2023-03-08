@@ -124,4 +124,6 @@ suspend fun main() {
   } while (transaction.status != TransactionStatus.COMPLETED)
 
   println("Successful withdrawal")
+
+  wallet.close()
 }

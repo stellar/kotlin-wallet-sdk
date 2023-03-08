@@ -1,34 +1,22 @@
 package org.stellar.walletsdk.anchor
 
+import io.ktor.client.*
+import io.ktor.http.*
 import mu.KotlinLogging
-import okhttp3.OkHttpClient
 import okhttp3.internal.toImmutableMap
-import org.stellar.walletsdk.*
+import org.stellar.walletsdk.InteractiveFlowResponse
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
-import org.stellar.walletsdk.json.toJson
-import org.stellar.walletsdk.toml.StellarToml
-import org.stellar.walletsdk.toml.parseToml
-import org.stellar.walletsdk.util.OkHttpUtils
+import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
 
-/**
- * Interactive flow for deposit and withdrawal using SEP-24.
- *
- * @param anchor instance of the [Anchor]
- * @param httpClient HTTP client
- * @return response object from the anchor
- * @throws [AnchorAssetException] if asset was refused by the anchor
- * @throws [ServerRequestFailedException] if network request fails
- */
+/** Interactive flow for deposit and withdrawal using SEP-24. */
 class Interactive
 internal constructor(
-  private val homeDomain: String,
   private val anchor: Anchor,
-  private val cfg: Config,
-  private val httpClient: OkHttpClient,
+  private val httpClient: HttpClient,
 ) {
   /**
    * Initiates interactive withdrawal using
@@ -108,17 +96,14 @@ internal constructor(
     type: String,
     assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
   ): InteractiveFlowResponse {
-    val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
-    val tomlInfo = parseToml(toml.getToml())
+    val info = anchor.getInfo()
 
     // Check if SEP-24 and SEP-10 are configured
-    if (tomlInfo.services.sep24 == null) {
+    if (info.services.sep24 == null) {
       throw AnchorInteractiveFlowNotSupported
-    } else if (!tomlInfo.services.sep24.hasAuth) {
+    } else if (!info.services.sep24.hasAuth) {
       throw AnchorAuthNotSupported
     }
-
-    val transferServerEndpoint = tomlInfo.services.sep24.transferServerSep24
 
     val serviceInfo = anchor.getServicesInfo()
 
@@ -142,14 +127,15 @@ internal constructor(
 
     log.debug { "Interactive $type request: account = $account, asset_code = ${assetId.code}" }
 
+    val url =
+      URLBuilder(
+          info.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
+        )
+        .appendPathSegments("transactions", type, "interactive")
+        .build()
+        .toString()
+
     // Get SEP-24 anchor response
-    val requestUrl = "$transferServerEndpoint/transactions/${type}/interactive"
-    val request = OkHttpUtils.makePostRequest(requestUrl, requestParams.toImmutableMap(), authToken)
-
-    return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-      response.toJson()
-    }
+    return httpClient.postJson(url, requestParams.toImmutableMap(), authToken)
   }
 }

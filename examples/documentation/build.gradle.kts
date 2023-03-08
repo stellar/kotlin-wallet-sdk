@@ -10,8 +10,5 @@ dependencies {
     implementation(project(":wallet-sdk"))
 
     implementation(libs.kotlin.serialization.json)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.serialization.json)
-    implementation(libs.ktor.client.okhttp)
+    implementation(libs.bundles.ktor.client)
 }
