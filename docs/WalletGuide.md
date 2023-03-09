@@ -80,10 +80,10 @@ val walletCustomClient =
     )
   )
 ```
-This code will set connect timeout to 10 seconds via 
+This code will set the connect timeout to 10 seconds via the
 [okhttp configuration](https://ktor.io/docs/http-client-engines.html#okhttp) 
-and install [retry plugin](https://ktor.io/docs/client-retry.html)  
-Some services also allows client configuration. For example, to change connect timeout when connecting to recovery 
+and also installs the [retry plugin](https://ktor.io/docs/client-retry.html).
+You can also specify client configuration for specific Wallet SDK classes. For example, to change connect timeout when connecting to recovery 
 servers:
 ```kotlin
 val recoveryCustomClient =
