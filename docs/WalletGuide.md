@@ -61,10 +61,10 @@ val walletCustom = Wallet(
 ```
 
 ### Configuring client
-Wallet SDK uses [ktor client](https://ktor.io/docs/getting-started-ktor-client.html) for all network requests 
-(excluding Horizon, where SDK http client is used). Currently, okhttp engine is configured to be used with the client.  
-Ktor has a reach client configuration, you can read about it more [here](https://ktor.io/docs/create-client.html#configure-client).
-For example, client can be globally configured:
+The Wallet SDK uses the [ktor client](https://ktor.io/docs/getting-started-ktor-client.html) for all network requests 
+(excluding Horizon, where the Stellar SDK's http client is used). Currently, the okhttp engine is configured to be used with the client.  
+You can read more about how to configure the ktor client [here](https://ktor.io/docs/create-client.html#configure-client).
+For example, the client can be globally configured:
 ```kotlin
 val walletCustomClient =
   Wallet(
