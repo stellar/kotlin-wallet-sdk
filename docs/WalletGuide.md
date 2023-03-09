@@ -93,9 +93,9 @@ val recoveryCustomClient =
 ```
 
 ### Closing resources
-After wallet class is no longer used, it's necessary to close all clients used by it. While in some applications it may 
-not be required (e.g. wallet lives for the whole lifetime of the app), in other cases it can be required.  
-If your wallet class is short-lived it's recommended to close client resources using close function:
+After the wallet class is no longer used, it's necessary to close all clients used by it. While in some applications it may 
+not be required (e.g. the wallet lives for the whole lifetime of the app), in other cases it can be required.  
+If your wallet class is short-lived, it's recommended to close client resources using close function:
 ```kotlin
 fun closeWallet() {
   wallet.close()
