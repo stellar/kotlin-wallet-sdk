@@ -30,25 +30,23 @@ class Wallet(
 
   private val clients = mutableListOf(cfg.app.defaultClient)
 
-  @Deprecated("To be removed in 0.7", ReplaceWith("anchor(httpClient) { host = homeDomain }"))
-  fun anchor(homeDomain: String, httpClientConfig: (OkHttpConfig.() -> Unit)? = null): Anchor {
-    return anchor(httpClientConfig) { host = homeDomain }
+  @Deprecated(
+    "To be removed in 0.7",
+    ReplaceWith("this.anchor(Url(\"https://\$homeDomain\"), httpClientConfig)", "io.ktor.http.Url")
+  )
+  fun anchor(homeDomain: String, httpClientConfig: ClientConfigFn? = null): Anchor {
+    return anchor(Url("https://$homeDomain"), httpClientConfig)
   }
 
-  fun anchor(
-    httpClientConfig: (OkHttpConfig.() -> Unit)? = null,
-    url: URLBuilder.() -> Unit
-  ): Anchor {
-    val builder = URLBuilder().also { it.url() }
-
-    return Anchor(cfg, builder, getClient(httpClientConfig))
+  fun anchor(url: Url, httpClientConfig: ClientConfigFn? = null): Anchor {
+    return Anchor(cfg, url, getClient(httpClientConfig))
   }
 
   fun stellar(): Stellar {
     return Stellar(cfg)
   }
 
-  fun recovery(httpClientConfig: (OkHttpConfig.() -> Unit)? = null): Recovery {
+  fun recovery(httpClientConfig: ClientConfigFn? = null): Recovery {
     return Recovery(cfg, stellar(), getClient(httpClientConfig))
   }
 
@@ -56,13 +54,21 @@ class Wallet(
     clients.forEach { it.close() }
   }
 
-  private fun getClient(httpClientConfig: (OkHttpConfig.() -> Unit)?): HttpClient {
+  @Suppress("UNCHECKED_CAST")
+  private fun getClient(httpClientConfig: ClientConfigFn?): HttpClient {
     val httpClient =
       httpClientConfig?.run {
-        cfg.app.defaultClient.config { engine { (this as OkHttpConfig).httpClientConfig() } }
+        cfg.app.defaultClient.config { (this as HttpClientConfig<OkHttpConfig>).httpClientConfig() }
       }
     httpClient?.also { clients.add(it) }
     return httpClient ?: cfg.app.defaultClient
+  }
+
+  companion object {
+    val Testnet =
+      Wallet(
+        StellarConfiguration.Testnet,
+      )
   }
 }
 
@@ -123,7 +129,7 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
 data class ApplicationConfiguration(
   val defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
   val base64Decoder: Base64Decoder = defaultBase64Decoder,
-  val defaultClientConfig: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
+  val defaultClientConfig: ClientConfigFn = {}
 ) {
   @Suppress("MaxLineLength")
   @Deprecated(
@@ -152,10 +158,15 @@ data class ApplicationConfiguration(
   val defaultClient =
     HttpClient(OkHttp) {
       install(ContentNegotiation) { json(defaultJson) }
+      defaultRequest { url { protocol = URLProtocol.HTTPS } }
       defaultClientConfig()
     }
 }
 
 typealias Base64Decoder = ((String) -> ByteArray)
+
+internal typealias ClientConfig = HttpClientConfig<OkHttpConfig>
+
+internal typealias ClientConfigFn = (ClientConfig.() -> Unit)
 
 internal val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }

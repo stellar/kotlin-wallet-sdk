@@ -19,7 +19,7 @@ internal object StellarToml {
    *
    * @return content of the TOML file
    */
-  suspend fun getToml(baseURL: URLBuilder, httpClient: HttpClient): TomlInfo {
+  suspend fun getToml(baseURL: Url, httpClient: HttpClient): TomlInfo {
     val tomlContent =
       httpClient
         .get {

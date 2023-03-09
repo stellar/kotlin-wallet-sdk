@@ -22,10 +22,10 @@ private val log = KotlinLogging.logger {}
 class Anchor
 internal constructor(
   private val cfg: Config,
-  private val baseUrl: URLBuilder,
+  private val baseUrl: Url,
   private val httpClient: HttpClient
 ) {
-  private val infoHolder = InfoHolder(baseUrl, httpClient)
+  private val infoHolder = InfoHolder(cfg.stellar.network, baseUrl, httpClient)
 
   /**
    * Get anchor information from a TOML file.
@@ -46,7 +46,8 @@ internal constructor(
     return Auth(
       cfg,
       getInfo().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
-      baseUrl.host,
+      // Strip protocol
+      baseUrl.toString().replace("${baseUrl.protocol.name}://", ""),
       httpClient
     )
   }
@@ -174,7 +175,11 @@ internal constructor(
   }
 }
 
-private class InfoHolder(private val baseUrl: URLBuilder, private val httpClient: HttpClient) {
+private class InfoHolder(
+  private val network: Network,
+  private val baseUrl: Url,
+  private val httpClient: HttpClient
+) {
   // This 2 variables are lazy and shouldn't be used directly. Call getInfo() and getServiceInfo()
   // instead
   private lateinit var info: TomlInfo
@@ -183,6 +188,7 @@ private class InfoHolder(private val baseUrl: URLBuilder, private val httpClient
   suspend fun getInfo(): TomlInfo {
     if (!::info.isInitialized) {
       info = StellarToml.getToml(baseUrl, httpClient)
+      info.validate(network)
     }
 
     return info

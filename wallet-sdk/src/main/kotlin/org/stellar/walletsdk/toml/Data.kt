@@ -1,6 +1,9 @@
 package org.stellar.walletsdk.toml
 
+import io.ktor.http.*
+import org.stellar.sdk.Network
 import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.exception.ValidationException
 import shadow.com.google.gson.annotations.SerializedName
 
 data class TomlInfo(
@@ -52,6 +55,30 @@ data class TomlInfo(
           null
         }
     )
+
+  fun validate(network: Network) {
+    if (network != Network.PUBLIC) {
+      return
+    }
+
+    requireSecure("TRANSFER_SERVER", transferServer)
+    requireSecure("TRANSFER_SERVER_SEP0024", transferServerSep24)
+    requireSecure("FEDERATION_SERVER", federationServer)
+    requireSecure("AUTH_SERVER", authServer)
+    requireSecure("KYC_SERVER", kycServer)
+    requireSecure("WEB_AUTH_ENDPOINT", webAuthEndpoint)
+    requireSecure("DIRECT_PAYMENT_SERVER", directPaymentServer)
+    requireSecure("ANCHOR_QUOTE_SERVER", anchorQuoteServer)
+  }
+
+  private fun requireSecure(name: String, url: String?) {
+    if (url != null && URLBuilder(url).protocol.name != URLProtocol.HTTPS.name) {
+      throw ValidationException(
+        "TOML file contains url using http protocol for $name: $url. Http urls are prohibited " +
+          "in production environment. Please notify anchor owner."
+      )
+    }
+  }
 }
 
 data class InfoDocumentation(

@@ -1,5 +1,6 @@
 package org.stellar.example
 
+import io.ktor.http.*
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.walletsdk.StellarConfiguration
@@ -40,7 +41,7 @@ suspend fun main() {
   tx.sign(myAccount)
   stellar.submitTransaction(tx)
 
-  val anchor = wallet.anchor(DOMAIN)
+  val anchor = wallet.anchor(Url("https://$DOMAIN"))
 
   // Get info from the anchor server
   val info = anchor.getInfo()

@@ -128,9 +128,7 @@ internal constructor(
     log.debug { "Interactive $type request: account = $account, asset_code = ${assetId.code}" }
 
     val url =
-      URLBuilder(
-          info.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
-        )
+      URLBuilder(info.services.sep24.transferServerSep24)
         .appendPathSegments("transactions", type, "interactive")
         .build()
         .toString()

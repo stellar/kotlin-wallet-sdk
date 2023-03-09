@@ -28,7 +28,7 @@ dependencies {
   api(libs.coroutines.core)
   api(libs.java.stellar.sdk)
   api(libs.kotlin.datetime)
-  implementation(libs.bundles.ktor.client)
+  api(libs.bundles.ktor.client)
   implementation(libs.kotlin.serialization.json)
   implementation(libs.kotlin.logging)
 

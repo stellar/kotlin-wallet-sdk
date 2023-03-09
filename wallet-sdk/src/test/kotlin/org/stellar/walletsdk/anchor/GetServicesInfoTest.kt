@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.AUTH_HOME_DOMAIN
@@ -10,6 +11,6 @@ internal class GetServicesInfoTest {
 
   @Test
   fun `fetches info endpoint data`() {
-    runBlocking { wallet.anchor(AUTH_HOME_DOMAIN).getServicesInfo() }
+    runBlocking { wallet.anchor(Url("https://$AUTH_HOME_DOMAIN")).getServicesInfo() }
   }
 }

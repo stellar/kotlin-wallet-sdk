@@ -3,6 +3,8 @@
 <!--- TOC -->
 
 * [Getting started](#getting-started)
+  * [Configuring client](#configuring-client)
+  * [Closing resources](#closing-resources)
 * [Build on Stellar](#build-on-stellar)
   * [Account service](#account-service)
   * [Transaction builder](#transaction-builder)
@@ -21,6 +23,9 @@
 
 <!--- INCLUDE
 import org.stellar.walletsdk.*
+import io.ktor.client.plugins.*
+import io.ktor.http.*
+import java.time.Duration
 -->
 
 ## Getting started
@@ -49,7 +54,50 @@ There is one more available configuration for wallet that allows to configure in
 For example, to test with local servers on http protocol, http can be manually enabled.
 
 ```kotlin
-val walletCustom = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = true))
+val walletCustom = Wallet(
+  StellarConfiguration.Testnet,
+  ApplicationConfiguration { defaultRequest { url { protocol = URLProtocol.HTTP } } }
+)
+```
+
+### Configuring client
+Wallet SDK uses [ktor client](https://ktor.io/docs/getting-started-ktor-client.html) for all network requests 
+(excluding Horizon, where SDK http client is used). Currently, okhttp engine is configured to be used with the client.  
+Ktor has a reach client configuration, you can read about it more [here](https://ktor.io/docs/create-client.html#configure-client).
+For example, client can be globally configured:
+```kotlin
+val walletCustomClient =
+  Wallet(
+    StellarConfiguration.Testnet,
+    ApplicationConfiguration(
+      defaultClientConfig = {
+        engine { this.config { this.connectTimeout(Duration.ofSeconds(10)) } }
+        install(HttpRequestRetry) {
+          retryOnServerErrors(maxRetries = 5)
+          exponentialDelay()
+        }
+      }
+    )
+  )
+```
+This code will set connect timeout to 10 seconds and install [retry plugin](https://ktor.io/docs/client-retry.html)  
+Some services also allows client configuration. For example, to change connect timeout when connecting to recovery 
+servers:
+```kotlin
+val recoveryCustomClient =
+  walletCustomClient.recovery {
+    engine { this.config { this.connectTimeout(Duration.ofSeconds(30)) } }
+  }
+```
+
+### Closing resources
+After wallet class is no longer used, it's necessary to close all clients used by it. While in some applications it may 
+not be required (e.g. wallet lives for the whole lifetime of the app), in other cases it can be required.  
+If your wallet class is short-lived it's recommended to close client resources using close function:
+```kotlin
+fun closeWallet() {
+  wallet.close()
+}
 ```
 
 > You can get the full code [here](../examples/documentation/src/example-basic-01.kt).
@@ -452,6 +500,7 @@ suspend fun recoverSigned(xdrString: String) {
 ## Anchor
 
 <!--- INCLUDE .*anchor.*
+import io.ktor.http.Url
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.AnchorServiceInfo
 import org.stellar.walletsdk.anchor.AnchorTransaction
@@ -490,7 +539,7 @@ suspend fun main() {
 Build on and off ramps with anchors for deposits and withdrawals.
 
 ```kotlin
-val anchor = wallet.anchor("testanchor.stellar.org")
+val anchor = wallet.anchor(Url("https://testanchor.stellar.org"))
 ```
 
 Get anchor information from a TOML file.
@@ -627,7 +676,7 @@ Wallet can now use this class:
 val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(DemoWalletSigner()))
 ```
 <!--- INCLUDE
-private val anchor = wallet.anchor("testanchor.stellar.org")
+val anchor = wallet.anchor(Url("https://testanchor.stellar.org"))
 -->
 It can now be used for autentication with client domain:
 ```kotlin

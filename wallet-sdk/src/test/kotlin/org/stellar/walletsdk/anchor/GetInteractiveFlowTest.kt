@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.Test
@@ -10,7 +11,7 @@ import org.stellar.walletsdk.toml.parseToml
 
 internal class GetInteractiveFlowTest {
   private val wallet = TestWallet
-  private val anchor = wallet.anchor(AUTH_HOME_DOMAIN)
+  private val anchor = wallet.anchor(Url("https://$AUTH_HOME_DOMAIN"))
   private val toml = parseToml(mapFromTomlFile("stellar.toml"))
 
   @Test

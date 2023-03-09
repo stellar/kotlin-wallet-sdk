@@ -3,7 +3,9 @@
 package org.stellar.walletsdk
 
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlin.test.assertEquals
 import kotlin.test.fail
 import kotlin.time.Duration.Companion.seconds
@@ -29,8 +31,11 @@ class AnchorPlatformTest {
   private val asset = USDC
   private val homeDomain = "localhost:8080"
   private val wallet =
-    Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(useHttp = true))
-  private val anchor = wallet.anchor(homeDomain)
+    Wallet(
+      StellarConfiguration.Testnet,
+      ApplicationConfiguration { defaultRequest { url { protocol = URLProtocol.HTTP } } }
+    )
+  private val anchor = wallet.anchor(Url("http://$homeDomain"))
   private val client = HttpClient()
   private val maxTries = 40
 
