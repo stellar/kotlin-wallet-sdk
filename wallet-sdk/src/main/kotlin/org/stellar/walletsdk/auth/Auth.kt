@@ -1,16 +1,16 @@
 package org.stellar.walletsdk.auth
 
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import mu.KotlinLogging
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
-import org.stellar.walletsdk.json.toJson
-import org.stellar.walletsdk.scheme
-import org.stellar.walletsdk.util.OkHttpUtils
+import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
 
@@ -32,7 +32,7 @@ internal constructor(
   private val cfg: Config,
   private val webAuthEndpoint: String,
   private val homeDomain: String,
-  private val httpClient: OkHttpClient
+  private val httpClient: HttpClient
 ) {
   /**
    * Authenticates to an external server.
@@ -73,20 +73,18 @@ internal constructor(
     memoId: String? = null,
     clientDomain: String? = null
   ): ChallengeResponse {
-    val endpoint = webAuthEndpoint.toHttpUrl()
-    val authURL = endpoint.newBuilder().scheme(cfg.scheme)
+    val url = URLBuilder(webAuthEndpoint)
 
     // Add required query params
-    authURL
-      .addQueryParameter("account", account.address)
-      .addQueryParameter("home_domain", homeDomain)
+    url.parameters.append("account", account.address)
+    url.parameters.append("home_domain", homeDomain)
 
     if (!memoId.isNullOrBlank()) {
       if (memoId.toInt() < 0) {
         throw InvalidMemoIdException
       }
 
-      authURL.addQueryParameter("memo", memoId)
+      url.parameters.append("memo", memoId)
     }
 
     if (!clientDomain.isNullOrBlank()) {
@@ -94,32 +92,24 @@ internal constructor(
         throw ClientDomainWithMemoException
       }
 
-      authURL.addQueryParameter("client_domain", clientDomain)
+      url.parameters.append("client_domain", clientDomain)
     }
-
-    authURL.build()
 
     log.debug {
       "Challenge request: account = $account, memo = $memoId, client_domain = $clientDomain"
     }
 
-    val request = OkHttpUtils.buildStringGetRequest(authURL.toString())
+    val jsonResponse = httpClient.get(url.build()).body<ChallengeResponse>()
 
-    return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-      val jsonResponse: ChallengeResponse = response.toJson()
-
-      if (jsonResponse.transaction.isBlank()) {
-        throw MissingTransactionException
-      }
-
-      if (jsonResponse.networkPassphrase != cfg.stellar.network.networkPassphrase) {
-        throw NetworkMismatchException
-      }
-
-      jsonResponse
+    if (jsonResponse.transaction.isBlank()) {
+      throw MissingTransactionException
     }
+
+    if (jsonResponse.networkPassphrase != cfg.stellar.network.networkPassphrase) {
+      throw NetworkMismatchException
+    }
+
+    return jsonResponse
   }
 
   /**
@@ -173,20 +163,15 @@ internal constructor(
   private suspend fun getToken(signedTransaction: Transaction): AuthToken {
     val signedChallengeTxnXdr = signedTransaction.toEnvelopeXdrBase64()
     val tokenRequestParams = AuthTransaction(signedChallengeTxnXdr)
-    val tokenRequest = OkHttpUtils.makePostRequest(webAuthEndpoint, tokenRequestParams)
 
-    httpClient.newCall(tokenRequest).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
+    val resp: AuthTokenResponse = httpClient.postJson(webAuthEndpoint, tokenRequestParams)
 
-      val jsonResponse: AuthTokenResponse = response.toJson()
-
-      if (jsonResponse.token.toString().isBlank()) {
-        throw MissingTokenException
-      }
-
-      log.debug { "Auth token: ${jsonResponse.token.prettify()}..." }
-
-      return jsonResponse.token
+    if (resp.token.toString().isBlank()) {
+      throw MissingTokenException
     }
+
+    log.debug { "Auth token: ${resp.token.prettify()}..." }
+
+    return resp.token
   }
 }

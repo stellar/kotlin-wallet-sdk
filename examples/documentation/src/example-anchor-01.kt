@@ -1,6 +1,7 @@
 // This file was automatically generated from WalletGuide.md by Knit tool. Do not edit.
 package org.stellar.example.exampleAnchor01
 
+import io.ktor.http.Url
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.AnchorServiceInfo
 import org.stellar.walletsdk.anchor.AnchorTransaction
@@ -11,7 +12,7 @@ import org.stellar.walletsdk.toml.TomlInfo
 val wallet = Wallet(StellarConfiguration.Testnet)
 val accountKeyPair = wallet.stellar().account().createKeyPair()
 
-val anchor = wallet.anchor("testanchor.stellar.org")
+val anchor = wallet.anchor(Url("https://testanchor.stellar.org"))
 
 suspend fun anchorToml(): TomlInfo {
   return anchor.getInfo()

@@ -1,7 +1,7 @@
 package org.stellar.walletsdk.recovery
 
+import io.ktor.client.*
 import mu.KotlinLogging
-import okhttp3.OkHttpClient
 import org.stellar.sdk.*
 import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
@@ -13,8 +13,8 @@ import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.horizon.toPublicKeyPair
-import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.*
+import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
 
@@ -22,7 +22,7 @@ class Recovery
 internal constructor(
   private val cfg: Config,
   private val stellar: Stellar,
-  private val client: OkHttpClient
+  private val client: HttpClient
 ) {
   /**
    * Sign transaction with recovery servers. It is used to recover an account using
@@ -55,20 +55,15 @@ internal constructor(
   ): DecoratedSignature {
     val requestUrl = "${it.endpoint}/accounts/$accountAddress/sign/${it.signerAddress}"
     val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
-    val request = OkHttpUtils.makePostRequest(requestUrl, requestParams, it.authToken)
 
     log.debug {
       "Recovery server signature request: accountAddress = $accountAddress, " +
         "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.prettify()}..."
     }
 
-    return client.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
+    val authResponse: AuthSignature = client.postJson(requestUrl, requestParams, it.authToken)
 
-      val authResponse: AuthSignature = response.toJson()
-
-      createDecoratedSignature(it.signerAddress, cfg.app.base64Decoder(authResponse.signature))
-    }
+    return createDecoratedSignature(it.signerAddress, cfg.app.base64Decoder(authResponse.signature))
   }
 
   /**
@@ -93,25 +88,15 @@ internal constructor(
         Auth(cfg, it.authEndpoint, it.homeDomain, client).authenticate(account, it.walletSigner)
 
       val requestUrl = "${it.endpoint}/accounts/${account.address}"
-      val request =
-        OkHttpUtils.makePostRequest(
-          requestUrl,
-          RecoveryIdentities(identities = accountIdentity),
-          authToken
-        )
+      val resp: RecoveryAccount =
+        client.postJson(requestUrl, RecoveryIdentities(accountIdentity), authToken)
 
       log.debug {
         "Recovery server enroll request: accountAddress = ${account.address}, homeDomain =" +
           " ${it.homeDomain}, authToken = ${authToken.prettify()}..."
       }
 
-      client.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-        val jsonResponse = response.toJson<RecoveryAccount>()
-
-        getLatestRecoverySigner(jsonResponse.signers)
-      }
+      getLatestRecoverySigner(resp.signers)
     }
   }
 

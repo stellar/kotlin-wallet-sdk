@@ -43,7 +43,7 @@ class DemoWalletSigner: WalletSigner.DefaultSigner()
 }
 
 val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(DemoWalletSigner()))
-private val anchor = wallet.anchor("testanchor.stellar.org")
+val anchor = wallet.anchor(Url("https://testanchor.stellar.org"))
 
 suspend fun authenticate(): AuthToken {
   return anchor

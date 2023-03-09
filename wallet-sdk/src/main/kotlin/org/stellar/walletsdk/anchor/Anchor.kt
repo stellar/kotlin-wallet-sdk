@@ -1,45 +1,31 @@
 package org.stellar.walletsdk.anchor
 
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
-import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.toml.TomlInfo
-import org.stellar.walletsdk.toml.parseToml
 import org.stellar.walletsdk.util.*
+import org.stellar.walletsdk.util.Util.anchorGet
 
 private val log = KotlinLogging.logger {}
 
-/**
- * Build on/off ramps with anchors.
- *
- * @property server Horizon [Server] instance
- * @property network Stellar [Network] instance
- * @property homeDomain home domain of the anchor
- * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
- */
+/** Build on/off ramps with anchors. */
 class Anchor
 internal constructor(
   private val cfg: Config,
-  private val homeDomain: String,
-  private val httpClient: OkHttpClient
+  private val baseUrl: Url,
+  private val httpClient: HttpClient
 ) {
-  private val server = cfg.stellar.server
-  private val network = cfg.stellar.network
-
-  // This 2 variables are lazy and shouldn't be used directly. Call getInfo() and getServiceInfo()
-  // instead
-  private lateinit var info: TomlInfo
-  private lateinit var serviceInfo: AnchorServiceInfo
+  private val infoHolder = InfoHolder(cfg.stellar.network, baseUrl, httpClient)
 
   /**
    * Get anchor information from a TOML file.
@@ -47,13 +33,7 @@ internal constructor(
    * @return TOML file content
    */
   suspend fun getInfo(): TomlInfo {
-    if (!::info.isInitialized) {
-      val toml = StellarToml(cfg.scheme, homeDomain, httpClient)
-
-      info = parseToml(toml.getToml())
-    }
-
-    return info
+    return infoHolder.getInfo()
   }
 
   /**
@@ -66,7 +46,8 @@ internal constructor(
     return Auth(
       cfg,
       getInfo().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
-      homeDomain,
+      // Strip protocol
+      baseUrl.toString().replace("${baseUrl.protocol.name}://", ""),
       httpClient
     )
   }
@@ -80,31 +61,7 @@ internal constructor(
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
   suspend fun getServicesInfo(): AnchorServiceInfo {
-    if (!::serviceInfo.isInitialized) {
-      val url =
-        getInfo().services.sep24?.transferServerSep24?.toHttpUrl()
-          ?: throw AnchorInteractiveFlowNotSupported
-
-      val urlBuilder = HttpUrl.Builder().scheme(url.scheme).host(url.host).port(url.port)
-
-      url.pathSegments.forEach { urlBuilder.addPathSegment(it) }
-      urlBuilder.addPathSegment("info")
-
-      val infoUrl = urlBuilder.build().toString()
-
-      log.debug { "Anchor services /info request: serviceUrl = $url" }
-
-      val request = Request.Builder().url(infoUrl).build()
-
-      serviceInfo =
-        httpClient.newCall(request).execute().use { response ->
-          if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-          response.toJson()
-        }
-    }
-
-    return serviceInfo
+    return infoHolder.getServicesInfo()
   }
 
   /**
@@ -113,7 +70,7 @@ internal constructor(
    * @return interactive flow service
    */
   fun interactive(): Interactive {
-    return Interactive(homeDomain, this, cfg, httpClient)
+    return Interactive(this, httpClient)
   }
 
   // TODO: is this for SEP-24 only?
@@ -128,18 +85,11 @@ internal constructor(
    * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
-    val transferServerEndpoint =
-      getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
-    val endpointUrl = "$transferServerEndpoint/transaction?id=$transactionId"
-    val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
-
-    log.debug { "Anchor account's transaction by ID request: transactionId = $transactionId" }
-
-    return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-      response.toJson<AnchorTransactionStatusResponse>().transaction
-    }
+    return get<AnchorTransactionStatusResponse>(authToken) {
+        appendPathSegments("transaction")
+        parameters.append("id", transactionId)
+      }
+      .transaction
   }
 
   // TODO: is this for SEP-24 only?
@@ -157,20 +107,11 @@ internal constructor(
     asset: AssetId,
     authToken: AuthToken
   ): List<AnchorTransaction> {
-    val transferServerEndpoint =
-      getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
-    val endpointUrl = "$transferServerEndpoint/transactions?asset_code=${asset.sep38}"
-    val request = OkHttpUtils.buildStringGetRequest(endpointUrl, authToken)
-
-    log.debug {
-      "Anchor account's all transactions request: assetCode = ${asset.sep38}, authToken = ${authToken.prettify()}"
-    }
-
-    return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-      response.toJson<AnchorAllTransactionsResponse>().transactions
-    }
+    return get<AnchorAllTransactionsResponse>(authToken) {
+        appendPathSegments("transactions")
+        parameters.append("asset_code", asset.sep38)
+      }
+      .transactions
   }
 
   /**
@@ -201,17 +142,6 @@ internal constructor(
       throw AssetNotSupportedException(assetId)
     }
 
-    val transferServerEndpoint =
-      getInfo().services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
-    val endpointHttpUrl = transferServerEndpoint.toHttpUrl()
-    val endpointUrl = HttpUrl.Builder().scheme("https").host(endpointHttpUrl.host)
-
-    // Add path segments, if there are any
-    endpointHttpUrl.pathSegments.forEach { endpointUrl.addPathSegment(it) }
-
-    // Add transactions path segment
-    endpointUrl.addPathSegment("transactions")
-
     // Add query params
     val queryParams = mutableMapOf<String, String>()
     queryParams["asset_code"] = assetId.sep38
@@ -220,9 +150,6 @@ internal constructor(
     noOlderThan?.run { queryParams["no_older_than"] = this }
     lang?.run { queryParams["lang"] = this }
 
-    queryParams.forEach { endpointUrl.addQueryParameter(it.key, it.value) }
-
-    val request = OkHttpUtils.buildStringGetRequest(endpointUrl.build().toString(), authToken)
     val finalStatusList = listOf(TransactionStatus.COMPLETED, TransactionStatus.REFUNDED)
 
     log.debug {
@@ -231,12 +158,54 @@ internal constructor(
         "lang = $lang"
     }
 
-    return httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) throw ServerRequestFailedException(response)
-
-      response.toJson<AnchorAllTransactionsResponse>().transactions.filter {
-        finalStatusList.contains(it.status)
+    val resp: AnchorAllTransactionsResponse =
+      get(authToken) {
+        appendPathSegments("transactions")
+        queryParams.forEach { parameters.append(it.key, it.value) }
       }
+
+    return resp.transactions.filter { finalStatusList.contains(it.status) }
+  }
+
+  private suspend inline fun <reified T> get(
+    authToken: AuthToken? = null,
+    urlBlock: URLBuilder.() -> Unit = {},
+  ): T {
+    return httpClient.anchorGet(getInfo(), authToken, urlBlock)
+  }
+}
+
+private class InfoHolder(
+  private val network: Network,
+  private val baseUrl: Url,
+  private val httpClient: HttpClient
+) {
+  // This 2 variables are lazy and shouldn't be used directly. Call getInfo() and getServiceInfo()
+  // instead
+  private lateinit var info: TomlInfo
+  private lateinit var serviceInfo: AnchorServiceInfo
+
+  suspend fun getInfo(): TomlInfo {
+    if (!::info.isInitialized) {
+      info = StellarToml.getToml(baseUrl, httpClient)
+      info.validate(network)
     }
+
+    return info
+  }
+
+  suspend fun getServicesInfo(): AnchorServiceInfo {
+    if (!::serviceInfo.isInitialized) {
+      serviceInfo = get { appendPathSegments("info") }
+    }
+
+    return serviceInfo
+  }
+
+  private suspend inline fun <reified T> get(
+    authToken: AuthToken? = null,
+    urlBlock: URLBuilder.() -> Unit = {},
+  ): T {
+    return httpClient.anchorGet(getInfo(), authToken, urlBlock)
   }
 }

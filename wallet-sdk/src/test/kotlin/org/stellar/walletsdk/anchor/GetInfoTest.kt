@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import io.ktor.http.*
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
@@ -13,7 +14,7 @@ import org.stellar.walletsdk.toml.parseToml
 
 internal class GetInfoTest {
   private val wallet = TestWallet
-  private val anchor = wallet.anchor(AUTH_HOME_DOMAIN)
+  private val anchor = wallet.anchor(Url("https://$AUTH_HOME_DOMAIN"))
   private val toml = parseToml(mapFromTomlFile("stellar.toml"))
 
   @Test
@@ -23,7 +24,7 @@ internal class GetInfoTest {
 
   @Test
   fun `throws exception if TOML is not found`() {
-    val anchorInvalid = wallet.anchor(ADDRESS_ACTIVE.address)
+    val anchorInvalid = wallet.anchor(Url("https://${ADDRESS_ACTIVE.address}"))
 
     assertThrows<Exception> { runBlocking { anchorInvalid.getInfo() } }
   }

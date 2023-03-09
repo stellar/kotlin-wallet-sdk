@@ -8,7 +8,7 @@ import okhttp3.Response
 
 private val log = KotlinLogging.logger {}
 
-private val defaultJson = Json { ignoreUnknownKeys = true }
+internal val defaultJson = Json { ignoreUnknownKeys = true }
 
 internal inline fun <reified T> String.fromJson(format: Json = defaultJson): T {
   log.trace { "JSON format: $this" }

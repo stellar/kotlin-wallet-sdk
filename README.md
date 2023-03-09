@@ -42,7 +42,7 @@ Here's a small example creating main wallet class with default configuration con
   val wallet = Wallet(StellarConfiguration.Testnet)
 ```
 
-It should later be re-used across the code, as it has access to various usefull children classes. For example, new key pair can be
+It should later be re-used across the code, as it has access to various useful children classes. For example, new key pair can be
 created using it.
 
 ```kotlin
