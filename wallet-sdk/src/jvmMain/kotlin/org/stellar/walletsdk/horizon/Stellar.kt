@@ -34,7 +34,7 @@ internal actual constructor(
    * @param memo optional memo
    * @return transaction builder
    */
-  suspend fun transaction(
+  actual suspend fun transaction(
     sourceAddress: AccountKeyPair,
     memo: Pair<MemoType, String>?,
   ): TransactionBuilder {

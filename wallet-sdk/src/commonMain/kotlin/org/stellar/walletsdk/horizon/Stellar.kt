@@ -27,8 +27,7 @@ internal constructor(
    */
   suspend fun transaction(
     sourceAddress: AccountKeyPair,
-    memo: Pair<MemoType, String>? = null,
-    defaultSponsorAddress: String? = null
+    memo: Pair<MemoType, String>? = null
   ): TransactionBuilder
 
   /**
