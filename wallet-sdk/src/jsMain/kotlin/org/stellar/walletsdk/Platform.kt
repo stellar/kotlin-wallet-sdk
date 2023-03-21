@@ -1,5 +1,16 @@
 package org.stellar.walletsdk
 
-import external.Networks
+actual data class Network(val passphrase: String) {
+  override fun toString(): String {
+    return passphrase
+  }
 
-actual typealias Network = Networks
+  companion object {
+    val PUBLIC = Network("Public Global Stellar Network ; September 2015")
+    val TESTNET = Network("Test SDF Network ; September 2015")
+  }
+}
+
+actual fun Network.isPublic(): Boolean {
+  return this == Network.PUBLIC
+}

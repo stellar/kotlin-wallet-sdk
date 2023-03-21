@@ -170,11 +170,9 @@ external open class Memo<T> {
   }
 }
 
-external class Networks {
-  companion object  {
-    val PUBLIC: Networks = definedExternally/* = 'Public Global Stellar Network ; September 2015' */
-    val TESTNET: Networks = definedExternally/* = 'Test SDF Network ; September 2015' */
-  }
+external enum class Networks {
+  PUBLIC /* = 'Public Global Stellar Network ; September 2015' */,
+  TESTNET /* = 'Test SDF Network ; September 2015' */
 }
 
 external var AuthRequiredFlag: Number /* 1 */
@@ -293,7 +291,7 @@ external open class TransactionBuilder(
     var memo: Memo<Any>?
       get() = definedExternally
       set(value) = definedExternally
-    var networkPassphrase: Networks?
+    var networkPassphrase: String?
       get() = definedExternally
       set(value) = definedExternally
     var timebounds: `T$103`?

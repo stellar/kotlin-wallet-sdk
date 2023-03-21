@@ -1,33 +1,85 @@
 package org.stellar.walletsdk.toml
 
 import io.ktor.http.*
+import kotlinx.serialization.SerialName
 import org.stellar.walletsdk.Network
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.exception.ValidationException
+import org.stellar.walletsdk.isPublic
 
-expect class TomlInfo {
+data class TomlInfo(
+  @SerialName("VERSION")  val version: String?,
+  @SerialName("NETWORK_PASSPHRASE")  val networkPassphrase: String?,
+  @SerialName("FEDERATION_SERVER")  val federationServer: String?,
+  @SerialName("AUTH_SERVER") val authServer: String?,
+  @SerialName("TRANSFER_SERVER")  val transferServer: String?,
+  @SerialName("TRANSFER_SERVER_SEP0024")  val transferServerSep24: String?,
+  @SerialName("KYC_SERVER")  val kycServer: String?,
+  @SerialName("WEB_AUTH_ENDPOINT")  val webAuthEndpoint: String?,
+  @SerialName("SIGNING_KEY")  val signingKey: String?,
+  @SerialName("HORIZON_URL")  val horizonUrl: String?,
+  @SerialName("ACCOUNTS")  val accounts: List<String>?,
+  @SerialName("URI_REQUEST_SIGNING_KEY")  val uriRequestSigningKey: String?,
+  @SerialName("DIRECT_PAYMENT_SERVER")  val directPaymentServer: String?,
+  @SerialName("ANCHOR_QUOTE_SERVER")  val anchorQuoteServer: String?,
+  @SerialName("DOCUMENTATION")  val documentation: InfoDocumentation?,
+  @SerialName("PRINCIPALS")  val principals: List<InfoContact>?,
+  @SerialName("CURRENCIES")  val currencies: List<InfoCurrency>?,
+  @SerialName("VALIDATORS")  val validators: List<InfoValidator>?
+) {
   // Supported services (SEPs)
-  val services: InfoServices
-  val version: String?
-  val networkPassphrase: String?
-  val federationServer: String?
-  val authServer: String?
-  val transferServer: String?
-  val transferServerSep24: String?
-  val kycServer: String?
-  val webAuthEndpoint: String?
-  val signingKey: String?
-  val horizonUrl: String?
-  val accounts: List<String>?
-  val uriRequestSigningKey: String?
-  val directPaymentServer: String?
-  val anchorQuoteServer: String?
-  val documentation: InfoDocumentation?
-  val principals: List<InfoContact>?
-  val currencies: List<InfoCurrency>?
-  val validators: List<InfoValidator>?
+  private val hasAuth = webAuthEndpoint != null && signingKey != null
+   val services: InfoServices =
+    InfoServices(
+      sep6 =
+      if (transferServer != null) {
+        Sep6(transferServer, anchorQuoteServer)
+      } else {
+        null
+      },
+      sep10 =
+      if (hasAuth) {
+        Sep10(webAuthEndpoint.toString(), signingKey.toString())
+      } else {
+        null
+      },
+      sep24 =
+      if (transferServerSep24 != null) {
+        Sep24(transferServerSep24, hasAuth)
+      } else {
+        null
+      },
+      sep31 =
+      if (directPaymentServer != null) {
+        Sep31(directPaymentServer, hasAuth, kycServer, anchorQuoteServer)
+      } else {
+        null
+      }
+    )
 
-   fun validate(network: Network)
+   fun validate(network: Network) {
+    if (!network.isPublic()) {
+      return
+    }
+
+    requireSecure("TRANSFER_SERVER", transferServer)
+    requireSecure("TRANSFER_SERVER_SEP0024", transferServerSep24)
+    requireSecure("FEDERATION_SERVER", federationServer)
+    requireSecure("AUTH_SERVER", authServer)
+    requireSecure("KYC_SERVER", kycServer)
+    requireSecure("WEB_AUTH_ENDPOINT", webAuthEndpoint)
+    requireSecure("DIRECT_PAYMENT_SERVER", directPaymentServer)
+    requireSecure("ANCHOR_QUOTE_SERVER", anchorQuoteServer)
+  }
+
+  private fun requireSecure(name: String, url: String?) {
+    if (url != null && URLBuilder(url).protocol.name != URLProtocol.HTTPS.name) {
+      throw ValidationException(
+        "TOML file contains url using http protocol for $name: $url. Http urls are prohibited " +
+                "in production environment. Please notify anchor owner."
+      )
+    }
+  }
 }
 
 data class InfoDocumentation(

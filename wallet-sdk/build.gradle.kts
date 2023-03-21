@@ -100,6 +100,7 @@ project.kotlin {
     val jsMain by getting {
       dependencies {
         implementation(libs.coroutines.test)
+        implementation(libs.ktor.client.js)
         implementation(npm("stellar-sdk", "10.4.1"))
         implementation("org.jetbrains.kotlin-wrappers:kotlin-typescript:4.7.4-pre.376")
         implementation("deezer.kustomexport:lib:0.8.1")
