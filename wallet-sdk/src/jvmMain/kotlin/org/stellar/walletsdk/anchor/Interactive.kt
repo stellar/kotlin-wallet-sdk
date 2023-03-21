@@ -3,7 +3,6 @@ package org.stellar.walletsdk.anchor
 import io.ktor.client.*
 import io.ktor.http.*
 import mu.KotlinLogging
-import okhttp3.internal.toImmutableMap
 import org.stellar.walletsdk.InteractiveFlowResponse
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
@@ -134,6 +133,6 @@ internal actual constructor(
         .toString()
 
     // Get SEP-24 anchor response
-    return httpClient.postJson(url, requestParams.toImmutableMap(), authToken)
+    return httpClient.postJson(url, requestParams.toMap(), authToken)
   }
 }

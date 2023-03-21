@@ -4,6 +4,7 @@ import org.stellar.sdk.*
 import org.stellar.sdk.TransactionBuilder as SdkBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.Network
 import org.stellar.walletsdk.anchor.MemoType
 import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
@@ -14,7 +15,7 @@ import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.util.*
-import org.stellar.walletsdk.util.Util.makeMemo
+import org.stellar.walletsdk.util.JvmUtil.makeMemo
 
 /** Class that allows to construct Stellar transactions, containing one or more operations */
 @Suppress("TooManyFunctions")

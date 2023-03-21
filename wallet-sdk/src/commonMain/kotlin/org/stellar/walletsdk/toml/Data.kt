@@ -1,6 +1,9 @@
 package org.stellar.walletsdk.toml
 
+import io.ktor.http.*
+import org.stellar.walletsdk.Network
 import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.exception.ValidationException
 
 expect class TomlInfo {
   // Supported services (SEPs)
@@ -23,6 +26,8 @@ expect class TomlInfo {
   val principals: List<InfoContact>?
   val currencies: List<InfoCurrency>?
   val validators: List<InfoValidator>?
+
+   fun validate(network: Network)
 }
 
 data class InfoDocumentation(

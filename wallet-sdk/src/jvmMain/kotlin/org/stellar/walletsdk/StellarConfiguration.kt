@@ -8,7 +8,7 @@ import org.stellar.sdk.Server
 import shadow.okhttp3.OkHttpClient
 
 actual data class StellarConfiguration(
-  val network: Network,
+  actual val network: Network,
   val horizonUrl: String,
   val maxBaseFeeStroops: UInt = 100u,
   val horizonClient: OkHttpClient? = null,

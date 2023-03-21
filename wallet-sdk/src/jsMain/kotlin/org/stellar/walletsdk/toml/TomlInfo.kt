@@ -1,5 +1,7 @@
 package org.stellar.walletsdk.toml
 
+import org.stellar.walletsdk.Network
+
 actual class TomlInfo {
   actual val services: InfoServices
     get() = TODO("Not yet implemented")
@@ -39,4 +41,7 @@ actual class TomlInfo {
     get() = TODO("Not yet implemented")
   actual val validators: List<InfoValidator>?
     get() = TODO("Not yet implemented")
+
+  actual fun validate(network: Network) {
+  }
 }

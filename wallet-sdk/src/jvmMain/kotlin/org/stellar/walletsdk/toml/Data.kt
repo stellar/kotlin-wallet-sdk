@@ -55,7 +55,7 @@ actual data class TomlInfo(
         }
     )
 
-  fun validate(network: Network) {
+  actual fun validate(network: Network) {
     if (network != Network.PUBLIC) {
       return
     }
