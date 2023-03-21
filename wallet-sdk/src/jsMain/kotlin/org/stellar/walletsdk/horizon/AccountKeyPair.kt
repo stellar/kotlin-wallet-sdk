@@ -52,3 +52,7 @@ fun String.toPublicKeyPair(): PublicKeyPair {
 actual typealias Transaction = external.Transaction
 
 actual typealias AbstractTransaction = TransactionI
+
+actual  fun Transaction.toEnvelopeXdrBase64(): String {
+  return this.toXDR()
+}

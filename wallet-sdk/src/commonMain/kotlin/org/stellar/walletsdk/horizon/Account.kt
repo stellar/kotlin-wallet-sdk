@@ -21,3 +21,5 @@ expect class SigningKeyPair : AccountKeyPair {
 expect class Transaction
 
 expect abstract class AbstractTransaction
+
+internal expect fun Transaction.toEnvelopeXdrBase64(): String

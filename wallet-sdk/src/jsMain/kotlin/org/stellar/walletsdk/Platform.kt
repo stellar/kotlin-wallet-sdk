@@ -14,3 +14,6 @@ actual data class Network(val passphrase: String) {
 actual fun Network.isPublic(): Boolean {
   return this == Network.PUBLIC
 }
+
+internal actual val Network.passphrase: String
+  get() = passphrase
