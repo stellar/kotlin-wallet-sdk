@@ -14,7 +14,7 @@ import org.stellar.walletsdk.toml.parseToml
 
 internal class GetInfoTest {
   private val wallet = TestWallet
-  private val anchor = wallet.anchor(Url("https://$AUTH_HOME_DOMAIN"))
+  private val anchor = wallet.anchor("https://$AUTH_HOME_DOMAIN")
   private val toml = parseToml(mapFromTomlFile("stellar.toml"))
 
   @Test
@@ -24,7 +24,7 @@ internal class GetInfoTest {
 
   @Test
   fun `throws exception if TOML is not found`() {
-    val anchorInvalid = wallet.anchor(Url("https://${ADDRESS_ACTIVE.address}"))
+    val anchorInvalid = wallet.anchor("https://${ADDRESS_ACTIVE.address}")
 
     assertThrows<Exception> { runBlocking { anchorInvalid.getInfo() } }
   }

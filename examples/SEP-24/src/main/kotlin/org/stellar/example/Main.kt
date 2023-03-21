@@ -41,7 +41,7 @@ suspend fun main() {
   tx.sign(myAccount)
   stellar.submitTransaction(tx)
 
-  val anchor = wallet.anchor(Url("https://$DOMAIN"))
+  val anchor = wallet.anchor("https://$DOMAIN")
 
   // Get info from the anchor server
   val info = anchor.getInfo()

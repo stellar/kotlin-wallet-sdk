@@ -541,7 +541,7 @@ suspend fun main() {
 Build on and off ramps with anchors for deposits and withdrawals.
 
 ```kotlin
-val anchor = wallet.anchor(Url("https://testanchor.stellar.org"))
+val anchor = wallet.anchor("https://testanchor.stellar.org")
 ```
 
 Get anchor information from a TOML file.
@@ -678,7 +678,7 @@ Wallet can now use this class:
 val wallet = Wallet(StellarConfiguration.Testnet, ApplicationConfiguration(DemoWalletSigner()))
 ```
 <!--- INCLUDE
-val anchor = wallet.anchor(Url("https://testanchor.stellar.org"))
+val anchor = wallet.anchor("https://testanchor.stellar.org")
 -->
 It can now be used for autentication with client domain:
 ```kotlin
