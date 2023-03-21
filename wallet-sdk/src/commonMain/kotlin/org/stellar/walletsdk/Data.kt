@@ -66,6 +66,7 @@ data class FormattedLiquidityPool(
 )
 
 @Serializable
+@JsExport
 data class InteractiveFlowResponse(
   val id: String,
   val url: String,

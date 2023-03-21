@@ -10,6 +10,7 @@ import external.TransactionI
  * [SigningKeyPair], obtained from private key. Existing account in string format can be converted
  * to public key pair via calling [toPublicKeyPair] helper function.
  */
+@JsExport
 actual sealed interface AccountKeyPair {
   val keypair: Keypair
   actual val address: String

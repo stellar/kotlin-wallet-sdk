@@ -1,6 +1,5 @@
 package org.stellar.walletsdk
 
-import deezer.kustomexport.KustomExport
 import io.ktor.client.*
 import io.ktor.client.engine.*
 import io.ktor.client.plugins.*
@@ -20,7 +19,6 @@ import org.stellar.walletsdk.recovery.Recovery
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
  * network.
  */
-@KustomExport
 class Wallet(
   stellarConfiguration: StellarConfiguration,
   applicationConfiguration: ApplicationConfiguration = ApplicationConfiguration()

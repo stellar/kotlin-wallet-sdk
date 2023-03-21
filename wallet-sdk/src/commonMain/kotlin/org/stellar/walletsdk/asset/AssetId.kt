@@ -22,6 +22,7 @@ sealed interface StellarAssetId : AssetId {
     get() = STELLAR_SCHEME
 }
 
+@JsExport
 data class IssuedAssetId(val code: String, val issuer: String) : StellarAssetId {
   override val id = "$code:$issuer"
 

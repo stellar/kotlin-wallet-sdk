@@ -1,4 +1,9 @@
 import walletsdk = org.stellar.walletsdk;
+import Greeter = org.stellar.walletsdk.Greeter;
+import Signer = org.stellar.walletsdk.Signer;
+import testnetWallet = org.stellar.walletsdk.testnetWallet;
+import IssuedAssetId = org.stellar.walletsdk.asset.IssuedAssetId;
+import SigningKeyPair = org.stellar.walletsdk.horizon.SigningKeyPair;
 
 if (typeof Buffer === 'undefined') global.Buffer = require('buffer').Buffer
 import {Button, StyleSheet, Text, View} from 'react-native';
@@ -6,13 +11,7 @@ import {org} from "kotlin-wallet-sdk";
 import {useState} from "react";
 import {Keypair, Transaction} from 'stellar-sdk';
 import * as Random from 'expo-random';
-import Greeter = org.stellar.walletsdk.Greeter;
-import Signer = org.stellar.walletsdk.Signer;
-import IssuedAssetId = org.stellar.walletsdk.asset.IssuedAssetId;
-import InteractiveFlowResponse = org.stellar.walletsdk.InteractiveFlowResponse;
-import Wallet = org.stellar.walletsdk.js.Wallet;
-import testnetWallet = org.stellar.walletsdk.js.testnetWallet;
-import PublicKeyPair = org.stellar.walletsdk.horizon.PublicKeyPair;
+
 
 export default function App() {
     const [res, setRes] = useState("Press button to create account")
@@ -52,16 +51,15 @@ async function test(setRes: React.Dispatch<React.SetStateAction<string>>) {
 
         setRes(`Account created. \nTransaction hash: ${res.hash}. \nAddress: ${(res.keypair as Keypair).publicKey()}`)
 
-
-        const anchor = testnetWallet().anchor("testanchor.stellar.org", null)
+        const anchor = testnetWallet().anchor("testanchor.stellar.org")
         const USDC =
             new IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
-        const auth = await anchor.auth(controller.signal)
+        const auth = await anchor.auth()
 
-        const authToken: string = await auth.authenticate(new PublicKeyPair(kp), null, null, null, controller.signal)
+        const authToken = await auth.authenticate(new SigningKeyPair(kp))
 
-        const interactive: InteractiveFlowResponse = await anchor.interactive().deposit(kp.publicKey(), USDC, authToken, null, controller.signal)
+        const interactive = await anchor.interactive().deposit(kp.publicKey(), USDC, authToken)
 
         setRes(`Interactive flow url: ${interactive.url}`)
     } catch (e) {

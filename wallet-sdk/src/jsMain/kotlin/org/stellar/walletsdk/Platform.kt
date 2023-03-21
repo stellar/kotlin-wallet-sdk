@@ -1,5 +1,6 @@
 package org.stellar.walletsdk
 
+@JsExport
 actual data class Network(val passphrase: String) {
   override fun toString(): String {
     return passphrase

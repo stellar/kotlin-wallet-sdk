@@ -1,11 +1,12 @@
 package org.stellar.walletsdk
 
-import deezer.kustomexport.KustomExport
+import org.stellar.walletsdk.js.WalletJS
 
+@JsExport
 actual data class StellarConfiguration(
   actual val network: Network,
   val horizonUrl: String,
-  val maxBaseFeeStroops: UInt = 100u,
+  val maxBaseFeeStroops: Int = 100,
 ) {
   actual companion object {
     actual val Testnet =
@@ -15,7 +16,7 @@ actual data class StellarConfiguration(
 
 internal actual val defaultBase64Decoder: Base64Decoder = { TODO("") }
 
-@KustomExport
-fun testnetWallet(): Wallet {
-  return Wallet(StellarConfiguration(Network.TESTNET, "https://horizon-testnet.stellar.org"))
+@JsExport
+fun testnetWallet(): WalletJS {
+  return WalletJS(StellarConfiguration(Network.TESTNET, "https://horizon-testnet.stellar.org"))
 }

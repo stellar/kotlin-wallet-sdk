@@ -1,6 +1,5 @@
 package org.stellar.walletsdk.auth
 
-import deezer.kustomexport.KustomExport
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -29,7 +28,6 @@ private val log = KotlinLogging.logger {}
  * signing methods
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
-@KustomExport
 class Auth
 constructor(
   private val cfg: Config,

@@ -1,6 +1,9 @@
+@file:JsExport
+
 package org.stellar.walletsdk.toml
 
 import io.ktor.http.*
+import kotlin.js.JsExport
 import kotlinx.serialization.SerialName
 import org.stellar.walletsdk.Network
 import org.stellar.walletsdk.asset.IssuedAssetId
