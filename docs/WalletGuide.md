@@ -102,7 +102,7 @@ fun closeWallet() {
 }
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-basic-01.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-basic-01.kt).
 
 <!--- INCLUDE
 val wallet = Wallet(StellarConfiguration.Testnet)
@@ -155,7 +155,7 @@ suspend fun getAccountHistory(): List<WalletOperation<OperationResponse>> {
 }
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-account-01.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-account-01.kt).
 
 ### Transaction builder
 
@@ -278,7 +278,7 @@ suspend fun signAndSubmit() {
 }
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-transaction-01.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-transaction-01.kt).
 
 
 ### Transaction builder (extra)
@@ -324,7 +324,7 @@ suspend fun addDeviceKeyPair() {
 }
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-transaction-02.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-transaction-02.kt).
 
 ### Transaction builder (sponsoring)
 <!--- INCLUDE .*transaction-\d.*
@@ -358,7 +358,7 @@ compared to regular `TransactionBuilder`.
 Note, that transaction must be signed by both sponsor account (`sponsoringKeyPair`) and account being 
 sponsored (`sponsoredKeyPair`)
 
-> You can get the full code [here](../examples/documentation/src/example-transaction-03.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-transaction-03.kt).
 
 ### Sponsoring account creation
 One of things that can be done via sponsoring is to create account having 0 starting balance. This account creation can
@@ -382,7 +382,7 @@ time sponsored account (freshly created) is different from the transaction sourc
 specify it. Otherwise, transaction will contain malformed operation. As before, transaction must be signed by 
 both keys.  
 
-> You can get the full code [here](../examples/documentation/src/example-transaction-04.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-transaction-04.kt).
 
 ### Sponsoring account creation and modification
 If you want to create account and modify it in one transaction, it's possible to do so with passing `sponsoredAccount` 
@@ -408,7 +408,7 @@ suspend fun sponsorAccountCreationAndModification() {
 }
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-transaction-05.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-transaction-05.kt).
 > 
 ### Fee bump transaction
 <!--- INCLUDE .*transaction-06.*
@@ -453,7 +453,7 @@ Finally, submit a fee bump transaction. Executing this transaction will be fully
   wallet.stellar().submitTransaction(feeBump)
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-transaction-06.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-transaction-06.kt).
 
 ### Using XDR to exchange transaction data between server and client
 Note, that wallet may not have a signing key for `sponsorKeyPair`. In that case, it's necessary to convert transaction
@@ -497,7 +497,7 @@ suspend fun recoverSigned(xdrString: String) {
 }
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-transaction-xdr-01.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-transaction-xdr-01.kt).
 
 ## Anchor
 
@@ -599,7 +599,7 @@ suspend fun accountHistory(): List<AnchorTransaction> {
 }
 ```
 
-> You can get the full code [here](../examples/documentation/src/example-anchor-01.kt).
+> You can get the full code [here](../examples/documentation/src/jvmMain/kotlin/example-anchor-01.kt).
 
 ### Add client domain signing
 

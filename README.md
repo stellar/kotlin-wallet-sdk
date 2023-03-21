@@ -49,7 +49,7 @@ created using it.
   val newKeyPair = wallet.stellar().account().createKeyPair()
 ```
 
-> You can get the full code [here](examples/documentation/src/example-readme-01.kt).
+> You can get the full code [here](examples/documentation/src/jvmMain/kotlin/example-readme-01.kt).
 
 Read [full wallet guide](docs/WalletGuide.md) for more info
 
