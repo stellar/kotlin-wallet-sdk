@@ -30,16 +30,10 @@ class Wallet(
 
   private val clients = mutableListOf(cfg.app.defaultClient)
 
-  @Deprecated(
-    "To be removed in 0.7",
-    ReplaceWith("this.anchor(Url(\"https://\$homeDomain\"), httpClientConfig)", "io.ktor.http.Url")
-  )
   fun anchor(homeDomain: String, httpClientConfig: ClientConfigFn? = null): Anchor {
-    return anchor(Url("https://$homeDomain"), httpClientConfig)
-  }
+    val url = if (homeDomain.contains("://")) homeDomain else "https://$homeDomain"
 
-  fun anchor(url: Url, httpClientConfig: ClientConfigFn? = null): Anchor {
-    return Anchor(cfg, url, getClient(httpClientConfig))
+    return Anchor(cfg, Url(url), getClient(httpClientConfig))
   }
 
   fun stellar(): Stellar {

@@ -12,7 +12,7 @@ import org.stellar.walletsdk.toml.TomlInfo
 val wallet = Wallet(StellarConfiguration.Testnet)
 val accountKeyPair = wallet.stellar().account().createKeyPair()
 
-val anchor = wallet.anchor(Url("https://testanchor.stellar.org"))
+val anchor = wallet.anchor("https://testanchor.stellar.org")
 
 suspend fun anchorToml(): TomlInfo {
   return anchor.getInfo()

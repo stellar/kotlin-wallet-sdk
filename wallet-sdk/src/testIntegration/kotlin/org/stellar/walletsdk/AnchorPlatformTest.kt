@@ -35,7 +35,7 @@ class AnchorPlatformTest {
       StellarConfiguration.Testnet,
       ApplicationConfiguration { defaultRequest { url { protocol = URLProtocol.HTTP } } }
     )
-  private val anchor = wallet.anchor(Url("http://$homeDomain"))
+  private val anchor = wallet.anchor("http://$homeDomain")
   private val client = HttpClient()
   private val maxTries = 40
 
