@@ -1,5 +1,7 @@
 package org.stellar.walletsdk
 
+import deezer.kustomexport.KustomExport
+
 actual data class StellarConfiguration(
   actual val network: Network,
   val horizonUrl: String,
@@ -12,3 +14,8 @@ actual data class StellarConfiguration(
 }
 
 internal actual val defaultBase64Decoder: Base64Decoder = { TODO("") }
+
+@KustomExport
+fun testnetWallet(): Wallet {
+  return Wallet(StellarConfiguration(Network.TESTNET, "https://horizon-testnet.stellar.org"))
+}

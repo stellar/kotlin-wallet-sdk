@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.auth
 
+import deezer.kustomexport.KustomExport
 import kotlin.jvm.JvmInline
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
@@ -13,8 +14,9 @@ data class ChallengeResponse(
 )
 
 @Serializable
+@KustomExport
 @JvmInline
-value class AuthToken(private val value: String) {
+value class AuthToken(val value: String) {
   fun prettify(): String {
     return value.take(STRING_TRIM_LENGTH)
   }

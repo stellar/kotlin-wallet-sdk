@@ -7,7 +7,8 @@ import org.stellar.walletsdk.horizon.SigningKeyPair
 
 class AnchorTest {
   val anchor = Wallet.Testnet.anchor("testanchor.stellar.org")
-  private val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
+  private val USDC =
+    IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
   @Test
   fun testGetInfo() = runTest {

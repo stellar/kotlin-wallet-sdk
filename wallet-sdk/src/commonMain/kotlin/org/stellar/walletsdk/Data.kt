@@ -1,5 +1,8 @@
+@file:JsExport
+
 package org.stellar.walletsdk
 
+import kotlin.js.JsExport
 import kotlinx.serialization.Serializable
 import org.stellar.walletsdk.asset.AssetId
 

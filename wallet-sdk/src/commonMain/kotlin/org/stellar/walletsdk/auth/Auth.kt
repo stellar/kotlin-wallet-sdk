@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.auth
 
+import deezer.kustomexport.KustomExport
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -21,15 +22,16 @@ private val log = KotlinLogging.logger {}
  *
  * @property webAuthEndpoint Authentication endpoint URL
  * @property homeDomain Domain hosting stellar.toml (
- *   [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
- *   containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
+ * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
+ * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
  * @property network Stellar network
  * @property defaultSigner interface to define wallet client and domain (if using `clientDomain`)
- *   signing methods
+ * signing methods
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
+@KustomExport
 class Auth
-internal constructor(
+constructor(
   private val cfg: Config,
   private val webAuthEndpoint: String,
   private val homeDomain: String,
@@ -62,7 +64,7 @@ internal constructor(
    * Request transaction challenge from the auth endpoint.
    *
    * @return transaction as Base64 encoded TransactionEnvelope XDR string and network passphrase
-   *   from the auth endpoint
+   * from the auth endpoint
    * @throws [InvalidMemoIdException] when memo ID is not valid
    * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
    * @throws [ServerRequestFailedException] when request fails
@@ -118,7 +120,7 @@ internal constructor(
    * methods.
    *
    * @param challengeResponse challenge transaction and network passphrase returned from the auth
-   *   endpoint
+   * endpoint
    * @return signed transaction
    */
   private suspend fun sign(
@@ -169,4 +171,5 @@ internal constructor(
 }
 
 internal expect fun ChallengeResponse.toTransaction(): Transaction
+
 internal expect fun Transaction.hasClientDomain(): Boolean

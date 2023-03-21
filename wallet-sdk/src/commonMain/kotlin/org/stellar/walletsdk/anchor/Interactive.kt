@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import deezer.kustomexport.KustomExport
 import io.ktor.client.*
 import io.ktor.http.*
 import mu.KotlinLogging
@@ -12,6 +13,7 @@ import org.stellar.walletsdk.util.Util.postJson
 private val log = KotlinLogging.logger {}
 
 /** Interactive flow for deposit and withdrawal using SEP-24. */
+@KustomExport
 class Interactive
 internal constructor(
   private val anchor: Anchor,
@@ -36,10 +38,11 @@ internal constructor(
     accountAddress: String,
     assetId: IssuedAssetId,
     authToken: AuthToken,
-    extraFields: Map<String, String>? = null,
+    // TODO: support extraFields
+    //    extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
-    return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "withdraw") {
+    return flow(accountAddress, assetId, authToken, null, fundsAccountAddress, "withdraw") {
       it.withdraw[assetId.code]
     }
   }
@@ -63,10 +66,10 @@ internal constructor(
     accountAddress: String,
     assetId: IssuedAssetId,
     authToken: AuthToken,
-    extraFields: Map<String, String>? = null,
+    //    extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
-    return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "deposit") {
+    return flow(accountAddress, assetId, authToken, null, fundsAccountAddress, "deposit") {
       it.deposit[assetId.code]
     }
   }

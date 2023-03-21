@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.anchor
 
+import deezer.kustomexport.KustomExport
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -18,6 +19,7 @@ import org.stellar.walletsdk.util.Util.anchorGet
 private val log = KotlinLogging.logger {}
 
 /** Build on/off ramps with anchors. */
+@KustomExport
 class Anchor
 internal constructor(
   private val cfg: Config,

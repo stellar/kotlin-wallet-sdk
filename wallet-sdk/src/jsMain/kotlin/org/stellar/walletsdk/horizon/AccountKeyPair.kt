@@ -1,3 +1,5 @@
+@file:JsExport
+
 package org.stellar.walletsdk.horizon
 
 import external.Keypair
@@ -53,6 +55,6 @@ actual typealias Transaction = external.Transaction
 
 actual typealias AbstractTransaction = TransactionI
 
-actual  fun Transaction.toEnvelopeXdrBase64(): String {
+actual fun Transaction.toEnvelopeXdrBase64(): String {
   return this.toXDR()
 }

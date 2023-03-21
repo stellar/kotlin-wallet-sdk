@@ -4,6 +4,7 @@ import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.stellar.walletsdk.auth.Auth
 
 internal class AuthTest : SuspendTest() {
   private val cfg = TestWallet.cfg
