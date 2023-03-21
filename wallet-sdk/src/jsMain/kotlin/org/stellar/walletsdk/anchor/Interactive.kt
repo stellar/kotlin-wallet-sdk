@@ -1,6 +1,6 @@
 package org.stellar.walletsdk.anchor
 
-import org.stellar.walletsdk.Config
+import io.ktor.client.*
 import org.stellar.walletsdk.InteractiveFlowResponse
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
@@ -14,14 +14,7 @@ import org.stellar.walletsdk.auth.AuthToken
  * @throws [AnchorAssetException] if asset was refused by the anchor
  * @throws [ServerRequestFailedException] if network request fails
  */
-actual class Interactive
-internal actual constructor(homeDomain: String, anchor: Anchor, cfg: Config) {
-  internal actual val homeDomain: String
-    get() = TODO("Not yet implemented")
-  internal actual val anchor: Anchor
-    get() = TODO("Not yet implemented")
-  internal actual val cfg: Config
-    get() = TODO("Not yet implemented")
+actual class Interactive internal actual constructor(anchor: Anchor, httpClient: HttpClient) {
 
   /**
    * Initiates interactive withdrawal using

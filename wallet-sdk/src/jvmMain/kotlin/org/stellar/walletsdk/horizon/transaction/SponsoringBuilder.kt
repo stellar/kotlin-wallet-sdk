@@ -3,7 +3,7 @@ package org.stellar.walletsdk.horizon.transaction
 import org.stellar.sdk.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 
-class SponsoringBuilder
+actual class SponsoringBuilder
 internal constructor(
   sourceAccount: String,
   private val sponsorAccount: AccountKeyPair,
@@ -20,7 +20,7 @@ internal constructor(
    * @param startingBalance optional Starting account balance in XLM. Default value is 0.
    * @throws [InvalidSponsoredAccountException]
    */
-  fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt = 0u): SponsoringBuilder =
+  actual fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt): SponsoringBuilder =
     building {
       doCreateAccount(newAccount, startingBalance, sponsorAccount.address)
     }

@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.recovery
 
+import io.ktor.client.*
 import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Config
@@ -7,7 +8,8 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.horizon.Transaction
 
-actual class Recovery internal actual constructor(cfg: Config, stellar: Stellar) {
+actual class Recovery
+internal actual constructor(cfg: Config, stellar: Stellar, client: HttpClient) {
 
   // TODO: create account helper to handle 409 Conflict > fetch account data from RS and return
   //  signers[0].key
@@ -85,7 +87,7 @@ actual class Recovery internal actual constructor(cfg: Config, stellar: Stellar)
     account: AccountKeyPair,
     accountSigner: List<AccountSigner>,
     accountThreshold: AccountThreshold,
-    sponsorAddress: String?
+    sponsorAddress: AccountKeyPair?
   ): Transaction {
     TODO("Not yet implemented")
   }

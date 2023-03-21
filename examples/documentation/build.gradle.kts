@@ -18,6 +18,7 @@ kotlin {
 
             implementation(libs.kotlin.serialization.json)
             implementation(libs.bundles.ktor.client)
+            implementation(libs.ktor.client.okhttp)
         }
     }
   }

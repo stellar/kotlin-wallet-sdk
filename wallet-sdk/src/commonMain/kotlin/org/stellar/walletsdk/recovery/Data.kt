@@ -2,8 +2,10 @@ package org.stellar.walletsdk.recovery
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.auth.WalletSigner
+import org.stellar.walletsdk.horizon.AccountKeyPair
 
 @Serializable internal data class TransactionRequest(val transaction: String)
 
@@ -61,4 +63,25 @@ data class RecoveryAccountIdentity(
 data class SignerWeight(
   val master: Int,
   val recoveryServer: Int,
+)
+
+/**
+ * Configuration for recoverable wallet
+ *
+ * @param accountAddress Stellar address of the account that is registering
+ * @param deviceAddress Stellar address of the device that is added as a signer
+ * @param accountThreshold Low, medium, and high thresholds to set on the account
+ * @param accountIdentity A list of account identities to be registered with the recovery servers
+ * @param recoveryServers A list of recovery servers to register with
+ * @param signerWeight Signer weight to set
+ * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
+ */
+data class RecoverableWalletConfig(
+  val accountAddress: AccountKeyPair,
+  val deviceAddress: String,
+  val accountThreshold: AccountThreshold,
+  val accountIdentity: List<RecoveryAccountIdentity>,
+  val recoveryServers: List<RecoveryServer>,
+  val signerWeight: SignerWeight,
+  val sponsorAddress: AccountKeyPair? = null
 )

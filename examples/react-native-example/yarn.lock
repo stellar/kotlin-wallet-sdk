@@ -2231,7 +2231,7 @@ Base64@~0.2.0:
   resolved "https://registry.yarnpkg.com/Base64/-/Base64-0.2.1.tgz#ba3a4230708e186705065e66babdd4c35cf60028"
   integrity sha512-reGEWshDmTDQDsCec/HduOO9Wyj6yMOupMfhIf3ugN1TDlK2NQW4DDJSqNNtp380SNcvRfXtO8HSCQot0d0SMw==
 
-abort-controller@^3.0.0:
+abort-controller@3.0.0, abort-controller@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/abort-controller/-/abort-controller-3.0.0.tgz#eaf54d53b62bae4138e809ca225c8439a6efb392"
   integrity sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==
@@ -6462,12 +6462,15 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-kotlin-wallet-sdk@../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0w.tgz:
-  version "0.4.0"
-  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.4.0w.tgz#f5d69af3f555e82797c1703f42239fec99051080"
+kotlin-wallet-sdk@../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz:
+  version "0.5.0"
+  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz#821433005f200e37a08dd24928f2f187437c7d16"
   dependencies:
     "@js-joda/core" "3.2.0"
+    abort-controller "3.0.0"
+    node-fetch "2.6.7"
     stellar-sdk "10.4.1"
+    ws "8.5.0"
 
 last-call-webpack-plugin@^3.0.0:
   version "3.0.0"
@@ -10827,6 +10830,11 @@ write-file-atomic@^2.3.0:
     graceful-fs "^4.1.11"
     imurmurhash "^0.1.4"
     signal-exit "^3.0.2"
+
+ws@8.5.0:
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.5.0.tgz#bfb4be96600757fe5382de12c670dab984a1ed4f"
+  integrity sha512-BWX0SWVgLPzYwF8lTzEy1egjhS4S4OEAHfsO8o65WOVsrnSRGaSiUaa9e0ggGlkMTtBlmOpEXiie9RUcBO86qg==
 
 ws@^6.1.4, ws@^6.2.1:
   version "6.2.2"

@@ -1,6 +1,6 @@
 package org.stellar.walletsdk.anchor
 
-import org.stellar.walletsdk.Config
+import io.ktor.client.*
 import org.stellar.walletsdk.InteractiveFlowResponse
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
@@ -14,11 +14,7 @@ import org.stellar.walletsdk.auth.AuthToken
  * @throws [AnchorAssetException] if asset was refused by the anchor
  * @throws [ServerRequestFailedException] if network request fails
  */
-expect class Interactive internal constructor(homeDomain: String, anchor: Anchor, cfg: Config) {
-  internal val homeDomain: String
-  internal val anchor: Anchor
-  internal val cfg: Config
-
+expect class Interactive internal constructor(anchor: Anchor, httpClient: HttpClient) {
   /**
    * Initiates interactive withdrawal using
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).

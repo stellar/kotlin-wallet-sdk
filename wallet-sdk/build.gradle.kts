@@ -84,7 +84,7 @@ project.kotlin {
     val jvmMain by getting {
       dependencies {
         api(libs.java.stellar.sdk)
-        api(libs.okhttp3)
+        api(libs.ktor.client.okhttp)
       }
     }
     val jvmTest by getting {

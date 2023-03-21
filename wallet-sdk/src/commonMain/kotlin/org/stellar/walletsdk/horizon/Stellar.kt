@@ -6,6 +6,7 @@ import kotlin.jvm.JvmName
 import mu.KotlinLogging
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.anchor.MemoType
+import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
 
 private val log = KotlinLogging.logger {}
 
@@ -38,6 +39,6 @@ internal constructor(
    * @throws [TransactionSubmitFailedException] when submission failed
    */
   suspend fun submitTransaction(
-    signedTransaction: Transaction,
+    signedTransaction: AbstractTransaction,
   )
 }

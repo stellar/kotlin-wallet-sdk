@@ -53,10 +53,10 @@ internal object Util {
       )
     urlBuilder.urlBlock()
     return this.get(urlBuilder.build()) {
-      if (authToken != null) {
-        headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+        if (authToken != null) {
+          headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+        }
       }
-    }
       .body()
   }
 
@@ -67,13 +67,13 @@ internal object Util {
     block: HttpRequestBuilder.() -> Unit = {}
   ): Resp {
     return this.post(url) {
-      contentType(ContentType.Application.Json)
-      setBody(requestBody)
-      if (authToken != null) {
-        headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+        contentType(ContentType.Application.Json)
+        setBody(requestBody)
+        if (authToken != null) {
+          headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+        }
+        block()
       }
-      block()
-    }
       .body()
   }
 }

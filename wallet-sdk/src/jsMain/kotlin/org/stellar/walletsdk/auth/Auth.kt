@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.auth
 
+import io.ktor.client.*
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.horizon.AccountKeyPair
 
@@ -17,13 +18,12 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
 actual class Auth
-internal actual constructor(cfg: Config, webAuthEndpoint: String, homeDomain: String) {
-  internal actual val cfg: Config
-    get() = TODO("Not yet implemented")
-  internal actual val webAuthEndpoint: String
-    get() = TODO("Not yet implemented")
-  internal actual val homeDomain: String
-    get() = TODO("Not yet implemented")
+internal actual constructor(
+  cfg: Config,
+  webAuthEndpoint: String,
+  homeDomain: String,
+  httpClient: HttpClient
+) {
 
   /**
    * Authenticates to an external server.

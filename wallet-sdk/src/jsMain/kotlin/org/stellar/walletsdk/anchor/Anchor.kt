@@ -1,5 +1,7 @@
 package org.stellar.walletsdk.anchor
 
+import io.ktor.client.*
+import io.ktor.http.*
 import kotlin.js.Promise
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.asset.AssetId
@@ -8,17 +10,7 @@ import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.toml.TomlInfo
 
 /** Build on/off ramps with anchors. */
-actual class Anchor internal actual constructor(cfg: Config, homeDomain: String) {
-
-  // TODO: is this for SEP-24 only?
-  // TODO: handle extra fields
-
-  // TODO: is this for SEP-24 only?
-  // TODO: handle extra fields
-  internal actual val cfg: Config
-    get() = TODO("Not yet implemented")
-  internal actual val homeDomain: String
-    get() = TODO("Not yet implemented")
+actual class Anchor internal actual constructor(cfg: Config, baseUrl: Url, httpClient: HttpClient) {
 
   /**
    * Get anchor information from a TOML file.

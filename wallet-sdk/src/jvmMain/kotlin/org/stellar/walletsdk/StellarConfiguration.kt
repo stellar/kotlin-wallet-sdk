@@ -1,5 +1,7 @@
 package org.stellar.walletsdk
 
+import io.ktor.client.engine.*
+import io.ktor.client.engine.okhttp.*
 import java.util.*
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
@@ -24,13 +26,14 @@ actual data class StellarConfiguration(
     // Only used for tests
     internal set
 
-  actual fun isPublic(): Boolean {
-    return network == Network.PUBLIC
-  }
-
-  companion object {
-    val Testnet = StellarConfiguration(Network.TESTNET, "https://horizon-testnet.stellar.org")
+  actual companion object {
+    actual val Testnet =
+      StellarConfiguration(Network.TESTNET, "https://horizon-testnet.stellar.org")
   }
 }
 
 internal actual val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }
+
+internal actual typealias ClientConfigType = OkHttpConfig
+
+internal actual typealias Engine = OkHttp

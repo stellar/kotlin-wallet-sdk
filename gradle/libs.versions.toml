@@ -39,7 +39,7 @@ kotlin-logging = { module = "io.github.microutils:kotlin-logging", version.ref =
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
 
 [bundles]
-ktor-client = ["ktor-client-core", "ktor-client-content-negotiation", "ktor-client-json", "ktor-client-okhttp"]
+ktor-client = ["ktor-client-core", "ktor-client-content-negotiation", "ktor-client-json"]
 
 [plugins]
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

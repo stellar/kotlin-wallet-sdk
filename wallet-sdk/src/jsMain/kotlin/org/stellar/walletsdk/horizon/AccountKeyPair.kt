@@ -23,4 +23,6 @@ actual class SigningKeyPair : AccountKeyPair {
   }
 }
 
-actual open class Transaction
+actual class Transaction
+
+actual abstract class AbstractTransaction

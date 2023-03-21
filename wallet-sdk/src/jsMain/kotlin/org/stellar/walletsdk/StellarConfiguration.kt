@@ -1,7 +1,8 @@
 package org.stellar.walletsdk
 actual class StellarConfiguration {
-  actual fun isPublic(): Boolean {
-    TODO("Not yet implemented")
+  actual companion object {
+    actual val Testnet: StellarConfiguration
+      get() = TODO("Not yet implemented")
   }
 }
 

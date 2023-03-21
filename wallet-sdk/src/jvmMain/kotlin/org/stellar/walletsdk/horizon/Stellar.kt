@@ -66,7 +66,7 @@ internal actual constructor(
     baseFee: UInt? = null
   ): FeeBumpTransaction {
     return FeeBumpTransaction.Builder(transaction)
-      .setBaseFee((baseFee ?: cfg.stellar.baseFee).toLong())
+      .setBaseFee((baseFee ?: cfg.stellar.maxBaseFeeStroops).toLong())
       .setFeeAccount(feeAddress.address)
       .build()
   }

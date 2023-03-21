@@ -18,4 +18,6 @@ expect class SigningKeyPair : AccountKeyPair {
   fun <T : Transaction> sign(transaction: T): T
 }
 
-expect abstract class Transaction
+expect class Transaction
+
+expect abstract class AbstractTransaction

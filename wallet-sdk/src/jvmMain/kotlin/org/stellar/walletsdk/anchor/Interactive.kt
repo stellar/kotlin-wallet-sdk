@@ -14,9 +14,9 @@ private val log = KotlinLogging.logger {}
 
 /** Interactive flow for deposit and withdrawal using SEP-24. */
 actual class Interactive
-actual internal constructor(
-  internal actual val anchor: Anchor,
-  internal actual val httpClient: HttpClient,
+internal actual constructor(
+  private val anchor: Anchor,
+  private val httpClient: HttpClient,
 ) {
   /**
    * Initiates interactive withdrawal using

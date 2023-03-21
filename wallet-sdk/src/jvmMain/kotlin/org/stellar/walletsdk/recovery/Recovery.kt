@@ -2,7 +2,8 @@ package org.stellar.walletsdk.recovery
 
 import io.ktor.client.*
 import mu.KotlinLogging
-import org.stellar.sdk.*
+import org.stellar.sdk.KeyPair
+import org.stellar.sdk.Transaction
 import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountSigner
@@ -13,7 +14,6 @@ import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.horizon.toPublicKeyPair
-import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
@@ -85,7 +85,7 @@ internal actual constructor(
     return recoveryServers.map {
       // TODO: pass auth token as an argument?
       val authToken =
-        Auth(cfg, it.authEndpoint, it.homeDomain).authenticate(account, it.walletSigner)
+        Auth(cfg, it.authEndpoint, it.homeDomain, client).authenticate(account, it.walletSigner)
 
       val requestUrl = "${it.endpoint}/accounts/${account.address}"
       val resp: RecoveryAccount =

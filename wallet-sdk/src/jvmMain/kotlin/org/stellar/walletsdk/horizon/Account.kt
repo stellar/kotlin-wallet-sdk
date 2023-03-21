@@ -48,4 +48,6 @@ fun String.toPublicKeyPair(): PublicKeyPair {
   return PublicKeyPair(KeyPair.fromAccountId(this))
 }
 
-actual typealias Transaction = org.stellar.sdk.AbstractTransaction
+actual typealias Transaction = org.stellar.sdk.Transaction
+
+actual typealias AbstractTransaction = org.stellar.sdk.AbstractTransaction

@@ -1,5 +1,6 @@
 package org.stellar.walletsdk.auth
 
+import io.ktor.client.*
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.horizon.AccountKeyPair
 
@@ -21,10 +22,8 @@ internal constructor(
   cfg: Config,
   webAuthEndpoint: String,
   homeDomain: String,
+  httpClient: HttpClient
 ) {
-  internal val cfg: Config
-  internal val webAuthEndpoint: String
-  internal val homeDomain: String
 
   /**
    * Authenticates to an external server.

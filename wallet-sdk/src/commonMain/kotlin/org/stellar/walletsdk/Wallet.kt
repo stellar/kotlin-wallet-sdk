@@ -1,17 +1,13 @@
 package org.stellar.walletsdk
 
 import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
+import io.ktor.client.engine.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
-import java.util.*
-import org.stellar.sdk.Network
-import org.stellar.sdk.Server
-import kotlin.js.JsExport
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
@@ -58,7 +54,9 @@ class Wallet(
   private fun getClient(httpClientConfig: ClientConfigFn?): HttpClient {
     val httpClient =
       httpClientConfig?.run {
-        cfg.app.defaultClient.config { (this as HttpClientConfig<OkHttpConfig>).httpClientConfig() }
+        cfg.app.defaultClient.config {
+          (this as HttpClientConfig<ClientConfigType>).httpClientConfig()
+        }
       }
     httpClient?.also { clients.add(it) }
     return httpClient ?: cfg.app.defaultClient
@@ -69,46 +67,6 @@ class Wallet(
       Wallet(
         StellarConfiguration.Testnet,
       )
-  }
-}
-
-/**
- * Configuration for all Stellar-related activity.
- *
- * @constructor Create empty Stellar configuration
- * @property network network to be used
- * @property horizonUrl URL of the Horizons server.
- * @property baseFee default [base fee]
- * (https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
- * to be used
- * @property horizonClient optional HTTP client configuration to be used for Horizon calls.
- * @property submitClient optional HTTP client configuration to be used for transaction submission.
- */
-data class StellarConfiguration(
-  val network: Network,
-  val horizonUrl: String,
-  /**
-   * [Default base fee]
-   * (https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
-   */
-  val baseFee: UInt = 100u,
-  val horizonClient: OkHttpClient? = null,
-  val submitClient: OkHttpClient? = null
-) {
-  var server: Server =
-    if (horizonClient != null) {
-      requireNotNull(submitClient) {
-        "Horizon and submit client must be both initialized or set to null"
-      }
-      Server(horizonUrl, horizonClient, submitClient)
-    } else {
-      Server(horizonUrl)
-    }
-    // Only used for tests
-    internal set
-
-  companion object {
-    val Testnet = StellarConfiguration(Network.TESTNET, "https://horizon-testnet.stellar.org")
   }
 }
 
@@ -156,7 +114,7 @@ data class ApplicationConfiguration(
   )
 
   val defaultClient =
-    HttpClient(OkHttp) {
+    HttpClient(Engine) {
       install(ContentNegotiation) { json(defaultJson) }
       defaultRequest { url { protocol = URLProtocol.HTTPS } }
       defaultClientConfig()
@@ -165,8 +123,10 @@ data class ApplicationConfiguration(
 
 typealias Base64Decoder = ((String) -> ByteArray)
 
-internal typealias ClientConfig = HttpClientConfig<OkHttpConfig>
+internal typealias ClientConfig = HttpClientConfig<ClientConfigType>
 
 internal typealias ClientConfigFn = (ClientConfig.() -> Unit)
 
-internal val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }
+expect class ClientConfigType : HttpClientEngineConfig
+
+expect object Engine : HttpClientEngineFactory<ClientConfigType>

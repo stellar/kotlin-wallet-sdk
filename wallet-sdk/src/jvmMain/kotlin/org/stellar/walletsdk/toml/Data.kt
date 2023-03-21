@@ -74,7 +74,7 @@ actual data class TomlInfo(
     if (url != null && URLBuilder(url).protocol.name != URLProtocol.HTTPS.name) {
       throw ValidationException(
         "TOML file contains url using http protocol for $name: $url. Http urls are prohibited " +
-                "in production environment. Please notify anchor owner."
+          "in production environment. Please notify anchor owner."
       )
     }
   }

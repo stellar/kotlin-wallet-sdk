@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.horizon.transaction
 
 import org.stellar.sdk.*
+import org.stellar.sdk.TransactionBuilder as SdkBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.MemoType
@@ -14,7 +15,6 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.Util.makeMemo
-import org.stellar.sdk.TransactionBuilder as SdkBuilder
 
 /** Class that allows to construct Stellar transactions, containing one or more operations */
 @Suppress("TooManyFunctions")
@@ -25,7 +25,7 @@ internal constructor(
   memo: Pair<MemoType, String>?
 ) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount.accountId) {
   private val network: Network = cfg.stellar.network
-  private val maxBaseFeeInStroops: Int = cfg.stellar.baseFee.toInt()
+  private val maxBaseFeeInStroops: Int = cfg.stellar.maxBaseFeeStroops.toInt()
   override val operations: MutableList<Operation> = mutableListOf()
 
   // TODO: make timeout configurable
@@ -46,9 +46,9 @@ internal constructor(
    * @return [TransactionBuilder]
    * @receiver [SponsoringBuilder]
    */
-  fun sponsoring(
+  actual fun sponsoring(
     sponsorAccount: AccountKeyPair,
-    sponsoredAccount: AccountKeyPair? = null,
+    sponsoredAccount: AccountKeyPair?,
     body: SponsoringBuilder.() -> SponsoringBuilder
   ): TransactionBuilder {
     SponsoringBuilder(sponsoredAccount?.address ?: sourceAddress, sponsorAccount, operations)
@@ -65,7 +65,7 @@ internal constructor(
    * accounts is 1 XLM. Default value is 1.
    * @throws [InvalidStartingBalanceException] on invalid starting balance
    */
-  fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt = 1u) = building {
+  actual fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt) = building {
     if (startingBalance < 1u) {
       throw InvalidStartingBalanceException
     }
@@ -83,23 +83,24 @@ internal constructor(
    * @param amount amount of asset to transfer
    * @return formed transfer transaction
    */
-  fun transfer(destinationAddress: String, assetId: StellarAssetId, amount: String) = building {
-    PaymentOperation.Builder(destinationAddress, assetId.toAsset(), amount).build()
-  }
+  actual fun transfer(destinationAddress: String, assetId: StellarAssetId, amount: String) =
+    building {
+      PaymentOperation.Builder(destinationAddress, assetId.toAsset(), amount).build()
+    }
 
   /**
    * Adds operation to this builder
    *
    * @param operation operation that can be created using SDK
    */
-  fun addOperation(operation: Operation) = building { operation }
+  actual fun addOperation(operation: Operation) = building { operation }
 
   /**
    * Creates transaction
    *
    * @return **unsigned** transaction
    */
-  fun build(): Transaction {
+  actual fun build(): Transaction {
     operations.forEach { builder.addOperation(it) }
     return builder.build()
   }
@@ -116,3 +117,5 @@ suspend fun WithdrawalTransaction.toTransferTransaction(
     .transfer(this.withdrawAnchorAccount, assetId, this.amountIn)
     .build()
 }
+
+actual typealias Operation = org.stellar.sdk.Operation

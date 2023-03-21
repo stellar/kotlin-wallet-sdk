@@ -2,6 +2,7 @@
 
 package org.stellar.walletsdk.recovery
 
+import io.ktor.client.*
 import kotlin.jvm.JvmName
 import mu.KotlinLogging
 import org.stellar.walletsdk.AccountSigner
@@ -14,7 +15,7 @@ import org.stellar.walletsdk.horizon.Transaction
 
 private val log = KotlinLogging.logger {}
 
-expect class Recovery internal constructor(cfg: Config, stellar: Stellar) {
+expect class Recovery internal constructor(cfg: Config, stellar: Stellar, client: HttpClient) {
   /**
    * Sign transaction with recovery servers. It is used to recover an account using
    * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
@@ -87,27 +88,6 @@ expect class Recovery internal constructor(cfg: Config, stellar: Stellar) {
     account: AccountKeyPair,
     accountSigner: List<AccountSigner>,
     accountThreshold: AccountThreshold,
-    sponsorAddress: String? = null
+    sponsorAddress: AccountKeyPair? = null
   ): Transaction
 }
-
-/**
- * Configuration for recoverable wallet
- *
- * @param accountAddress Stellar address of the account that is registering
- * @param deviceAddress Stellar address of the device that is added as a signer
- * @param accountThreshold Low, medium, and high thresholds to set on the account
- * @param accountIdentity A list of account identities to be registered with the recovery servers
- * @param recoveryServers A list of recovery servers to register with
- * @param signerWeight Signer weight to set
- * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
- */
-data class RecoverableWalletConfig(
-  val accountAddress: AccountKeyPair,
-  val deviceAddress: String,
-  val accountThreshold: AccountThreshold,
-  val accountIdentity: List<RecoveryAccountIdentity>,
-  val recoveryServers: List<RecoveryServer>,
-  val signerWeight: SignerWeight,
-  val sponsorAddress: String? = null
-)

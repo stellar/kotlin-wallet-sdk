@@ -9,7 +9,8 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
 
 private val log = KotlinLogging.logger {}
 
-abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) {
+actual abstract class CommonTransactionBuilder<T>
+actual constructor(protected val sourceAddress: String) {
   abstract val operations: MutableList<Operation>
 
   @Suppress("UNCHECKED_CAST")
@@ -29,7 +30,7 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun addAccountSigner(signerAddress: AccountKeyPair, signerWeight: Int) = building {
+  actual fun addAccountSigner(signerAddress: AccountKeyPair, signerWeight: Int) = building {
     log.debug {
       "${if (signerWeight == 0) "Remove" else "Add"} account signer txn: sourceAddress = " +
         "$sourceAddress, signerAddress = $signerAddress, signerWeight = $signerWeight"
@@ -50,7 +51,7 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun removeAccountSigner(signerAddress: AccountKeyPair): T {
+  actual fun removeAccountSigner(signerAddress: AccountKeyPair): T {
     require(signerAddress.address != sourceAddress) {
       "This method can't be used to remove master signer key, " +
         "call ${this::lockAccountMasterKey.name} method instead"
@@ -67,7 +68,7 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun lockAccountMasterKey() = building {
+  actual fun lockAccountMasterKey() = building {
     log.debug { "Lock master key tx: accountAddress = $sourceAddress" }
 
     SetOptionsOperation.Builder().setSourceAccount(sourceAddress).setMasterKeyWeight(0).build()
@@ -81,10 +82,9 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun addAssetSupport(
+  actual fun addAssetSupport(
     asset: IssuedAssetId,
-    trustLimit: String =
-      Long.MAX_VALUE.toBigDecimal().movePointLeft(DECIMAL_POINT_PRECISION).toPlainString(),
+    trustLimit: String,
   ) = building {
     log.debug {
       "${if (trustLimit == "0") "Remove" else "Add"} asset txn: sourceAddress = $sourceAddress, " +
@@ -103,11 +103,11 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  fun removeAssetSupport(asset: IssuedAssetId): T {
+  actual fun removeAssetSupport(asset: IssuedAssetId): T {
     return addAssetSupport(asset, "0")
   }
 
-  fun setThreshold(low: Int, medium: Int, high: Int) = building {
+  actual fun setThreshold(low: Int, medium: Int, high: Int) = building {
     SetOptionsOperation.Builder()
       .setSourceAccount(sourceAddress)
       .setLowThreshold(low)
@@ -131,3 +131,6 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
       .build()
   }
 }
+
+actual val defaultTrustLimit: String =
+  Long.MAX_VALUE.toBigDecimal().movePointLeft(DECIMAL_POINT_PRECISION).toPlainString()

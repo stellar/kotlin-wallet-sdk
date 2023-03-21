@@ -2,6 +2,7 @@ package org.stellar.walletsdk.horizon
 
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.anchor.MemoType
+import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
 
 actual class Stellar internal actual constructor(cfg: Config) {
   actual fun account(): AccountService {
@@ -20,8 +21,7 @@ actual class Stellar internal actual constructor(cfg: Config) {
    */
   actual suspend fun transaction(
     sourceAddress: AccountKeyPair,
-    memo: Pair<MemoType, String>?,
-    defaultSponsorAddress: String?
+    memo: Pair<MemoType, String>?
   ): TransactionBuilder {
     TODO("Not yet implemented")
   }
@@ -33,5 +33,5 @@ actual class Stellar internal actual constructor(cfg: Config) {
    * @return `true` if submitted successfully
    * @throws [TransactionSubmitFailedException] when submission failed
    */
-  actual suspend fun submitTransaction(signedTransaction: Transaction) {}
+  actual suspend fun submitTransaction(signedTransaction: AbstractTransaction) {}
 }

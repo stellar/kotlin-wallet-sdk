@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger {}
 
 /** Build on/off ramps with anchors. */
 actual class Anchor
-actual internal constructor(
+internal actual constructor(
   private val cfg: Config,
   private val baseUrl: Url,
   private val httpClient: HttpClient

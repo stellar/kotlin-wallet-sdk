@@ -29,10 +29,10 @@ private val log = KotlinLogging.logger {}
  */
 actual class Auth
 internal actual constructor(
-  internal actual val cfg: Config,
-  internal actual val webAuthEndpoint: String,
-  internal actual val homeDomain: String,
-  internal actual val httpClient: HttpClient
+  private val cfg: Config,
+  private val webAuthEndpoint: String,
+  private val homeDomain: String,
+  private val httpClient: HttpClient
 ) {
   /**
    * Authenticates to an external server.
