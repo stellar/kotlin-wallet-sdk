@@ -1,17 +1,21 @@
+import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.stellar.walletsdk.Wallet
-import kotlin.test.Test
 
 class AnchorTest {
-    @Test
-    fun testGetInfo() = runTest {
-        val anchor = Wallet.Testnet.anchor("testanchor.stellar.org")
-        val info = anchor.getInfo()
+  val anchor = Wallet.Testnet.anchor("testanchor.stellar.org")
 
-        println(info)
+  @Test
+  fun testGetInfo() = runTest {
+    val info = anchor.getInfo()
 
-        val servicesInfo = anchor.getServicesInfo()
+    println(info)
 
-        println(servicesInfo)
-    }
+    val servicesInfo = anchor.getServicesInfo()
+
+    println(servicesInfo)
+  }
+
+  //  @Test fun testAuth() = runTest { anchor.auth().authenticate(SigningKeyPair(Keypair.random()))
+  // }
 }

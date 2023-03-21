@@ -52,7 +52,7 @@ class AddressCreator(private val secretKey: String, private val signer: Signer) 
 
 @JsExport
 external interface Signer {
-  fun sign(t: Transaction<*, *>, k: Keypair): Transaction<*, *>
+  fun sign(t: Transaction__0, k: Keypair): Transaction__0
 }
 
 @JsExport data class Result(val hash: String, val keypair: Keypair)

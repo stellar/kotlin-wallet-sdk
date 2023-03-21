@@ -6464,12 +6464,12 @@ kleur@^3.0.3:
 
 kotlin-wallet-sdk@../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz:
   version "0.5.0"
-  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz#821433005f200e37a08dd24928f2f187437c7d16"
+  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz#a37234f7eff923874470bd8110df7620cbe0d93d"
   dependencies:
     "@js-joda/core" "3.2.0"
     abort-controller "3.0.0"
     node-fetch "2.6.7"
-    stellar-sdk "10.4.1"
+    stellar-sdk "^10.4.1"
     ws "8.5.0"
 
 last-call-webpack-plugin@^3.0.0:
@@ -9611,7 +9611,7 @@ stellar-base@^8.2.2:
   optionalDependencies:
     sodium-native "^3.3.0"
 
-stellar-sdk@10.4.1:
+stellar-sdk@10.4.1, stellar-sdk@^10.4.1:
   version "10.4.1"
   resolved "https://registry.yarnpkg.com/stellar-sdk/-/stellar-sdk-10.4.1.tgz#823eb20e7f346b87c3bcaeeb11ec8128a1790d90"
   integrity sha512-Wdm2UoLuN9SNrSEHO0R/I+iZuRwUkfny1xg4akhGCpO8LQZw8QzuMTJvbEoMT3sHT4/eWYiteVLp7ND21xZf5A==

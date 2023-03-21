@@ -8,56 +8,56 @@ import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.isPublic
 
 data class TomlInfo(
-  @SerialName("VERSION")  val version: String?,
-  @SerialName("NETWORK_PASSPHRASE")  val networkPassphrase: String?,
-  @SerialName("FEDERATION_SERVER")  val federationServer: String?,
+  @SerialName("VERSION") val version: String?,
+  @SerialName("NETWORK_PASSPHRASE") val networkPassphrase: String?,
+  @SerialName("FEDERATION_SERVER") val federationServer: String?,
   @SerialName("AUTH_SERVER") val authServer: String?,
-  @SerialName("TRANSFER_SERVER")  val transferServer: String?,
-  @SerialName("TRANSFER_SERVER_SEP0024")  val transferServerSep24: String?,
-  @SerialName("KYC_SERVER")  val kycServer: String?,
-  @SerialName("WEB_AUTH_ENDPOINT")  val webAuthEndpoint: String?,
-  @SerialName("SIGNING_KEY")  val signingKey: String?,
-  @SerialName("HORIZON_URL")  val horizonUrl: String?,
-  @SerialName("ACCOUNTS")  val accounts: List<String>?,
-  @SerialName("URI_REQUEST_SIGNING_KEY")  val uriRequestSigningKey: String?,
-  @SerialName("DIRECT_PAYMENT_SERVER")  val directPaymentServer: String?,
-  @SerialName("ANCHOR_QUOTE_SERVER")  val anchorQuoteServer: String?,
-  @SerialName("DOCUMENTATION")  val documentation: InfoDocumentation?,
-  @SerialName("PRINCIPALS")  val principals: List<InfoContact>?,
-  @SerialName("CURRENCIES")  val currencies: List<InfoCurrency>?,
-  @SerialName("VALIDATORS")  val validators: List<InfoValidator>?
+  @SerialName("TRANSFER_SERVER") val transferServer: String?,
+  @SerialName("TRANSFER_SERVER_SEP0024") val transferServerSep24: String?,
+  @SerialName("KYC_SERVER") val kycServer: String?,
+  @SerialName("WEB_AUTH_ENDPOINT") val webAuthEndpoint: String?,
+  @SerialName("SIGNING_KEY") val signingKey: String?,
+  @SerialName("HORIZON_URL") val horizonUrl: String?,
+  @SerialName("ACCOUNTS") val accounts: List<String>?,
+  @SerialName("URI_REQUEST_SIGNING_KEY") val uriRequestSigningKey: String?,
+  @SerialName("DIRECT_PAYMENT_SERVER") val directPaymentServer: String?,
+  @SerialName("ANCHOR_QUOTE_SERVER") val anchorQuoteServer: String?,
+  @SerialName("DOCUMENTATION") val documentation: InfoDocumentation?,
+  @SerialName("PRINCIPALS") val principals: List<InfoContact>?,
+  @SerialName("CURRENCIES") val currencies: List<InfoCurrency>?,
+  @SerialName("VALIDATORS") val validators: List<InfoValidator>?
 ) {
   // Supported services (SEPs)
   private val hasAuth = webAuthEndpoint != null && signingKey != null
-   val services: InfoServices =
+  val services: InfoServices =
     InfoServices(
       sep6 =
-      if (transferServer != null) {
-        Sep6(transferServer, anchorQuoteServer)
-      } else {
-        null
-      },
+        if (transferServer != null) {
+          Sep6(transferServer, anchorQuoteServer)
+        } else {
+          null
+        },
       sep10 =
-      if (hasAuth) {
-        Sep10(webAuthEndpoint.toString(), signingKey.toString())
-      } else {
-        null
-      },
+        if (hasAuth) {
+          Sep10(webAuthEndpoint.toString(), signingKey.toString())
+        } else {
+          null
+        },
       sep24 =
-      if (transferServerSep24 != null) {
-        Sep24(transferServerSep24, hasAuth)
-      } else {
-        null
-      },
+        if (transferServerSep24 != null) {
+          Sep24(transferServerSep24, hasAuth)
+        } else {
+          null
+        },
       sep31 =
-      if (directPaymentServer != null) {
-        Sep31(directPaymentServer, hasAuth, kycServer, anchorQuoteServer)
-      } else {
-        null
-      }
+        if (directPaymentServer != null) {
+          Sep31(directPaymentServer, hasAuth, kycServer, anchorQuoteServer)
+        } else {
+          null
+        }
     )
 
-   fun validate(network: Network) {
+  fun validate(network: Network) {
     if (!network.isPublic()) {
       return
     }
@@ -76,7 +76,7 @@ data class TomlInfo(
     if (url != null && URLBuilder(url).protocol.name != URLProtocol.HTTPS.name) {
       throw ValidationException(
         "TOML file contains url using http protocol for $name: $url. Http urls are prohibited " +
-                "in production environment. Please notify anchor owner."
+          "in production environment. Please notify anchor owner."
       )
     }
   }

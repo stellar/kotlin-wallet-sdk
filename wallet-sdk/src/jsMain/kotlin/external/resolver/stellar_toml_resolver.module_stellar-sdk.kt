@@ -1,7 +1,5 @@
-
 @file:JsModule("stellar-sdk")
 @file:JsNonModule
-
 @file:Suppress(
   "INTERFACE_WITH_SUPERCLASS",
   "OVERRIDING_FINAL_MEMBER",
@@ -11,9 +9,7 @@
 
 package external.resolver
 
-import external.Networks
 import kotlin.js.Promise
-
 
 external open class StellarTomlResolver {
   interface StellarTomlResolveOptions {

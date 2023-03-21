@@ -22,9 +22,9 @@ internal constructor(
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
    *
    * @param accountAddress Stellar address of the account, used for authentication and by default
-   *   for depositing or withdrawing funds
+   * for depositing or withdrawing funds
    * @param fundsAccountAddress optional Stellar address of the account for depositing or
-   *   withdrawing funds, if different from the account address
+   * withdrawing funds, if different from the account address
    * @param assetId Asset code to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
@@ -49,9 +49,9 @@ internal constructor(
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
    *
    * @param accountAddress Stellar address of the account, used for authentication and by default
-   *   for depositing or withdrawing funds
+   * for depositing or withdrawing funds
    * @param fundsAccountAddress optional Stellar address of the account for depositing or
-   *   withdrawing funds, if different from the account address
+   * withdrawing funds, if different from the account address
    * @param assetId Asset code to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
