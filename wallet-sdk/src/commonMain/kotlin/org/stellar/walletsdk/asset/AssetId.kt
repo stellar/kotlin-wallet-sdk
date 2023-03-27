@@ -1,6 +1,8 @@
+@file:JsExport
+
 package org.stellar.walletsdk.asset
 
-import kotlin.jvm.JvmInline
+import kotlin.js.JsExport
 import mu.KotlinLogging
 
 private val log = KotlinLogging.logger {}
@@ -20,6 +22,7 @@ sealed interface StellarAssetId : AssetId {
     get() = STELLAR_SCHEME
 }
 
+@JsExport
 data class IssuedAssetId(val code: String, val issuer: String) : StellarAssetId {
   override val id = "$code:$issuer"
 
@@ -30,8 +33,7 @@ object NativeAssetId : StellarAssetId {
   override val id = "native"
 }
 
-@JvmInline
-value class FiatAssetId(override val id: String) : AssetId {
+data class FiatAssetId(override val id: String) : AssetId {
   override val scheme: String
     get() = FIAT_SCHEME
 

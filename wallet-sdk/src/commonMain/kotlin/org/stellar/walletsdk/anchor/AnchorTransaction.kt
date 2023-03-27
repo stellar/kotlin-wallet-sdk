@@ -6,6 +6,7 @@
 
 package org.stellar.walletsdk.anchor
 
+import kotlin.js.JsExport
 import kotlinx.datetime.Instant
 import kotlinx.datetime.serializers.InstantIso8601Serializer
 import kotlinx.serialization.*
@@ -17,6 +18,7 @@ import org.stellar.walletsdk.json.AnchorTransactionSerializer
 import org.stellar.walletsdk.json.AssetIdSerializer
 
 @Serializable(AnchorTransactionSerializer::class)
+@JsExport
 sealed interface AnchorTransaction {
   val id: String
   val status: TransactionStatus

@@ -6464,7 +6464,7 @@ kleur@^3.0.3:
 
 kotlin-wallet-sdk@../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz:
   version "0.5.0"
-  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz#821433005f200e37a08dd24928f2f187437c7d16"
+  resolved "../../wallet-sdk/build/productionLibrary/kotlin-wallet-sdk-v0.5.0.tgz#df14f8f4bcd9c4714f42ace7944df6722e87f02e"
   dependencies:
     "@js-joda/core" "3.2.0"
     abort-controller "3.0.0"

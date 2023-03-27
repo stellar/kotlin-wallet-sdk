@@ -20,7 +20,7 @@ class AddressCreator(private val secretKey: String, private val signer: Signer) 
             Account(key.publicKey(), acc.sequence),
             object : TransactionBuilder.TransactionBuilderOptions {
               override var fee = "100"
-              override var networkPassphrase: Networks? = Networks.TESTNET
+              override var networkPassphrase: String? = Network.TESTNET.passphrase
             }
           )
           .setTimeout(0)
@@ -52,7 +52,7 @@ class AddressCreator(private val secretKey: String, private val signer: Signer) 
 
 @JsExport
 external interface Signer {
-  fun sign(t: Transaction<*, *>, k: Keypair): Transaction<*, *>
+  fun sign(t: Transaction__0, k: Keypair): Transaction__0
 }
 
 @JsExport data class Result(val hash: String, val keypair: Keypair)

@@ -183,7 +183,7 @@ external var AuthImmutableFlag: Number /* 4 */
 
 external var AuthClawbackEnabledFlag: Number /* 8 */
 
-external open class TransactionI {
+abstract external class TransactionI {
   open fun addSignature(publicKey: String, signature: String)
   open fun addDecoratedSignature(signature: dynamic)
   open var fee: String
@@ -203,7 +203,7 @@ external open class FeeBumpTransaction : TransactionI {
   constructor(envelope: String, networkPassphrase: String)
   //  constructor(envelope: TransactionEnvelope, networkPassphrase: String)
   open var feeSource: String
-  open var innerTransaction: Transaction<*, *>
+  open var innerTransaction: Transaction__0
 }
 
 external interface `T$101` {
@@ -216,25 +216,28 @@ external interface `T$102` {
   var maxLedger: Number
 }
 
-external open class Transaction<
-  TMemo : Memo<Any>,
-  TOps : Array<
-    dynamic /* Operation.CreateAccount | Operation.Payment | Operation.PathPaymentStrictReceive |
- Operation.PathPaymentStrictSend | Operation.CreatePassiveSellOffer | Operation.ManageSellOffer |
- Operation.ManageBuyOffer | SetOptions__0 | Operation.ChangeTrust | Operation.AllowTrust |
- Operation.AccountMerge | Operation.Inflation | Operation.ManageData | Operation.BumpSequence |
- Operation.CreateClaimableBalance | Operation.ClaimClaimableBalance |
- Operation.BeginSponsoringFutureReserves | Operation.EndSponsoringFutureReserves |
- Operation.RevokeAccountSponsorship | Operation.RevokeTrustlineSponsorship |
- Operation.RevokeOfferSponsorship | Operation.RevokeDataSponsorship |
- Operation.RevokeClaimableBalanceSponsorship | Operation.RevokeLiquidityPoolSponsorship |
- Operation.RevokeSignerSponsorship | Operation.Clawback | Operation.ClawbackClaimableBalance |
- Operation.SetTrustLineFlags | Operation.LiquidityPoolDeposit | Operation.LiquidityPoolWithdraw */>
-> : TransactionI {
+external open class Transaction
+// <
+//  TMemo : Memo<Any>,
+//  TOps : Array<
+//    dynamic /* Operation.CreateAccount | Operation.Payment | Operation.PathPaymentStrictReceive |
+// Operation.PathPaymentStrictSend | Operation.CreatePassiveSellOffer | Operation.ManageSellOffer |
+// Operation.ManageBuyOffer | SetOptions__0 | Operation.ChangeTrust | Operation.AllowTrust |
+// Operation.AccountMerge | Operation.Inflation | Operation.ManageData | Operation.BumpSequence |
+// Operation.CreateClaimableBalance | Operation.ClaimClaimableBalance |
+// Operation.BeginSponsoringFutureReserves | Operation.EndSponsoringFutureReserves |
+// Operation.RevokeAccountSponsorship | Operation.RevokeTrustlineSponsorship |
+// Operation.RevokeOfferSponsorship | Operation.RevokeDataSponsorship |
+// Operation.RevokeClaimableBalanceSponsorship | Operation.RevokeLiquidityPoolSponsorship |
+// Operation.RevokeSignerSponsorship | Operation.Clawback | Operation.ClawbackClaimableBalance |
+// Operation.SetTrustLineFlags | Operation.LiquidityPoolDeposit | Operation.LiquidityPoolWithdraw
+// */>
+// >
+: TransactionI {
   constructor(envelope: String, networkPassphrase: String)
   //  constructor(envelope: TransactionEnvelope, networkPassphrase: String)
-  open var memo: TMemo
-  open var operations: TOps
+  open var memo: Memo<Any>
+  open var operations: Array<Operation2__0>
   open var sequence: String
   open var source: String
   open var timeBounds: `T$101`
@@ -268,7 +271,7 @@ external open class TransactionBuilder(
   open fun setMinAccountSequenceAge(durationInSeconds: Number): TransactionBuilder /* this */
   open fun setMinAccountSequenceLedgerGap(gap: Number): TransactionBuilder /* this */
   open fun setExtraSigners(extraSigners: Array<String>): TransactionBuilder /* this */
-  open fun build(): Transaction<*, *>
+  open fun build(): Transaction__0
   open fun setNetworkPassphrase(networkPassphrase: String): TransactionBuilder /* this */
   interface `T$103` {
     var minTime: dynamic /* Date? | Number? | String? */
@@ -291,7 +294,7 @@ external open class TransactionBuilder(
     var memo: Memo<Any>?
       get() = definedExternally
       set(value) = definedExternally
-    var networkPassphrase: Networks?
+    var networkPassphrase: String?
       get() = definedExternally
       set(value) = definedExternally
     var timebounds: `T$103`?

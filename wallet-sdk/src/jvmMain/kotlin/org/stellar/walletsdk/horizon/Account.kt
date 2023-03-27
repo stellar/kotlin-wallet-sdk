@@ -51,3 +51,7 @@ fun String.toPublicKeyPair(): PublicKeyPair {
 actual typealias Transaction = org.stellar.sdk.Transaction
 
 actual typealias AbstractTransaction = org.stellar.sdk.AbstractTransaction
+
+actual fun Transaction.toEnvelopeXdrBase64(): String {
+  return this.toEnvelopeXdrBase64()
+}

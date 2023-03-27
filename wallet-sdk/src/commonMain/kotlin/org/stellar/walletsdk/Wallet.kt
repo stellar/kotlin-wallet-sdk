@@ -8,6 +8,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
+import kotlin.js.JsName
 import org.stellar.walletsdk.anchor.Anchor
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
@@ -22,10 +23,11 @@ class Wallet(
   stellarConfiguration: StellarConfiguration,
   applicationConfiguration: ApplicationConfiguration = ApplicationConfiguration()
 ) : Closeable {
-  internal val cfg = Config(stellarConfiguration, applicationConfiguration)
+  val cfg = Config(stellarConfiguration, applicationConfiguration)
 
   private val clients = mutableListOf(cfg.app.defaultClient)
 
+  @JsName("deprecated")
   @Deprecated(
     "To be removed in 0.7",
     ReplaceWith("this.anchor(Url(\"https://\$homeDomain\"), httpClientConfig)", "io.ktor.http.Url")
@@ -70,7 +72,7 @@ class Wallet(
   }
 }
 
-internal data class Config(val stellar: StellarConfiguration, val app: ApplicationConfiguration)
+data class Config(val stellar: StellarConfiguration, val app: ApplicationConfiguration)
 
 /**
  * Application configuration
@@ -99,6 +101,7 @@ data class ApplicationConfiguration(
         "io.ktor.http.URLProtocol"
       )
   )
+  @JsName("deprecated")
   constructor(
     defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
     base64Decoder: Base64Decoder = defaultBase64Decoder,
@@ -126,7 +129,3 @@ typealias Base64Decoder = ((String) -> ByteArray)
 internal typealias ClientConfig = HttpClientConfig<ClientConfigType>
 
 internal typealias ClientConfigFn = (ClientConfig.() -> Unit)
-
-expect class ClientConfigType : HttpClientEngineConfig
-
-expect object Engine : HttpClientEngineFactory<ClientConfigType>

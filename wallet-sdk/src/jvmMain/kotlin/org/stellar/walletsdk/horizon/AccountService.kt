@@ -3,6 +3,7 @@ package org.stellar.walletsdk.horizon
 import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.Network
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.util.*

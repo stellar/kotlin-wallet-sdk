@@ -4,7 +4,6 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import shadow.com.moandjiezana.toml.Toml
 
 /**
  * [Stellar info file](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)
@@ -13,24 +12,11 @@ import shadow.com.moandjiezana.toml.Toml
  * @property homeDomain Home domain where to find stellar.toml file
  * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
-internal actual object StellarToml {
+internal expect object StellarToml {
   /**
    * Get TOML file content.
    *
    * @return content of the TOML file
    */
-  actual suspend fun getToml(baseURL: Url, httpClient: HttpClient): TomlInfo {
-    val tomlContent =
-      httpClient
-        .get {
-          accept(ContentType.Text.Any)
-          url {
-            takeFrom(baseURL)
-            appendPathSegments(".well-known", "stellar.toml")
-          }
-        }
-        .bodyAsText()
-
-    return parseToml(Toml().read(tomlContent).toMap())
-  }
+  suspend fun getToml(baseURL: Url, httpClient: HttpClient): TomlInfo
 }
