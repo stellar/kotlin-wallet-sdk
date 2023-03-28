@@ -175,6 +175,12 @@ internal constructor(
   }
 }
 
+fun Anchor.sep24(): Sep24 {
+  return this.interactive()
+}
+
+typealias Sep24 = Interactive
+
 private class InfoHolder(
   private val network: Network,
   private val baseUrl: Url,
