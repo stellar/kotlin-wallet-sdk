@@ -8,4 +8,4 @@ dependencies {
   // implementation("org.stellar:wallet-sdk:0.1.0")
 }
 
-application { mainClass.set("org.stellar.example.MainKt") }
+application { mainClass.set("org.stellar.example.RunnerKt") }

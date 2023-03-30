@@ -2,7 +2,7 @@ package org.stellar.example
 
 object Info {
   @JvmStatic
-  suspend fun main(args: Array<String>) {
+  suspend fun main() {
     // Get info from the anchor server
     val info = anchor.getInfo()
 

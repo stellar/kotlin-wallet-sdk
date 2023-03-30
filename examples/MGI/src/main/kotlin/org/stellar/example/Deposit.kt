@@ -6,7 +6,7 @@ import org.stellar.walletsdk.anchor.TransactionStatus
 
 object Deposit {
   @JvmStatic
-  suspend fun main(args: Array<String>) {
+  suspend fun main() {
     // Authorizing
     val token = anchor.auth().authenticate(myAccount, Signer, clientDomain = clientDomain)
 
