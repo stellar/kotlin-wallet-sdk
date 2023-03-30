@@ -111,7 +111,11 @@ suspend fun WithdrawalTransaction.toTransferTransaction(
   this.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
 
   return stellar
-    .transaction(this.from, this.withdrawalMemo.let { this.withdrawalMemoType to it })
+    .transaction(
+      this.from,
+      this.withdrawalMemo?.let { this.withdrawalMemoType to it }
+        ?: throw ValidationException("Missing withdrawal_memo in the transaction")
+    )
     .transfer(this.withdrawAnchorAccount, assetId, this.amountIn)
     .build()
 }

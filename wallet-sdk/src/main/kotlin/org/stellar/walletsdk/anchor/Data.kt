@@ -28,7 +28,7 @@ data class AnchorServiceInfo(
   val deposit: Map<String, AnchorServiceAsset>,
   val withdraw: Map<String, AnchorServiceAsset>,
   val fee: AnchorServiceFee,
-  val features: AnchorServiceFeatures,
+  val features: AnchorServiceFeatures? = null,
 )
 
 @Serializable

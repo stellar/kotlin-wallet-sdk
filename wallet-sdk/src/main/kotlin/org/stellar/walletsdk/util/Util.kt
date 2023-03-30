@@ -7,9 +7,14 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
+import org.stellar.walletsdk.asset.*
+import org.stellar.walletsdk.asset.FIAT_SCHEME
+import org.stellar.walletsdk.asset.STELLAR_SCHEME
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.AnchorInteractiveFlowNotSupported
 import org.stellar.walletsdk.exception.IncorrectTransactionStatusException
+import org.stellar.walletsdk.exception.InvalidJsonException
+import org.stellar.walletsdk.json.fromJson
 import org.stellar.walletsdk.toml.TomlInfo
 
 internal object Util {
@@ -27,12 +32,16 @@ internal object Util {
         info.services.sep24?.transferServerSep24 ?: throw AnchorInteractiveFlowNotSupported
       )
     urlBuilder.urlBlock()
-    return this.get(urlBuilder.build()) {
-        if (authToken != null) {
-          headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+
+    val textBody =
+      this.get(urlBuilder.build()) {
+          if (authToken != null) {
+            headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+          }
         }
-      }
-      .body()
+        .bodyAsText()
+
+    return textBody.fromJson()
   }
 
   internal suspend inline fun <reified Req, reified Resp> HttpClient.postJson(
@@ -57,4 +66,23 @@ fun AnchorTransaction.requireStatus(requiredStatus: TransactionStatus) {
   if (this.status != requiredStatus) {
     throw IncorrectTransactionStatusException(this, requiredStatus)
   }
+}
+
+fun String.toAssetId(): AssetId {
+  val str = this
+  if (str == NativeAssetId.id) {
+    return NativeAssetId
+  } else if (str.startsWith(STELLAR_SCHEME)) {
+    val split = str.split(":")
+
+    // scheme:code:issuer
+    if (split.size != 3) {
+      throw InvalidJsonException("Invalid asset format", str)
+    }
+
+    return IssuedAssetId(split[1], split[2])
+  } else if (str.startsWith(FIAT_SCHEME)) {
+    return FiatAssetId(str)
+  }
+  throw InvalidJsonException("Unknown scheme", str)
 }

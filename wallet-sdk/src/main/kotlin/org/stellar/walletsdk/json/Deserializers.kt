@@ -19,3 +19,19 @@ object AccountAsStringSerializer : KSerializer<PublicKeyPair> {
   override fun deserialize(decoder: Decoder): PublicKeyPair =
     decoder.decodeString().toPublicKeyPair()
 }
+
+object NullableAccountAsStringSerializer : KSerializer<PublicKeyPair?> {
+  override val descriptor: SerialDescriptor =
+    PrimitiveSerialDescriptor("PublicKeyPair", PrimitiveKind.STRING)
+  override fun serialize(encoder: Encoder, value: PublicKeyPair?) =
+    encoder.encodeString(value!!.address)
+  override fun deserialize(decoder: Decoder): PublicKeyPair? {
+    val string = decoder.decodeString()
+
+    if (string.isBlank()) {
+      return null
+    }
+
+    return string.toPublicKeyPair()
+  }
+}
