@@ -112,15 +112,26 @@ suspend fun WithdrawalTransaction.toTransferTransaction(
   return this.toStellarTransfer(stellar, assetId)
 }
 
+/**
+ * Transforms this withdrawal transaction to the Stellar Transfer transaction that can be submitted
+ * to the network.
+ *
+ * @param stellar instance of the Stellar service.
+ * @param assetId asset that is being transferred.
+ * @param sourceAddress (optional) origin account that will be used to transfer funds. If not
+ *   specified, `from` field of this transaction will be used.
+ * @return Stellar transfer transaction.
+ */
 suspend fun WithdrawalTransaction.toStellarTransfer(
   stellar: Stellar,
-  assetId: StellarAssetId
+  assetId: StellarAssetId,
+  sourceAddress: AccountKeyPair? = null
 ): Transaction {
   this.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
 
   return stellar
     .transaction(
-      this.from,
+      sourceAddress ?: this.from,
       this.withdrawalMemo?.let { this.withdrawalMemoType to it }
         ?: throw ValidationException("Missing withdrawal_memo in the transaction")
     )
