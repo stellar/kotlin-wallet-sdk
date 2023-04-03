@@ -10,6 +10,7 @@ import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.sign
+import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
 import org.stellar.walletsdk.horizon.transaction.toTransferTransaction
 
 object Withdrawal {
@@ -37,7 +38,7 @@ object Withdrawal {
     } while (transaction.status != TransactionStatus.PENDING_USER_TRANSFER_START)
 
     // Send transaction with transfer
-    val transfer = (transaction as WithdrawalTransaction).toTransferTransaction(stellar, asset)
+    val transfer = (transaction as WithdrawalTransaction).toStellarTransfer(stellar, asset)
 
     transfer.sign(myAccount)
 

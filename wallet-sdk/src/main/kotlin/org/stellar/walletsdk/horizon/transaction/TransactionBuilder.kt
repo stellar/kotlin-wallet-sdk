@@ -40,7 +40,7 @@ internal constructor(
    *
    * @param sponsorAccount account that will be used to sponsor all operations inside the block
    * @param sponsoredAccount account that is sponsored and will be used as a source account of all
-   * operations inside the block. If not specified, defaults to builder's sourceAddress.
+   *   operations inside the block. If not specified, defaults to builder's sourceAddress.
    * @param body main code block, that contains logic of operations sponsoring
    * @return [TransactionBuilder]
    * @receiver [SponsoringBuilder]
@@ -61,7 +61,7 @@ internal constructor(
    *
    * @param newAccount Key pair of an account to be created.
    * @param startingBalance optional Starting account balance in XLM. Minimum for non-sponsored
-   * accounts is 1 XLM. Default value is 1.
+   *   accounts is 1 XLM. Default value is 1.
    * @throws [InvalidStartingBalanceException] on invalid starting balance
    */
   fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt = 1u) = building {
@@ -104,7 +104,15 @@ internal constructor(
   }
 }
 
+@Deprecated("To be removed in future versions", ReplaceWith("toStellarTransfer(stellar, assetId)"))
 suspend fun WithdrawalTransaction.toTransferTransaction(
+  stellar: Stellar,
+  assetId: StellarAssetId
+): Transaction {
+  return this.toStellarTransfer(stellar, assetId)
+}
+
+suspend fun WithdrawalTransaction.toStellarTransfer(
   stellar: Stellar,
   assetId: StellarAssetId
 ): Transaction {
