@@ -8,7 +8,7 @@ suspend fun main(args: Array<String>) {
     "withdrawal" -> Withdrawal.main()
     "transaction" -> GetTransaction.main()
     "info" -> Info.main()
-    null -> throw IllegalStateException("Provide type of job to run $acceptedString")
+    null -> error("Provide type of job to run $acceptedString")
     else -> throw IllegalArgumentException("Unknown type $acceptedString ")
   }
 }

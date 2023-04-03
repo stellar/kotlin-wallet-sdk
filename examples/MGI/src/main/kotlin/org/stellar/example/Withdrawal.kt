@@ -59,14 +59,3 @@ object Withdrawal {
     println("Successful withdrawal")
   }
 }
-
-object Signer : WalletSigner.DefaultSigner() {
-  override suspend fun signWithDomainAccount(
-    transactionXDR: String,
-    networkPassPhrase: String,
-    account: AccountKeyPair
-  ): Transaction {
-    val tx = Transaction.fromEnvelopeXdr(transactionXDR, Network(networkPassPhrase))
-    return tx.sign(accountKp) as Transaction
-  }
-}

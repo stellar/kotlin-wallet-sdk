@@ -1,6 +1,6 @@
 ## MoneyGram integration example
 ### Code structure
-This module contains an example for integration with the MoneyGram.  
+This module contains an example for integration with MoneyGram.  
 The code is split between 4 parts:
 1. [Deposit](src/main/kotlin/org/stellar/example/Deposit.kt) shows an example of making a deposit transaction
 2. [Withdrawal](src/main/kotlin/org/stellar/example/Withdrawal.kt) shows an example of making a withdrawal transaction
@@ -17,6 +17,6 @@ You will need to define following env variables to successfully run the code:
 2. `CLIENT_PRIVATE` private key from SEP-1 client domain file. Alternatively, you may want to implement your own `WalletSigner`.
 3. (Optional) `STELLAR_KEY` private key of the user account with established USDC trustline. If not specified, default will be used. (Please do not drain the funds of the example account)
 
-In addition, when calling `trasacntion` service, you will need auth token and transaction id. (Auth token is printed during withdrawal/deposit flow in the console):
+In addition, when calling `transaction` service, you will need auth token and transaction id. (Auth token is printed during withdrawal/deposit flow in the console):
 1. `AUTH_TOKEN` SEP-10 Auth Token.
 2. `TRANSACTION_ID` id of transaction you want to fetch data for, 
