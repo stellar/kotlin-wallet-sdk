@@ -1,6 +1,5 @@
 package org.stellar.example
 
-import io.ktor.http.*
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.walletsdk.StellarConfiguration
@@ -11,7 +10,7 @@ import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
-import org.stellar.walletsdk.horizon.transaction.toTransferTransaction
+import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -107,7 +106,7 @@ suspend fun main() {
   } while (transaction.status != TransactionStatus.PENDING_USER_TRANSFER_START)
 
   // Send transaction with transfer
-  val transfer = (transaction as WithdrawalTransaction).toTransferTransaction(stellar, asset)
+  val transfer = (transaction as WithdrawalTransaction).toStellarTransfer(stellar, asset)
 
   transfer.sign(keypair)
 

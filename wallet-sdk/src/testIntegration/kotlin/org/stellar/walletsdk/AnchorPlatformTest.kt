@@ -21,7 +21,7 @@ import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
-import org.stellar.walletsdk.horizon.transaction.toTransferTransaction
+import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
 
 class AnchorPlatformTest {
   private val USDC =
@@ -83,7 +83,7 @@ class AnchorPlatformTest {
     waitStatus(withdrawal.id, TransactionStatus.PENDING_USER_TRANSFER_START, token)
 
     val transfer =
-      (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction).toTransferTransaction(
+      (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction).toStellarTransfer(
         wallet.stellar(),
         asset
       )
@@ -139,7 +139,7 @@ class AnchorPlatformTest {
 
       val transfer =
         (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction)
-          .toTransferTransaction(wallet.stellar(), asset)
+          .toStellarTransfer(wallet.stellar(), asset)
 
       transfer.sign(keypair)
 

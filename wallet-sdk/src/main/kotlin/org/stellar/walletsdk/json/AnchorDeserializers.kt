@@ -11,8 +11,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.asset.*
-import org.stellar.walletsdk.asset.STELLAR_SCHEME
 import org.stellar.walletsdk.exception.InvalidJsonException
+import org.stellar.walletsdk.util.toAssetId
 
 internal object AnchorTransactionSerializer :
   JsonContentPolymorphicSerializer<AnchorTransaction>(AnchorTransaction::class) {
@@ -58,20 +58,6 @@ internal object AssetIdSerializer : KSerializer<AssetId> {
   override fun deserialize(decoder: Decoder): AssetId {
     val str = decoder.decodeString()
 
-    if (str == NativeAssetId.id) {
-      return NativeAssetId
-    } else if (str.startsWith(STELLAR_SCHEME)) {
-      val split = str.split(":")
-
-      // scheme:code:issuer
-      if (split.size != 3) {
-        throw InvalidJsonException("Invalid asset format", str)
-      }
-
-      return IssuedAssetId(split[1], split[2])
-    } else if (str.startsWith(FIAT_SCHEME)) {
-      return FiatAssetId(str)
-    }
-    throw InvalidJsonException("Unknown scheme", str)
+    return str.toAssetId()
   }
 }
