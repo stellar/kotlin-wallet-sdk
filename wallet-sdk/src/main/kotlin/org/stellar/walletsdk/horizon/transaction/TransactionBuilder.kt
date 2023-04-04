@@ -32,7 +32,7 @@ internal constructor(
     SdkBuilder(sourceAccount, network).setBaseFee(maxBaseFeeInStroops).setTimeout(180)
 
   init {
-    memo?.also { builder.addMemo(it.first.mapper(it.second, cfg.app)) }
+    memo?.also { builder.addMemo(it.first.mapper(it.second)) }
   }
 
   /**
@@ -40,7 +40,7 @@ internal constructor(
    *
    * @param sponsorAccount account that will be used to sponsor all operations inside the block
    * @param sponsoredAccount account that is sponsored and will be used as a source account of all
-   *   operations inside the block. If not specified, defaults to builder's sourceAddress.
+   * operations inside the block. If not specified, defaults to builder's sourceAddress.
    * @param body main code block, that contains logic of operations sponsoring
    * @return [TransactionBuilder]
    * @receiver [SponsoringBuilder]
@@ -61,7 +61,7 @@ internal constructor(
    *
    * @param newAccount Key pair of an account to be created.
    * @param startingBalance optional Starting account balance in XLM. Minimum for non-sponsored
-   *   accounts is 1 XLM. Default value is 1.
+   * accounts is 1 XLM. Default value is 1.
    * @throws [InvalidStartingBalanceException] on invalid starting balance
    */
   fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt = 1u) = building {
@@ -119,7 +119,7 @@ suspend fun WithdrawalTransaction.toTransferTransaction(
  * @param stellar instance of the Stellar service.
  * @param assetId asset that is being transferred.
  * @param sourceAddress (optional) origin account that will be used to transfer funds. If not
- *   specified, `from` field of this transaction will be used.
+ * specified, `from` field of this transaction will be used.
  * @return Stellar transfer transaction.
  */
 suspend fun WithdrawalTransaction.toStellarTransfer(

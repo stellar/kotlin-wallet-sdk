@@ -138,8 +138,10 @@ class AnchorPlatformTest {
       waitStatus(withdrawal.id, TransactionStatus.PENDING_USER_TRANSFER_START, token)
 
       val transfer =
-        (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction)
-          .toStellarTransfer(wallet.stellar(), asset)
+        (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction).toStellarTransfer(
+          wallet.stellar(),
+          asset
+        )
 
       transfer.sign(keypair)
 

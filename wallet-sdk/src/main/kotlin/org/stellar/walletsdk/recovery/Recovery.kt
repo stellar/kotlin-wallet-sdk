@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.recovery
 
 import io.ktor.client.*
+import kotlin.io.encoding.Base64
 import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.sdk.xdr.DecoratedSignature
@@ -63,7 +64,7 @@ internal constructor(
 
     val authResponse: AuthSignature = client.postJson(requestUrl, requestParams, it.authToken)
 
-    return createDecoratedSignature(it.signerAddress, cfg.app.base64Decoder(authResponse.signature))
+    return createDecoratedSignature(it.signerAddress, Base64.decode(authResponse.signature))
   }
 
   /**
