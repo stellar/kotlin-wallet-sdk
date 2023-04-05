@@ -1,9 +1,9 @@
 package org.stellar.walletsdk.anchor
 
+import kotlin.io.encoding.Base64
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.stellar.sdk.Memo
-import org.stellar.walletsdk.ApplicationConfiguration
 import org.stellar.walletsdk.util.Util.isHex
 
 @Serializable
@@ -46,15 +46,15 @@ data class Payment(
   @SerialName("id_type") val idType: String
 )
 
-enum class MemoType(val mapper: (String, cfg: ApplicationConfiguration) -> Memo) {
-  @SerialName("text") TEXT({ s, _ -> Memo.text(s) }),
+enum class MemoType(val mapper: (String) -> Memo) {
+  @SerialName("text") TEXT({ s -> Memo.text(s) }),
   /** Hash memo. Supports hex or base64 string encoding */
   @SerialName("hash") HASH(::hash),
-  @SerialName("id") ID({ s, _ -> Memo.id(s.toLong()) })
+  @SerialName("id") ID({ s -> Memo.id(s.toLong()) })
 }
 
-private fun hash(s: String, cfg: ApplicationConfiguration): Memo {
-  return if (s.isHex()) Memo.hash(s) else Memo.hash(cfg.base64Decoder(s))
+private fun hash(s: String): Memo {
+  return if (s.isHex()) Memo.hash(s) else Memo.hash(Base64.decode(s))
 }
 
 @Serializable data class AnchorTransactionStatusResponse(val transaction: AnchorTransaction)

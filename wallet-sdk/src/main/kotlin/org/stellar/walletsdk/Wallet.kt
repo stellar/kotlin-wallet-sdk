@@ -122,7 +122,6 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
  */
 data class ApplicationConfiguration(
   val defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
-  val base64Decoder: Base64Decoder = defaultBase64Decoder,
   val defaultClientConfig: ClientConfigFn = {}
 ) {
   @Suppress("MaxLineLength")
@@ -130,18 +129,16 @@ data class ApplicationConfiguration(
     "Can be configured using defaultClientConfig",
     replaceWith =
       ReplaceWith(
-        "ApplicationConfiguration(defaultSigner, base64Decoder) { defaultRequest { url { protocol = URLProtocol.HTTP } } }",
+        "ApplicationConfiguration(defaultSigner) { defaultRequest { url { protocol = URLProtocol.HTTP } } }",
         "io.ktor.client.plugins.defaultRequest",
         "io.ktor.http.URLProtocol"
       )
   )
   constructor(
     defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
-    base64Decoder: Base64Decoder = defaultBase64Decoder,
     useHttp: Boolean
   ) : this(
     defaultSigner,
-    base64Decoder,
     {
       if (useHttp) {
         defaultRequest { url { protocol = URLProtocol.HTTP } }
@@ -157,10 +154,6 @@ data class ApplicationConfiguration(
     }
 }
 
-typealias Base64Decoder = ((String) -> ByteArray)
-
 internal typealias ClientConfig = HttpClientConfig<OkHttpConfig>
 
 internal typealias ClientConfigFn = (ClientConfig.() -> Unit)
-
-internal val defaultBase64Decoder: Base64Decoder = { Base64.getDecoder().decode(it) }

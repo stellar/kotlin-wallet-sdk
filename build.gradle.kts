@@ -74,6 +74,15 @@ subprojects {
         dependsOn("spotlessKotlinApply")
       }
       kotlinOptions.jvmTarget = jvmVersion.toString()
+      compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.io.encoding.ExperimentalEncodingApi")
+      }
+    }
+
+    compileTestKotlin {
+      compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.io.encoding.ExperimentalEncodingApi")
+      }
     }
 
     test { useJUnitPlatform() }

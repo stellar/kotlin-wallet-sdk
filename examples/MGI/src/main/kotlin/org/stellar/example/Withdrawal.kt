@@ -2,16 +2,11 @@ package org.stellar.example
 
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
-import org.stellar.sdk.Network
-import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
-import org.stellar.walletsdk.auth.WalletSigner
-import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.sign
 import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
-import org.stellar.walletsdk.horizon.transaction.toTransferTransaction
 
 object Withdrawal {
   suspend fun main() {
