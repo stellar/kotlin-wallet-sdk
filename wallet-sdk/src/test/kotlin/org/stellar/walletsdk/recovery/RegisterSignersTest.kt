@@ -19,7 +19,7 @@ internal class RegisterSignersTest {
         .recovery()
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
         )
     }
@@ -34,7 +34,7 @@ internal class RegisterSignersTest {
         .recovery()
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
         )
     }
@@ -49,7 +49,7 @@ internal class RegisterSignersTest {
         .recovery()
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
           sponsorAddress = ADDRESS_ACTIVE_TWO
         )

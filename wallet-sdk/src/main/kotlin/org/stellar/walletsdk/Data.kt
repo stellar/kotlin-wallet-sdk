@@ -3,6 +3,7 @@ package org.stellar.walletsdk
 import kotlinx.serialization.Serializable
 import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.walletsdk.asset.AssetId
+import org.stellar.walletsdk.horizon.AccountKeyPair
 
 data class AccountInfo(
   val publicKey: String,
@@ -10,8 +11,6 @@ data class AccountInfo(
   val liquidityPools: List<FormattedLiquidityPool>,
   val reservedNativeBalance: String,
 )
-
-data class AccountSigner(val address: String, val weight: Int)
 
 /**
  * Account weights threshold

@@ -50,15 +50,18 @@ internal object Util {
     authToken: AuthToken? = null,
     block: HttpRequestBuilder.() -> Unit = {}
   ): Resp {
-    return this.post(url) {
-        contentType(ContentType.Application.Json)
-        setBody(requestBody)
-        if (authToken != null) {
-          headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+    val result =
+      this.post(url) {
+          contentType(ContentType.Application.Json)
+          setBody(requestBody)
+          if (authToken != null) {
+            headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+          }
+          block()
         }
-        block()
-      }
-      .body()
+        .bodyAsText()
+
+    return result.fromJson()
   }
 }
 
