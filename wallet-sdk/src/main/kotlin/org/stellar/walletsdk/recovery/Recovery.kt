@@ -15,6 +15,7 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.horizon.toPublicKeyPair
 import org.stellar.walletsdk.horizon.transaction.CommonTransactionBuilder
+import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
@@ -38,11 +39,11 @@ internal constructor(
    */
   suspend fun signWithRecoveryServers(
     transaction: Transaction,
-    accountAddress: String,
+    accountAddress: AccountKeyPair,
     recoveryServers: List<RecoveryServerAuth>
   ): Transaction {
     val signatures =
-      recoveryServers.map { getRecoveryServerTxnSignature(transaction, accountAddress, it) }
+      recoveryServers.map { getRecoveryServerTxnSignature(transaction, accountAddress.address, it) }
 
     signatures.forEach { transaction.addSignature(it) }
 
@@ -159,6 +160,17 @@ internal constructor(
       ),
       recoverySigners
     )
+  }
+
+  suspend fun getAccountInfo(
+    accountAddress: AccountKeyPair,
+    recoveryServers: List<RecoveryServerAuth>
+  ): List<RecoverableAccountInfo> {
+    return recoveryServers.map {
+      val requestUrl = "${it.endpoint}/accounts/${accountAddress.address}"
+
+      client.authGet(requestUrl, it.authToken)
+    }
   }
 
   /**

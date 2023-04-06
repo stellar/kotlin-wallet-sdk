@@ -33,8 +33,15 @@ internal object Util {
       )
     urlBuilder.urlBlock()
 
+    return this.authGet(urlBuilder.build().toString(), authToken)
+  }
+
+  internal suspend inline fun <reified T> HttpClient.authGet(
+    url: String,
+    authToken: AuthToken?,
+  ): T {
     val textBody =
-      this.get(urlBuilder.build()) {
+      this.get(url) {
           if (authToken != null) {
             headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
           }

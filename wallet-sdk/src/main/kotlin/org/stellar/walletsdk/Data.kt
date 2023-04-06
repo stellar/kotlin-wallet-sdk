@@ -3,7 +3,6 @@ package org.stellar.walletsdk
 import kotlinx.serialization.Serializable
 import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.walletsdk.asset.AssetId
-import org.stellar.walletsdk.horizon.AccountKeyPair
 
 data class AccountInfo(
   val publicKey: String,

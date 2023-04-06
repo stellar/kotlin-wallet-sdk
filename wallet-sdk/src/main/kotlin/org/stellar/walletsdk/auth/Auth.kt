@@ -52,7 +52,7 @@ internal constructor(
    * Request transaction challenge from the auth endpoint.
    *
    * @return transaction as Base64 encoded TransactionEnvelope XDR string and network passphrase
-   *   from the auth endpoint
+   * from the auth endpoint
    * @throws [InvalidMemoIdException] when memo ID is not valid
    * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
    * @throws [ServerRequestFailedException] when request fails
@@ -108,7 +108,7 @@ internal constructor(
    * methods.
    *
    * @param challengeResponse challenge transaction and network passphrase returned from the auth
-   *   endpoint
+   * endpoint
    * @return signed transaction
    */
   private suspend fun sign(

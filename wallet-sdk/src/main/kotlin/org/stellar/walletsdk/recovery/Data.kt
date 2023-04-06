@@ -1,11 +1,18 @@
+@file:UseSerializers(AccountAsStringSerializer::class, InstantIso8601Serializer::class)
+
 package org.stellar.walletsdk.recovery
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.serializers.InstantIso8601Serializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.AccountKeyPair
+import org.stellar.walletsdk.horizon.PublicKeyPair
+import org.stellar.walletsdk.json.AccountAsStringSerializer
 
 @Serializable internal data class TransactionRequest(val transaction: String)
 
@@ -97,3 +104,14 @@ data class RecoverableWallet(val transaction: Transaction, val signers: List<Str
 
 internal data class AccountSigner(val address: AccountKeyPair, val weight: Int)
 
+@Serializable
+data class RecoverableAccountInfo(
+  val address: PublicKeyPair,
+  val identities: List<RecoverableIdentity>,
+  val signers: List<RecoverableSigner>
+)
+
+@Serializable data class RecoverableIdentity(val role: String, val authenticated: Boolean? = null)
+
+@Serializable
+data class RecoverableSigner(val key: PublicKeyPair, @SerialName("added_at") val added: Instant? = null)

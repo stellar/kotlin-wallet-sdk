@@ -77,10 +77,21 @@ suspend fun recoverAccount(account: AccountKeyPair, recoverySigners: List<String
   val transaction =
     wallet.stellar().transaction(account).addAccountSigner(recoveredSigner, 10).build()
 
+  val accountInfo =
+    recovery.getAccountInfo(
+      account,
+      listOf(
+        RecoveryServerAuth(cfg.recovery.server1.endpoint, recoverySigners[0], auth1),
+        RecoveryServerAuth(cfg.recovery.server2.endpoint, recoverySigners[1], auth2)
+      )
+    )
+
+  println(accountInfo)
+
   val signed =
     recovery.signWithRecoveryServers(
       transaction,
-      account.address,
+      account,
       listOf(
         RecoveryServerAuth(cfg.recovery.server1.endpoint, recoverySigners[0], auth1),
         RecoveryServerAuth(cfg.recovery.server2.endpoint, recoverySigners[1], auth2)
