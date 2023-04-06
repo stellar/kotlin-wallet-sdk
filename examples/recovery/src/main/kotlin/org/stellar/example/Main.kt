@@ -6,7 +6,6 @@ import com.sksamuel.hoplite.addResourceSource
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.asset.XLM
-import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
 import org.stellar.walletsdk.recovery.*
@@ -19,13 +18,14 @@ val second = RecoveryServerKey("second")
 val servers = mapOf(first to cfg.recovery.server1, second to cfg.recovery.server2)
 val recovery = wallet.recovery(servers)
 
+val account = wallet.stellar().account().createKeyPair()
+val deviceKey = wallet.stellar().account().createKeyPair()
+val recoveryKey = wallet.stellar().account().createKeyPair()
+
 suspend fun main() {
   val recoverData = createAccount()
 
-  val account = recoverData.first
-  val recoverySigners = recoverData.second
-
-  recoverAccount(account, recoverySigners)
+  recoverAccount(recoverData)
 
   wallet.close()
 }
@@ -38,15 +38,12 @@ fun readConfig(): Config {
   return cfgBuilder.build().loadConfigOrThrow<Config>()
 }
 
-suspend fun createAccount(): Pair<SigningKeyPair, List<String>> {
-  val newAccount = wallet.stellar().account().createKeyPair()
-  val deviceKey = wallet.stellar().account().createKeyPair()
-
+suspend fun createAccount(): List<String> {
   val identities =
     listOf(
       RecoveryAccountIdentity(
         RecoveryRole.OWNER,
-        listOf(RecoveryAccountAuthMethod(RecoveryType.STELLAR_ADDRESS, sponsor.address))
+        listOf(RecoveryAccountAuthMethod(RecoveryType.STELLAR_ADDRESS, recoveryKey.address))
       )
     )
 
@@ -55,7 +52,7 @@ suspend fun createAccount(): Pair<SigningKeyPair, List<String>> {
   val recoverableWallet =
     recovery.createRecoverableWallet(
       RecoverableWalletConfig(
-        newAccount,
+        account,
         deviceKey,
         AccountThreshold(10, 10, 10),
         mapOf(first to identities, second to identities),
@@ -64,34 +61,22 @@ suspend fun createAccount(): Pair<SigningKeyPair, List<String>> {
       )
     )
 
-  val tx = recoverableWallet.transaction.sign(newAccount).sign(sponsor)
+  val tx = recoverableWallet.transaction.sign(account).sign(sponsor)
 
   wallet.stellar().submitTransaction(tx)
 
-  println("Recoverable account created: ${newAccount.address} transaction ${tx.hashHex()}")
+  println("Recoverable account created: ${account.address} transaction ${tx.hashHex()}")
 
-  return newAccount to recoverableWallet.signers
+  return recoverableWallet.signers
 }
 
-suspend fun recoverAccount(account: AccountKeyPair, recoverySigners: List<String>) {
-  val auth1 = recovery.sep10Auth(first).authenticate(sponsor)
-  val auth2 = recovery.sep10Auth(second).authenticate(sponsor)
-
-  val newKey = wallet.stellar().account().createKeyPair()
+suspend fun recoverAccount(recoverySigners: List<String>) {
+  val auth1 = recovery.sep10Auth(first).authenticate(recoveryKey)
+  val auth2 = recovery.sep10Auth(second).authenticate(recoveryKey)
 
   val accountInfo = recovery.getAccountInfo(account, mapOf(first to auth1, second to auth2))
 
   println("Recoverable info: $accountInfo")
-
-  val signed =
-    recovery.replaceDeviceKey(
-      account,
-      newKey,
-      mapOf(
-        first to RecoveryServerSigning(recoverySigners[0], auth1),
-        second to RecoveryServerSigning(recoverySigners[1], auth2)
-      )
-    )
 
   val refill =
     wallet
@@ -102,6 +87,18 @@ suspend fun recoverAccount(account: AccountKeyPair, recoverySigners: List<String
       .sign(sponsor)
 
   wallet.stellar().submitTransaction(refill)
+
+  val newKey = wallet.stellar().account().createKeyPair()
+
+  val signed =
+    recovery.replaceDeviceKey(
+      account,
+      newKey,
+      mapOf(
+        first to RecoveryServerSigning(recoverySigners[0], auth1),
+        second to RecoveryServerSigning(recoverySigners[1], auth2)
+      )
+    )
 
   val sponsored = wallet.stellar().makeFeeBump(sponsor, signed).sign(sponsor)
 

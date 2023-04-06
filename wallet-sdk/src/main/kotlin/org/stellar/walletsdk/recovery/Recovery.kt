@@ -123,12 +123,12 @@ internal constructor(
   suspend fun getAccountInfo(
     accountAddress: AccountKeyPair,
     auth: Map<RecoveryServerKey, AuthToken>
-  ): List<RecoverableAccountInfo> {
+  ): Map<RecoveryServerKey, RecoverableAccountInfo> {
     return auth.map {
       val requestUrl = "${servers.getServer(it.key).endpoint}/accounts/${accountAddress.address}"
 
-      client.authGet(requestUrl, it.value)
-    }
+      it.key to client.authGet<RecoverableAccountInfo>(requestUrl, it.value)
+    }.toMap()
   }
 
   /**
