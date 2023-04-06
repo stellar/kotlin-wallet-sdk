@@ -1,7 +1,6 @@
 package org.stellar.walletsdk.recovery
 
 import io.ktor.client.*
-import kotlin.io.encoding.Base64
 import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.sdk.xdr.DecoratedSignature
@@ -27,52 +26,7 @@ internal constructor(
   private val stellar: Stellar,
   private val client: HttpClient,
   private val servers: Map<RecoveryServerKey, RecoveryServer>
-) {
-  /**
-   * Sign transaction with recovery servers. It is used to recover an account using
-   * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
-   *
-   * @param transaction Transaction with new signer to be signed by recovery servers
-   * @param accountAddress Stellar address of the account that is recovered
-   * @param serverAuth List of recovery servers to use
-   * @return transaction with recovery server signatures
-   * @throws [ServerRequestFailedException] when request fails
-   * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
-   */
-  suspend fun signWithRecoveryServers(
-    transaction: Transaction,
-    accountAddress: AccountKeyPair,
-    serverAuth: Map<RecoveryServerKey, RecoveryServerSigning>
-  ): Transaction {
-    val signatures =
-      serverAuth.map { getRecoveryServerTxnSignature(transaction, accountAddress.address, it) }
-
-    signatures.forEach { transaction.addSignature(it) }
-
-    return transaction
-  }
-
-  private suspend fun getRecoveryServerTxnSignature(
-    transaction: Transaction,
-    accountAddress: String,
-    it: Map.Entry<RecoveryServerKey, RecoveryServerSigning>
-  ): DecoratedSignature {
-    val server = servers.getServer(it.key)
-    val auth = it.value
-
-    val requestUrl = "${server.endpoint}/accounts/$accountAddress/sign/${auth.signerAddress}"
-    val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
-
-    log.debug {
-      "Recovery server signature request: accountAddress = $accountAddress, " +
-        "signerAddress = ${auth.signerAddress}, authToken = ${auth.authToken.prettify()}..."
-    }
-
-    val authResponse: AuthSignature = client.postJson(requestUrl, requestParams, auth.authToken)
-
-    return createDecoratedSignature(auth.signerAddress, Base64.decode(authResponse.signature))
-  }
-
+) : AccountRecover by AccountRecoverImpl(stellar, client, servers) {
   /**
    * Register account with recovery servers using
    * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
@@ -218,12 +172,6 @@ internal constructor(
 
     return builder.build()
   }
-
-  private fun Map<RecoveryServerKey, RecoveryServer>.getServer(
-    key: RecoveryServerKey
-  ): RecoveryServer {
-    return this[key] ?: throw ValidationException("Server with key $key was not found")
-  }
 }
 
 private inline fun <reified T : CommonTransactionBuilder<*>> T.register(
@@ -235,26 +183,6 @@ private inline fun <reified T : CommonTransactionBuilder<*>> T.register(
   this.setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
   return this
 }
-
-/**
- * Configuration for recoverable wallet
- *
- * @param accountAddress Stellar address of the account that is registering
- * @param deviceAddress Stellar address of the device that is added as a primary signer. It will
- * replace the master key of [accountAddress]
- * @param accountThreshold Low, medium, and high thresholds to set on the account
- * @param accountIdentity A list of account identities to be registered with the recovery servers
- * @param signerWeight Signer weight of the device and recovery keys to set
- * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
- */
-data class RecoverableWalletConfig(
-  val accountAddress: AccountKeyPair,
-  val deviceAddress: AccountKeyPair,
-  val accountThreshold: AccountThreshold,
-  val accountIdentity: Map<RecoveryServerKey, List<RecoveryAccountIdentity>>,
-  val signerWeight: SignerWeight,
-  val sponsorAddress: AccountKeyPair? = null
-)
 
 internal fun createDecoratedSignature(
   signatureAddress: String,
@@ -269,4 +197,10 @@ internal fun createDecoratedSignature(
   decoratedSig.hint = KeyPair.fromAccountId(signatureAddress).signatureHint
 
   return decoratedSig
+}
+
+internal fun Map<RecoveryServerKey, RecoveryServer>.getServer(
+  key: RecoveryServerKey
+): RecoveryServer {
+  return this[key] ?: throw ValidationException("Server with key $key was not found")
 }

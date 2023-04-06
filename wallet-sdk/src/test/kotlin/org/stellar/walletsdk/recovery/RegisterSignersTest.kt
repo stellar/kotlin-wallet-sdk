@@ -28,7 +28,7 @@ internal class RegisterSignersTest {
   }
 
   @Test
-  fun `there are 2 operations in non-sponsored transaction`() {
+  fun `there are 3 operations in non-sponsored transaction`() {
     val transaction = runBlocking {
       wallet
         .recovery(mapOf())
@@ -39,11 +39,11 @@ internal class RegisterSignersTest {
         )
     }
 
-    assertEquals(transaction.operations.size, 2)
+    assertEquals(transaction.operations.size, 3)
   }
 
   @Test
-  fun `there are 4 operations in sponsored transaction`() {
+  fun `there are 5 operations in sponsored transaction`() {
     val transaction = runBlocking {
       wallet
         .recovery(mapOf())
@@ -55,6 +55,6 @@ internal class RegisterSignersTest {
         )
     }
 
-    assertEquals(transaction.operations.size, 4)
+    assertEquals(transaction.operations.size, 5)
   }
 }

@@ -77,19 +77,16 @@ suspend fun recoverAccount(account: AccountKeyPair, recoverySigners: List<String
   val auth1 = recovery.sep10Auth(first).authenticate(sponsor)
   val auth2 = recovery.sep10Auth(second).authenticate(sponsor)
 
-  val recoveredSigner = wallet.stellar().account().createKeyPair()
-
-  val transaction =
-    wallet.stellar().transaction(account).addAccountSigner(recoveredSigner, 10).build()
+  val newKey = wallet.stellar().account().createKeyPair()
 
   val accountInfo = recovery.getAccountInfo(account, mapOf(first to auth1, second to auth2))
 
-  println(accountInfo)
+  println("Recoverable info: $accountInfo")
 
   val signed =
-    recovery.signWithRecoveryServers(
-      transaction,
+    recovery.replaceDeviceKey(
       account,
+      newKey,
       mapOf(
         first to RecoveryServerSigning(recoverySigners[0], auth1),
         second to RecoveryServerSigning(recoverySigners[1], auth2)
@@ -109,4 +106,6 @@ suspend fun recoverAccount(account: AccountKeyPair, recoverySigners: List<String
   val sponsored = wallet.stellar().makeFeeBump(sponsor, signed).sign(sponsor)
 
   wallet.stellar().submitTransaction(sponsored)
+
+  println("Replaced lost key with a new one")
 }
