@@ -16,7 +16,7 @@ internal class RegisterSignersTest {
   fun `defaults work`() {
     val transaction = runBlocking {
       wallet
-        .recovery()
+        .recovery(mapOf())
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
           accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
@@ -31,7 +31,7 @@ internal class RegisterSignersTest {
   fun `there are 2 operations in non-sponsored transaction`() {
     val transaction = runBlocking {
       wallet
-        .recovery()
+        .recovery(mapOf())
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
           accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
@@ -46,7 +46,7 @@ internal class RegisterSignersTest {
   fun `there are 4 operations in sponsored transaction`() {
     val transaction = runBlocking {
       wallet
-        .recovery()
+        .recovery(mapOf())
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
           accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),

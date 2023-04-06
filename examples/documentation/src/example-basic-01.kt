@@ -31,8 +31,8 @@ val walletCustomClient =
     )
   )
 
-val recoveryCustomClient =
-  walletCustomClient.recovery {
+val anchorCustomClient =
+  walletCustomClient.anchor("example.com") {
     engine { this.config { this.connectTimeout(Duration.ofSeconds(30)) } }
   }
 

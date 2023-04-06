@@ -36,8 +36,7 @@ data class RecoveryServer(
   val walletSigner: WalletSigner? = null
 )
 
-data class RecoveryServerAuth(
-  val endpoint: String,
+data class RecoveryServerSigning(
   val signerAddress: String,
   val authToken: AuthToken,
 )
@@ -114,4 +113,9 @@ data class RecoverableAccountInfo(
 @Serializable data class RecoverableIdentity(val role: String, val authenticated: Boolean? = null)
 
 @Serializable
-data class RecoverableSigner(val key: PublicKeyPair, @SerialName("added_at") val added: Instant? = null)
+data class RecoverableSigner(
+  val key: PublicKeyPair,
+  @SerialName("added_at") val added: Instant? = null
+)
+
+@JvmInline value class RecoveryServerKey(val name: String)

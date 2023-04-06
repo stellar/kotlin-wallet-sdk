@@ -9,6 +9,7 @@ import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.auth.Auth
+import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.AccountKeyPair
@@ -24,7 +25,8 @@ class Recovery
 internal constructor(
   private val cfg: Config,
   private val stellar: Stellar,
-  private val client: HttpClient
+  private val client: HttpClient,
+  private val servers: Map<RecoveryServerKey, RecoveryServer>
 ) {
   /**
    * Sign transaction with recovery servers. It is used to recover an account using
@@ -32,7 +34,7 @@ internal constructor(
    *
    * @param transaction Transaction with new signer to be signed by recovery servers
    * @param accountAddress Stellar address of the account that is recovered
-   * @param recoveryServers List of recovery servers to use
+   * @param serverAuth List of recovery servers to use
    * @return transaction with recovery server signatures
    * @throws [ServerRequestFailedException] when request fails
    * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
@@ -40,10 +42,10 @@ internal constructor(
   suspend fun signWithRecoveryServers(
     transaction: Transaction,
     accountAddress: AccountKeyPair,
-    recoveryServers: List<RecoveryServerAuth>
+    serverAuth: Map<RecoveryServerKey, RecoveryServerSigning>
   ): Transaction {
     val signatures =
-      recoveryServers.map { getRecoveryServerTxnSignature(transaction, accountAddress.address, it) }
+      serverAuth.map { getRecoveryServerTxnSignature(transaction, accountAddress.address, it) }
 
     signatures.forEach { transaction.addSignature(it) }
 
@@ -53,46 +55,48 @@ internal constructor(
   private suspend fun getRecoveryServerTxnSignature(
     transaction: Transaction,
     accountAddress: String,
-    it: RecoveryServerAuth
+    it: Map.Entry<RecoveryServerKey, RecoveryServerSigning>
   ): DecoratedSignature {
-    val requestUrl = "${it.endpoint}/accounts/$accountAddress/sign/${it.signerAddress}"
+    val server = servers.getServer(it.key)
+    val auth = it.value
+
+    val requestUrl = "${server.endpoint}/accounts/$accountAddress/sign/${auth.signerAddress}"
     val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
 
     log.debug {
       "Recovery server signature request: accountAddress = $accountAddress, " +
-        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.prettify()}..."
+        "signerAddress = ${auth.signerAddress}, authToken = ${auth.authToken.prettify()}..."
     }
 
-    val authResponse: AuthSignature = client.postJson(requestUrl, requestParams, it.authToken)
+    val authResponse: AuthSignature = client.postJson(requestUrl, requestParams, auth.authToken)
 
-    return createDecoratedSignature(it.signerAddress, Base64.decode(authResponse.signature))
+    return createDecoratedSignature(auth.signerAddress, Base64.decode(authResponse.signature))
   }
 
   /**
    * Register account with recovery servers using
    * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
-   *
-   * @param recoveryServers A list of recovery servers to register with
-   * @param accountIdentity A list of account identities to be registered with the recovery servers
-   * @return a list of recovery servers' signatures
-   * @throws [ServerRequestFailedException] when request fails
-   * @throws [RecoveryException] when error happens working with recovery servers
    */
   private suspend fun enrollWithRecoveryServer(
-    recoveryServers: List<RecoveryServer>,
     account: AccountKeyPair,
-    accountIdentity: List<RecoveryAccountIdentity>
+    identityMap: Map<RecoveryServerKey, List<RecoveryAccountIdentity>>
   ): List<String> {
-    return recoveryServers.map {
-      val authToken = sep10Auth(it).authenticate(account, it.walletSigner)
+    return servers.map { entry ->
+      val server = entry.value
+      val key = entry.key
+      val accountIdentity =
+        identityMap[key]
+          ?: throw ValidationException("Account identity for server $key was not specified")
 
-      val requestUrl = "${it.endpoint}/accounts/${account.address}"
+      val authToken = sep10Auth(key).authenticate(account, server.walletSigner)
+
+      val requestUrl = "${server.endpoint}/accounts/${account.address}"
       val resp: RecoveryAccount =
         client.postJson(requestUrl, RecoveryIdentities(accountIdentity), authToken)
 
       log.debug {
         "Recovery server enroll request: accountAddress = ${account.address}, homeDomain =" +
-          " ${it.homeDomain}, authToken = ${authToken.prettify()}..."
+          " ${server.homeDomain}, authToken = ${authToken.prettify()}..."
       }
 
       getLatestRecoverySigner(resp.signers)
@@ -104,7 +108,8 @@ internal constructor(
    *
    * @return auth object
    */
-  fun sep10Auth(server: RecoveryServer): Auth {
+  fun sep10Auth(key: RecoveryServerKey): Auth {
+    val server = servers.getServer(key)
     return Auth(cfg, server.authEndpoint, server.homeDomain, client)
   }
 
@@ -139,7 +144,6 @@ internal constructor(
   suspend fun createRecoverableWallet(config: RecoverableWalletConfig): RecoverableWallet {
     val recoverySigners =
       enrollWithRecoveryServer(
-        config.recoveryServers,
         config.accountAddress,
         config.accountIdentity,
       )
@@ -164,12 +168,12 @@ internal constructor(
 
   suspend fun getAccountInfo(
     accountAddress: AccountKeyPair,
-    recoveryServers: List<RecoveryServerAuth>
+    auth: Map<RecoveryServerKey, AuthToken>
   ): List<RecoverableAccountInfo> {
-    return recoveryServers.map {
-      val requestUrl = "${it.endpoint}/accounts/${accountAddress.address}"
+    return auth.map {
+      val requestUrl = "${servers.getServer(it.key).endpoint}/accounts/${accountAddress.address}"
 
-      client.authGet(requestUrl, it.authToken)
+      client.authGet(requestUrl, it.value)
     }
   }
 
@@ -214,6 +218,12 @@ internal constructor(
 
     return builder.build()
   }
+
+  private fun Map<RecoveryServerKey, RecoveryServer>.getServer(
+    key: RecoveryServerKey
+  ): RecoveryServer {
+    return this[key] ?: throw ValidationException("Server with key $key was not found")
+  }
 }
 
 private inline fun <reified T : CommonTransactionBuilder<*>> T.register(
@@ -234,7 +244,6 @@ private inline fun <reified T : CommonTransactionBuilder<*>> T.register(
  * replace the master key of [accountAddress]
  * @param accountThreshold Low, medium, and high thresholds to set on the account
  * @param accountIdentity A list of account identities to be registered with the recovery servers
- * @param recoveryServers A list of recovery servers to register with
  * @param signerWeight Signer weight of the device and recovery keys to set
  * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
  */
@@ -242,8 +251,7 @@ data class RecoverableWalletConfig(
   val accountAddress: AccountKeyPair,
   val deviceAddress: AccountKeyPair,
   val accountThreshold: AccountThreshold,
-  val accountIdentity: List<RecoveryAccountIdentity>,
-  val recoveryServers: List<RecoveryServer>,
+  val accountIdentity: Map<RecoveryServerKey, List<RecoveryAccountIdentity>>,
   val signerWeight: SignerWeight,
   val sponsorAddress: AccountKeyPair? = null
 )
