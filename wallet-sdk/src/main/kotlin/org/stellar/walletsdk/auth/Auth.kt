@@ -17,15 +17,6 @@ private val log = KotlinLogging.logger {}
 /**
  * Authenticate to an external server using
  * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
- *
- * @property webAuthEndpoint Authentication endpoint URL
- * @property homeDomain Domain hosting stellar.toml (
- * [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)) file
- * containing `WEB_AUTH_ENDPOINT` URL and `SIGNING_KEY`
- * @property network Stellar network
- * @property defaultSigner interface to define wallet client and domain (if using `clientDomain`)
- * signing methods
- * @property httpClient optional custom HTTP client, uses [OkHttpClient] by default
  */
 class Auth
 internal constructor(

@@ -18,6 +18,14 @@
 * [Anchor](#anchor)
   * [Add client domain signing](#add-client-domain-signing)
     * [Example](#example)
+* [Recovery](#recovery)
+  * [Create recovery class](#create-recovery-class)
+  * [Create recoverable account](#create-recoverable-account)
+  * [Get account info](#get-account-info)
+  * [Recover account](#recover-account)
+    * [Prepare for recovery](#prepare-for-recovery)
+    * [Recover](#recover)
+  * [Sample project](#sample-project)
 
 <!--- END -->
 
@@ -83,11 +91,11 @@ val walletCustomClient =
 This code will set the connect timeout to 10 seconds via the
 [okhttp configuration](https://ktor.io/docs/http-client-engines.html#okhttp) 
 and also installs the [retry plugin](https://ktor.io/docs/client-retry.html).
-You can also specify client configuration for specific Wallet SDK classes. For example, to change connect timeout when connecting to recovery 
-servers:
+You can also specify client configuration for specific Wallet SDK classes. For example, to change connect timeout when connecting to some anchor 
+server:
 ```kotlin
-val recoveryCustomClient =
-  walletCustomClient.recovery {
+val anchorCustomClient =
+  walletCustomClient.anchor("example.com") {
     engine { this.config { this.connectTimeout(Duration.ofSeconds(30)) } }
   }
 ```
@@ -699,3 +707,224 @@ suspend fun main() {
 }
 -->
 > You can get the full code [here](../examples/documentation/src/example-client-domain-01.kt).
+
+## Recovery
+
+<!--- INCLUDE .*recovery.*
+import org.stellar.walletsdk.AccountThreshold
+import org.stellar.walletsdk.asset.XLM
+import org.stellar.walletsdk.Wallet
+import org.stellar.walletsdk.horizon.*
+import org.stellar.walletsdk.recovery.*
+
+val wallet = Wallet.Testnet
+-->
+
+Use [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md) to create recoverable accounts and restore device keys using recovery servers.  
+
+### Create recovery class
+First, we need to define recovery server that will be used. For simplicity, there is a key assigned to each server, so they can be referenced later. 
+
+```kotlin
+val first = RecoveryServerKey("first")
+val second = RecoveryServerKey("second")
+val firstServer = RecoveryServer("recovery.example.com", "auth.example.com", "example.com")
+val secondServer = RecoveryServer("recovery2.example.com", "auth2.example.com", "example.com")
+val servers = mapOf(first to firstServer, second to secondServer)
+val recovery = wallet.recovery(servers)
+```
+
+> You can get the full code [here](../examples/documentation/src/example-recovery-01.kt).
+
+<!--- INCLUDE .*recovery.*
+val first = RecoveryServerKey("first")
+val second = RecoveryServerKey("second")
+val firstServer = RecoveryServer("recovery.example.com", "auth.example.com", "example.com")
+val secondServer = RecoveryServer("recovery2.example.com", "auth2.example.com", "example.com")
+val servers = mapOf(first to firstServer, second to secondServer)
+val recovery = wallet.recovery(servers)
+val sponsor = SigningKeyPair.fromSecret("<example key>")
+-->
+
+### Create recoverable account
+
+<!--- INCLUDE 
+suspend fun createAccount() {
+-->
+
+<!--- SUFFIX 
+}
+-->
+
+First, let's create an account key and a device key that will be attached to this account
+```kotlin
+  val account = wallet.stellar().account().createKeyPair()
+  val deviceKey = wallet.stellar().account().createKeyPair()
+```
+
+Next, we need to define SEP-30 identities. In this example we are going to use the same list of identities on both recovery servers. 
+```kotlin
+  val recoveryKey = wallet.stellar().account().createKeyPair()
+
+  val identities =
+    listOf(
+      RecoveryAccountIdentity(
+        RecoveryRole.OWNER,
+        listOf(RecoveryAccountAuthMethod(RecoveryType.STELLAR_ADDRESS, recoveryKey.address))
+      )
+    )
+```
+Here, stellar key will be used as a recovery method. Other recovery servers may support email or phone as a recovery methods
+
+You can read more about SEP-30 identities [here](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md#common-request-fields)
+
+Next, let's create a recoverable account:
+```kotlin
+  val recoverableWallet =
+    recovery.createRecoverableWallet(
+      RecoverableWalletConfig(
+        account,
+        deviceKey,
+        AccountThreshold(10, 10, 10),
+        mapOf(first to identities, second to identities),
+        SignerWeight(10, 5),
+        sponsor
+      )
+    )
+```
+With given parameters, this function will:
+1. Create `account` on the Stellar network (if it's not created yet).
+2. `sponsor` will be used to sponsor all operations. You may not sponsor creating recoverable wallet, but in that case `account` must already be created.
+3. `deviceKey` will be used as a primary account key. Please note that master key belonging to `account` will be locked. `deviceKey` should be used as a primary signer instead.
+4. Set all account thresholds to 10. You can read more about threshold in the [documentation](https://developers.stellar.org/docs/encyclopedia/signatures-multisig#thresholds)
+5. Use identities that were defined earlier on both servers. (That means, both server will accept SEP-10 authentication via `recoveryKey` as an auth method)
+6. Set device key weight to 10, and recovery server weight to 5. Given account thresholds, both servers must be used to recover account, as transaction signed by one will only have weight of 5, which is not sufficient to change account key.
+
+Finally, sign and submit transaction to the network
+```kotlin
+  val tx = recoverableWallet.transaction.sign(account).sign(sponsor)
+
+  wallet.stellar().submitTransaction(tx)
+
+  val recoverySigners = recoverableWallet.signers
+```
+Note, that sponsor must sign key, as well as master key of the account. (After transaction is executed, you won't be able to use master key anymore)
+
+After transaction is executed, new account will be created.
+1. Address of account will be `account.address`
+2. `account` key will not be usable. Transaction signed with this key won't have enough authority.
+3. Primary signer with weight 10 will be `deviceKey` key.
+4. Recovery signers with weight 5 will be stored in `recoverySigners` list.
+5. All reserves for this account are sponsored by `sponsor`.
+6. Account will have 0 XLM on its balance.
+
+> You can get the full code [here](../examples/documentation/src/example-recovery-02.kt).
+
+### Get account info
+
+<!--- INCLUDE
+val recoveryKey = SigningKeyPair.fromSecret("<recovery key>")
+val account = "<account address>".toPublicKeyPair()
+
+suspend fun accountInfo() {
+-->
+
+<!--- SUFFIX 
+}
+-->
+
+You can fetch account info from one or more servers. To do so, first we need to authenticate,
+```kotlin
+  val auth1 = recovery.sep10Auth(first).authenticate(recoveryKey)
+  val auth2 = recovery.sep10Auth(second).authenticate(recoveryKey)
+```
+This implementation uses SEP-10 as authentication method.
+
+Next, get account info using auth tokens:
+```kotlin
+  val accountInfo = recovery.getAccountInfo(account, mapOf(first to auth1, second to auth2))
+
+  println("Recoverable info: $accountInfo")
+```
+
+The result info will be associated with a respective recovery server key.
+
+> You can get the full code [here](../examples/documentation/src/example-recovery-03.kt).
+
+### Recover account
+
+<!--- INCLUDE
+val recoveryKey = SigningKeyPair.fromSecret("<recovery key>")
+val account = "<account address>".toPublicKeyPair()
+val recoverySigners = listOf("<first signer address>", "<second signer address>")
+
+suspend fun recover() {
+-->
+
+<!--- SUFFIX 
+}
+-->
+
+#### Prepare for recovery
+**Note**: This section is when recovery server doesn't support signing sponsored transaction. If your SEP-30 provider supports it, you can skip to [the next part](#prepare-for-recovery)
+
+With no sponsor it's required to refill account to pay for new key reserves:
+
+```kotlin
+  val refill =
+    wallet
+        .stellar()
+        .transaction(sponsor)
+        .transfer(account.address, XLM, "0.5")
+        .build()
+        .sign(sponsor)
+
+  wallet.stellar().submitTransaction(refill)
+```
+
+#### Recover
+
+First, we need to authenticate with recovery servers,
+```kotlin
+  val auth1 = recovery.sep10Auth(first).authenticate(recoveryKey)
+  val auth2 = recovery.sep10Auth(second).authenticate(recoveryKey)
+```
+We need to know signers that will be used to sign the transaction. You can get them either on wallet creation step (`recoverySigners` variable), or via fetching account info from recovery serves. 
+
+Next, create a new device key and retrieve a signed key replacement transaction from recovery servers:
+```kotlin
+  val newKey = wallet.stellar().account().createKeyPair()
+
+  val serverAuth = mapOf(
+    first to RecoveryServerSigning(recoverySigners[0], auth1),
+    second to RecoveryServerSigning(recoverySigners[1], auth2)
+  )
+
+  val signedReplaceKeyTransaction =
+    recovery.replaceDeviceKey(
+      account,
+      newKey,
+      serverAuth
+    )
+```
+Calling with function will create a transaction that locks previous device key and replaces it with a new key (having the same weight as an old one). 
+Lost device key is deduced automatically. Signer will be considered a device key, if one of these conditions matches:
+1. It's the only signer that's not in `serverAuth`
+2. All signers in `serverAuth` has the same weight, and potential signer is the only one with a different weight.
+
+Note that account created above will match the first criteria. If 2-3 schema were used, then second criteria would match. (In 2-3 schema, 3 serves are used and 2 of them is enough to recover key. This is a recommended approach.)
+
+Note: you can also use more low-level `signWithRecoveryServers` functions to sign arbitrary transaction.
+
+Finally, it's time to submit transaction. In this example we will use fee bump, as account only has funds to pay for reserves. If your account has more funds available, or replace device key transaction is being sponsored, you can submit `signedReplaceKeyTransaction` transaction directly.
+
+```kotlin
+  val feeBumped = wallet.stellar().makeFeeBump(sponsor, signedReplaceKeyTransaction).sign(sponsor)
+
+  wallet.stellar().submitTransaction(feeBumped)
+```
+
+> You can get the full code [here](../examples/documentation/src/example-recovery-04.kt).
+
+### Sample project
+You can find the sample project in the [examples](../examples/recovery)

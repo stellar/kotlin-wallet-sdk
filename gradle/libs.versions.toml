@@ -2,6 +2,7 @@
 # Library versions
 coroutines = "1.6.4"
 google-gson = "2.8.9"
+hoplite = "2.7.0"
 java-stellar-sdk = "0.34.2"
 dokka = "1.6.10"
 kotlin = "1.8.20"
@@ -22,6 +23,8 @@ detekt = "1.22.0"
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 google-gson = { module = "com.google.code.gson:gson", version.ref = "google-gson" }
+hoplite-core = { module = "com.sksamuel.hoplite:hoplite-core", version.ref = "hoplite" }
+hoplite-yaml = { module = "com.sksamuel.hoplite:hoplite-yaml", version.ref = "hoplite" }
 java-stellar-sdk = { module = "com.github.stellar:java-stellar-sdk", version.ref = "java-stellar-sdk" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }

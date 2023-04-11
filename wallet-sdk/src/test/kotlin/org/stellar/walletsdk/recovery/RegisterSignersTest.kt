@@ -16,10 +16,10 @@ internal class RegisterSignersTest {
   fun `defaults work`() {
     val transaction = runBlocking {
       wallet
-        .recovery()
+        .recovery(mapOf())
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
         )
     }
@@ -28,33 +28,33 @@ internal class RegisterSignersTest {
   }
 
   @Test
-  fun `there are 2 operations in non-sponsored transaction`() {
+  fun `there are 3 operations in non-sponsored transaction`() {
     val transaction = runBlocking {
       wallet
-        .recovery()
+        .recovery(mapOf())
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10)
         )
     }
 
-    assertEquals(transaction.operations.size, 2)
+    assertEquals(transaction.operations.size, 3)
   }
 
   @Test
-  fun `there are 4 operations in sponsored transaction`() {
+  fun `there are 5 operations in sponsored transaction`() {
     val transaction = runBlocking {
       wallet
-        .recovery()
+        .recovery(mapOf())
         .registerRecoveryServerSigners(
           ADDRESS_ACTIVE,
-          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO.address, weight = 10)),
+          accountSigner = listOf(AccountSigner(address = ADDRESS_ACTIVE_TWO, weight = 10)),
           accountThreshold = AccountThreshold(low = 10, medium = 10, high = 10),
           sponsorAddress = ADDRESS_ACTIVE_TWO
         )
     }
 
-    assertEquals(transaction.operations.size, 4)
+    assertEquals(transaction.operations.size, 5)
   }
 }

@@ -1,20 +1,21 @@
 package org.stellar.walletsdk.recovery
 
 import io.ktor.client.*
-import kotlin.io.encoding.Base64
 import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
-import org.stellar.walletsdk.AccountSigner
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.auth.Auth
+import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.horizon.toPublicKeyPair
-import org.stellar.walletsdk.util.*
+import org.stellar.walletsdk.horizon.transaction.CommonTransactionBuilder
+import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
@@ -23,82 +24,47 @@ class Recovery
 internal constructor(
   private val cfg: Config,
   private val stellar: Stellar,
-  private val client: HttpClient
-) {
-  /**
-   * Sign transaction with recovery servers. It is used to recover an account using
-   * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
-   *
-   * @param transaction Transaction with new signer to be signed by recovery servers
-   * @param accountAddress Stellar address of the account that is recovered
-   * @param recoveryServers List of recovery servers to use
-   * @return transaction with recovery server signatures
-   * @throws [ServerRequestFailedException] when request fails
-   * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
-   */
-  suspend fun signWithRecoveryServers(
-    transaction: Transaction,
-    accountAddress: String,
-    recoveryServers: List<RecoveryServerAuth>
-  ): Transaction {
-    val signatures =
-      recoveryServers.map { getRecoveryServerTxnSignature(transaction, accountAddress, it) }
-
-    signatures.forEach { transaction.addSignature(it) }
-
-    return transaction
-  }
-
-  private suspend fun getRecoveryServerTxnSignature(
-    transaction: Transaction,
-    accountAddress: String,
-    it: RecoveryServerAuth
-  ): DecoratedSignature {
-    val requestUrl = "${it.endpoint}/accounts/$accountAddress/sign/${it.signerAddress}"
-    val requestParams = TransactionRequest(transaction.toEnvelopeXdrBase64())
-
-    log.debug {
-      "Recovery server signature request: accountAddress = $accountAddress, " +
-        "signerAddress = ${it.signerAddress}, authToken = ${it.authToken.prettify()}..."
-    }
-
-    val authResponse: AuthSignature = client.postJson(requestUrl, requestParams, it.authToken)
-
-    return createDecoratedSignature(it.signerAddress, Base64.decode(authResponse.signature))
-  }
-
+  private val client: HttpClient,
+  private val servers: Map<RecoveryServerKey, RecoveryServer>
+) : AccountRecover by AccountRecoverImpl(stellar, client, servers) {
   /**
    * Register account with recovery servers using
    * [SEP-30](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0030.md).
-   *
-   * @param recoveryServers A list of recovery servers to register with
-   * @param accountIdentity A list of account identities to be registered with the recovery servers
-   * @return a list of recovery servers' signatures
-   * @throws [ServerRequestFailedException] when request fails
-   * @throws [RecoveryException] when error happens working with recovery servers
    */
-  // TODO: can be private?
-  suspend fun enrollWithRecoveryServer(
-    recoveryServers: List<RecoveryServer>,
+  private suspend fun enrollWithRecoveryServer(
     account: AccountKeyPair,
-    accountIdentity: List<RecoveryAccountIdentity>
+    identityMap: Map<RecoveryServerKey, List<RecoveryAccountIdentity>>
   ): List<String> {
-    return recoveryServers.map {
-      // TODO: pass auth token as an argument?
-      val authToken =
-        Auth(cfg, it.authEndpoint, it.homeDomain, client).authenticate(account, it.walletSigner)
+    return servers.map { entry ->
+      val server = entry.value
+      val key = entry.key
+      val accountIdentity =
+        identityMap[key]
+          ?: throw ValidationException("Account identity for server $key was not specified")
 
-      val requestUrl = "${it.endpoint}/accounts/${account.address}"
+      val authToken = sep10Auth(key).authenticate(account, server.walletSigner)
+
+      val requestUrl = "${server.endpoint}/accounts/${account.address}"
       val resp: RecoveryAccount =
         client.postJson(requestUrl, RecoveryIdentities(accountIdentity), authToken)
 
       log.debug {
         "Recovery server enroll request: accountAddress = ${account.address}, homeDomain =" +
-          " ${it.homeDomain}, authToken = ${authToken.prettify()}..."
+          " ${server.homeDomain}, authToken = ${authToken.prettify()}..."
       }
 
       getLatestRecoverySigner(resp.signers)
     }
+  }
+
+  /**
+   * Create new auth object to authenticate account with the recovery server using SEP-10.
+   *
+   * @return auth object
+   */
+  fun sep10Auth(key: RecoveryServerKey): Auth {
+    val server = servers.getServer(key)
+    return Auth(cfg, server.authEndpoint, server.homeDomain, client)
   }
 
   private fun getLatestRecoverySigner(signers: List<RecoveryAccountSigner>): String {
@@ -118,37 +84,57 @@ internal constructor(
    * registers the account with recovery servers, adds recovery servers and device account as new
    * account signers, and sets threshold weights on the account.
    *
+   * **Warning**: This transaction will lock master key of the account. Make sure you have access to
+   * specified [RecoverableWalletConfig.deviceAddress]
+   *
    * This transaction can be sponsored.
    *
-   * Uses [enrollWithRecoveryServer] and [registerRecoveryServerSigners] internally.
-   *
-   * @param config: RecoverableWalletConfig
+   * @param config: [RecoverableWalletConfig]
    * @return transaction
    * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  suspend fun createRecoverableWallet(config: RecoverableWalletConfig): Transaction {
+  suspend fun createRecoverableWallet(config: RecoverableWalletConfig): RecoverableWallet {
+    if (config.deviceAddress.address == config.accountAddress.address) {
+      throw ValidationException("Device key must be different from master (account) key")
+    }
+
     val recoverySigners =
       enrollWithRecoveryServer(
-        config.recoveryServers,
         config.accountAddress,
         config.accountIdentity,
       )
 
     val signer =
       recoverySigners
-        .map { rs -> AccountSigner(rs, config.signerWeight.recoveryServer) }
+        .map { rs -> AccountSigner(rs.toPublicKeyPair(), config.signerWeight.recoveryServer) }
         .toMutableList()
 
-    signer.add(AccountSigner(config.deviceAddress, config.signerWeight.master))
+    signer.add(AccountSigner(config.deviceAddress, config.signerWeight.device))
 
-    return registerRecoveryServerSigners(
-      config.accountAddress,
-      signer,
-      config.accountThreshold,
-      config.sponsorAddress
+    return RecoverableWallet(
+      registerRecoveryServerSigners(
+        config.accountAddress,
+        signer,
+        config.accountThreshold,
+        config.sponsorAddress
+      ),
+      recoverySigners
     )
+  }
+
+  suspend fun getAccountInfo(
+    accountAddress: AccountKeyPair,
+    auth: Map<RecoveryServerKey, AuthToken>
+  ): Map<RecoveryServerKey, RecoverableAccountInfo> {
+    return auth
+      .map {
+        val requestUrl = "${servers.getServer(it.key).endpoint}/accounts/${accountAddress.address}"
+
+        it.key to client.authGet<RecoverableAccountInfo>(requestUrl, it.value)
+      }
+      .toMap()
   }
 
   /**
@@ -163,49 +149,46 @@ internal constructor(
    * @return transaction
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  // TODO: can be private?
-  suspend fun registerRecoveryServerSigners(
+  internal suspend fun registerRecoveryServerSigners(
     account: AccountKeyPair,
     accountSigner: List<AccountSigner>,
     accountThreshold: AccountThreshold,
     sponsorAddress: AccountKeyPair? = null
   ): Transaction {
-    val builder = stellar.transaction(account)
+    val exists = stellar.server.accountOrNull(account.address) != null
+    val source =
+      if (exists) account
+      else
+        sponsorAddress ?: throw ValidationException("Account does not exist and is not sponsored.")
+
+    val builder = stellar.transaction(source)
 
     if (sponsorAddress != null) {
-      builder.sponsoring(sponsorAddress) {
-        accountSigner.forEach { this.addAccountSigner(it.address.toPublicKeyPair(), it.weight) }
-        setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
+      if (exists) {
+        builder.sponsoring(sponsorAddress) { register(accountSigner, accountThreshold) }
+      } else {
+        builder.sponsoring(sponsorAddress, account) {
+          createAccount(account)
+          register(accountSigner, accountThreshold)
+        }
       }
     } else {
-      accountSigner.forEach { builder.addAccountSigner(it.address.toPublicKeyPair(), it.weight) }
-      builder.setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
+      builder.register(accountSigner, accountThreshold)
     }
 
     return builder.build()
   }
 }
 
-/**
- * Configuration for recoverable wallet
- *
- * @param accountAddress Stellar address of the account that is registering
- * @param deviceAddress Stellar address of the device that is added as a signer
- * @param accountThreshold Low, medium, and high thresholds to set on the account
- * @param accountIdentity A list of account identities to be registered with the recovery servers
- * @param recoveryServers A list of recovery servers to register with
- * @param signerWeight Signer weight to set
- * @param sponsorAddress optional Stellar address of the account sponsoring this transaction
- */
-data class RecoverableWalletConfig(
-  val accountAddress: AccountKeyPair,
-  val deviceAddress: String,
-  val accountThreshold: AccountThreshold,
-  val accountIdentity: List<RecoveryAccountIdentity>,
-  val recoveryServers: List<RecoveryServer>,
-  val signerWeight: SignerWeight,
-  val sponsorAddress: AccountKeyPair? = null
-)
+private inline fun <reified T : CommonTransactionBuilder<*>> T.register(
+  accountSigner: List<AccountSigner>,
+  accountThreshold: AccountThreshold
+): T {
+  lockAccountMasterKey()
+  accountSigner.forEach { this.addAccountSigner(it.address, it.weight) }
+  this.setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
+  return this
+}
 
 internal fun createDecoratedSignature(
   signatureAddress: String,
@@ -220,4 +203,10 @@ internal fun createDecoratedSignature(
   decoratedSig.hint = KeyPair.fromAccountId(signatureAddress).signatureHint
 
   return decoratedSig
+}
+
+internal fun Map<RecoveryServerKey, RecoveryServer>.getServer(
+  key: RecoveryServerKey
+): RecoveryServer {
+  return this[key] ?: throw ValidationException("Server with key $key was not found")
 }

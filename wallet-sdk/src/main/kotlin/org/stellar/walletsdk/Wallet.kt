@@ -16,6 +16,8 @@ import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.json.defaultJson
 import org.stellar.walletsdk.recovery.Recovery
+import org.stellar.walletsdk.recovery.RecoveryServer
+import org.stellar.walletsdk.recovery.RecoveryServerKey
 import shadow.okhttp3.OkHttpClient
 
 /**
@@ -40,8 +42,11 @@ class Wallet(
     return Stellar(cfg)
   }
 
-  fun recovery(httpClientConfig: ClientConfigFn? = null): Recovery {
-    return Recovery(cfg, stellar(), getClient(httpClientConfig))
+  fun recovery(
+    servers: Map<RecoveryServerKey, RecoveryServer>,
+    httpClientConfig: ClientConfigFn? = null
+  ): Recovery {
+    return Recovery(cfg, stellar(), getClient(httpClientConfig), servers)
   }
 
   override fun close() {

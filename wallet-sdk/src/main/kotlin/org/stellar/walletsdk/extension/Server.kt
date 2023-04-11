@@ -26,9 +26,7 @@ private fun <T> safeHorizonCall(body: () -> T): T {
  * Fetch account information from the Stellar network.
  *
  * @param accountAddress Stellar address of the account
- *
  * @return Account response object
- *
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 @Throws(HorizonRequestFailedException::class)
@@ -36,14 +34,23 @@ suspend fun Server.accountByAddress(accountAddress: String): AccountResponse {
   return safeHorizonCall { accounts().account(accountAddress) }
 }
 
+suspend fun Server.accountOrNull(accountAddress: String): AccountResponse? {
+  try {
+    return this.accountByAddress(accountAddress)
+  } catch (e: HorizonRequestFailedException) {
+    if (e.errorCode == 404) {
+      return null
+    }
+    throw e
+  }
+}
+
 /**
  * Fetch liquidity pool information from the Stellar network.
  *
  * @param liquidityPoolId Liquidity pool ID
  * @param cachedAssetInfo Previously cached asset information to use for liquidity pool assets
- *
  * @return liquidity pool data object
- *
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
 suspend fun Server.liquidityPoolInfo(
@@ -107,9 +114,7 @@ suspend fun Server.liquidityPoolInfo(
  * @param order optional data order, ascending or descending, defaults to descending
  * @param cursor optional cursor to specify a starting point
  * @param includeFailed optional flag to include failed operations, defaults to false
- *
  * @return a list of account operations
- *
  * @throws [OperationsLimitExceededException] when maximum limit of 200 is exceeded
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */

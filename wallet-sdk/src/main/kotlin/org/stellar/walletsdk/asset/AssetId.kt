@@ -33,6 +33,8 @@ object NativeAssetId : StellarAssetId {
   override val id = "native"
 }
 
+typealias XLM = NativeAssetId
+
 @JvmInline
 value class FiatAssetId(override val id: String) : AssetId {
   override val scheme: String

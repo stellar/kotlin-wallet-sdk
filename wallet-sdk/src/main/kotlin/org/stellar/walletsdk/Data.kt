@@ -11,8 +11,6 @@ data class AccountInfo(
   val reservedNativeBalance: String,
 )
 
-data class AccountSigner(val address: String, val weight: Int)
-
 /**
  * Account weights threshold
  *

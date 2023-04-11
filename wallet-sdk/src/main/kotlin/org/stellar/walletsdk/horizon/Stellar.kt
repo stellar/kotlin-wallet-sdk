@@ -8,10 +8,9 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.anchor.MemoType
-import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.exception.ValidationException
-import org.stellar.walletsdk.extension.accountByAddress
+import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
 
 private val log = KotlinLogging.logger {}
@@ -39,14 +38,8 @@ internal constructor(
     memo: Pair<MemoType, String>? = null,
   ): TransactionBuilder {
     val sourceAccount =
-      try {
-        server.accountByAddress(sourceAddress.address)
-      } catch (e: HorizonRequestFailedException) {
-        if (e.errorCode == 404) {
-          throw ValidationException("Source account $sourceAddress doesn't exist in the network")
-        }
-        throw e
-      }
+      server.accountOrNull(sourceAddress.address)
+        ?: throw ValidationException("Source account $sourceAddress doesn't exist in the network")
     return TransactionBuilder(cfg, sourceAccount, memo)
   }
 
