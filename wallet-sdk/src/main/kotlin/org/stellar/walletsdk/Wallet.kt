@@ -129,28 +129,6 @@ data class ApplicationConfiguration(
   val defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
   val defaultClientConfig: ClientConfigFn = {}
 ) {
-  @Suppress("MaxLineLength")
-  @Deprecated(
-    "Can be configured using defaultClientConfig",
-    replaceWith =
-      ReplaceWith(
-        "ApplicationConfiguration(defaultSigner) { defaultRequest { url { protocol = URLProtocol.HTTP } } }",
-        "io.ktor.client.plugins.defaultRequest",
-        "io.ktor.http.URLProtocol"
-      )
-  )
-  constructor(
-    defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
-    useHttp: Boolean
-  ) : this(
-    defaultSigner,
-    {
-      if (useHttp) {
-        defaultRequest { url { protocol = URLProtocol.HTTP } }
-      }
-    }
-  )
-
   val defaultClient =
     HttpClient(OkHttp) {
       install(ContentNegotiation) { json(defaultJson) }

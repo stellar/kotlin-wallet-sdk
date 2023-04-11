@@ -22,8 +22,3 @@ class HorizonRequestFailedException(val response: ErrorResponse) :
   WalletException(response.body ?: response.message ?: "Horizon request failed") {
   val errorCode = response.code
 }
-
-// TODO: delete when TOML is parsed
-@Deprecated("To be removed")
-class StellarTomlMissingFields(missingFields: List<String>) :
-  WalletException("TOML configuration is missing: ${missingFields.joinToString(",")}")

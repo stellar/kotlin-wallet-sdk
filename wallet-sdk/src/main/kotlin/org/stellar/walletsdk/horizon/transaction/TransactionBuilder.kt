@@ -104,14 +104,6 @@ internal constructor(
   }
 }
 
-@Deprecated("To be removed in future versions", ReplaceWith("toStellarTransfer(stellar, assetId)"))
-suspend fun WithdrawalTransaction.toTransferTransaction(
-  stellar: Stellar,
-  assetId: StellarAssetId
-): Transaction {
-  return this.toStellarTransfer(stellar, assetId)
-}
-
 /**
  * Transforms this withdrawal transaction to the Stellar Transfer transaction that can be submitted
  * to the network.
