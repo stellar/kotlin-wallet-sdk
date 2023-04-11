@@ -96,6 +96,10 @@ internal constructor(
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
   suspend fun createRecoverableWallet(config: RecoverableWalletConfig): RecoverableWallet {
+    if (config.deviceAddress.address == config.accountAddress.address) {
+      throw ValidationException("Device key must be different from master (account) key")
+    }
+
     val recoverySigners =
       enrollWithRecoveryServer(
         config.accountAddress,
@@ -124,11 +128,13 @@ internal constructor(
     accountAddress: AccountKeyPair,
     auth: Map<RecoveryServerKey, AuthToken>
   ): Map<RecoveryServerKey, RecoverableAccountInfo> {
-    return auth.map {
-      val requestUrl = "${servers.getServer(it.key).endpoint}/accounts/${accountAddress.address}"
+    return auth
+      .map {
+        val requestUrl = "${servers.getServer(it.key).endpoint}/accounts/${accountAddress.address}"
 
-      it.key to client.authGet<RecoverableAccountInfo>(requestUrl, it.value)
-    }.toMap()
+        it.key to client.authGet<RecoverableAccountInfo>(requestUrl, it.value)
+      }
+      .toMap()
   }
 
   /**
