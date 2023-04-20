@@ -8,6 +8,7 @@ import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
+import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
@@ -73,8 +74,6 @@ internal constructor(
     return Interactive(this, httpClient)
   }
 
-  // TODO: is this for SEP-24 only?
-  // TODO: handle extra fields
   /**
    * Get single transaction's current status and details.
    *
@@ -88,6 +87,45 @@ internal constructor(
     return get<AnchorTransactionStatusResponse>(authToken) {
         appendPathSegments("transaction")
         parameters.append("id", transactionId)
+      }
+      .transaction
+  }
+
+  /**
+   * Get single transaction's current status and details. One of the [id], [stellarTransactionId],
+   * [externalTransactionId] must be provided.
+   *
+   * @param id transaction ID
+   * @param stellarTransactionId stellar transaction ID
+   * @param externalTransactionId external transaction ID
+   * @param authToken auth token of the account authenticated with the anchor
+   * @return transaction object
+   * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
+   * @throws [ServerRequestFailedException] if network request fails
+   */
+  suspend fun getTransactionBy(
+    authToken: AuthToken,
+    id: String? = null,
+    stellarTransactionId: String? = null,
+    externalTransactionId: String? = null,
+    lang: String? = null
+  ): AnchorTransaction {
+    if (id == null && stellarTransactionId == null && externalTransactionId == null) {
+      throw ValidationException(
+        "One of id, stellarTransactionId or externalTransactionId is required."
+      )
+    }
+
+    return get<AnchorTransactionStatusResponse>(authToken) {
+        appendPathSegments("transaction")
+        id?.apply { parameters.append("id", id) }
+        stellarTransactionId?.apply {
+          parameters.append("stellar_transaction_id", stellarTransactionId)
+        }
+        externalTransactionId?.apply {
+          parameters.append("external_transaction_id", externalTransactionId)
+        }
+        lang?.apply { parameters.append("lang", lang) }
       }
       .transaction
   }

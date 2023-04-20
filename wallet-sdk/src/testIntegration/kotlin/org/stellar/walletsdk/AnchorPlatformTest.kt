@@ -6,6 +6,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.fail
 import kotlin.time.Duration.Companion.seconds
@@ -15,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.stellar.walletsdk.anchor.DepositTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
@@ -101,19 +103,9 @@ class AnchorPlatformTest {
     runBlocking {
       val token = anchor.auth().authenticate(keypair)
 
-      // Start interactive deposit
-      val deposit =
-        anchor.interactive().deposit(keypair.address, asset, token, mapOf("amount" to "10"))
+      val txId = makeDeposit(token)
 
-      val transaction = anchor.getTransaction(deposit.id, token)
-
-      assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
-
-      val resp = client.get(deposit.url)
-
-      assertEquals(200, resp.status.value)
-
-      waitStatus(deposit.id, TransactionStatus.COMPLETED, token)
+      waitStatus(txId, TransactionStatus.COMPLETED, token)
     }
   }
 
@@ -149,6 +141,66 @@ class AnchorPlatformTest {
 
       waitStatus(withdrawal.id, TransactionStatus.COMPLETED, token)
     }
+  }
+
+  @Test
+  @Disabled // TODO: enable using docker
+  fun `listAllTransaction works`() = runBlocking {
+    val newAcc = wallet.stellar().account().createKeyPair()
+
+    val tx =
+      wallet
+        .stellar()
+        .transaction(keypair)
+        .sponsoring(keypair, newAcc) {
+          createAccount(newAcc)
+          addAssetSupport(USDC)
+        }
+        .build()
+        .sign(keypair)
+        .sign(newAcc)
+
+    wallet.stellar().submitTransaction(tx)
+
+    val token = anchor.auth().authenticate(newAcc)
+    val deposits = (0..5).map { makeDeposit(token, newAcc).also { delay(7.seconds) } }
+    deposits.forEach { waitStatus(it, TransactionStatus.COMPLETED, token) }
+    val history = anchor.getHistory(USDC, token)
+
+    history.forEach { assertContains(deposits, it.id) }
+  }
+
+  @Test
+  @Disabled // TODO: enable using docker
+  fun `list by stellar transaction id works`() = runBlocking {
+    val token = anchor.auth().authenticate(keypair)
+
+    val txId = makeDeposit(token)
+
+    waitStatus(txId, TransactionStatus.COMPLETED, token)
+
+    val transaction = anchor.getTransaction(txId, token) as DepositTransaction
+
+    val transactionByStellarId =
+      anchor.getTransactionBy(token, stellarTransactionId = transaction.stellarTransactionId)
+
+    assertEquals(transaction, transactionByStellarId)
+  }
+
+  private suspend fun makeDeposit(token: AuthToken, keyPair: SigningKeyPair = keypair): String {
+    // Start interactive deposit
+    val deposit =
+      anchor.interactive().deposit(keyPair.address, asset, token, mapOf("amount" to "10"))
+
+    val transaction = anchor.getTransaction(deposit.id, token)
+
+    assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
+
+    val resp = client.get(deposit.url)
+
+    assertEquals(200, resp.status.value)
+
+    return transaction.id
   }
 
   suspend fun waitStatus(id: String, expectedStatus: TransactionStatus, token: AuthToken) {
