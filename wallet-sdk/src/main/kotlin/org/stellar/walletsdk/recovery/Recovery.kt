@@ -118,7 +118,8 @@ internal constructor(
         config.accountAddress,
         signer,
         config.accountThreshold,
-        config.sponsorAddress
+        config.sponsorAddress,
+        config.builderExtra
       ),
       recoverySigners
     )
@@ -153,7 +154,8 @@ internal constructor(
     account: AccountKeyPair,
     accountSigner: List<AccountSigner>,
     accountThreshold: AccountThreshold,
-    sponsorAddress: AccountKeyPair? = null
+    sponsorAddress: AccountKeyPair? = null,
+    builderExtra: ((CommonTransactionBuilder<*>) -> Unit)? = null
   ): Transaction {
     val exists = stellar.server.accountOrNull(account.address) != null
     val source =
@@ -165,15 +167,17 @@ internal constructor(
 
     if (sponsorAddress != null) {
       if (exists) {
-        builder.sponsoring(sponsorAddress) { register(accountSigner, accountThreshold) }
+        builder.sponsoring(sponsorAddress) {
+          register(accountSigner, accountThreshold, builderExtra)
+        }
       } else {
         builder.sponsoring(sponsorAddress, account) {
           createAccount(account)
-          register(accountSigner, accountThreshold)
+          register(accountSigner, accountThreshold, builderExtra)
         }
       }
     } else {
-      builder.register(accountSigner, accountThreshold)
+      builder.register(accountSigner, accountThreshold, builderExtra)
     }
 
     return builder.build()
@@ -182,11 +186,13 @@ internal constructor(
 
 private inline fun <reified T : CommonTransactionBuilder<*>> T.register(
   accountSigner: List<AccountSigner>,
-  accountThreshold: AccountThreshold
+  accountThreshold: AccountThreshold,
+  noinline builderExtra: ((CommonTransactionBuilder<*>) -> Unit)?
 ): T {
   lockAccountMasterKey()
   accountSigner.forEach { this.addAccountSigner(it.address, it.weight) }
   this.setThreshold(accountThreshold.low, accountThreshold.medium, accountThreshold.high)
+  builderExtra?.invoke(this)
   return this
 }
 

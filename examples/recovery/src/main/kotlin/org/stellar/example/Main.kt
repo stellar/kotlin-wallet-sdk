@@ -5,10 +5,13 @@ import com.sksamuel.hoplite.PropertySource
 import com.sksamuel.hoplite.addResourceSource
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Wallet
+import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.asset.XLM
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
 import org.stellar.walletsdk.recovery.*
+
+private val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
 
 val wallet = Wallet.Testnet
 val cfg = readConfig()
@@ -58,7 +61,7 @@ suspend fun createAccount(): List<String> {
         mapOf(first to identities, second to identities),
         SignerWeight(10, 5),
         sponsor
-      )
+      ) { it.addAssetSupport(USDC) }
     )
 
   val tx = recoverableWallet.transaction.sign(account).sign(sponsor)
