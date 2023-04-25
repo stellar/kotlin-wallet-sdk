@@ -13,6 +13,7 @@ import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.auth.WalletSigner
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.PublicKeyPair
+import org.stellar.walletsdk.horizon.transaction.CommonTransactionBuilder
 import org.stellar.walletsdk.json.AccountAsStringSerializer
 
 @Serializable internal data class TransactionRequest(val transaction: String)
@@ -36,7 +37,8 @@ data class RecoverableWalletConfig(
   val accountThreshold: AccountThreshold,
   val accountIdentity: Map<RecoveryServerKey, List<RecoveryAccountIdentity>>,
   val signerWeight: SignerWeight,
-  val sponsorAddress: AccountKeyPair? = null
+  val sponsorAddress: AccountKeyPair? = null,
+  val builderExtra: ((CommonTransactionBuilder<*>) -> Unit)? = null
 )
 
 /**

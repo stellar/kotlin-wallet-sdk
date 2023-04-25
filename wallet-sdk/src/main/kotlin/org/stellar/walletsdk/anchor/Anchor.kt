@@ -8,7 +8,6 @@ import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
-import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*

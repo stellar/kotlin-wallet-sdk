@@ -712,7 +712,7 @@ suspend fun main() {
 
 <!--- INCLUDE .*recovery.*
 import org.stellar.walletsdk.AccountThreshold
-import org.stellar.walletsdk.asset.XLM
+import org.stellar.walletsdk.asset.*
 import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.horizon.*
 import org.stellar.walletsdk.recovery.*
@@ -799,6 +799,26 @@ With given parameters, this function will:
 4. Set all account thresholds to 10. You can read more about threshold in the [documentation](https://developers.stellar.org/docs/encyclopedia/signatures-multisig#thresholds)
 5. Use identities that were defined earlier on both servers. (That means, both server will accept SEP-10 authentication via `recoveryKey` as an auth method)
 6. Set device key weight to 10, and recovery server weight to 5. Given account thresholds, both servers must be used to recover account, as transaction signed by one will only have weight of 5, which is not sufficient to change account key.
+
+<!--- INCLUDE
+  val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
+-->
+
+In addition, you can add your own operations in the transaction. For example, establishing trustline in the same transaction is simple:
+```kotlin
+  val recoverableWalletWithTrustline =
+    recovery.createRecoverableWallet(
+      RecoverableWalletConfig(
+        account,
+        deviceKey,
+        AccountThreshold(10, 10, 10),
+        mapOf(first to identities, second to identities),
+        SignerWeight(10, 5),
+        sponsor
+      ) { it.addAssetSupport(USDC) }
+    )
+```
+Please note, that if sponsor is passed, this extra operations will also be sponsored.
 
 Finally, sign and submit transaction to the network
 ```kotlin

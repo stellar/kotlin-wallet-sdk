@@ -2,7 +2,7 @@
 package org.stellar.example.exampleRecovery01
 
 import org.stellar.walletsdk.AccountThreshold
-import org.stellar.walletsdk.asset.XLM
+import org.stellar.walletsdk.asset.*
 import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.horizon.*
 import org.stellar.walletsdk.recovery.*

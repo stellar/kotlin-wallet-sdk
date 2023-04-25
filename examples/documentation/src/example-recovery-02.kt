@@ -2,7 +2,7 @@
 package org.stellar.example.exampleRecovery02
 
 import org.stellar.walletsdk.AccountThreshold
-import org.stellar.walletsdk.asset.XLM
+import org.stellar.walletsdk.asset.*
 import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.horizon.*
 import org.stellar.walletsdk.recovery.*
@@ -41,6 +41,19 @@ suspend fun createAccount() {
         SignerWeight(10, 5),
         sponsor
       )
+    )
+  val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5")
+
+  val recoverableWalletWithTrustline =
+    recovery.createRecoverableWallet(
+      RecoverableWalletConfig(
+        account,
+        deviceKey,
+        AccountThreshold(10, 10, 10),
+        mapOf(first to identities, second to identities),
+        SignerWeight(10, 5),
+        sponsor
+      ) { it.addAssetSupport(USDC) }
     )
 
   val tx = recoverableWallet.transaction.sign(account).sign(sponsor)
