@@ -14,14 +14,14 @@ Maven:
 <dependency>
   <groupId>org.stellar</groupId>
   <artifactId>wallet-sdk</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```gradle
-implementation("org.stellar:wallet-sdk:0.6.0")
+implementation("org.stellar:wallet-sdk:0.7.0")
 ```
 
 ## Introduction
