@@ -1,10 +1,9 @@
 package org.stellar.walletsdk.horizon
 
+import java.time.Duration
 import mu.KotlinLogging
-import org.stellar.sdk.AbstractTransaction
-import org.stellar.sdk.FeeBumpTransaction
-import org.stellar.sdk.Server
-import org.stellar.sdk.Transaction
+import org.stellar.sdk.*
+import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.anchor.MemoType
@@ -12,6 +11,7 @@ import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
+import org.stellar.walletsdk.util.toTimeBounds
 
 private val log = KotlinLogging.logger {}
 
@@ -29,18 +29,46 @@ internal constructor(
    * Creates builder that allows to form Stellar transaction, adding Stellar's
    * [operations](https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment)
    *
-   * @param sourceAddress Stellar address of account initiating a transaction
-   * @param memo optional memo
+   * @param sourceAddress Stellar address of account initiating a transaction.
+   * @param baseFee base fee that will be used for this transaction. If not specified [default
+   * config fee][StellarConfiguration.baseFee] will be used.
+   * @param timeBounds [Time Bounds](https://developers.stellar.org/docs/glossary#time-bounds) for
+   * this transaction. If not specified, [default config timeout]
+   * [StellarConfiguration.defaultTimeout] will be used.
+   * @param memo optional transaction memo
    * @return transaction builder
    */
   suspend fun transaction(
     sourceAddress: AccountKeyPair,
+    baseFee: UInt? = null,
     memo: Pair<MemoType, String>? = null,
+    timeBounds: TimeBounds? = null
   ): TransactionBuilder {
     val sourceAccount =
       server.accountOrNull(sourceAddress.address)
         ?: throw ValidationException("Source account $sourceAddress doesn't exist in the network")
-    return TransactionBuilder(cfg, sourceAccount, memo)
+    return TransactionBuilder(cfg, sourceAccount, baseFee, memo, timeBounds)
+  }
+
+  /**
+   * Creates builder that allows to form Stellar transaction, adding Stellar's
+   * [operations](https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment)
+   *
+   * @param sourceAddress Stellar address of account initiating a transaction.
+   * @param baseFee base fee that will be used for this transaction. If not specified [default
+   * config fee][StellarConfiguration.baseFee] will be used.
+   * @param timeout Duration after which transaction expires. If not specified, [default config
+   * timeout][StellarConfiguration.defaultTimeout] will be used.
+   * @param memo optional transaction memo.
+   * @return transaction builder
+   */
+  suspend fun transaction(
+    sourceAddress: AccountKeyPair,
+    timeout: Duration,
+    baseFee: UInt? = null,
+    memo: Pair<MemoType, String>? = null,
+  ): TransactionBuilder {
+    return transaction(sourceAddress, baseFee, memo, timeout.toTimeBounds())
   }
 
   /**
@@ -71,41 +99,133 @@ internal constructor(
    * @return `true` if submitted successfully
    * @throws [TransactionSubmitFailedException] when submission failed
    */
+  @Suppress("SwallowedException")
   suspend fun submitTransaction(
     signedTransaction: AbstractTransaction,
   ) {
-    when (signedTransaction) {
-      is Transaction -> {
-        log.debug {
-          "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
-            "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
-            "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
+    try {
+      when (signedTransaction) {
+        is Transaction -> {
+          log.debug {
+            "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
+              "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
+              "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
                     .signatures.size}"
+          }
+
+          val response = server.submitTransaction(signedTransaction)
+
+          if (!response.isSuccess) {
+            throw TransactionSubmitFailedException(response)
+          }
+
+          log.debug { "Transaction submitted with hash ${response.hash}" }
         }
+        is FeeBumpTransaction -> {
+          log.debug {
+            "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
+              "${signedTransaction.innerTransaction.hashHex()}."
+          }
 
-        val response = server.submitTransaction(signedTransaction)
+          val response = server.submitTransaction(signedTransaction)
 
-        if (!response.isSuccess) {
-          throw TransactionSubmitFailedException(response)
+          if (!response.isSuccess) {
+            throw TransactionSubmitFailedException(response)
+          }
+
+          log.debug { "Transaction submitted with hash ${response.hash}" }
         }
-
-        log.debug { "Transaction submitted with hash ${response.hash}" }
+        else -> error("Unknown transaction type")
       }
-      is FeeBumpTransaction -> {
-        log.debug {
-          "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
-            "${signedTransaction.innerTransaction.hashHex()}."
+    } catch (e: SubmitTransactionTimeoutResponseException) {
+      log.info { "Transaction ${signedTransaction.hashHex()} timed out. Resubmitting..." }
+      return submitTransaction(signedTransaction)
+    }
+  }
+
+  /**
+   * Submit transaction with a fee increase. Recommended way of creating transactions. This method
+   * repeatedly tries to submit transaction, until it's successful. When [timeout] is reached, base
+   * fee will be increased on the [baseFeeIncrease] value.
+   *
+   * @param sourceAccount source account of transaction. Will be used as a signer.
+   * @param timeout transaction timeout.
+   * @param baseFeeIncrease amount on which fee will be increased after timeout is reached.
+   * @param baseFee base transaction fee. If not specified, [default configuration value]
+   * [StellarConfiguration.baseFee] will be used.
+   * @param memo optional transaction memo.
+   * @param buildingFunction function that will build the transaction.
+   * @return transaction that has been submitted to the network.
+   */
+  @Suppress("LongParameterList")
+  suspend fun submitWithFeeIncrease(
+    sourceAccount: SigningKeyPair,
+    timeout: Duration,
+    baseFeeIncrease: UInt,
+    baseFee: UInt? = null,
+    memo: Pair<MemoType, String>? = null,
+    buildingFunction: TransactionBuilder.() -> TransactionBuilder
+  ): Transaction {
+    return submitWithFeeIncrease(
+      sourceAccount,
+      timeout,
+      baseFeeIncrease,
+      baseFee,
+      memo,
+      { this.sign(sourceAccount) },
+      buildingFunction
+    )
+  }
+
+  /**
+   * Submit transaction with a fee increase. Recommended way of creating transactions. This method
+   * repeatedly tries to submit transaction, until it's successful. When [timeout] is reached, base
+   * fee will be increased on the [baseFeeIncrease] value.
+   *
+   * @param sourceAddress source address of transaction
+   * @param timeout transaction timeout
+   * @param baseFeeIncrease amount on which fee will be increased after timeout is reached
+   * @param baseFee base transaction fee. If not specified, [default configuration value]
+   * [StellarConfiguration.baseFee] will be used
+   * @param memo optional transaction memo
+   * @param signerFunction function that will be used to sign the transaction
+   * @param buildingFunction function that will build the transaction
+   * @return transaction that has been submitted to the network.
+   */
+  @Suppress("LongParameterList")
+  suspend fun submitWithFeeIncrease(
+    sourceAddress: AccountKeyPair,
+    timeout: Duration,
+    baseFeeIncrease: UInt,
+    baseFee: UInt? = null,
+    memo: Pair<MemoType, String>? = null,
+    signerFunction: Transaction.() -> Transaction,
+    buildingFunction: TransactionBuilder.() -> TransactionBuilder
+  ): Transaction {
+    val builder = transaction(sourceAddress, timeout, baseFee, memo)
+    val transaction = builder.buildingFunction().build()
+    val signedTransaction = transaction.signerFunction()
+
+    try {
+      submitTransaction(signedTransaction)
+      return transaction
+    } catch (e: TransactionSubmitFailedException) {
+      if (e.transactionResultCode == "tx_too_late") {
+        val newFee = transaction.fee.toUInt() + baseFeeIncrease
+        log.info {
+          "Transaction ${transaction.hashHex()} has expired. Increasing fee to $newFee Stroops."
         }
-
-        val response = server.submitTransaction(signedTransaction)
-
-        if (!response.isSuccess) {
-          throw TransactionSubmitFailedException(response)
-        }
-
-        log.debug { "Transaction submitted with hash ${response.hash}" }
+        return submitWithFeeIncrease(
+          sourceAddress,
+          timeout,
+          baseFeeIncrease,
+          newFee,
+          memo,
+          signerFunction,
+          buildingFunction
+        )
       }
-      else -> error("Unknown transaction type")
+      throw e
     }
   }
 

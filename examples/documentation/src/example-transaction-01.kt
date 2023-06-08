@@ -5,6 +5,7 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.*
+import java.time.Duration
 
 val wallet = Wallet(StellarConfiguration.Testnet)
 val account = wallet.stellar().account()
@@ -48,6 +49,12 @@ suspend fun setThreshold(): Transaction {
 suspend fun signAndSubmit() {
   val signedTxn = createAccount().sign(sourceAccountKeyPair)
   wallet.stellar().submitTransaction(signedTxn)
+}
+
+suspend fun submitWithFeeIncrease() {
+  wallet.stellar().submitWithFeeIncrease(sourceAccountKeyPair, Duration.ofSeconds(30), 100u) {
+    this.createAccount(destinationAccountKeyPair)
+  }
 }
 suspend fun main() {
   val fundTxn = createAccount()

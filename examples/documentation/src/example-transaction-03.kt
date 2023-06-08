@@ -5,6 +5,7 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.*
+import java.time.Duration
 
 val wallet = Wallet(StellarConfiguration.Testnet)
 val account = wallet.stellar().account()

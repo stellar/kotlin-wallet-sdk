@@ -175,6 +175,7 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.*
+import java.time.Duration
 
 val wallet = Wallet(StellarConfiguration.Testnet)
 val account = wallet.stellar().account()
@@ -277,7 +278,9 @@ suspend fun setThreshold(): Transaction {
 ### Submit transaction
 
 Submit a signed transaction to the Stellar network. A sponsored transaction must be signed by both the account and the
-sponsor.
+sponsor. 
+
+Transaction is automatically re-submitted on the Horizon 504 error (timeout), that indicates sudden network activity increase.  
 
 ```kotlin
 suspend fun signAndSubmit() {
@@ -285,6 +288,24 @@ suspend fun signAndSubmit() {
   wallet.stellar().submitTransaction(signedTxn)
 }
 ```
+
+However, the method above doesn't handle fee price surge in the network gracefully. If required fee for transaction to be included in the 
+ledger becomes too high and transaction expires before making it into the ledger, this method will throw an exception.
+
+So, instead, alternative approach is recommended:
+
+```kotlin
+suspend fun submitWithFeeIncrease() {
+  wallet.stellar().submitWithFeeIncrease(sourceAccountKeyPair, Duration.ofSeconds(30), 100u) {
+    this.createAccount(destinationAccountKeyPair)
+  }
+}
+```
+
+This will create and sign transaction originated from `sourceAccountKeyPair`. Every 30 seconds this function will re-construct 
+this transaction with a new fee (increased by 100 stroops), repeating signing and submitting.  
+Once transaction is successful, function will return transaction body.  
+Note, that any other error will terminate retry cycle and exception will be thrown.
 
 > You can get the full code [here](../examples/documentation/src/example-transaction-01.kt).
 

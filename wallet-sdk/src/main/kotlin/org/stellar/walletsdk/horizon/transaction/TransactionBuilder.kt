@@ -19,20 +19,37 @@ import org.stellar.walletsdk.util.*
 @Suppress("TooManyFunctions")
 class TransactionBuilder
 internal constructor(
-  private val cfg: Config,
+  cfg: Config,
   sourceAccount: AccountResponse,
-  memo: Pair<MemoType, String>?
+  baseFee: UInt?,
+  memo: Pair<MemoType, String>?,
+  timeBounds: TimeBounds?
 ) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount.accountId) {
   private val network: Network = cfg.stellar.network
   private val maxBaseFeeInStroops: Int = cfg.stellar.baseFee.toInt()
   override val operations: MutableList<Operation> = mutableListOf()
 
-  // TODO: make timeout configurable
   private val builder: SdkBuilder =
-    SdkBuilder(sourceAccount, network).setBaseFee(maxBaseFeeInStroops).setTimeout(180)
+    SdkBuilder(sourceAccount, network)
+      .setBaseFee(baseFee?.toInt() ?: maxBaseFeeInStroops)
+      .addPreconditions(
+        TransactionPreconditions.builder()
+          .timeBounds(timeBounds ?: cfg.stellar.defaultTimeout.toTimeBounds())
+          .build()
+      )
 
   init {
     memo?.also { builder.addMemo(it.first.mapper(it.second)) }
+  }
+
+  /**
+   * Add memo to this builder
+   *
+   * @param memo memo to add
+   */
+  fun addMemo(memo: Pair<MemoType, String>): TransactionBuilder {
+    builder.addMemo(memo.first.mapper(memo.second))
+    return this
   }
 
   /**
@@ -114,6 +131,13 @@ internal constructor(
  * specified, `from` field of this transaction will be used.
  * @return Stellar transfer transaction.
  */
+@Deprecated(
+  "Deprecated in favor of TransactionBuilder function",
+  replaceWith =
+    ReplaceWith(
+      "stellar.transaction(this.from).transferWithdrawalTransaction(this, assetId).build()"
+    )
+)
 suspend fun WithdrawalTransaction.toStellarTransfer(
   stellar: Stellar,
   assetId: StellarAssetId,
@@ -124,9 +148,28 @@ suspend fun WithdrawalTransaction.toStellarTransfer(
   return stellar
     .transaction(
       sourceAddress ?: this.from,
-      this.withdrawalMemo?.let { this.withdrawalMemoType to it }
-        ?: throw ValidationException("Missing withdrawal_memo in the transaction")
+      memo = this.withdrawalMemo?.let { this.withdrawalMemoType to it }
+          ?: throw ValidationException("Missing withdrawal_memo in the transaction")
     )
     .transfer(this.withdrawAnchorAccount, assetId, this.amountIn)
     .build()
+}
+
+/**
+ * Add a transfer to this builder from the withdrawal transaction
+ *
+ * @param transaction withdrawal transaction to fulfill
+ * @param assetId target asset id
+ */
+suspend fun TransactionBuilder.transferWithdrawalTransaction(
+  transaction: WithdrawalTransaction,
+  assetId: StellarAssetId
+): TransactionBuilder {
+  transaction.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
+
+  return this.addMemo(
+      transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }
+        ?: throw ValidationException("Missing withdrawal_memo in the transaction")
+    )
+    .transfer(transaction.withdrawAnchorAccount, assetId, transaction.amountIn)
 }
