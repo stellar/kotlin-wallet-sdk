@@ -19,17 +19,23 @@ import org.stellar.walletsdk.util.*
 @Suppress("TooManyFunctions")
 class TransactionBuilder
 internal constructor(
-  private val cfg: Config,
+  cfg: Config,
   sourceAccount: AccountResponse,
-  memo: Pair<MemoType, String>?
+  memo: Pair<MemoType, String>?,
+  timeBounds: TimeBounds?
 ) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount.accountId) {
   private val network: Network = cfg.stellar.network
   private val maxBaseFeeInStroops: Int = cfg.stellar.baseFee.toInt()
   override val operations: MutableList<Operation> = mutableListOf()
 
-  // TODO: make timeout configurable
   private val builder: SdkBuilder =
-    SdkBuilder(sourceAccount, network).setBaseFee(maxBaseFeeInStroops).setTimeout(180)
+    SdkBuilder(sourceAccount, network)
+      .setBaseFee(maxBaseFeeInStroops)
+      .addPreconditions(
+        TransactionPreconditions.builder()
+          .timeBounds(timeBounds ?: cfg.stellar.defaultTimeout.toTimeBounds())
+          .build()
+      )
 
   init {
     memo?.also { builder.addMemo(it.first.mapper(it.second)) }

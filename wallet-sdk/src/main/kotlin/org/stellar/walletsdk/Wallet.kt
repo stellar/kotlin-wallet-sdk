@@ -8,6 +8,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
+import java.time.Duration
 import java.util.*
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
@@ -80,6 +81,7 @@ class Wallet(
  * @property baseFee default [base fee]
  * (https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
  * to be used
+ * @property defaultTimeout default transaction timeout
  * @property horizonClient optional HTTP client configuration to be used for Horizon calls.
  * @property submitClient optional HTTP client configuration to be used for transaction submission.
  */
@@ -91,6 +93,7 @@ data class StellarConfiguration(
    * (https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
    */
   val baseFee: UInt = 100u,
+  val defaultTimeout: Duration = Duration.ofMinutes(3),
   val horizonClient: OkHttpClient? = null,
   val submitClient: OkHttpClient? = null
 ) {

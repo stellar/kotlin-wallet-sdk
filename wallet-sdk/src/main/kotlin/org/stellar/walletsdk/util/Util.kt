@@ -5,6 +5,9 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import java.time.Duration
+import java.time.Instant
+import org.stellar.sdk.TimeBounds
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.asset.*
@@ -70,6 +73,10 @@ internal object Util {
 
     return result.fromJson()
   }
+}
+
+fun Duration.toTimeBounds(): TimeBounds {
+  return TimeBounds(0, Instant.now().plus(this).toEpochMilli() / 1000)
 }
 
 fun AnchorTransaction.requireStatus(requiredStatus: TransactionStatus) {

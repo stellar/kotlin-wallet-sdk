@@ -1,10 +1,9 @@
 package org.stellar.walletsdk.horizon
 
+import java.time.Duration
 import mu.KotlinLogging
-import org.stellar.sdk.AbstractTransaction
-import org.stellar.sdk.FeeBumpTransaction
-import org.stellar.sdk.Server
-import org.stellar.sdk.Transaction
+import org.stellar.sdk.*
+import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.anchor.MemoType
@@ -12,6 +11,7 @@ import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
+import org.stellar.walletsdk.util.toTimeBounds
 
 private val log = KotlinLogging.logger {}
 
@@ -36,11 +36,20 @@ internal constructor(
   suspend fun transaction(
     sourceAddress: AccountKeyPair,
     memo: Pair<MemoType, String>? = null,
+    timeBounds: TimeBounds? = null
   ): TransactionBuilder {
     val sourceAccount =
       server.accountOrNull(sourceAddress.address)
         ?: throw ValidationException("Source account $sourceAddress doesn't exist in the network")
-    return TransactionBuilder(cfg, sourceAccount, memo)
+    return TransactionBuilder(cfg, sourceAccount, memo, timeBounds)
+  }
+
+  suspend fun transaction(
+    sourceAddress: AccountKeyPair,
+    timeout: Duration,
+    memo: Pair<MemoType, String>? = null,
+  ): TransactionBuilder {
+    return transaction(sourceAddress, memo, timeout.toTimeBounds())
   }
 
   /**
@@ -74,38 +83,43 @@ internal constructor(
   suspend fun submitTransaction(
     signedTransaction: AbstractTransaction,
   ) {
-    when (signedTransaction) {
-      is Transaction -> {
-        log.debug {
-          "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
-            "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
-            "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
+    try {
+      when (signedTransaction) {
+        is Transaction -> {
+          log.debug {
+            "Submit txn to network: sourceAccount = ${signedTransaction.sourceAccount}, memo = " +
+              "${signedTransaction.memo}, fee = ${signedTransaction.fee}, operationCount = " +
+              "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
                     .signatures.size}"
+          }
+
+          val response = server.submitTransaction(signedTransaction)
+
+          if (!response.isSuccess) {
+            throw TransactionSubmitFailedException(response)
+          }
+
+          log.debug { "Transaction submitted with hash ${response.hash}" }
         }
+        is FeeBumpTransaction -> {
+          log.debug {
+            "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
+              "${signedTransaction.innerTransaction.hashHex()}."
+          }
 
-        val response = server.submitTransaction(signedTransaction)
+          val response = server.submitTransaction(signedTransaction)
 
-        if (!response.isSuccess) {
-          throw TransactionSubmitFailedException(response)
+          if (!response.isSuccess) {
+            throw TransactionSubmitFailedException(response)
+          }
+
+          log.debug { "Transaction submitted with hash ${response.hash}" }
         }
-
-        log.debug { "Transaction submitted with hash ${response.hash}" }
+        else -> error("Unknown transaction type")
       }
-      is FeeBumpTransaction -> {
-        log.debug {
-          "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
-            "${signedTransaction.innerTransaction.hashHex()}."
-        }
-
-        val response = server.submitTransaction(signedTransaction)
-
-        if (!response.isSuccess) {
-          throw TransactionSubmitFailedException(response)
-        }
-
-        log.debug { "Transaction submitted with hash ${response.hash}" }
-      }
-      else -> error("Unknown transaction type")
+    } catch (e: SubmitTransactionTimeoutResponseException) {
+      log.info { "Transaction ${signedTransaction.hashHex()} timed out. Resubmitting..." }
+      return submitTransaction(signedTransaction)
     }
   }
 

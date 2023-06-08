@@ -13,6 +13,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
 import org.stellar.sdk.responses.SubmitTransactionResponse
+import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 
 internal class SubmitTransactionTest {
@@ -67,5 +68,19 @@ internal class SubmitTransactionTest {
 
     assertTrue(exception.toString().contains(errorMessage))
     verify(exactly = 1) { server.submitTransaction(any() as Transaction) }
+  }
+
+  @Test
+  fun `resubmit works`() {
+    val mockResponse = mockk<SubmitTransactionResponse>()
+    every { mockResponse.isSuccess } returns true
+
+    every { server.submitTransaction(any() as Transaction) } throws
+      SubmitTransactionTimeoutResponseException() andThenThrows
+      SubmitTransactionTimeoutResponseException() andThen
+      mockResponse
+
+    assertDoesNotThrow { (runBlocking { wallet.stellar().submitTransaction(transaction) }) }
+    verify(exactly = 3) { server.submitTransaction(any() as Transaction) }
   }
 }
