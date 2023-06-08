@@ -21,6 +21,7 @@ class TransactionBuilder
 internal constructor(
   cfg: Config,
   sourceAccount: AccountResponse,
+  baseFee: UInt?,
   memo: Pair<MemoType, String>?,
   timeBounds: TimeBounds?
 ) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount.accountId) {
@@ -30,7 +31,7 @@ internal constructor(
 
   private val builder: SdkBuilder =
     SdkBuilder(sourceAccount, network)
-      .setBaseFee(maxBaseFeeInStroops)
+      .setBaseFee(baseFee?.toInt() ?: maxBaseFeeInStroops)
       .addPreconditions(
         TransactionPreconditions.builder()
           .timeBounds(timeBounds ?: cfg.stellar.defaultTimeout.toTimeBounds())
@@ -39,6 +40,16 @@ internal constructor(
 
   init {
     memo?.also { builder.addMemo(it.first.mapper(it.second)) }
+  }
+
+  /**
+   * Add memo to this builder
+   *
+   * @param memo memo to add
+   */
+  fun addMemo(memo: Pair<MemoType, String>): TransactionBuilder {
+    builder.addMemo(memo.first.mapper(memo.second))
+    return this
   }
 
   /**
@@ -120,6 +131,13 @@ internal constructor(
  * specified, `from` field of this transaction will be used.
  * @return Stellar transfer transaction.
  */
+@Deprecated(
+  "Deprecated in favor of TransactionBuilder function",
+  replaceWith =
+    ReplaceWith(
+      "stellar.transaction(this.from).transferWithdrawalTransaction(this, assetId).build()"
+    )
+)
 suspend fun WithdrawalTransaction.toStellarTransfer(
   stellar: Stellar,
   assetId: StellarAssetId,
@@ -130,9 +148,28 @@ suspend fun WithdrawalTransaction.toStellarTransfer(
   return stellar
     .transaction(
       sourceAddress ?: this.from,
-      this.withdrawalMemo?.let { this.withdrawalMemoType to it }
-        ?: throw ValidationException("Missing withdrawal_memo in the transaction")
+      memo = this.withdrawalMemo?.let { this.withdrawalMemoType to it }
+          ?: throw ValidationException("Missing withdrawal_memo in the transaction")
     )
     .transfer(this.withdrawAnchorAccount, assetId, this.amountIn)
     .build()
+}
+
+/**
+ * Add a transfer to this builder from the withdrawal transaction
+ *
+ * @param transaction withdrawal transaction to fulfill
+ * @param assetId target asset id
+ */
+suspend fun TransactionBuilder.transferWithdrawalTransaction(
+  transaction: WithdrawalTransaction,
+  assetId: StellarAssetId
+): TransactionBuilder {
+  transaction.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
+
+  return this.addMemo(
+      transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }
+        ?: throw ValidationException("Missing withdrawal_memo in the transaction")
+    )
+    .transfer(transaction.withdrawAnchorAccount, assetId, transaction.amountIn)
 }

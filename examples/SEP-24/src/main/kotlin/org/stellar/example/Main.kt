@@ -11,6 +11,7 @@ import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
 import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
+import org.stellar.walletsdk.horizon.transaction.transferWithdrawalTransaction
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
 // testnet tokens at
@@ -106,7 +107,8 @@ suspend fun main() {
   } while (transaction.status != TransactionStatus.PENDING_USER_TRANSFER_START)
 
   // Send transaction with transfer
-  val transfer = (transaction as WithdrawalTransaction).toStellarTransfer(stellar, asset)
+  val t = (transaction as WithdrawalTransaction)
+  val transfer = stellar.transaction(t.from).transferWithdrawalTransaction(t, asset).build()
 
   transfer.sign(keypair)
 
