@@ -30,6 +30,7 @@ internal constructor(
    * [operations](https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment)
    *
    * @param sourceAddress Stellar address of account initiating a transaction
+   * @param timeBounds [Time Bounds](https://developers.stellar.org/docs/glossary#time-bounds) for this transaction
    * @param memo optional memo
    * @return transaction builder
    */
@@ -44,6 +45,15 @@ internal constructor(
     return TransactionBuilder(cfg, sourceAccount, memo, timeBounds)
   }
 
+  /**
+   * Creates builder that allows to form Stellar transaction, adding Stellar's
+   * [operations](https://developers.stellar.org/docs/fundamentals-and-concepts/list-of-operations#payment)
+   *
+   * @param sourceAddress Stellar address of account initiating a transaction
+   * @param timeout Duration after which transaction expires
+   * @param memo optional memo
+   * @return transaction builder
+   */
   suspend fun transaction(
     sourceAddress: AccountKeyPair,
     timeout: Duration,
@@ -80,6 +90,7 @@ internal constructor(
    * @return `true` if submitted successfully
    * @throws [TransactionSubmitFailedException] when submission failed
    */
+  @Suppress("SwallowedException")
   suspend fun submitTransaction(
     signedTransaction: AbstractTransaction,
   ) {
