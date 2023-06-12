@@ -6,6 +6,8 @@ import mu.KotlinLogging
 import okhttp3.internal.toImmutableMap
 import org.stellar.walletsdk.InteractiveFlowResponse
 import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.asset.NativeAssetId
+import org.stellar.walletsdk.asset.StellarAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.util.Util.postJson
@@ -26,7 +28,7 @@ internal constructor(
    * for depositing or withdrawing funds
    * @param fundsAccountAddress optional Stellar address of the account for depositing or
    * withdrawing funds, if different from the account address
-   * @param assetId Asset code to deposit or withdraw
+   * @param assetId Stellar asset to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
    * @return response object from the anchor
@@ -35,13 +37,16 @@ internal constructor(
    */
   suspend fun withdraw(
     accountAddress: String,
-    assetId: IssuedAssetId,
+    assetId: StellarAssetId,
     authToken: AuthToken,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
     return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "withdraw") {
-      it.withdraw[assetId.code]
+      when (assetId) {
+        is IssuedAssetId -> it.withdraw[assetId.code]
+        is NativeAssetId -> it.withdraw[NativeAssetId.id]
+      }
     }
   }
 
@@ -53,7 +58,7 @@ internal constructor(
    * for depositing or withdrawing funds
    * @param fundsAccountAddress optional Stellar address of the account for depositing or
    * withdrawing funds, if different from the account address
-   * @param assetId Asset code to deposit or withdraw
+   * @param assetId Stellar asset to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
    * @return response object from the anchor
@@ -62,13 +67,16 @@ internal constructor(
    */
   suspend fun deposit(
     accountAddress: String,
-    assetId: IssuedAssetId,
+    assetId: StellarAssetId,
     authToken: AuthToken,
     extraFields: Map<String, String>? = null,
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
     return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "deposit") {
-      it.deposit[assetId.code]
+      when (assetId) {
+        is IssuedAssetId -> it.deposit[assetId.code]
+        is NativeAssetId -> it.deposit[NativeAssetId.id]
+      }
     }
   }
 
@@ -89,7 +97,7 @@ internal constructor(
   @Suppress("LongParameterList", "ThrowsCount")
   private suspend fun flow(
     accountAddress: String,
-    assetId: IssuedAssetId,
+    assetId: StellarAssetId,
     authToken: AuthToken,
     extraFields: Map<String, String>?,
     fundsAccountAddress: String?,
@@ -118,14 +126,23 @@ internal constructor(
     val requestParams = mutableMapOf<String, String>()
     val account = fundsAccountAddress ?: accountAddress
     requestParams["account"] = fundsAccountAddress ?: accountAddress
-    requestParams["asset_code"] = assetId.code
-    requestParams["asset_issuer"] = assetId.issuer
+    when (assetId) {
+      is IssuedAssetId -> {
+        requestParams["asset_code"] = assetId.code
+        requestParams["asset_issuer"] = assetId.issuer
+      }
+      is NativeAssetId -> {
+        requestParams["asset_code"] = NativeAssetId.id
+      }
+    }
 
     if (extraFields != null) {
       requestParams += extraFields
     }
 
-    log.debug { "Interactive $type request: account = $account, asset_code = ${assetId.code}" }
+    log.debug {
+      "Interactive $type request: account = $account, asset_code = ${requestParams["asset_code"]}"
+    }
 
     val url =
       URLBuilder(info.services.sep24.transferServerSep24)
