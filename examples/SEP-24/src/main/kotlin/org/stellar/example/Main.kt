@@ -10,7 +10,6 @@ import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
-import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
 import org.stellar.walletsdk.horizon.transaction.transferWithdrawalTransaction
 
 // Setup main account that will fund new (user) accounts. You can get new key pair and fill it with
