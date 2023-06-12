@@ -43,10 +43,9 @@ internal constructor(
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
     return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "withdraw") {
-      if (assetId is IssuedAssetId) {
-        it.withdraw[assetId.code]
-      } else {
-        it.withdraw[NativeAssetId.id]
+      when (assetId) {
+        is IssuedAssetId -> it.withdraw[assetId.code]
+        is NativeAssetId -> it.withdraw[NativeAssetId.id]
       }
     }
   }
@@ -74,10 +73,9 @@ internal constructor(
     fundsAccountAddress: String? = null,
   ): InteractiveFlowResponse {
     return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "deposit") {
-      if (assetId is IssuedAssetId) {
-        it.deposit[assetId.code]
-      } else {
-        it.deposit[NativeAssetId.id]
+      when (assetId) {
+        is IssuedAssetId -> it.deposit[assetId.code]
+        is NativeAssetId -> it.deposit[NativeAssetId.id]
       }
     }
   }
@@ -128,11 +126,14 @@ internal constructor(
     val requestParams = mutableMapOf<String, String>()
     val account = fundsAccountAddress ?: accountAddress
     requestParams["account"] = fundsAccountAddress ?: accountAddress
-    if (assetId is IssuedAssetId) {
-      requestParams["asset_code"] = assetId.code
-      requestParams["asset_issuer"] = assetId.issuer
-    } else {
-      requestParams["asset_code"] = NativeAssetId.id
+    when (assetId) {
+      is IssuedAssetId -> {
+        requestParams["asset_code"] = assetId.code
+        requestParams["asset_issuer"] = assetId.issuer
+      }
+      is NativeAssetId -> {
+        requestParams["asset_code"] = NativeAssetId.id
+      }
     }
 
     if (extraFields != null) {
