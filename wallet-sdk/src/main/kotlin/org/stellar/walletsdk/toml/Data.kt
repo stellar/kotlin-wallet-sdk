@@ -3,6 +3,8 @@ package org.stellar.walletsdk.toml
 import io.ktor.http.*
 import org.stellar.sdk.Network
 import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.asset.NativeAssetId
+import org.stellar.walletsdk.asset.StellarAssetId
 import org.stellar.walletsdk.exception.ValidationException
 import shadow.com.google.gson.annotations.SerializedName
 
@@ -122,7 +124,7 @@ data class InfoValidator(
 
 data class InfoCurrency(
   @SerializedName("code") val code: String,
-  @SerializedName("issuer") val issuer: String,
+  @SerializedName("issuer") val issuer: String?,
   @SerializedName("code_template") val codeTemplate: String?,
   @SerializedName("status") val status: String?,
   @SerializedName("display_decimals") val displayDecimals: Int?,
@@ -147,7 +149,12 @@ data class InfoCurrency(
 ) {
   private val myCode = code
   private val myIssuer = issuer
-  val assetId: IssuedAssetId = IssuedAssetId(myCode, myIssuer)
+  val assetId: StellarAssetId =
+    when {
+      myCode == "native" && myIssuer == null -> NativeAssetId
+      myCode != "native" && myIssuer != null -> IssuedAssetId(myCode, myIssuer)
+      else -> throw ValidationException("Invalid asset code and issuer pair: $myCode, $myIssuer")
+    }
 }
 
 data class InfoServices(
