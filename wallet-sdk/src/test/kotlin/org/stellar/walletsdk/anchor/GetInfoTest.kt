@@ -9,6 +9,8 @@ import org.junit.jupiter.api.assertThrows
 import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.AUTH_HOME_DOMAIN
 import org.stellar.walletsdk.TestWallet
+import org.stellar.walletsdk.asset.IssuedAssetId
+import org.stellar.walletsdk.asset.NativeAssetId
 import org.stellar.walletsdk.helpers.mapFromTomlFile
 import org.stellar.walletsdk.toml.parseToml
 
@@ -35,9 +37,11 @@ internal class GetInfoTest {
   }
 
   @Test
-  fun `currency should have assetId`() {
-    val currency = toml.currencies?.get(0)
+  fun `currencies should have assetId`() {
+    val assetIds = toml.currencies?.map { it.assetId }
 
-    assertNotNull(currency?.assetId)
+    val srt = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
+    val native = NativeAssetId
+    assert(assetIds?.containsAll(setOf(srt, native)) == true)
   }
 }

@@ -48,7 +48,7 @@ fun parseToml(toml: Map<String, Any>): TomlInfo {
       InfoCurrency(
         code = it["code"].toString(),
         codeTemplate = it["code_template"]?.toString(),
-        issuer = it["issuer"].toString(),
+        issuer = it["issuer"]?.toString(),
         status = it["status"]?.toString(),
         displayDecimals = it["display_decimals"]?.toString()?.toInt(),
         name = it["name"]?.toString(),
