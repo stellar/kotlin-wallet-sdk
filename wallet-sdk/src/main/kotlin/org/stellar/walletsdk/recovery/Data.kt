@@ -56,7 +56,8 @@ data class RecoveryServer(
   val endpoint: String,
   val authEndpoint: String,
   val homeDomain: String,
-  val walletSigner: WalletSigner? = null
+  val walletSigner: WalletSigner? = null,
+  val clientDomain: String? = null
 )
 
 data class RecoveryServerSigning(
