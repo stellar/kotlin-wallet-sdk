@@ -42,7 +42,7 @@ internal constructor(
         identityMap[key]
           ?: throw ValidationException("Account identity for server $key was not specified")
 
-      val authToken = sep10Auth(key).authenticate(account, server.walletSigner)
+      val authToken = sep10Auth(key).authenticate(account, server.walletSigner, server.clientDomain)
 
       val requestUrl = "${server.endpoint}/accounts/${account.address}"
       val resp: RecoveryAccount =

@@ -121,15 +121,12 @@ internal data class Config(val stellar: StellarConfiguration, val app: Applicati
  *
  * @constructor Create empty Application configuration
  * @property defaultSigner default signer implementation to be used across application
- * @property base64Decoder Base64 decoder. Default [java.util.Base64] decoder works with Android API
- * 23+. To support Android API older than API 23, custom base64Decoder needs to be provided. For
- * example, `android.util.Base64`.
- * @property useHttp when enabled, switch from https to http scheme. Only allowed when network is
- * not [Network.PUBLIC] for security reasons
+ * @property defaultClientDomain default client_domain
  * @property defaultClientConfig configuration for default client used across the app.
  */
 data class ApplicationConfiguration(
   val defaultSigner: WalletSigner = WalletSigner.DefaultSigner(),
+  val defaultClientDomain: String? = null,
   val defaultClientConfig: ClientConfigFn = {}
 ) {
   val defaultClient =

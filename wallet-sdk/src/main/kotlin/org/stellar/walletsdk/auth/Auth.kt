@@ -43,7 +43,7 @@ internal constructor(
     memoId: String? = null,
     clientDomain: String? = null
   ): AuthToken {
-    val challengeTxn = challenge(accountAddress, memoId, clientDomain)
+    val challengeTxn = challenge(accountAddress, memoId, clientDomain ?: cfg.app.defaultClientDomain)
     val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
   }
