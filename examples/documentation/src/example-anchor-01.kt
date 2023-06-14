@@ -29,11 +29,11 @@ suspend fun getAnchorServices(): AnchorServiceInfo {
 val asset = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
 
 suspend fun interactiveDeposit(): String {
-  return anchor.interactive().deposit( asset, getAuthToken()).url
+  return anchor.interactive().deposit(asset, getAuthToken()).url
 }
 
 suspend fun interactiveWithdrawal(): String {
-  return anchor.interactive().withdraw( asset, getAuthToken()).url
+  return anchor.interactive().withdraw(asset, getAuthToken()).url
 }
 
 suspend fun anchorTransaction(): AnchorTransaction {

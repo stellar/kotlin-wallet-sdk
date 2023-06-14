@@ -5,7 +5,6 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import java.util.*
-import kotlin.io.encoding.Base64
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.stellar.sdk.Network
@@ -13,7 +12,6 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
-import org.stellar.walletsdk.json.fromJson
 import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
@@ -166,10 +164,7 @@ internal constructor(
       throw MissingTokenException
     }
 
-    val parsed = String(Base64.decode(resp.token.split(".")[1]))
-
-    val token = parsed.fromJson<AuthToken>()
-    token.token = resp.token
+    val token = AuthToken.from(resp.token)
 
     if (token.expiresAt < Clock.System.now()) {
       throw ValidationException(

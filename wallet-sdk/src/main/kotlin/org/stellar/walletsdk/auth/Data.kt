@@ -2,6 +2,7 @@
 
 package org.stellar.walletsdk.auth
 
+import kotlin.io.encoding.Base64
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,6 +10,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 import org.stellar.walletsdk.STRING_TRIM_LENGTH
 import org.stellar.walletsdk.json.InstantEpochSerializer
+import org.stellar.walletsdk.json.fromJson
 
 @Serializable
 data class ChallengeResponse(
@@ -33,6 +35,15 @@ data class AuthToken(
 
   override fun toString(): String {
     return token
+  }
+
+  companion object {
+    fun from(string: String): AuthToken {
+      val parsed = String(Base64.decode(string.split(".")[1]))
+      val token = parsed.fromJson<AuthToken>()
+      token.token = string
+      return token
+    }
   }
 }
 
