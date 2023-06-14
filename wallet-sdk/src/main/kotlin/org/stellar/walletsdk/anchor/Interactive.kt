@@ -24,10 +24,9 @@ internal constructor(
    * Initiates interactive withdrawal using
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
    *
-   * @param accountAddress Stellar address of the account, used for authentication and by default
-   * for depositing or withdrawing funds
-   * @param fundsAccountAddress optional Stellar address of the account for depositing or
-   * withdrawing funds, if different from the account address
+   * @param withdrawalAccount The Stellar or muxed account the client will use as the source of the
+   * withdrawal payment to the anchor. Defaults to the account authenticated via SEP-10 if not
+   * specified.
    * @param assetId Stellar asset to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
@@ -36,13 +35,12 @@ internal constructor(
    * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun withdraw(
-    accountAddress: String,
     assetId: StellarAssetId,
     authToken: AuthToken,
     extraFields: Map<String, String>? = null,
-    fundsAccountAddress: String? = null,
+    withdrawalAccount: String? = null,
   ): InteractiveFlowResponse {
-    return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "withdraw") {
+    return flow(assetId, authToken, extraFields, withdrawalAccount, "withdraw") {
       when (assetId) {
         is IssuedAssetId -> it.withdraw[assetId.code]
         is NativeAssetId -> it.withdraw[NativeAssetId.id]
@@ -54,10 +52,9 @@ internal constructor(
    * Initiates interactive deposit using
    * [SEP-24](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
    *
-   * @param accountAddress Stellar address of the account, used for authentication and by default
-   * for depositing or withdrawing funds
-   * @param fundsAccountAddress optional Stellar address of the account for depositing or
-   * withdrawing funds, if different from the account address
+   * @param destinationAccount The Stellar or muxed account the client wants to use as the
+   * destination of the payment sent by the anchor. Defaults to the account authenticated via SEP-10
+   * if not specified.
    * @param assetId Stellar asset to deposit or withdraw
    * @param authToken Auth token from the anchor (account's authentication using SEP-10)
    * @param extraFields Additional information to pass to the anchor
@@ -66,13 +63,12 @@ internal constructor(
    * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun deposit(
-    accountAddress: String,
     assetId: StellarAssetId,
     authToken: AuthToken,
     extraFields: Map<String, String>? = null,
-    fundsAccountAddress: String? = null,
+    destinationAccount: String? = null,
   ): InteractiveFlowResponse {
-    return flow(accountAddress, assetId, authToken, extraFields, fundsAccountAddress, "deposit") {
+    return flow(assetId, authToken, extraFields, destinationAccount, "deposit") {
       when (assetId) {
         is IssuedAssetId -> it.deposit[assetId.code]
         is NativeAssetId -> it.deposit[NativeAssetId.id]
@@ -96,11 +92,10 @@ internal constructor(
    */
   @Suppress("LongParameterList", "ThrowsCount")
   private suspend fun flow(
-    accountAddress: String,
     assetId: StellarAssetId,
     authToken: AuthToken,
     extraFields: Map<String, String>?,
-    fundsAccountAddress: String?,
+    account: String?,
     type: String,
     assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
   ): InteractiveFlowResponse {
@@ -124,8 +119,7 @@ internal constructor(
     }
 
     val requestParams = mutableMapOf<String, String>()
-    val account = fundsAccountAddress ?: accountAddress
-    requestParams["account"] = fundsAccountAddress ?: accountAddress
+    account?.run { requestParams["account"] = this }
     when (assetId) {
       is IssuedAssetId -> {
         requestParams["asset_code"] = assetId.code

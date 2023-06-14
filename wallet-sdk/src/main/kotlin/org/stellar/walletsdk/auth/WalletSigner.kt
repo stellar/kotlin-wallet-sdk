@@ -50,12 +50,10 @@ interface WalletSigner {
    * @constructor Create empty Json http signer
    * @property url url to which requests should be made
    * @property requestTransformer optional transformer of the default request. Can be used for
-   *   authentication purposes, etc.
+   * authentication purposes, etc.
    */
-  class DomainSigner(
-    val url: String,
-    val requestTransformer: HttpRequestBuilder.() -> Unit = {}
-  ) : DefaultSigner() {
+  class DomainSigner(val url: String, val requestTransformer: HttpRequestBuilder.() -> Unit = {}) :
+    DefaultSigner() {
     val client = HttpClient() { install(ContentNegotiation) { json() } }
 
     @Serializable

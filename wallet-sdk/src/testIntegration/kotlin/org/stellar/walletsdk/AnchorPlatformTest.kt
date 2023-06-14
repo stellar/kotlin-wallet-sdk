@@ -59,7 +59,7 @@ class AnchorPlatformTest {
     val token = anchor.auth().authenticate(keypair)
 
     // Start interactive deposit
-    val deposit = anchor.interactive().deposit(keypair.address, asset, token)
+    val deposit = anchor.interactive().deposit(asset, token)
 
     val transaction = anchor.getTransaction(deposit.id, token)
 
@@ -74,7 +74,7 @@ class AnchorPlatformTest {
     val token = anchor.auth().authenticate(keypair)
 
     // Start interactive withdrawal
-    val withdrawal = anchor.interactive().withdraw(keypair.address, asset, token)
+    val withdrawal = anchor.interactive().withdraw(asset, token)
 
     val transaction = anchor.getTransaction(withdrawal.id, token)
 
@@ -116,8 +116,7 @@ class AnchorPlatformTest {
       val token = anchor.auth().authenticate(keypair)
 
       // Start interactive withdrawal
-      val withdrawal =
-        anchor.interactive().withdraw(keypair.address, asset, token, mapOf("amount" to "10"))
+      val withdrawal = anchor.interactive().withdraw(asset, token, mapOf("amount" to "10"))
 
       val transaction = anchor.getTransaction(withdrawal.id, token)
 
@@ -189,8 +188,7 @@ class AnchorPlatformTest {
 
   private suspend fun makeDeposit(token: AuthToken, keyPair: SigningKeyPair = keypair): String {
     // Start interactive deposit
-    val deposit =
-      anchor.interactive().deposit(keyPair.address, asset, token, mapOf("amount" to "10"))
+    val deposit = anchor.interactive().deposit(asset, token, mapOf("amount" to "10"))
 
     val transaction = anchor.getTransaction(deposit.id, token)
 

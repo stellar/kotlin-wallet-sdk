@@ -16,7 +16,7 @@ object Withdrawal {
     println("Auth token: $token")
 
     // Start interactive withdrawal
-    val withdrawal = anchor.interactive().withdraw(myAccount.address, asset, authToken = token)
+    val withdrawal = anchor.interactive().withdraw(asset, authToken = token)
 
     // Request user input
     println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")

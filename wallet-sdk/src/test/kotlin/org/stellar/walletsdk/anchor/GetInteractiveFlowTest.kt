@@ -22,7 +22,6 @@ internal class GetInteractiveFlowTest {
       anchor
         .interactive()
         .deposit(
-          accountAddress = ADDRESS_ACTIVE.address,
           ASSET_SRT,
           authToken = authToken,
         )
@@ -39,8 +38,7 @@ internal class GetInteractiveFlowTest {
       anchor
         .interactive()
         .deposit(
-          accountAddress = ADDRESS_ACTIVE.address,
-          fundsAccountAddress = ADDRESS_ACTIVE_TWO.address,
+          destinationAccount = ADDRESS_ACTIVE_TWO.address,
           assetId = ASSET_SRT,
           authToken = authToken,
         )
@@ -57,7 +55,6 @@ internal class GetInteractiveFlowTest {
       anchor
         .interactive()
         .withdraw(
-          accountAddress = ADDRESS_ACTIVE.address,
           ASSET_SRT,
           authToken = authToken,
         )
@@ -74,8 +71,7 @@ internal class GetInteractiveFlowTest {
       anchor
         .interactive()
         .deposit(
-          accountAddress = ADDRESS_ACTIVE.address,
-          fundsAccountAddress = ADDRESS_ACTIVE_TWO.address,
+          destinationAccount = ADDRESS_ACTIVE_TWO.address,
           assetId = ASSET_SRT,
           authToken = authToken,
         )
