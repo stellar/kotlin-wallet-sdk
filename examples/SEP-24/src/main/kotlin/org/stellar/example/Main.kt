@@ -64,7 +64,7 @@ suspend fun main() {
   val token = anchor.auth().authenticate(keypair)
 
   // Start interactive deposit
-  val deposit = anchor.interactive().deposit(keypair.address, asset, authToken = token)
+  val deposit = anchor.interactive().deposit(asset, authToken = token)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -89,7 +89,7 @@ suspend fun main() {
   println("Successful deposit")
 
   // Start interactive withdrawal
-  val withdrawal = anchor.interactive().withdraw(keypair.address, asset, authToken = token)
+  val withdrawal = anchor.interactive().withdraw(asset, authToken = token)
 
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")

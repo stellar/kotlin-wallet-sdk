@@ -1,8 +1,10 @@
 package org.stellar.walletsdk.json
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
@@ -60,4 +62,12 @@ internal object AssetIdSerializer : KSerializer<AssetId> {
 
     return str.toAssetId()
   }
+}
+
+internal object InstantEpochSerializer : KSerializer<Instant> {
+  override val descriptor: SerialDescriptor =
+    PrimitiveSerialDescriptor(Instant::class.qualifiedName!!, PrimitiveKind.LONG)
+  override fun serialize(encoder: Encoder, value: Instant) =
+    encoder.encodeLong(value.toEpochMilliseconds() / 1000)
+  override fun deserialize(decoder: Decoder) = Instant.fromEpochSeconds(decoder.decodeLong())
 }

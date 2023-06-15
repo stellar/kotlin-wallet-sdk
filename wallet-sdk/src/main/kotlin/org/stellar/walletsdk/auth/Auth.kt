@@ -4,6 +4,8 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import java.util.*
+import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.stellar.sdk.Network
 import org.stellar.sdk.Transaction
@@ -43,7 +45,8 @@ internal constructor(
     memoId: String? = null,
     clientDomain: String? = null
   ): AuthToken {
-    val challengeTxn = challenge(accountAddress, memoId, clientDomain ?: cfg.app.defaultClientDomain)
+    val challengeTxn =
+      challenge(accountAddress, memoId, clientDomain ?: cfg.app.defaultClientDomain)
     val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
   }
@@ -157,12 +160,18 @@ internal constructor(
 
     val resp: AuthTokenResponse = httpClient.postJson(webAuthEndpoint, tokenRequestParams)
 
-    if (resp.token.toString().isBlank()) {
+    if (resp.token.isBlank()) {
       throw MissingTokenException
     }
 
-    log.debug { "Auth token: ${resp.token.prettify()}..." }
+    val token = AuthToken.from(resp.token)
 
-    return resp.token
+    if (token.expiresAt < Clock.System.now()) {
+      throw ValidationException(
+        "Auth token has already expired. Expiration time: ${token.expiresAt}"
+      )
+    }
+
+    return token
   }
 }
