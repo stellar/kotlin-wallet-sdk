@@ -24,7 +24,7 @@ data class AuthToken(
   @SerialName("sub") val principalAccount: String,
   @SerialName("iat") val issuedAt: Instant,
   @SerialName("exp") val expiresAt: Instant,
-  @SerialName("client_domain") val clientDomain: String?
+  @SerialName("client_domain") val clientDomain: String? = null
 ) {
   @Transient // not jvm transient
   lateinit var token: String
