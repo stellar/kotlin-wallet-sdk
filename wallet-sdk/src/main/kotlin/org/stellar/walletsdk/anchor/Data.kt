@@ -46,11 +46,11 @@ data class Payment(
   @SerialName("id_type") val idType: String
 )
 
-enum class MemoType(val mapper: (String) -> Memo) {
-  @SerialName("text") TEXT({ s -> Memo.text(s) }),
+enum class MemoType(val mapper: (String) -> Memo, val serialName: String) {
+  @SerialName("text") TEXT({ s -> Memo.text(s) }, "text"),
   /** Hash memo. Supports hex or base64 string encoding */
-  @SerialName("hash") HASH(::hash),
-  @SerialName("id") ID({ s -> Memo.id(s.toLong()) })
+  @SerialName("hash") HASH(::hash, "hash"),
+  @SerialName("id") ID({ s -> Memo.id(s.toLong()) }, "id")
 }
 
 private fun hash(s: String): Memo {

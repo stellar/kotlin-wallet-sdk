@@ -2,6 +2,7 @@ package org.stellar.walletsdk.anchor
 
 import io.ktor.client.*
 import io.ktor.http.*
+import kotlin.io.encoding.Base64
 import mu.KotlinLogging
 import okhttp3.internal.toImmutableMap
 import org.stellar.walletsdk.InteractiveFlowResponse
@@ -40,7 +41,7 @@ internal constructor(
     extraFields: Map<String, String>? = null,
     withdrawalAccount: String? = null,
   ): InteractiveFlowResponse {
-    return flow(assetId, authToken, extraFields, withdrawalAccount, "withdraw") {
+    return flow(assetId, authToken, extraFields, withdrawalAccount, null, "withdraw") {
       when (assetId) {
         is IssuedAssetId -> it.withdraw[assetId.code]
         is NativeAssetId -> it.withdraw[NativeAssetId.id]
@@ -67,8 +68,9 @@ internal constructor(
     authToken: AuthToken,
     extraFields: Map<String, String>? = null,
     destinationAccount: String? = null,
+    destinationMemo: Pair<String, MemoType>? = null,
   ): InteractiveFlowResponse {
-    return flow(assetId, authToken, extraFields, destinationAccount, "deposit") {
+    return flow(assetId, authToken, extraFields, destinationAccount, destinationMemo, "deposit") {
       when (assetId) {
         is IssuedAssetId -> it.deposit[assetId.code]
         is NativeAssetId -> it.deposit[NativeAssetId.id]
@@ -90,12 +92,13 @@ internal constructor(
    * string)
    * [documentation](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md#request)
    */
-  @Suppress("LongParameterList", "ThrowsCount")
+  @Suppress("LongParameterList", "ThrowsCount", "TooGenericExceptionCaught", "SwallowedException")
   private suspend fun flow(
     assetId: StellarAssetId,
     authToken: AuthToken,
     extraFields: Map<String, String>?,
     account: String?,
+    memo: Pair<String, MemoType>?,
     type: String,
     assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
   ): InteractiveFlowResponse {
@@ -120,6 +123,19 @@ internal constructor(
 
     val requestParams = mutableMapOf<String, String>()
     account?.run { requestParams["account"] = this }
+
+    if (memo != null) {
+      requestParams["memo"] = memo.first
+      requestParams["memo_type"] = memo.second.serialName
+
+      if (memo.second == MemoType.HASH) {
+        try {
+          Base64.decode(memo.first)
+        } catch (e: Exception) {
+          throw ValidationException("Hash memo must be base64 encoded")
+        }
+      }
+    }
     when (assetId) {
       is IssuedAssetId -> {
         requestParams["asset_code"] = assetId.code
