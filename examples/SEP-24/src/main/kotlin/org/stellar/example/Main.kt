@@ -63,8 +63,10 @@ suspend fun main() {
   // Authorizing
   val token = anchor.auth().authenticate(keypair)
 
+  val sep9 = mapOf("email_address" to "mail@example.com")
+
   // Start interactive deposit
-  val deposit = anchor.interactive().deposit(asset, authToken = token)
+  val deposit = anchor.interactive().deposit(asset, token, sep9)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")

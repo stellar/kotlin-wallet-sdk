@@ -5,6 +5,7 @@ import io.ktor.http.Url
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.AnchorServiceInfo
 import org.stellar.walletsdk.anchor.AnchorTransaction
+import org.stellar.walletsdk.anchor.MemoType
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.toml.TomlInfo
@@ -34,6 +35,20 @@ suspend fun interactiveDeposit(): String {
 
 suspend fun interactiveWithdrawal(): String {
   return anchor.interactive().withdraw(asset, getAuthToken()).url
+}
+
+suspend fun depositSep9(): InteractiveFlowResponse {
+  val sep9 = mapOf("email_address" to "mail@example.com")
+
+  return anchor.interactive().deposit(asset, getAuthToken(), sep9)
+}
+
+suspend fun depositDifferentAccount(): InteractiveFlowResponse {
+  val recipientAccount = "G..."
+  val memo = "my memo" to MemoType.TEXT
+  return anchor
+    .interactive()
+    .deposit(asset, getAuthToken(), destinationAccount = recipientAccount, destinationMemo = memo)
 }
 
 suspend fun anchorTransaction(): AnchorTransaction {
