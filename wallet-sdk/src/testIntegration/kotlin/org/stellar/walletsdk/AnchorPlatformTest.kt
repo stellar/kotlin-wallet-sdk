@@ -195,9 +195,12 @@ class AnchorPlatformTest {
     val customer = anchor.customer(token)
     val testCustomerType = "sep31-receiver"
     val testCustomerAccount = "GDZNFN6JRKKIN2HSV5IOMXPHNWB5EIK2EG4KZK5CQKSJWXSX3CMRJQ52"
-    val testPayload =
+    val testSep12Payload =
       mapOf(
         "type" to testCustomerType,
+      )
+    val testSep9Payload =
+      mapOf(
         "first_name" to "John",
         "last_name" to "Doe",
         "address" to "123 Washington Street",
@@ -210,7 +213,7 @@ class AnchorPlatformTest {
         "bank_account_type" to "checking"
       )
 
-    val addCustomerResponse = customer.add(testPayload)
+    val addCustomerResponse = customer.add(testSep12Payload, testSep9Payload)
     assertNotNull(addCustomerResponse.id)
 
     val customerData = customer.getById(addCustomerResponse.id, testCustomerType)

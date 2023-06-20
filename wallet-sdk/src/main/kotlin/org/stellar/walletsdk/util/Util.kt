@@ -18,7 +18,6 @@ import org.stellar.walletsdk.exception.IncorrectTransactionStatusException
 import org.stellar.walletsdk.exception.InvalidJsonException
 import org.stellar.walletsdk.json.fromJson
 import org.stellar.walletsdk.toml.TomlInfo
-import org.stellar.walletsdk.util.Util.authGet
 
 internal object Util {
   internal fun String.isHex(): Boolean {

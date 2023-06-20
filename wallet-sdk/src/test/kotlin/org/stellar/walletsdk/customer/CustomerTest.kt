@@ -84,7 +84,8 @@ internal class CustomerTest : SuspendTest() {
     val token = getToken()
     assertNotNull(token)
 
-    val testCustomerPayload =
+    val testCustomerSep12Payload = mapOf("type" to "sep31-receiver", "lang" to "en")
+    val testCustomerSep9Payload =
       mapOf("first_name" to "Allie", "last_name" to "Grater", "email_address" to "allie@email.com")
     val expectedCustomer = AddCustomerResponse("1")
 
@@ -99,7 +100,8 @@ internal class CustomerTest : SuspendTest() {
 
       val httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { json() } }
 
-      Customer(token, AUTH_HOME_DOMAIN, httpClient).add(testCustomerPayload)
+      Customer(token, AUTH_HOME_DOMAIN, httpClient)
+        .add(testCustomerSep12Payload, testCustomerSep9Payload)
     }
 
     assertNotNull(customer)

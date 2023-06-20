@@ -1,10 +1,7 @@
 package org.stellar.walletsdk.customer
 
 import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
 import io.ktor.http.*
-import okhttp3.MediaType.Companion.toMediaType
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.CustomerNotFoundException
 import org.stellar.walletsdk.exception.UnauthorizedCustomerDeletionException
@@ -12,9 +9,6 @@ import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.Util.authDelete
 import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.putJson
-
-const val APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=utf-8"
-val TYPE_JSON = APPLICATION_JSON_CHARSET_UTF_8.toMediaType()
 
 class Customer
 internal constructor(
@@ -38,12 +32,20 @@ internal constructor(
   /**
    * Create a new customer.
    *
-   * @param customer map of customer information
+   * @param customerSep12Info map of customer SEP-12 information
+   * @param customerSep9Info map of customer SEP-9 information
    * @return a customer with id information
    */
-  suspend fun add(customer: Map<String, String>): AddCustomerResponse {
-    val endpoint = getEndpoint()
+  suspend fun add(
+    customerSep12Info: Map<String, String>,
+    customerSep9Info: Map<String, String>? = null
+  ): AddCustomerResponse {
+    var customer = customerSep12Info
+    if (customerSep9Info != null) {
+      customer = customer + customerSep9Info
+    }
     val body = customer.toJson()
+    val endpoint = getEndpoint()
     val urlString = "$baseUrl/$endpoint/customer"
 
     return httpClient.putJson<String, AddCustomerResponse>(urlString, body, token)
@@ -70,7 +72,7 @@ internal constructor(
     }
   }
 
-  fun getEndpoint(): String {
+  private fun getEndpoint(): String {
     val isTestRunning = System.getProperty("IS_TEST_RUNNING").toBoolean()
     return if (isTestRunning) "kyc" else "sep12"
   }

@@ -8,7 +8,7 @@ data class AddCustomerResponse(
   @SerialName("id") var id: String,
 )
 
-enum class Sep12Status(val _name: String) {
+enum class Sep12Status(val status: String) {
   @SerialName("NEEDS_INFO") NEEDS_INFO("NEEDS_INFO"),
   @SerialName("ACCEPTED") ACCEPTED("ACCEPTED"),
   @SerialName("PROCESSING") PROCESSING("PROCESSING"),
@@ -23,7 +23,7 @@ data class Field(
   var choices: List<String>? = null,
   var optional: Boolean? = null,
 ) {
-  enum class Type(val _name: String) {
+  enum class Type(val status: String) {
     @SerialName("string") STRING("string"),
     @SerialName("binary") BINARY("binary"),
     @SerialName("number") NUMBER("number"),
