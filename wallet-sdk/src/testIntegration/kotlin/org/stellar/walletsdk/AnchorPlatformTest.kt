@@ -8,6 +8,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.fail
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.walletsdk.anchor.DepositTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
@@ -184,6 +186,37 @@ class AnchorPlatformTest {
       anchor.getTransactionBy(token, stellarTransactionId = transaction.stellarTransactionId)
 
     assertEquals(transaction, transactionByStellarId)
+  }
+
+  @Test
+  @Disabled
+  fun `manage customer`() = runBlocking {
+    val token = anchor.auth().authenticate(keypair)
+    val customer = anchor.customer(token)
+    val testCustomerType = "sep31-receiver"
+    val testCustomerAccount = "GDZNFN6JRKKIN2HSV5IOMXPHNWB5EIK2EG4KZK5CQKSJWXSX3CMRJQ52"
+    val testPayload =
+      mapOf(
+        "type" to testCustomerType,
+        "first_name" to "John",
+        "last_name" to "Doe",
+        "address" to "123 Washington Street",
+        "city" to "San Francisco",
+        "state_or_province" to "CA",
+        "address_country_code" to "US",
+        "clabe_number" to "1234",
+        "bank_number" to "abcd",
+        "bank_account_number" to "1234",
+        "bank_account_type" to "checking"
+      )
+
+    val addCustomerResponse = customer.add(testPayload)
+    assertNotNull(addCustomerResponse.id)
+
+    val customerData = customer.getById(addCustomerResponse.id, testCustomerType)
+    assertNotNull(customerData)
+
+    assertDoesNotThrow { runBlocking { customer.delete(testCustomerAccount) } }
   }
 
   private suspend fun makeDeposit(token: AuthToken, keyPair: SigningKeyPair = keypair): String {

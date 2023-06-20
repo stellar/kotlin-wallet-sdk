@@ -10,6 +10,7 @@ import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
+import org.stellar.walletsdk.customer.Customer
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.toml.TomlInfo
@@ -50,6 +51,15 @@ internal constructor(
       baseUrl.toString().replace("${baseUrl.protocol.name}://", ""),
       httpClient
     )
+  }
+
+  /**
+   * Create new customer object to handle customer records with the anchor using SEP-12.
+   *
+   * @return customer object
+   */
+  suspend fun customer(token: AuthToken): Customer {
+    return Customer(token, baseUrl.toString(), httpClient)
   }
 
   /**
