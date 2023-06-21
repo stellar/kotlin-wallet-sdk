@@ -1,22 +1,18 @@
 package org.stellar.walletsdk
 
-import io.ktor.client.plugins.*
-import io.ktor.http.*
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.stellar.walletsdk.exception.CustomerExceptions
 import org.stellar.walletsdk.horizon.SigningKeyPair
 
 class CustomerManagementTest {
-  private val wallet =
-    Wallet(
-      StellarConfiguration.Testnet,
-      ApplicationConfiguration { defaultRequest { url { protocol = URLProtocol.HTTP } } }
-    )
-  private val anchor = wallet.anchor("https://$AUTH_HOME_DOMAIN")
+  private val wallet = Wallet(StellarConfiguration.Testnet)
+  private val anchor = wallet.anchor(AUTH_HOME_DOMAIN)
   val keypair =
     SigningKeyPair.fromSecret("SDGEPZ5QOQ24XGCVA274ZL43OKI6NND5CSR4XD4UH6QT3AA33P66FAJW")
 
@@ -38,10 +34,6 @@ class CustomerManagementTest {
     val customer = anchor.customer(token)
     val testCustomerType = "sep31-receiver"
     val testCustomerAccount = "GDZNFN6JRKKIN2HSV5IOMXPHNWB5EIK2EG4KZK5CQKSJWXSX3CMRJQ52"
-    val testSep12Payload =
-      mapOf(
-        "type" to testCustomerType,
-      )
     val testSep9Payload =
       mapOf(
         "first_name" to "John",
@@ -56,12 +48,18 @@ class CustomerManagementTest {
         "bank_account_type" to "checking"
       )
 
-    val addCustomerResponse = customer.add(testSep12Payload, testSep9Payload)
+    val addCustomerResponse =
+      customer.add(
+        sep9Info = testSep9Payload,
+        type = testCustomerType,
+        account = testCustomerAccount
+      )
     assertNotNull(addCustomerResponse.id)
 
     val customerData = customer.getById(addCustomerResponse.id, testCustomerType)
     assertNotNull(customerData)
 
+    assertFailsWith<CustomerExceptions> { runBlocking { customer.delete(addCustomerResponse.id) } }
     assertDoesNotThrow { runBlocking { customer.delete(testCustomerAccount) } }
   }
 }

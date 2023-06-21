@@ -6,10 +6,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.fail
+import kotlin.test.*
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -23,6 +20,7 @@ import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
+import org.stellar.walletsdk.exception.CustomerExceptions
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
 import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
@@ -195,10 +193,6 @@ class AnchorPlatformTest {
     val customer = anchor.customer(token)
     val testCustomerType = "sep31-receiver"
     val testCustomerAccount = "GDZNFN6JRKKIN2HSV5IOMXPHNWB5EIK2EG4KZK5CQKSJWXSX3CMRJQ52"
-    val testSep12Payload =
-      mapOf(
-        "type" to testCustomerType,
-      )
     val testSep9Payload =
       mapOf(
         "first_name" to "John",
@@ -213,13 +207,19 @@ class AnchorPlatformTest {
         "bank_account_type" to "checking"
       )
 
-    val addCustomerResponse = customer.add(testSep12Payload, testSep9Payload)
+    val addCustomerResponse =
+      customer.add(
+        sep9Info = testSep9Payload,
+        type = testCustomerType,
+        account = testCustomerAccount
+      )
     assertNotNull(addCustomerResponse.id)
 
     val customerData = customer.getById(addCustomerResponse.id, testCustomerType)
     assertNotNull(customerData)
 
     assertDoesNotThrow { runBlocking { customer.delete(testCustomerAccount) } }
+    assertFailsWith<CustomerExceptions> { runBlocking { customer.delete(addCustomerResponse.id) } }
   }
 
   private suspend fun makeDeposit(token: AuthToken, keyPair: SigningKeyPair = keypair): String {
