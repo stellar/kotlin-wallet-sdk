@@ -1,12 +1,8 @@
 package org.stellar.example
 
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.Wallet
-import org.stellar.walletsdk.anchor.AnchorTransaction
-import org.stellar.walletsdk.anchor.TransactionStatus
-import org.stellar.walletsdk.anchor.WithdrawalTransaction
+import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
@@ -73,20 +69,20 @@ suspend fun main() {
 
   println("Waiting for tokens...")
 
-  var status: TransactionStatus? = null
+  val watch = anchor.watcher().watchOneTransaction(token, deposit.id)
 
-  // Optional step: wait for token to appear on user account
   do {
-    // Get transaction info
-    val transaction = anchor.getTransaction(deposit.id, token)
+    val statusChange = watch.channel.receive()
 
-    if (status != transaction.status) {
-      status = transaction.status
-      println("Deposit transaction status changed to $status. Message: ${transaction.message}")
+    when (statusChange) {
+      is FirstStatusChange ->
+        println("First status change encountered. Transaction is ${statusChange.status}")
+      is IntermediateStatusChange ->
+        println(
+          "Transaction status changed from ${statusChange.oldStatus} to ${statusChange.status}. Message: ${statusChange.transaction.message}"
+        )
     }
-
-    delay(5.seconds)
-  } while (transaction.status != TransactionStatus.COMPLETED)
+  } while (!statusChange.isTerminal())
 
   println("Successful deposit")
 
@@ -96,19 +92,15 @@ suspend fun main() {
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
 
-  var transaction: AnchorTransaction
-
-  status = null
+  var statusChange: TransactionStatusChange
 
   // Wait for user input
   do {
-    // Get transaction info
-    transaction = anchor.getTransaction(withdrawal.id, token)
-    delay(5.seconds)
-  } while (transaction.status != TransactionStatus.PENDING_USER_TRANSFER_START)
+    statusChange = watch.channel.receive()
+  } while (statusChange.status != TransactionStatus.PENDING_USER_TRANSFER_START)
 
   // Send transaction with transfer
-  val t = (transaction as WithdrawalTransaction)
+  val t = (statusChange.transaction as WithdrawalTransaction)
   val transfer = stellar.transaction(t.from).transferWithdrawalTransaction(t, asset).build()
 
   transfer.sign(keypair)
@@ -116,15 +108,12 @@ suspend fun main() {
   stellar.submitTransaction(transfer)
 
   do {
-    transaction = anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction
+    statusChange = watch.channel.receive()
 
-    if (status != transaction.status) {
-      status = transaction.status
-      println("Withdrawal transaction status changed to $status. Message: ${transaction.message}")
-    }
-
-    delay(5.seconds)
-  } while (transaction.status != TransactionStatus.COMPLETED)
+    println(
+      "Withdrawal transaction status changed to ${statusChange.status}. Message: ${statusChange.transaction.message}"
+    )
+  } while (!statusChange.isTerminal())
 
   println("Successful withdrawal")
 

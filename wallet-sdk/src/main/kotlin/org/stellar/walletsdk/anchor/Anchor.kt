@@ -82,6 +82,10 @@ internal constructor(
     return Interactive(this, httpClient)
   }
 
+  fun watcher(): Watcher {
+    return Watcher(this)
+  }
+
   /**
    * Get single transaction's current status and details.
    *
