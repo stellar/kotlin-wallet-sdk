@@ -82,7 +82,7 @@ internal constructor(
     return Interactive(this, httpClient)
   }
 
-  fun watcher(): Watcher {
+  fun watcher(retryCount: Int = 3): Watcher {
     return Watcher(this)
   }
 

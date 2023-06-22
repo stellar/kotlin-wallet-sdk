@@ -69,20 +69,20 @@ suspend fun main() {
 
   println("Waiting for tokens...")
 
-  val watch = anchor.watcher().watchOneTransaction(token, deposit.id)
+  val depositWatcher = anchor.watcher().watchOneTransaction(token, deposit.id)
 
   do {
-    val statusChange = watch.channel.receive()
+    val statusChange = depositWatcher.channel.receive()
 
     when (statusChange) {
-      is FirstStatusChange ->
-        println("First status change encountered. Transaction is ${statusChange.status}")
-      is IntermediateStatusChange ->
+      is StatusChange ->
         println(
-          "Transaction status changed from ${statusChange.oldStatus} to ${statusChange.status}. Message: ${statusChange.transaction.message}"
+          "Transaction status changed from ${statusChange.oldStatus ?: "none"} to ${statusChange.status}. Message: ${statusChange.transaction.message}"
         )
+      is ChannelClosed -> println("Transaction tracking finished")
+      is RetriesExhausted -> println("Retries exhausted trying obtain transaction data, giving up.")
     }
-  } while (!statusChange.isTerminal())
+  } while (statusChange !is ChannelClosed)
 
   println("Successful deposit")
 
@@ -92,12 +92,16 @@ suspend fun main() {
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
 
-  var statusChange: TransactionStatusChange
+  val withdrawalWatcher = anchor.watcher().watchOneTransaction(token, withdrawal.id)
+  var statusChange: StatusUpdateEvent
 
   // Wait for user input
   do {
-    statusChange = watch.channel.receive()
-  } while (statusChange.status != TransactionStatus.PENDING_USER_TRANSFER_START)
+    statusChange = withdrawalWatcher.channel.receive()
+  } while (
+    ((statusChange as? StatusChange) ?: throw Exception("Channel unexpectedly closed")).status !=
+      TransactionStatus.PENDING_USER_TRANSFER_START
+  )
 
   // Send transaction with transfer
   val t = (statusChange.transaction as WithdrawalTransaction)
@@ -108,12 +112,17 @@ suspend fun main() {
   stellar.submitTransaction(transfer)
 
   do {
-    statusChange = watch.channel.receive()
+    statusChange = withdrawalWatcher.channel.receive()
 
-    println(
-      "Withdrawal transaction status changed to ${statusChange.status}. Message: ${statusChange.transaction.message}"
-    )
-  } while (!statusChange.isTerminal())
+    when (statusChange) {
+      is StatusChange ->
+        println(
+          "Withdrawal transaction status changed to ${statusChange.status}. Message: ${statusChange.transaction.message}"
+        )
+      is ChannelClosed -> println("Transaction tracking finished")
+      is RetriesExhausted -> println("Retries exhausted trying obtain transaction data, giving up.")
+    }
+  } while (statusChange !is ChannelClosed)
 
   println("Successful withdrawal")
 
