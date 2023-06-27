@@ -32,7 +32,7 @@ internal class CustomerTest : SuspendTest() {
   }
 
   @Test
-  fun `get customer by id`() {
+  fun `get customer by id and type`() {
     val token = getToken()
     assertNotNull(token)
 
@@ -72,7 +72,7 @@ internal class CustomerTest : SuspendTest() {
 
       val httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { json() } }
 
-      Customer(token, AUTH_HOME_DOMAIN, httpClient).getById(testCustomerId, testCustomerType)
+      Customer(token, AUTH_HOME_DOMAIN, httpClient).getByIdAndType(testCustomerId, testCustomerType)
     }
 
     assertNotNull(customer)
@@ -85,7 +85,39 @@ internal class CustomerTest : SuspendTest() {
     assertNotNull(token)
 
     val testCustomerType = "sep31-receiver"
-    val testCustomerAccount = "GDZNFN6JRKKIN2HSV5IOMXPHNWB5EIK2EG4KZK5CQKSJWXSX3CMRJQ52"
+    val expectedCustomer = AddCustomerResponse("1")
+    val testCreateSep9Payload =
+      mapOf(
+        "first_name" to "John",
+        "last_name" to "Doe",
+        "email_address" to "jonhdoe@email.com",
+      )
+
+    val customer = runBlocking {
+      val mockEngine = MockEngine { request ->
+        respond(
+          content = ByteReadChannel(expectedCustomer.toJson()),
+          status = HttpStatusCode.Created,
+          headers = headersOf(HttpHeaders.ContentType, "application/json")
+        )
+      }
+
+      val httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { json() } }
+
+      Customer(token, AUTH_HOME_DOMAIN, httpClient)
+        .add(sep9Info = testCreateSep9Payload, type = testCustomerType)
+    }
+
+    assertNotNull(customer)
+    assertEquals(expectedCustomer.id, customer.id)
+  }
+
+  @Test
+  fun `update customer`() {
+    val token = getToken()
+    assertNotNull(token)
+
+    val testCustomerType = "sep31-receiver"
     val testSep9Payload =
       mapOf("first_name" to "Allie", "last_name" to "Grater", "email_address" to "allie@email.com")
     val expectedCustomer = AddCustomerResponse("1")
@@ -102,7 +134,7 @@ internal class CustomerTest : SuspendTest() {
       val httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { json() } }
 
       Customer(token, AUTH_HOME_DOMAIN, httpClient)
-        .add(sep9Info = testSep9Payload, type = testCustomerType, account = testCustomerAccount)
+        .add(sep9Info = testSep9Payload, type = testCustomerType)
     }
 
     assertNotNull(customer)

@@ -44,6 +44,12 @@ data class TomlInfo(
         } else {
           null
         },
+      sep12 =
+        if (kycServer != null) {
+          Sep12(kycServer.toString(), signingKey.toString())
+        } else {
+          null
+        },
       sep24 =
         if (transferServerSep24 != null) {
           Sep24(transferServerSep24, hasAuth)
@@ -161,6 +167,7 @@ data class InfoServices(
   val sep6: Sep6?,
   // TODO: add SEP8
   val sep10: Sep10?,
+  val sep12: Sep12?,
   val sep24: Sep24?,
   val sep31: Sep31?
 )
@@ -184,6 +191,18 @@ data class Sep6(val transferServer: String, val anchorQuoteServer: String?)
  */
 data class Sep10(
   val webAuthEndpoint: String,
+  val signingKey: String,
+)
+
+/**
+ * [SEP-12](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0012.md): Stellar
+ * KYC endpoint.
+ *
+ * @property kycServer customer server endpoint
+ * @property signingKey Stellar public address of the signing key
+ */
+data class Sep12(
+  val kycServer: String,
   val signingKey: String,
 )
 

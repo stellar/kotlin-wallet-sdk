@@ -11,7 +11,3 @@ style:
     excludeGuardClauses: false
   ReturnCount:
     max: 5
-
-complexity:
-  LongParameterList:
-    functionThreshold: 7
