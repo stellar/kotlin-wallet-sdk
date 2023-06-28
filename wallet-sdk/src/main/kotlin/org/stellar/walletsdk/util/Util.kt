@@ -1,7 +1,6 @@
 package org.stellar.walletsdk.util
 
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -72,6 +71,44 @@ internal object Util {
         .bodyAsText()
 
     return result.fromJson()
+  }
+
+  internal suspend inline fun <reified Req, reified Resp> HttpClient.putJson(
+    url: String,
+    requestBody: Req,
+    authToken: AuthToken? = null,
+    block: HttpRequestBuilder.() -> Unit = {}
+  ): Resp {
+    val result =
+      this.put(url) {
+          contentType(ContentType.Application.Json)
+          setBody(requestBody)
+          if (authToken != null) {
+            headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+          }
+          block()
+        }
+        .bodyAsText()
+
+    return result.fromJson()
+  }
+
+  internal suspend inline fun HttpClient.authDelete(
+    url: String,
+    memo: String?,
+    authToken: AuthToken?,
+  ): HttpStatusCode {
+    val response =
+      this.delete(url) {
+        if (authToken != null) {
+          headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
+        }
+        if (memo != null) {
+          contentType(ContentType.Application.Json)
+          setBody(mapOf("memo" to memo))
+        }
+      }
+    return response.status
   }
 }
 

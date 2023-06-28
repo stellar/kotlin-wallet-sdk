@@ -38,6 +38,7 @@ dependencies {
   testImplementation(libs.okhttp3.mockserver)
   testImplementation(libs.google.gson)
   testImplementation(libs.logback.classic)
+  testImplementation(libs.ktor.client.mock)
 
   testIntegrationImplementation(libs.ktor.client.core)
   testIntegrationImplementation(libs.ktor.client.okhttp)

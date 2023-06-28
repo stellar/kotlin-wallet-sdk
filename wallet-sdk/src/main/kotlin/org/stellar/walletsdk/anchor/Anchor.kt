@@ -1,8 +1,6 @@
 package org.stellar.walletsdk.anchor
 
 import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
 import io.ktor.http.*
 import mu.KotlinLogging
 import org.stellar.sdk.*
@@ -10,10 +8,10 @@ import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
+import org.stellar.walletsdk.customer.Customer
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.toml.TomlInfo
-import org.stellar.walletsdk.util.*
 import org.stellar.walletsdk.util.Util.anchorGet
 
 private val log = KotlinLogging.logger {}
@@ -50,6 +48,17 @@ internal constructor(
       baseUrl.toString().replace("${baseUrl.protocol.name}://", ""),
       httpClient
     )
+  }
+
+  /**
+   * Create new customer object to handle customer records with the anchor using SEP-12.
+   *
+   * @return customer object
+   */
+  suspend fun customer(token: AuthToken): Customer {
+    val kycServer = getInfo().services.sep12?.kycServer ?: throw KYCServerNotFoundException()
+
+    return Customer(token, kycServer, httpClient)
   }
 
   /**
