@@ -107,7 +107,10 @@ data class NativeAssetDefault(
   val assetIssuer: String,
 )
 
-@Deprecated("Formatted classes are to be removed. Use rawOperation instead", replaceWith = ReplaceWith("this.rawOperation"))
+@Deprecated(
+  "Formatted classes are to be removed. Use rawOperation instead",
+  replaceWith = ReplaceWith("this.rawOperation")
+)
 data class WalletOperation<T>(
   val id: String,
   val date: String,
