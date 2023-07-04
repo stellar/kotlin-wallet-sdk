@@ -66,7 +66,6 @@ internal constructor(
    * payment methods.
    *
    * @return a list of available anchor services
-   * @throws [ServerRequestFailedException] if network request fails
    * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
    */
   suspend fun getServicesInfo(): AnchorServiceInfo {
@@ -89,7 +88,6 @@ internal constructor(
    * @param authToken auth token of the account authenticated with the anchor
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
-   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
     return get<AnchorTransactionStatusResponse>(authToken) {
@@ -109,7 +107,6 @@ internal constructor(
    * @param authToken auth token of the account authenticated with the anchor
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
-   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun getTransactionBy(
     authToken: AuthToken,
@@ -147,7 +144,6 @@ internal constructor(
    * @param authToken auth token of the account authenticated with the anchor
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
-   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun getTransactionsForAsset(
     asset: AssetId,
@@ -172,7 +168,6 @@ internal constructor(
    * @param lang optional language code specified using
    * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
    * @return a list of formatted operations
-   * @throws [ServerRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
   @Suppress("LongParameterList")

@@ -33,7 +33,6 @@ internal constructor(
    * @param extraFields Additional information to pass to the anchor
    * @return response object from the anchor
    * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun withdraw(
     assetId: StellarAssetId,
@@ -61,7 +60,6 @@ internal constructor(
    * @param extraFields Additional information to pass to the anchor
    * @return response object from the anchor
    * @throws [AnchorAssetException] if asset was refused by the anchor
-   * @throws [ServerRequestFailedException] if network request fails
    */
   suspend fun deposit(
     assetId: StellarAssetId,
