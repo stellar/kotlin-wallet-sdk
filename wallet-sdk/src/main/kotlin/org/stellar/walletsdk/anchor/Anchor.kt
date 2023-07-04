@@ -25,6 +25,7 @@ import org.stellar.walletsdk.util.Util.anchorGet
 private val log = KotlinLogging.logger {}
 
 /** Build on/off ramps with anchors. */
+@Suppress("TooManyFunctions")
 class Anchor
 internal constructor(
   private val cfg: Config,
