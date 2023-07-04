@@ -109,7 +109,7 @@ suspend fun main() {
 
   // Send transaction with transfer
   val t = (transaction as WithdrawalTransaction)
-  val transfer = stellar.transaction(t.from).transferWithdrawalTransaction(t, asset).build()
+  val transfer = stellar.transaction(keypair).transferWithdrawalTransaction(t, asset).build()
 
   transfer.sign(keypair)
 

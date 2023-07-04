@@ -147,7 +147,11 @@ suspend fun WithdrawalTransaction.toStellarTransfer(
 
   return stellar
     .transaction(
-      sourceAddress ?: this.from,
+      sourceAddress
+        ?: this.from
+          ?: throw ValidationException(
+          "Source account is not provided and from account is unknown"
+        ),
       memo = this.withdrawalMemo?.let { this.withdrawalMemoType to it }
           ?: throw ValidationException("Missing withdrawal_memo in the transaction")
     )
