@@ -1,15 +1,23 @@
+@file:Suppress("MaxLineLength")
+
 package org.stellar.walletsdk.anchor
 
 import io.ktor.client.*
 import io.ktor.http.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.channels.Channel
+import kotlinx.datetime.Instant
 import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
+import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.customer.Customer
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.toml.TomlInfo
 import org.stellar.walletsdk.util.Util.anchorGet
@@ -82,8 +90,23 @@ internal constructor(
     return Interactive(this, httpClient)
   }
 
-  fun watcher(retryCount: Int = 3): Watcher {
-    return Watcher(this)
+  /**
+   * Creates new transaction watcher
+   *
+   * @param pullDelay pull interval in which requests to the Anchor are being made.
+   * @param channelSize size of the Coroutine [Channel]. See
+   * [channel documentation](https://kotlinlang.org/docs/coroutines-and-channels.html#channels) for
+   * more info about channel size configuration. Be default, unlimited channel is created.
+   * @param exceptionHandler handler for exceptions. By default, [RetryExceptionHandler] is being
+   * used.
+   * @return new transaction watcher
+   */
+  fun watcher(
+    pullDelay: Duration = 5.seconds,
+    channelSize: Int = Channel.UNLIMITED,
+    exceptionHandler: WalletExceptionHandler = RetryExceptionHandler()
+  ): Watcher {
+    return Watcher(this, pullDelay, channelSize, exceptionHandler)
   }
 
   /**
@@ -142,10 +165,8 @@ internal constructor(
       .transaction
   }
 
-  // TODO: is this for SEP-24 only?
-  // TODO: handle extra fields
   /**
-   * Get all account's transactions by specified asset.
+   * Get all account's transactions by specified asset. See SEP-24 specification for parameters
    *
    * @param asset target asset to query for
    * @param authToken auth token of the account authenticated with the anchor
@@ -153,13 +174,31 @@ internal constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
    */
+  @Suppress("LongParameterList")
   suspend fun getTransactionsForAsset(
     asset: AssetId,
-    authToken: AuthToken
+    authToken: AuthToken,
+    noOlderThan: Instant? = null,
+    limit: Int? = null,
+    kind: TransactionKind? = null,
+    pagingId: String? = null,
+    lang: String? = null
   ): List<AnchorTransaction> {
     return get<AnchorAllTransactionsResponse>(authToken) {
         appendPathSegments("transactions")
-        parameters.append("asset_code", asset.sep38)
+
+        val code =
+          when (asset) {
+            is IssuedAssetId -> asset.code
+            else -> asset.id
+          }
+        parameters.append("asset_code", code)
+
+        noOlderThan?.run { parameters.append("no_longer_than", noOlderThan.toJson()) }
+        limit?.run { parameters.append("limit", limit.toString()) }
+        kind?.run { parameters.append("kind", kind.toString()) }
+        pagingId?.run { parameters.append("paging_id", pagingId.toString()) }
+        lang?.run { parameters.append("lang", lang.toString()) }
       }
       .transactions
   }

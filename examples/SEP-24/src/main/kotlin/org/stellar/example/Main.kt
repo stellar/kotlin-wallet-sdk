@@ -1,5 +1,6 @@
 package org.stellar.example
 
+import kotlinx.datetime.Instant
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.Wallet
 import org.stellar.walletsdk.anchor.*
@@ -21,6 +22,7 @@ private val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEV
 private val asset = USDC
 private const val DOMAIN = "testanchor.stellar.org"
 
+@Suppress("LongMethod", "TooGenericExceptionThrown")
 suspend fun main() {
   val wallet = Wallet(StellarConfiguration.Testnet)
 
@@ -69,7 +71,8 @@ suspend fun main() {
 
   println("Waiting for tokens...")
 
-  val depositWatcher = anchor.watcher().watchOneTransaction(token, deposit.id)
+  val depositWatcher =
+    anchor.watcher().watchAsset(token, USDC, since = Instant.fromEpochMilliseconds(0))
 
   do {
     val statusChange = depositWatcher.channel.receive()
@@ -77,10 +80,12 @@ suspend fun main() {
     when (statusChange) {
       is StatusChange ->
         println(
-          "Transaction status changed from ${statusChange.oldStatus ?: "none"} to ${statusChange.status}. Message: ${statusChange.transaction.message}"
+          "Transaction status changed from ${statusChange.oldStatus ?: "none"} to ${statusChange.status}. " +
+            "Message: ${statusChange.transaction.message}"
         )
       is ChannelClosed -> println("Transaction tracking finished")
-      is RetriesExhausted -> println("Retries exhausted trying obtain transaction data, giving up.")
+      is ExceptionHandlerExit ->
+        println("Retries exhausted trying obtain transaction data, giving up.")
     }
   } while (statusChange !is ChannelClosed)
 
@@ -117,10 +122,12 @@ suspend fun main() {
     when (statusChange) {
       is StatusChange ->
         println(
-          "Withdrawal transaction status changed to ${statusChange.status}. Message: ${statusChange.transaction.message}"
+          "Withdrawal transaction status changed to ${statusChange.status}. " +
+            "Message: ${statusChange.transaction.message}"
         )
       is ChannelClosed -> println("Transaction tracking finished")
-      is RetriesExhausted -> println("Retries exhausted trying obtain transaction data, giving up.")
+      is ExceptionHandlerExit ->
+        println("Retries exhausted trying obtain transaction data, giving up.")
     }
   } while (statusChange !is ChannelClosed)
 

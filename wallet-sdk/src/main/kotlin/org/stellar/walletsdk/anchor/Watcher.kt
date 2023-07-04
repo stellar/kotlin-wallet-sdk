@@ -4,37 +4,27 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import mu.KotlinLogging
+import org.stellar.walletsdk.asset.StellarAssetId
 import org.stellar.walletsdk.auth.AuthToken
 
 private val log = KotlinLogging.logger {}
-private val ERROR_STATUSES =
-  setOf(
-    TransactionStatus.ERROR,
-    TransactionStatus.NO_MARKET,
-    TransactionStatus.TOO_LARGE,
-    TransactionStatus.TOO_SMALL
-  )
 
-private val TERMINAL_STATUSES =
-  setOf(
-    TransactionStatus.COMPLETED,
-    TransactionStatus.REFUNDED,
-    TransactionStatus.EXPIRED,
-  ) + ERROR_STATUSES
-
-class Watcher internal constructor(private val anchor: Anchor) {
+class Watcher
+internal constructor(
+  private val anchor: Anchor,
+  private val pullDelay: Duration,
+  private val channelSize: Int,
+  private val exceptionHandler: WalletExceptionHandler
+) {
   suspend fun watchOneTransaction(
     authToken: AuthToken,
     id: String,
-    lang: String? = null,
-    pullDelay: Duration = 5.seconds,
-    channelSize: Int = UNLIMITED,
-    exceptionHandler: WalletExceptionHandler = RetryExceptionHandler()
+    lang: String? = null
   ): WatcherResult {
     val channel = Channel<StatusUpdateEvent>(channelSize)
 
@@ -70,7 +60,72 @@ class Watcher internal constructor(private val anchor: Anchor) {
                 log.error(e) { "CRITICAL: Couldn't invoke exception handler" }
               }
               if (shouldExit) {
-                channel.send(RetriesExhausted)
+                channel.send(ExceptionHandlerExit)
+              }
+            }
+          } while (!shouldExit)
+
+          channel.send(ChannelClosed)
+        }
+        .also { it.invokeOnCompletion { channel.close() } }
+    }
+
+    return WatcherResult(channel, job)
+  }
+
+  suspend fun watchAsset(
+    authToken: AuthToken,
+    asset: StellarAssetId,
+    since: Instant? = null,
+    lang: String? = null,
+    kind: TransactionKind? = null
+  ): WatcherResult {
+    val channel = Channel<StatusUpdateEvent>(channelSize)
+
+    val job = coroutineScope {
+      launch(Job()) {
+          var transactionStatuses = mapOf<String, AnchorTransaction>()
+          val retryContext = RetryContext()
+
+          do {
+            var shouldExit: Boolean
+
+            try {
+              val transactions =
+                anchor
+                  .getTransactionsForAsset(asset, authToken, since, kind = kind, lang = lang)
+                  .associateBy { it.id }
+
+              transactions.forEach {
+                val tx = it.value
+                val previousStatus = transactionStatuses[it.key]?.status
+
+                if (tx.status != previousStatus) {
+                  channel.send(StatusChange(tx, tx.status, previousStatus))
+                }
+              }
+
+              val unfinishedTransactions =
+                transactions.filter { it.value.status.isTerminal().not() }
+
+              transactionStatuses = transactions
+
+              if (unfinishedTransactions.isNotEmpty()) {
+                delay(pullDelay)
+              }
+
+              shouldExit = unfinishedTransactions.isEmpty()
+              retryContext.refresh()
+            } catch (e: Exception) {
+              try {
+                retryContext.onError(e)
+                shouldExit = exceptionHandler.invoke(retryContext)
+              } catch (e: Exception) {
+                shouldExit = true
+                log.error(e) { "CRITICAL: Couldn't invoke exception handler" }
+              }
+              if (shouldExit) {
+                channel.send(ExceptionHandlerExit)
               }
             }
           } while (!shouldExit)
@@ -86,6 +141,14 @@ class Watcher internal constructor(private val anchor: Anchor) {
 
 typealias WalletExceptionHandler = suspend (RetryContext) -> (Boolean)
 
+/**
+ * Simple exception handler that retries on the error
+ *
+ * @constructor Create empty Retry exception handler
+ * @property maxRetryCount maximum consequent retry count. If this specified number of errors
+ * happens in a row, handler will give up retrying.
+ * @property backoffPeriod delay before resuming the job
+ */
 class RetryExceptionHandler(
   private val maxRetryCount: Int = 3,
   private val backoffPeriod: Duration = 5.seconds
@@ -128,16 +191,16 @@ data class StatusChange(
   val oldStatus: TransactionStatus? = null,
 ) : StatusUpdateEvent {
   fun isTerminal(): Boolean {
-    return TERMINAL_STATUSES.contains(status)
+    return status.isTerminal()
   }
 
   fun isError(): Boolean {
-    return ERROR_STATUSES.contains(status)
+    return status.isError()
   }
 }
 
 object ChannelClosed : StatusUpdateEvent
 
-object RetriesExhausted : StatusUpdateEvent
+object ExceptionHandlerExit : StatusUpdateEvent
 
 data class WatcherResult(val channel: Channel<StatusUpdateEvent>, val job: Job)
