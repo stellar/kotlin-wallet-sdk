@@ -7,7 +7,6 @@ import org.stellar.sdk.Transaction
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.walletsdk.exception.NotAllSignaturesFetchedException
-import org.stellar.walletsdk.exception.ServerRequestFailedException
 import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.AccountKeyPair
@@ -47,7 +46,6 @@ internal class AccountRecoverImpl(
    * @param accountAddress Stellar address of the account that is recovered
    * @param serverAuth List of recovery servers to use
    * @return transaction with recovery server signatures
-   * @throws [ServerRequestFailedException] when request fails
    * @throws [NotAllSignaturesFetchedException] when all recovery servers don't return signatures
    */
   override suspend fun signWithRecoveryServers(
