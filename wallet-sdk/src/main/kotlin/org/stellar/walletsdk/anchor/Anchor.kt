@@ -96,10 +96,10 @@ internal constructor(
    *
    * @param pullDelay pull interval in which requests to the Anchor are being made.
    * @param channelSize size of the Coroutine [Channel]. See
-   * [channel documentation](https://kotlinlang.org/docs/coroutines-and-channels.html#channels) for
-   * more info about channel size configuration. Be default, unlimited channel is created.
+   *   [channel documentation](https://kotlinlang.org/docs/coroutines-and-channels.html#channels)
+   *   for more info about channel size configuration. Be default, unlimited channel is created.
    * @param exceptionHandler handler for exceptions. By default, [RetryExceptionHandler] is being
-   * used.
+   *   used.
    * @return new transaction watcher
    */
   fun watcher(
@@ -171,6 +171,12 @@ internal constructor(
    *
    * @param asset target asset to query for
    * @param authToken auth token of the account authenticated with the anchor
+   * @param noOlderThan The response should contain transactions starting on or after this date &
+   *   time.
+   * @param limit The response should contain at most limit transactions
+   * @param kind The kind of transaction that is desired
+   * @param pagingId The response should contain transactions starting prior to this ID (exclusive)
+   * @param lang Language to use
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    * @throws [ServerRequestFailedException] if network request fails
@@ -214,7 +220,7 @@ internal constructor(
    * @param pagingId optional return transactions prior to this ID
    * @param noOlderThan optional return transactions starting on or after this date and time
    * @param lang optional language code specified using
-   * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
+   *   [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
    * @return a list of formatted operations
    * @throws [ServerRequestFailedException] if network request fails
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
