@@ -93,7 +93,7 @@ internal constructor(
   /**
    * Creates new transaction watcher
    *
-   * @param pullDelay pull interval in which requests to the Anchor are being made.
+   * @param pollDelay poll interval in which requests to the Anchor are being made.
    * @param channelSize size of the Coroutine [Channel]. See
    *   [channel documentation](https://kotlinlang.org/docs/coroutines-and-channels.html#channels)
    *   for more info about channel size configuration. Be default, unlimited channel is created.
@@ -102,11 +102,11 @@ internal constructor(
    * @return new transaction watcher
    */
   fun watcher(
-    pullDelay: Duration = 5.seconds,
+    pollDelay: Duration = 5.seconds,
     channelSize: Int = Channel.UNLIMITED,
     exceptionHandler: WalletExceptionHandler = RetryExceptionHandler()
   ): Watcher {
-    return Watcher(this, pullDelay, channelSize, exceptionHandler)
+    return Watcher(this, pollDelay, channelSize, exceptionHandler)
   }
 
   /**

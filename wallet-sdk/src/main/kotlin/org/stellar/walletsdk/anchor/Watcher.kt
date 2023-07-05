@@ -17,7 +17,7 @@ private val log = KotlinLogging.logger {}
 class Watcher
 internal constructor(
   private val anchor: Anchor,
-  private val pullDelay: Duration,
+  private val pollDelay: Duration,
   private val channelSize: Int,
   private val exceptionHandler: WalletExceptionHandler
 ) {
@@ -46,7 +46,7 @@ internal constructor(
               oldStatus = statusChange.status
 
               if (!statusChange.isTerminal()) {
-                delay(pullDelay)
+                delay(pollDelay)
               }
 
               shouldExit = statusChange.isTerminal()
@@ -111,7 +111,7 @@ internal constructor(
               transactionStatuses = transactions
 
               if (unfinishedTransactions.isNotEmpty()) {
-                delay(pullDelay)
+                delay(pollDelay)
               }
 
               shouldExit = unfinishedTransactions.isEmpty()
