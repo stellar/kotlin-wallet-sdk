@@ -36,7 +36,6 @@ internal constructor(
    * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
    * @return authentication token (JWT)
    * @throws [ValidationException] when some of the request arguments are not valid
-   * @throws [ServerRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
   suspend fun authenticate(
@@ -58,7 +57,6 @@ internal constructor(
    * from the auth endpoint
    * @throws [InvalidMemoIdException] when memo ID is not valid
    * @throws [ClientDomainWithMemoException] when both client domain and memo ID provided
-   * @throws [ServerRequestFailedException] when request fails
    * @throws [InvalidResponseException] when JSON response is malformed
    */
   @Suppress("ThrowsCount")
@@ -151,7 +149,6 @@ internal constructor(
    *
    * @param signedTransaction signed transaction
    * @return transaction as Base64 encoded TransactionEnvelope XDR string
-   * @throws [ServerRequestFailedException] when request fails
    * @throws [MissingTokenException] when request JSON response does not contain `token`
    */
   private suspend fun getToken(signedTransaction: Transaction): AuthToken {

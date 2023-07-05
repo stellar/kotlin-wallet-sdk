@@ -53,6 +53,7 @@ suspend fun Server.accountOrNull(accountAddress: String): AccountResponse? {
  * @return liquidity pool data object
  * @throws [HorizonRequestFailedException] for Horizon exceptions
  */
+@Deprecated("Formatted classes are to be removed")
 suspend fun Server.liquidityPoolInfo(
   liquidityPoolId: LiquidityPoolID,
   cachedAssetInfo: MutableMap<String, CachedAsset>

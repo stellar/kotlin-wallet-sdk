@@ -6,6 +6,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import java.time.Duration
 import java.time.Instant
+import kotlinx.serialization.SerializationException
 import org.stellar.sdk.TimeBounds
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
@@ -13,9 +14,7 @@ import org.stellar.walletsdk.asset.*
 import org.stellar.walletsdk.asset.FIAT_SCHEME
 import org.stellar.walletsdk.asset.STELLAR_SCHEME
 import org.stellar.walletsdk.auth.AuthToken
-import org.stellar.walletsdk.exception.AnchorInteractiveFlowNotSupported
-import org.stellar.walletsdk.exception.IncorrectTransactionStatusException
-import org.stellar.walletsdk.exception.InvalidJsonException
+import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.fromJson
 import org.stellar.walletsdk.toml.TomlInfo
 
@@ -50,7 +49,7 @@ internal object Util {
         }
         .bodyAsText()
 
-    return textBody.fromJson()
+    return textBody.fromJsonOrError()
   }
 
   internal suspend inline fun <reified Req, reified Resp> HttpClient.postJson(
@@ -70,7 +69,7 @@ internal object Util {
         }
         .bodyAsText()
 
-    return result.fromJson()
+    return result.fromJsonOrError()
   }
 
   internal suspend inline fun <reified Req, reified Resp> HttpClient.putJson(
@@ -90,7 +89,7 @@ internal object Util {
         }
         .bodyAsText()
 
-    return result.fromJson()
+    return result.fromJsonOrError()
   }
 
   internal suspend inline fun HttpClient.authDelete(
@@ -109,6 +108,19 @@ internal object Util {
         }
       }
     return response.status
+  }
+
+  private inline fun <reified T> String.fromJsonOrError(): T {
+    return try {
+      this.fromJson()
+    } catch (e: SerializationException) {
+      try {
+        val error = this.fromJson<AnchorErrorResponse>()
+        throw AnchorRequestException(error.error, e)
+      } catch (ignored: SerializationException) {}
+
+      throw AnchorRequestException("Failed to deserialize string: $this", e)
+    }
   }
 }
 

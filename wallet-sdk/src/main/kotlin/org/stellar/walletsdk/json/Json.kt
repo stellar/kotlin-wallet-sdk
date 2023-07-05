@@ -22,12 +22,3 @@ internal inline fun <reified T> Response.toJson(format: Json = defaultJson): T {
 internal inline fun <reified T : Any> T.toJson(format: Json = defaultJson): String {
   return format.encodeToString(this)
 }
-
-@Suppress("SwallowedException", "TooGenericExceptionCaught")
-internal inline fun <reified T> Response.toJsonOrNull(format: Json = defaultJson): T? {
-  return try {
-    this.toJson<T>(format)
-  } catch (e: Exception) {
-    null
-  }
-}

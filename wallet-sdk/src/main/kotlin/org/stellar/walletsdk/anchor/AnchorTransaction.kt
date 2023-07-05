@@ -6,7 +6,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.serializers.InstantIso8601Serializer
 import kotlinx.serialization.*
 import org.stellar.walletsdk.horizon.PublicKeyPair
-import org.stellar.walletsdk.json.AccountAsStringSerializer
 import org.stellar.walletsdk.json.AnchorTransactionSerializer
 import org.stellar.walletsdk.json.NullableAccountAsStringSerializer
 
@@ -81,7 +80,7 @@ data class WithdrawalTransaction(
   @SerialName("external_transaction_id") override val externalTransactionId: String? = null,
   override val message: String? = null,
   override val refunds: Refunds? = null,
-  @Serializable(with = AccountAsStringSerializer::class) val from: PublicKeyPair,
+  val from: PublicKeyPair? = null,
   val to: PublicKeyPair? = null,
   @SerialName("withdraw_memo") val withdrawalMemo: String? = null,
   @SerialName("withdraw_memo_type") val withdrawalMemoType: MemoType,

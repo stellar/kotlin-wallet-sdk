@@ -25,6 +25,7 @@ import org.stellar.walletsdk.extension.reservedBalance
  * @return formatted account balances
  */
 @Suppress("LongMethod")
+@Deprecated("Formatted classes are to be removed")
 suspend fun formatAccountBalances(account: AccountResponse, server: Server): FormattedBalances {
   val cachedAssetTomlInfo = mutableMapOf<String, CachedAsset>()
 
@@ -140,6 +141,7 @@ suspend fun formatAccountBalances(account: AccountResponse, server: Server): For
  * @return formatted operation
  */
 @Suppress("ReturnCount")
+@Deprecated("Formatted classes are to be removed")
 fun formatStellarOperation(
   accountAddress: String,
   operation: OperationResponse
@@ -216,6 +218,7 @@ fun formatStellarOperation(
  *
  * @param T type of operation or transaction
  */
+@Deprecated("Formatted classes are to be removed")
 internal class WalletOperationBuilder<T : Any> {
   lateinit var id: String
   lateinit var date: String

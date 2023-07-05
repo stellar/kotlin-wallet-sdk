@@ -91,7 +91,6 @@ internal constructor(
    *
    * @param config: [RecoverableWalletConfig]
    * @return transaction
-   * @throws [ServerRequestFailedException] when request fails
    * @throws [RecoveryException] when error happens working with recovery servers
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
