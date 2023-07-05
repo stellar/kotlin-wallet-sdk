@@ -3,9 +3,7 @@ package org.stellar.example.exampleAnchor01
 
 import io.ktor.http.Url
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.anchor.AnchorServiceInfo
-import org.stellar.walletsdk.anchor.AnchorTransaction
-import org.stellar.walletsdk.anchor.MemoType
+import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.toml.TomlInfo
@@ -57,6 +55,36 @@ suspend fun anchorTransaction(): AnchorTransaction {
 
 suspend fun accountHistory(): List<AnchorTransaction> {
   return anchor.getHistory(asset, getAuthToken())
+}
+
+suspend fun watchTransaction() {
+  val watcher = anchor.watcher()
+  val result = watcher.watchOneTransaction(getAuthToken(), "transaction id")
+
+  do {
+    val event = result.channel.receive()
+    when (event) {
+      is StatusChange ->
+        println("Status changed to ${event.status}. Transaction: ${event.transaction}")
+      is ChannelClosed -> println("Channel closed. Job is done")
+      is ExceptionHandlerExit -> println("Exception handler exited the job")
+    }
+  } while (event !is ChannelClosed)
+}
+
+suspend fun watchAsset() {
+  val watcher = anchor.watcher()
+  val result = watcher.watchAsset(getAuthToken(), asset)
+  
+  do {
+    val event = result.channel.receive()
+    when (event) {
+      is StatusChange ->
+        println("Status changed to ${event.status}. Transaction: ${event.transaction}")
+      is ChannelClosed -> println("Channel closed. Job is done")
+      is ExceptionHandlerExit -> println("Exception handler exited the job")
+    }
+  } while (event !is ChannelClosed)
 }
 suspend fun main() {
   val anchorInfo = anchorToml()

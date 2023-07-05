@@ -1,12 +1,9 @@
 package org.stellar.example
 
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
+import kotlinx.datetime.Instant
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.Wallet
-import org.stellar.walletsdk.anchor.AnchorTransaction
-import org.stellar.walletsdk.anchor.TransactionStatus
-import org.stellar.walletsdk.anchor.WithdrawalTransaction
+import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
@@ -25,6 +22,7 @@ private val USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEV
 private val asset = USDC
 private const val DOMAIN = "testanchor.stellar.org"
 
+@Suppress("LongMethod", "TooGenericExceptionThrown")
 suspend fun main() {
   val wallet = Wallet(StellarConfiguration.Testnet)
 
@@ -73,20 +71,23 @@ suspend fun main() {
 
   println("Waiting for tokens...")
 
-  var status: TransactionStatus? = null
+  val depositWatcher =
+    anchor.watcher().watchAsset(token, USDC, since = Instant.fromEpochMilliseconds(0))
 
-  // Optional step: wait for token to appear on user account
   do {
-    // Get transaction info
-    val transaction = anchor.getTransaction(deposit.id, token)
+    val statusChange = depositWatcher.channel.receive()
 
-    if (status != transaction.status) {
-      status = transaction.status
-      println("Deposit transaction status changed to $status. Message: ${transaction.message}")
+    when (statusChange) {
+      is StatusChange ->
+        println(
+          "Transaction status changed from ${statusChange.oldStatus ?: "none"} to ${statusChange.status}. " +
+            "Message: ${statusChange.transaction.message}"
+        )
+      is ChannelClosed -> println("Transaction tracking finished")
+      is ExceptionHandlerExit ->
+        println("Retries exhausted trying obtain transaction data, giving up.")
     }
-
-    delay(5.seconds)
-  } while (transaction.status != TransactionStatus.COMPLETED)
+  } while (statusChange !is ChannelClosed)
 
   println("Successful deposit")
 
@@ -96,19 +97,19 @@ suspend fun main() {
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
 
-  var transaction: AnchorTransaction
-
-  status = null
+  val withdrawalWatcher = anchor.watcher().watchOneTransaction(token, withdrawal.id)
+  var statusChange: StatusUpdateEvent
 
   // Wait for user input
   do {
-    // Get transaction info
-    transaction = anchor.getTransaction(withdrawal.id, token)
-    delay(5.seconds)
-  } while (transaction.status != TransactionStatus.PENDING_USER_TRANSFER_START)
+    statusChange = withdrawalWatcher.channel.receive()
+  } while (
+    ((statusChange as? StatusChange) ?: throw Exception("Channel unexpectedly closed")).status !=
+      TransactionStatus.PENDING_USER_TRANSFER_START
+  )
 
   // Send transaction with transfer
-  val t = (transaction as WithdrawalTransaction)
+  val t = (statusChange.transaction as WithdrawalTransaction)
   val transfer = stellar.transaction(keypair).transferWithdrawalTransaction(t, asset).build()
 
   transfer.sign(keypair)
@@ -116,15 +117,19 @@ suspend fun main() {
   stellar.submitTransaction(transfer)
 
   do {
-    transaction = anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction
+    statusChange = withdrawalWatcher.channel.receive()
 
-    if (status != transaction.status) {
-      status = transaction.status
-      println("Withdrawal transaction status changed to $status. Message: ${transaction.message}")
+    when (statusChange) {
+      is StatusChange ->
+        println(
+          "Withdrawal transaction status changed to ${statusChange.status}. " +
+            "Message: ${statusChange.transaction.message}"
+        )
+      is ChannelClosed -> println("Transaction tracking finished")
+      is ExceptionHandlerExit ->
+        println("Retries exhausted trying obtain transaction data, giving up.")
     }
-
-    delay(5.seconds)
-  } while (transaction.status != TransactionStatus.COMPLETED)
+  } while (statusChange !is ChannelClosed)
 
   println("Successful withdrawal")
 

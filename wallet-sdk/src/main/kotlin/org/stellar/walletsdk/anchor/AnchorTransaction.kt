@@ -110,7 +110,7 @@ data class IncompleteDepositTransaction(
 @Serializable
 data class ErrorTransaction(
   override val id: String,
-  val kind: String,
+  val kind: TransactionKind,
   override val status: TransactionStatus,
   @SerialName("more_info_url") override val moreInfoUrl: String,
   @SerialName("started_at") override val startedAt: Instant,
@@ -138,3 +138,8 @@ data class ErrorTransaction(
   @SerialName("withdraw_memo_type") val withdrawalMemoType: MemoType? = null,
   @SerialName("withdraw_anchor_account") val withdrawAnchorAccount: String? = null
 ) : AnchorTransaction
+
+enum class TransactionKind {
+  @SerialName("deposit") DEPOSIT,
+  @SerialName("withdrawal") WITHDRAWAL
+}

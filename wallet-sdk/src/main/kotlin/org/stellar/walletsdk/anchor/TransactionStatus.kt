@@ -75,5 +75,28 @@ enum class TransactionStatus {
   @SerialName("too_large") TOO_LARGE,
 
   /** Catch-all for any error not enumerated above. */
-  @SerialName("error") ERROR
+  @SerialName("error") ERROR;
+
+  fun isTerminal(): Boolean {
+    return terminalStatuses.contains(this)
+  }
+
+  fun isError(): Boolean {
+    return errorStatuses.contains(this)
+  }
 }
+
+private val errorStatuses =
+  setOf(
+    TransactionStatus.ERROR,
+    TransactionStatus.NO_MARKET,
+    TransactionStatus.TOO_LARGE,
+    TransactionStatus.TOO_SMALL
+  )
+
+private val terminalStatuses =
+  setOf(
+    TransactionStatus.COMPLETED,
+    TransactionStatus.REFUNDED,
+    TransactionStatus.EXPIRED,
+  ) + errorStatuses
