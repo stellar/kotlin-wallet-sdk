@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import org.stellar.sdk.requests.RequestBuilder
 import org.stellar.walletsdk.asset.AssetId
 
+@Deprecated("Formatted classes are to be removed")
 data class AccountInfo(
   val publicKey: String,
   val assets: List<FormattedAsset>,
@@ -20,6 +21,7 @@ data class AccountInfo(
  */
 data class AccountThreshold(val low: Int, val medium: Int, val high: Int)
 
+@Deprecated("Formatted classes are to be removed")
 enum class AssetType(val type: String) {
   NATIVE("native"),
   ALPHANUM_4("credit_alphanum4"),
@@ -27,6 +29,7 @@ enum class AssetType(val type: String) {
   LIQUIDITY_POOL("liquidity_pool_shares")
 }
 
+@Deprecated("Formatted classes are to be removed")
 data class CachedAsset(
   val id: String,
   val homeDomain: String?,
@@ -35,6 +38,7 @@ data class CachedAsset(
   val amount: String?
 )
 
+@Deprecated("Formatted classes are to be removed")
 data class FormattedAsset(
   val id: String,
   val homeDomain: String?,
@@ -48,11 +52,13 @@ data class FormattedAsset(
   val sellingLiabilities: String
 )
 
+@Deprecated("Formatted classes are to be removed")
 data class FormattedBalances(
   val assets: MutableList<FormattedAsset>,
   val liquidityPools: MutableList<FormattedLiquidityPool>
 )
 
+@Deprecated("Formatted classes are to be removed")
 data class FormattedLiquidityPool(
   val id: String,
   val balance: String,
@@ -73,12 +79,14 @@ enum class Order(internal val builderEnum: RequestBuilder.Order) {
   DESC(RequestBuilder.Order.DESC)
 }
 
+@Deprecated("Formatted classes are to be removed")
 data class LiquidityPoolInfo(
   val totalTrustlines: Long,
   val totalShares: String,
   val reserves: MutableList<LiquidityPoolReserve>
 )
 
+@Deprecated("Formatted classes are to be removed")
 data class LiquidityPoolReserve(
   val id: String,
   val assetCode: String,
@@ -89,6 +97,7 @@ data class LiquidityPoolReserve(
   val amount: String,
 )
 
+@Deprecated("Formatted classes are to be removed")
 data class NativeAssetDefault(
   val id: String,
   val homeDomain: String?,
@@ -98,6 +107,10 @@ data class NativeAssetDefault(
   val assetIssuer: String,
 )
 
+@Deprecated(
+  "Formatted classes are to be removed. Use rawOperation instead",
+  replaceWith = ReplaceWith("this.rawOperation")
+)
 data class WalletOperation<T>(
   val id: String,
   val date: String,
@@ -108,6 +121,7 @@ data class WalletOperation<T>(
   val rawOperation: T,
 )
 
+@Deprecated("Formatted classes are to be removed")
 enum class WalletOperationType {
   SEND,
   RECEIVE,
