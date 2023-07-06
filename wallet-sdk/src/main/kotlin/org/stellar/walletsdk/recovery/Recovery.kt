@@ -7,8 +7,8 @@ import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountThreshold
 import org.stellar.walletsdk.Config
-import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
+import org.stellar.walletsdk.auth.Sep10
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.AccountKeyPair
@@ -62,9 +62,9 @@ internal constructor(
    *
    * @return auth object
    */
-  fun sep10Auth(key: RecoveryServerKey): Auth {
+  fun sep10Auth(key: RecoveryServerKey): Sep10 {
     val server = servers.getServer(key)
-    return Auth(cfg, server.authEndpoint, server.homeDomain, client)
+    return Sep10(cfg, server.authEndpoint, server.homeDomain, client)
   }
 
   private fun getLatestRecoverySigner(signers: List<RecoveryAccountSigner>): String {

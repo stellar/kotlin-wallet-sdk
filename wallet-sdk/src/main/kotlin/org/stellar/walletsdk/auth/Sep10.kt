@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger {}
  * Authenticate to an external server using
  * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
  */
-class Auth
+class Sep10
 internal constructor(
   private val cfg: Config,
   private val webAuthEndpoint: String,
@@ -31,7 +31,7 @@ internal constructor(
    * Authenticates to an external server.
    *
    * @param accountAddress Stellar address of the account authenticating
-   * @param walletSigner overriding [Auth.defaultSigner] to use in this authentication
+   * @param walletSigner overriding [Sep10.defaultSigner] to use in this authentication
    * @param memoId optional memo ID to distinguish the account
    * @param clientDomain optional domain hosting stellar.toml file containing `SIGNING_KEY`
    * @return authentication token (JWT)

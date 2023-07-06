@@ -8,9 +8,9 @@ import kotlinx.datetime.Instant
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
-import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
-import org.stellar.walletsdk.customer.Customer
+import org.stellar.walletsdk.auth.Sep10
+import org.stellar.walletsdk.customer.Sep12
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.toml.TomlInfo
@@ -31,7 +31,7 @@ internal constructor(
    *
    * @return TOML file content
    */
-  suspend fun getInfo(): TomlInfo {
+  suspend fun sep1(): TomlInfo {
     return infoHolder.getInfo()
   }
 
@@ -41,10 +41,10 @@ internal constructor(
    * @return auth object
    * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
    */
-  suspend fun auth(): Auth {
-    return Auth(
+  suspend fun sep10(): Sep10 {
+    return Sep10(
       cfg,
-      getInfo().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
+      sep1().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
       // Strip protocol
       baseUrl.toString().replace("${baseUrl.protocol.name}://", ""),
       httpClient
@@ -56,10 +56,10 @@ internal constructor(
    *
    * @return customer object
    */
-  suspend fun customer(token: AuthToken): Customer {
-    val kycServer = getInfo().services.sep12?.kycServer ?: throw KYCServerNotFoundException()
+  suspend fun sep12(token: AuthToken): Sep12 {
+    val kycServer = sep1().services.sep12?.kycServer ?: throw KYCServerNotFoundException()
 
-    return Customer(token, kycServer, httpClient)
+    return Sep12(token, kycServer, httpClient)
   }
 
   /**
@@ -67,8 +67,8 @@ internal constructor(
    *
    * @return interactive flow service
    */
-  fun interactive(): Interactive {
-    return Interactive(this, httpClient)
+  fun sep24(): Sep24 {
+    return Sep24(this, httpClient)
   }
 
   /**
@@ -84,7 +84,7 @@ internal constructor(
     ReplaceWith("interactive().getTransaction(transactionId, authToken)")
   )
   suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
-    return interactive().getTransaction(transactionId, authToken)
+    return sep24().getTransaction(transactionId, authToken)
   }
 
   /**
@@ -111,7 +111,7 @@ internal constructor(
     externalTransactionId: String? = null,
     lang: String? = null
   ): AnchorTransaction {
-    return interactive()
+    return sep24()
       .getTransactionBy(authToken, id, stellarTransactionId, externalTransactionId, lang)
   }
 
@@ -145,7 +145,7 @@ internal constructor(
     pagingId: String? = null,
     lang: String? = null
   ): List<AnchorTransaction> {
-    return interactive()
+    return sep24()
       .getTransactionsForAsset(asset, authToken, noOlderThan, limit, kind, pagingId, lang)
   }
 
@@ -162,28 +162,31 @@ internal constructor(
     noOlderThan: String? = null,
     lang: String? = null
   ): List<AnchorTransaction> {
-    return interactive().getHistory(assetId, authToken, limit, pagingId, noOlderThan, lang)
-  }
-
-  private suspend inline fun <reified T> get(
-    authToken: AuthToken? = null,
-    urlBlock: URLBuilder.() -> Unit = {},
-  ): T {
-    return httpClient.anchorGet(getInfo(), authToken, urlBlock)
+    return sep24().getHistory(assetId, authToken, limit, pagingId, noOlderThan, lang)
   }
 }
 
-suspend fun Anchor.sep12(authToken: AuthToken): Sep12 {
-  return this.customer(authToken)
+typealias Auth = Sep10
+
+typealias Customer = Sep12
+
+typealias Interactive = Sep24
+
+suspend fun Anchor.getInfo(): TomlInfo {
+  return this.sep1()
 }
 
-fun Anchor.sep24(): Sep24 {
-  return this.interactive()
+suspend fun Anchor.auth(): Auth {
+  return this.sep10()
 }
 
-typealias Sep24 = Interactive
+suspend fun Anchor.customer(authToken: AuthToken): Customer {
+  return this.sep12(authToken)
+}
 
-typealias Sep12 = Customer
+fun Anchor.interactive(): Interactive {
+  return this.sep24()
+}
 
 internal class InfoHolder(
   private val network: Network,

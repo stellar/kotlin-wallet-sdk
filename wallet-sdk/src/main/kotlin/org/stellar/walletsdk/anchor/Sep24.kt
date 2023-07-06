@@ -20,7 +20,7 @@ import org.stellar.walletsdk.util.Util.anchorGet
 private val log = KotlinLogging.logger {}
 
 /** Interactive flow for deposit and withdrawal using SEP-24. */
-class Interactive
+class Sep24
 internal constructor(
   internal val anchor: Anchor,
   internal val httpClient: HttpClient,
@@ -230,7 +230,7 @@ internal constructor(
     noOlderThan: String? = null,
     lang: String? = null
   ): List<AnchorTransaction> {
-    if (anchor.getInfo().currencies?.find { it.assetId == assetId } == null) {
+    if (anchor.sep1().currencies?.find { it.assetId == assetId } == null) {
       throw AssetNotSupportedException(assetId)
     }
 
@@ -263,6 +263,6 @@ internal constructor(
     authToken: AuthToken? = null,
     urlBlock: URLBuilder.() -> Unit = {},
   ): T {
-    return httpClient.anchorGet(anchor.getInfo(), authToken, urlBlock)
+    return httpClient.anchorGet(anchor.sep1(), authToken, urlBlock)
   }
 }

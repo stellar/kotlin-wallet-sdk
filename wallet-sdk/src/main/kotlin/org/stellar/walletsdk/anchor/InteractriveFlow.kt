@@ -29,7 +29,7 @@ private val log = KotlinLogging.logger {}
  * [documentation](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md#request)
  */
 @Suppress("LongParameterList", "ThrowsCount", "TooGenericExceptionCaught", "SwallowedException")
-internal suspend fun Interactive.flow(
+internal suspend fun Sep24.flow(
   assetId: StellarAssetId,
   authToken: AuthToken,
   extraFields: Map<String, String>?,
@@ -38,7 +38,7 @@ internal suspend fun Interactive.flow(
   type: String,
   assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
 ): InteractiveFlowResponse {
-  val info = anchor.getInfo()
+  val info = anchor.sep1()
 
   // Check if SEP-24 and SEP-10 are configured
   if (info.services.sep24 == null) {

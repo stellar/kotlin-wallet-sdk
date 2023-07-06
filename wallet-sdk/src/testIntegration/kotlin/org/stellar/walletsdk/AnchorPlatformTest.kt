@@ -49,18 +49,18 @@ class AnchorPlatformTest {
   @Test
   @Disabled
   fun `info works`() = runTest {
-    anchor.getInfo()
+    anchor.sep1()
 
-    anchor.interactive().getServicesInfo()
+    anchor.sep24().getServicesInfo()
   }
 
   @Test
   @Disabled
   fun `deposit url works`() = runBlocking {
-    val token = anchor.auth().authenticate(keypair)
+    val token = anchor.sep10().authenticate(keypair)
 
     // Start interactive deposit
-    val deposit = anchor.interactive().deposit(asset, token)
+    val deposit = anchor.sep24().deposit(asset, token)
 
     val transaction = anchor.getTransaction(deposit.id, token)
 
@@ -72,10 +72,10 @@ class AnchorPlatformTest {
   @Test
   @Disabled
   fun `withdrawal url works`() = runBlocking {
-    val token = anchor.auth().authenticate(keypair)
+    val token = anchor.sep10().authenticate(keypair)
 
     // Start interactive withdrawal
-    val withdrawal = anchor.interactive().withdraw(asset, token)
+    val withdrawal = anchor.sep24().withdraw(asset, token)
 
     val transaction = anchor.getTransaction(withdrawal.id, token)
 
@@ -102,7 +102,7 @@ class AnchorPlatformTest {
   @Disabled // TODO: enable using docker
   fun `test SEP-24 deposit`() {
     runBlocking {
-      val token = anchor.auth().authenticate(keypair)
+      val token = anchor.sep10().authenticate(keypair)
 
       val txId = makeDeposit(token)
 
@@ -114,10 +114,10 @@ class AnchorPlatformTest {
   @Disabled // TODO: enable using docker
   fun `test SEP-24 withdrawal`() {
     runBlocking {
-      val token = anchor.auth().authenticate(keypair)
+      val token = anchor.sep10().authenticate(keypair)
 
       // Start interactive withdrawal
-      val withdrawal = anchor.interactive().withdraw(asset, token, mapOf("amount" to "10"))
+      val withdrawal = anchor.sep24().withdraw(asset, token, mapOf("amount" to "10"))
 
       val transaction = anchor.getTransaction(withdrawal.id, token)
 
@@ -162,7 +162,7 @@ class AnchorPlatformTest {
 
     wallet.stellar().submitTransaction(tx)
 
-    val token = anchor.auth().authenticate(newAcc)
+    val token = anchor.sep10().authenticate(newAcc)
     val deposits = (0..5).map { makeDeposit(token, newAcc).also { delay(7.seconds) } }
     deposits.forEach { waitStatus(it, TransactionStatus.COMPLETED, token) }
     val history = anchor.getHistory(USDC, token)
@@ -173,7 +173,7 @@ class AnchorPlatformTest {
   @Test
   @Disabled // TODO: enable using docker
   fun `list by stellar transaction id works`() = runBlocking {
-    val token = anchor.auth().authenticate(keypair)
+    val token = anchor.sep10().authenticate(keypair)
 
     val txId = makeDeposit(token)
 
@@ -191,8 +191,8 @@ class AnchorPlatformTest {
   @Disabled
   fun `manage customer`() {
     runBlocking {
-      val token = anchor.auth().authenticate(keypair)
-      val customer = anchor.customer(token)
+      val token = anchor.sep10().authenticate(keypair)
+      val customer = anchor.sep12(token)
       val testCustomerType = "sep31-receiver"
       val testCustomerAccount = token.principalAccount
       val testCreateSep9Payload =
@@ -252,7 +252,7 @@ class AnchorPlatformTest {
 
   private suspend fun makeDeposit(token: AuthToken, keyPair: SigningKeyPair = keypair): String {
     // Start interactive deposit
-    val deposit = anchor.interactive().deposit(asset, token, mapOf("amount" to "10"))
+    val deposit = anchor.sep24().deposit(asset, token, mapOf("amount" to "10"))
 
     val transaction = anchor.getTransaction(deposit.id, token)
 
