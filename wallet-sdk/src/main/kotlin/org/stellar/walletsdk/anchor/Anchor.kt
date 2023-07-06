@@ -4,25 +4,17 @@ package org.stellar.walletsdk.anchor
 
 import io.ktor.client.*
 import io.ktor.http.*
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.channels.Channel
 import kotlinx.datetime.Instant
-import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.asset.AssetId
-import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.Auth
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.customer.Customer
 import org.stellar.walletsdk.exception.*
-import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.toml.StellarToml
 import org.stellar.walletsdk.toml.TomlInfo
 import org.stellar.walletsdk.util.Util.anchorGet
-
-private val log = KotlinLogging.logger {}
 
 /** Build on/off ramps with anchors. */
 @Suppress("TooManyFunctions")
@@ -87,7 +79,10 @@ internal constructor(
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    */
-  @Deprecated("Use interactive.getTransaction()", ReplaceWith("interactive().getTransaction(transactionId, authToken)"))
+  @Deprecated(
+    "Use interactive.getTransaction()",
+    ReplaceWith("interactive().getTransaction(transactionId, authToken)")
+  )
   suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
     return interactive().getTransaction(transactionId, authToken)
   }
@@ -103,8 +98,11 @@ internal constructor(
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    */
-  @Deprecated("Use interactive.getTransactionBy()",
-    ReplaceWith("interactive().getTransactionBy(authToken, id, stellarTransactionId, externalTransactionId, lang)")
+  @Deprecated(
+    "Use interactive.getTransactionBy()",
+    ReplaceWith(
+      "interactive().getTransactionBy(authToken, id, stellarTransactionId, externalTransactionId, lang)"
+    )
   )
   suspend fun getTransactionBy(
     authToken: AuthToken,
@@ -113,7 +111,8 @@ internal constructor(
     externalTransactionId: String? = null,
     lang: String? = null
   ): AnchorTransaction {
-    return interactive().getTransactionBy(authToken, id, stellarTransactionId, externalTransactionId, lang)
+    return interactive()
+      .getTransactionBy(authToken, id, stellarTransactionId, externalTransactionId, lang)
   }
 
   /**
@@ -131,8 +130,11 @@ internal constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    */
   @Suppress("LongParameterList")
-  @Deprecated("Use interactive.getTransactionsForAsset()",
-    ReplaceWith("interactive().getTransactionsForAsset(asset, authToken, noOlderThan, limit, kind, pagingId, lang)")
+  @Deprecated(
+    "Use interactive.getTransactionsForAsset()",
+    ReplaceWith(
+      "interactive().getTransactionsForAsset(asset, authToken, noOlderThan, limit, kind, pagingId, lang)"
+    )
   )
   suspend fun getTransactionsForAsset(
     asset: AssetId,
@@ -143,10 +145,12 @@ internal constructor(
     pagingId: String? = null,
     lang: String? = null
   ): List<AnchorTransaction> {
-    return interactive().getTransactionsForAsset(asset, authToken, noOlderThan, limit, kind, pagingId, lang)
+    return interactive()
+      .getTransactionsForAsset(asset, authToken, noOlderThan, limit, kind, pagingId, lang)
   }
 
-  @Deprecated("Use interactive.getHistory()",
+  @Deprecated(
+    "Use interactive.getHistory()",
     ReplaceWith("interactive().getHistory(assetId, authToken, limit, pagingId, noOlderThan, lang)")
   )
   @Suppress("LongParameterList")

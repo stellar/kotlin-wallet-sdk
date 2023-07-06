@@ -51,7 +51,7 @@ class AnchorPlatformTest {
   fun `info works`() = runTest {
     anchor.getInfo()
 
-    anchor.getServicesInfo()
+    anchor.interactive().getServicesInfo()
   }
 
   @Test

@@ -7,7 +7,7 @@ object Info {
     val info = anchor.getInfo()
 
     // Get SEP-24 info
-    val servicesInfo = anchor.getServicesInfo()
+    val servicesInfo = anchor.interactive().getServicesInfo()
 
     println("Info from anchor server: $info")
     println("SEP-24 info from anchor server: $servicesInfo")

@@ -2,11 +2,11 @@ package org.stellar.walletsdk.anchor
 
 import io.ktor.client.*
 import io.ktor.http.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
 import kotlinx.datetime.Instant
-import kotlin.io.encoding.Base64
 import mu.KotlinLogging
-import okhttp3.internal.toImmutableMap
 import org.stellar.walletsdk.InteractiveFlowResponse
 import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.asset.IssuedAssetId
@@ -16,9 +16,6 @@ import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.Util.anchorGet
-import org.stellar.walletsdk.util.Util.postJson
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 private val log = KotlinLogging.logger {}
 
@@ -123,9 +120,9 @@ internal constructor(
    */
   suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
     return get<AnchorTransactionStatusResponse>(authToken) {
-      appendPathSegments("transaction")
-      parameters.append("id", transactionId)
-    }
+        appendPathSegments("transaction")
+        parameters.append("id", transactionId)
+      }
       .transaction
   }
 
@@ -154,16 +151,16 @@ internal constructor(
     }
 
     return get<AnchorTransactionStatusResponse>(authToken) {
-      appendPathSegments("transaction")
-      id?.apply { parameters.append("id", id) }
-      stellarTransactionId?.apply {
-        parameters.append("stellar_transaction_id", stellarTransactionId)
+        appendPathSegments("transaction")
+        id?.apply { parameters.append("id", id) }
+        stellarTransactionId?.apply {
+          parameters.append("stellar_transaction_id", stellarTransactionId)
+        }
+        externalTransactionId?.apply {
+          parameters.append("external_transaction_id", externalTransactionId)
+        }
+        lang?.apply { parameters.append("lang", lang) }
       }
-      externalTransactionId?.apply {
-        parameters.append("external_transaction_id", externalTransactionId)
-      }
-      lang?.apply { parameters.append("lang", lang) }
-    }
       .transaction
   }
 
@@ -192,21 +189,21 @@ internal constructor(
     lang: String? = null
   ): List<AnchorTransaction> {
     return get<AnchorAllTransactionsResponse>(authToken) {
-      appendPathSegments("transactions")
+        appendPathSegments("transactions")
 
-      val code =
-        when (asset) {
-          is IssuedAssetId -> asset.code
-          else -> asset.id
-        }
-      parameters.append("asset_code", code)
+        val code =
+          when (asset) {
+            is IssuedAssetId -> asset.code
+            else -> asset.id
+          }
+        parameters.append("asset_code", code)
 
-      noOlderThan?.run { parameters.append("no_longer_than", noOlderThan.toJson()) }
-      limit?.run { parameters.append("limit", limit.toString()) }
-      kind?.run { parameters.append("kind", kind.toString()) }
-      pagingId?.run { parameters.append("paging_id", pagingId.toString()) }
-      lang?.run { parameters.append("lang", lang.toString()) }
-    }
+        noOlderThan?.run { parameters.append("no_longer_than", noOlderThan.toJson()) }
+        limit?.run { parameters.append("limit", limit.toString()) }
+        kind?.run { parameters.append("kind", kind.toString()) }
+        pagingId?.run { parameters.append("paging_id", pagingId.toString()) }
+        lang?.run { parameters.append("lang", lang.toString()) }
+      }
       .transactions
   }
 
@@ -249,8 +246,8 @@ internal constructor(
 
     log.debug {
       "Anchor account's formatted history request: asset = $assetId, authToken = " +
-              "${authToken.prettify()}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
-              "lang = $lang"
+        "${authToken.prettify()}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
+        "lang = $lang"
     }
 
     val resp: AnchorAllTransactionsResponse =
