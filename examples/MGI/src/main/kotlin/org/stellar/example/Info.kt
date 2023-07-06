@@ -1,5 +1,8 @@
 package org.stellar.example
 
+import org.stellar.walletsdk.anchor.getInfo
+import org.stellar.walletsdk.anchor.interactive
+
 object Info {
   @JvmStatic
   suspend fun main() {
