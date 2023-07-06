@@ -22,7 +22,7 @@ suspend fun getAuthToken(): AuthToken {
 }
 
 suspend fun getAnchorServices(): AnchorServiceInfo {
-  return anchor.getServicesInfo()
+  return anchor.interactive().getServicesInfo()
 }
 
 val asset = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")

@@ -593,7 +593,7 @@ fees, payment methods.
 
 ```kotlin
 suspend fun getAnchorServices(): AnchorServiceInfo {
-  return anchor.getServicesInfo()
+  return anchor.interactive().getServicesInfo()
 }
 ```
 

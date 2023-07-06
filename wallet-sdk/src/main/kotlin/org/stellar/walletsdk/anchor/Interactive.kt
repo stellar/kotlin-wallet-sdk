@@ -77,6 +77,17 @@ internal constructor(
   }
 
   /**
+   * Available anchor services and information about them. For example, limits, currency, fees,
+   * payment methods.
+   *
+   * @return a list of available anchor services
+   * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
+   */
+  suspend fun getServicesInfo(): AnchorServiceInfo {
+    return anchor.infoHolder.getServicesInfo()
+  }
+
+  /**
    * TODO: there should be a custom serializer Signature of method:
    * ```kotlin
    * fun flow(
@@ -109,7 +120,7 @@ internal constructor(
       throw AnchorAuthNotSupported
     }
 
-    val serviceInfo = anchor.getServicesInfo()
+    val serviceInfo = getServicesInfo()
 
     // Check if deposit/withdraw is enabled for the asset
 

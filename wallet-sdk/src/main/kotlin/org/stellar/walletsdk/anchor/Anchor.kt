@@ -32,7 +32,7 @@ internal constructor(
   private val baseUrl: Url,
   private val httpClient: HttpClient
 ) {
-  private val infoHolder = InfoHolder(cfg.stellar.network, baseUrl, httpClient)
+  internal val infoHolder = InfoHolder(cfg.stellar.network, baseUrl, httpClient)
 
   /**
    * Get anchor information from a TOML file.
@@ -68,17 +68,6 @@ internal constructor(
     val kycServer = getInfo().services.sep12?.kycServer ?: throw KYCServerNotFoundException()
 
     return Customer(token, kycServer, httpClient)
-  }
-
-  /**
-   * Available anchor services and information about them. For example, limits, currency, fees,
-   * payment methods.
-   *
-   * @return a list of available anchor services
-   * @throws [InvalidAnchorServiceUrl] if provided service URL is not a valid URL
-   */
-  suspend fun getServicesInfo(): AnchorServiceInfo {
-    return infoHolder.getServicesInfo()
   }
 
   /**
@@ -266,13 +255,19 @@ internal constructor(
   }
 }
 
+suspend fun Anchor.sep12(authToken: AuthToken): Sep12 {
+  return this.customer(authToken)
+}
+
 fun Anchor.sep24(): Sep24 {
   return this.interactive()
 }
 
 typealias Sep24 = Interactive
 
-private class InfoHolder(
+typealias Sep12 = Customer
+
+internal class InfoHolder(
   private val network: Network,
   private val baseUrl: Url,
   private val httpClient: HttpClient
