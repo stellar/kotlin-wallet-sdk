@@ -651,7 +651,7 @@ suspend fun accountHistory(): List<AnchorTransaction> {
 Watch transaction
 ```kotlin
 suspend fun watchTransaction() {
-  val watcher = anchor.watcher()
+  val watcher = anchor.interactive().watcher()
   val result = watcher.watchOneTransaction(getAuthToken(), "transaction id")
 
   do {
@@ -669,7 +669,7 @@ suspend fun watchTransaction() {
 Watch asset
 ```kotlin
 suspend fun watchAsset() {
-  val watcher = anchor.watcher()
+  val watcher = anchor.interactive().watcher()
   val result = watcher.watchAsset(getAuthToken(), asset)
   
   do {

@@ -80,25 +80,6 @@ internal constructor(
   }
 
   /**
-   * Creates new transaction watcher
-   *
-   * @param pollDelay poll interval in which requests to the Anchor are being made.
-   * @param channelSize size of the Coroutine [Channel]. See
-   *   [channel documentation](https://kotlinlang.org/docs/coroutines-and-channels.html#channels)
-   *   for more info about channel size configuration. Be default, unlimited channel is created.
-   * @param exceptionHandler handler for exceptions. By default, [RetryExceptionHandler] is being
-   *   used.
-   * @return new transaction watcher
-   */
-  fun watcher(
-    pollDelay: Duration = 5.seconds,
-    channelSize: Int = Channel.UNLIMITED,
-    exceptionHandler: WalletExceptionHandler = RetryExceptionHandler()
-  ): Watcher {
-    return Watcher(this, pollDelay, channelSize, exceptionHandler)
-  }
-
-  /**
    * Get single transaction's current status and details.
    *
    * @param transactionId transaction ID
@@ -106,12 +87,9 @@ internal constructor(
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    */
+  @Deprecated("Use interactive.getTransaction()", ReplaceWith("interactive().getTransaction(transactionId, authToken)"))
   suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
-    return get<AnchorTransactionStatusResponse>(authToken) {
-        appendPathSegments("transaction")
-        parameters.append("id", transactionId)
-      }
-      .transaction
+    return interactive().getTransaction(transactionId, authToken)
   }
 
   /**
@@ -125,6 +103,9 @@ internal constructor(
    * @return transaction object
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    */
+  @Deprecated("Use interactive.getTransactionBy()",
+    ReplaceWith("interactive().getTransactionBy(authToken, id, stellarTransactionId, externalTransactionId, lang)")
+  )
   suspend fun getTransactionBy(
     authToken: AuthToken,
     id: String? = null,
@@ -132,24 +113,7 @@ internal constructor(
     externalTransactionId: String? = null,
     lang: String? = null
   ): AnchorTransaction {
-    if (id == null && stellarTransactionId == null && externalTransactionId == null) {
-      throw ValidationException(
-        "One of id, stellarTransactionId or externalTransactionId is required."
-      )
-    }
-
-    return get<AnchorTransactionStatusResponse>(authToken) {
-        appendPathSegments("transaction")
-        id?.apply { parameters.append("id", id) }
-        stellarTransactionId?.apply {
-          parameters.append("stellar_transaction_id", stellarTransactionId)
-        }
-        externalTransactionId?.apply {
-          parameters.append("external_transaction_id", externalTransactionId)
-        }
-        lang?.apply { parameters.append("lang", lang) }
-      }
-      .transaction
+    return interactive().getTransactionBy(authToken, id, stellarTransactionId, externalTransactionId, lang)
   }
 
   /**
@@ -158,7 +122,7 @@ internal constructor(
    * @param asset target asset to query for
    * @param authToken auth token of the account authenticated with the anchor
    * @param noOlderThan The response should contain transactions starting on or after this date &
-   *   time.
+   * time.
    * @param limit The response should contain at most limit transactions
    * @param kind The kind of transaction that is desired
    * @param pagingId The response should contain transactions starting prior to this ID (exclusive)
@@ -167,6 +131,9 @@ internal constructor(
    * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
    */
   @Suppress("LongParameterList")
+  @Deprecated("Use interactive.getTransactionsForAsset()",
+    ReplaceWith("interactive().getTransactionsForAsset(asset, authToken, noOlderThan, limit, kind, pagingId, lang)")
+  )
   suspend fun getTransactionsForAsset(
     asset: AssetId,
     authToken: AuthToken,
@@ -176,39 +143,12 @@ internal constructor(
     pagingId: String? = null,
     lang: String? = null
   ): List<AnchorTransaction> {
-    return get<AnchorAllTransactionsResponse>(authToken) {
-        appendPathSegments("transactions")
-
-        val code =
-          when (asset) {
-            is IssuedAssetId -> asset.code
-            else -> asset.id
-          }
-        parameters.append("asset_code", code)
-
-        noOlderThan?.run { parameters.append("no_longer_than", noOlderThan.toJson()) }
-        limit?.run { parameters.append("limit", limit.toString()) }
-        kind?.run { parameters.append("kind", kind.toString()) }
-        pagingId?.run { parameters.append("paging_id", pagingId.toString()) }
-        lang?.run { parameters.append("lang", lang.toString()) }
-      }
-      .transactions
+    return interactive().getTransactionsForAsset(asset, authToken, noOlderThan, limit, kind, pagingId, lang)
   }
 
-  /**
-   * Get all successfully finished (either completed or refunded) account transactions for specified
-   * asset. Optional field implementation depends on anchor.
-   *
-   * @param authToken auth token of the account authenticated with the anchor
-   * @param assetId asset to make a query for
-   * @param limit optional how many transactions to fetch
-   * @param pagingId optional return transactions prior to this ID
-   * @param noOlderThan optional return transactions starting on or after this date and time
-   * @param lang optional language code specified using
-   *   [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
-   * @return a list of formatted operations
-   * @throws [AssetNotSupportedException] if asset is not supported by the anchor
-   */
+  @Deprecated("Use interactive.getHistory()",
+    ReplaceWith("interactive().getHistory(assetId, authToken, limit, pagingId, noOlderThan, lang)")
+  )
   @Suppress("LongParameterList")
   suspend fun getHistory(
     assetId: AssetId,
@@ -218,33 +158,7 @@ internal constructor(
     noOlderThan: String? = null,
     lang: String? = null
   ): List<AnchorTransaction> {
-    if (getInfo().currencies?.find { it.assetId == assetId } == null) {
-      throw AssetNotSupportedException(assetId)
-    }
-
-    // Add query params
-    val queryParams = mutableMapOf<String, String>()
-    queryParams["asset_code"] = assetId.sep38
-    limit?.run { queryParams["limit"] = this.toString() }
-    pagingId?.run { queryParams["paging_id"] = this }
-    noOlderThan?.run { queryParams["no_older_than"] = this }
-    lang?.run { queryParams["lang"] = this }
-
-    val finalStatusList = listOf(TransactionStatus.COMPLETED, TransactionStatus.REFUNDED)
-
-    log.debug {
-      "Anchor account's formatted history request: asset = $assetId, authToken = " +
-        "${authToken.prettify()}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
-        "lang = $lang"
-    }
-
-    val resp: AnchorAllTransactionsResponse =
-      get(authToken) {
-        appendPathSegments("transactions")
-        queryParams.forEach { parameters.append(it.key, it.value) }
-      }
-
-    return resp.transactions.filter { finalStatusList.contains(it.status) }
+    return interactive().getHistory(assetId, authToken, limit, pagingId, noOlderThan, lang)
   }
 
   private suspend inline fun <reified T> get(

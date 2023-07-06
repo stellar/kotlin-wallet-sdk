@@ -2,24 +2,31 @@ package org.stellar.walletsdk.anchor
 
 import io.ktor.client.*
 import io.ktor.http.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.datetime.Instant
 import kotlin.io.encoding.Base64
 import mu.KotlinLogging
 import okhttp3.internal.toImmutableMap
 import org.stellar.walletsdk.InteractiveFlowResponse
+import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.asset.NativeAssetId
 import org.stellar.walletsdk.asset.StellarAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.json.toJson
+import org.stellar.walletsdk.util.Util.anchorGet
 import org.stellar.walletsdk.util.Util.postJson
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 private val log = KotlinLogging.logger {}
 
 /** Interactive flow for deposit and withdrawal using SEP-24. */
 class Interactive
 internal constructor(
-  private val anchor: Anchor,
-  private val httpClient: HttpClient,
+  internal val anchor: Anchor,
+  internal val httpClient: HttpClient,
 ) {
   /**
    * Initiates interactive withdrawal using
@@ -88,88 +95,177 @@ internal constructor(
   }
 
   /**
-   * TODO: there should be a custom serializer Signature of method:
-   * ```kotlin
-   * fun flow(
-   *  request: InteractiveRequest,
-   *  requestMapper: (InteractiveRequest) -> (Unit) = {},
-   *  extraSEP9: Map<String, String>
-   * )
-   * ```
+   * Creates new transaction watcher
    *
-   * It should regularly encode InteractiveRequest (typed) + append all fields from sep9 (currently
-   * string)
-   * [documentation](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md#request)
+   * @param pollDelay poll interval in which requests to the Anchor are being made.
+   * @param channelSize size of the Coroutine [Channel]. See
+   * [channel documentation](https://kotlinlang.org/docs/coroutines-and-channels.html#channels) for
+   * more info about channel size configuration. Be default, unlimited channel is created.
+   * @param exceptionHandler handler for exceptions. By default, [RetryExceptionHandler] is being
+   * used.
+   * @return new transaction watcher
    */
-  @Suppress("LongParameterList", "ThrowsCount", "TooGenericExceptionCaught", "SwallowedException")
-  private suspend fun flow(
-    assetId: StellarAssetId,
+  fun watcher(
+    pollDelay: Duration = 5.seconds,
+    channelSize: Int = Channel.UNLIMITED,
+    exceptionHandler: WalletExceptionHandler = RetryExceptionHandler()
+  ): Watcher {
+    return Watcher(anchor, pollDelay, channelSize, exceptionHandler)
+  }
+
+  /**
+   * Get single transaction's current status and details.
+   *
+   * @param transactionId transaction ID
+   * @param authToken auth token of the account authenticated with the anchor
+   * @return transaction object
+   * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
+   */
+  suspend fun getTransaction(transactionId: String, authToken: AuthToken): AnchorTransaction {
+    return get<AnchorTransactionStatusResponse>(authToken) {
+      appendPathSegments("transaction")
+      parameters.append("id", transactionId)
+    }
+      .transaction
+  }
+
+  /**
+   * Get single transaction's current status and details. One of the [id], [stellarTransactionId],
+   * [externalTransactionId] must be provided.
+   *
+   * @param id transaction ID
+   * @param stellarTransactionId stellar transaction ID
+   * @param externalTransactionId external transaction ID
+   * @param authToken auth token of the account authenticated with the anchor
+   * @return transaction object
+   * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
+   */
+  suspend fun getTransactionBy(
     authToken: AuthToken,
-    extraFields: Map<String, String>?,
-    account: String?,
-    memo: Pair<String, MemoType>?,
-    type: String,
-    assetGet: (AnchorServiceInfo) -> AnchorServiceAsset?
-  ): InteractiveFlowResponse {
-    val info = anchor.getInfo()
-
-    // Check if SEP-24 and SEP-10 are configured
-    if (info.services.sep24 == null) {
-      throw AnchorInteractiveFlowNotSupported
-    } else if (!info.services.sep24.hasAuth) {
-      throw AnchorAuthNotSupported
+    id: String? = null,
+    stellarTransactionId: String? = null,
+    externalTransactionId: String? = null,
+    lang: String? = null
+  ): AnchorTransaction {
+    if (id == null && stellarTransactionId == null && externalTransactionId == null) {
+      throw ValidationException(
+        "One of id, stellarTransactionId or externalTransactionId is required."
+      )
     }
 
-    val serviceInfo = getServicesInfo()
-
-    // Check if deposit/withdraw is enabled for the asset
-
-    val asset = assetGet(serviceInfo) ?: throw AssetNotAcceptedForDepositException(assetId)
-
-    if (!asset.enabled) {
-      throw AssetNotEnabledForDepositException(assetId)
+    return get<AnchorTransactionStatusResponse>(authToken) {
+      appendPathSegments("transaction")
+      id?.apply { parameters.append("id", id) }
+      stellarTransactionId?.apply {
+        parameters.append("stellar_transaction_id", stellarTransactionId)
+      }
+      externalTransactionId?.apply {
+        parameters.append("external_transaction_id", externalTransactionId)
+      }
+      lang?.apply { parameters.append("lang", lang) }
     }
+      .transaction
+  }
 
-    val requestParams = mutableMapOf<String, String>()
-    account?.run { requestParams["account"] = this }
+  /**
+   * Get all account's transactions by specified asset. See SEP-24 specification for parameters
+   *
+   * @param asset target asset to query for
+   * @param authToken auth token of the account authenticated with the anchor
+   * @param noOlderThan The response should contain transactions starting on or after this date &
+   * time.
+   * @param limit The response should contain at most limit transactions
+   * @param kind The kind of transaction that is desired
+   * @param pagingId The response should contain transactions starting prior to this ID (exclusive)
+   * @param lang Language to use
+   * @return transaction object
+   * @throws [AnchorInteractiveFlowNotSupported] if SEP-24 interactive flow is not configured
+   */
+  @Suppress("LongParameterList")
+  suspend fun getTransactionsForAsset(
+    asset: AssetId,
+    authToken: AuthToken,
+    noOlderThan: Instant? = null,
+    limit: Int? = null,
+    kind: TransactionKind? = null,
+    pagingId: String? = null,
+    lang: String? = null
+  ): List<AnchorTransaction> {
+    return get<AnchorAllTransactionsResponse>(authToken) {
+      appendPathSegments("transactions")
 
-    if (memo != null) {
-      requestParams["memo"] = memo.first
-      requestParams["memo_type"] = memo.second.serialName
-
-      if (memo.second == MemoType.HASH) {
-        try {
-          Base64.decode(memo.first)
-        } catch (e: Exception) {
-          throw ValidationException("Hash memo must be base64 encoded")
+      val code =
+        when (asset) {
+          is IssuedAssetId -> asset.code
+          else -> asset.id
         }
-      }
+      parameters.append("asset_code", code)
+
+      noOlderThan?.run { parameters.append("no_longer_than", noOlderThan.toJson()) }
+      limit?.run { parameters.append("limit", limit.toString()) }
+      kind?.run { parameters.append("kind", kind.toString()) }
+      pagingId?.run { parameters.append("paging_id", pagingId.toString()) }
+      lang?.run { parameters.append("lang", lang.toString()) }
     }
-    when (assetId) {
-      is IssuedAssetId -> {
-        requestParams["asset_code"] = assetId.code
-        requestParams["asset_issuer"] = assetId.issuer
-      }
-      is NativeAssetId -> {
-        requestParams["asset_code"] = NativeAssetId.id
-      }
+      .transactions
+  }
+
+  /**
+   * Get all successfully finished (either completed or refunded) account transactions for specified
+   * asset. Optional field implementation depends on anchor.
+   *
+   * @param authToken auth token of the account authenticated with the anchor
+   * @param assetId asset to make a query for
+   * @param limit optional how many transactions to fetch
+   * @param pagingId optional return transactions prior to this ID
+   * @param noOlderThan optional return transactions starting on or after this date and time
+   * @param lang optional language code specified using
+   * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
+   * @return a list of formatted operations
+   * @throws [AssetNotSupportedException] if asset is not supported by the anchor
+   */
+  @Suppress("LongParameterList")
+  suspend fun getHistory(
+    assetId: AssetId,
+    authToken: AuthToken,
+    limit: Int? = null,
+    pagingId: String? = null,
+    noOlderThan: String? = null,
+    lang: String? = null
+  ): List<AnchorTransaction> {
+    if (anchor.getInfo().currencies?.find { it.assetId == assetId } == null) {
+      throw AssetNotSupportedException(assetId)
     }
 
-    if (extraFields != null) {
-      requestParams += extraFields
-    }
+    // Add query params
+    val queryParams = mutableMapOf<String, String>()
+    queryParams["asset_code"] = assetId.sep38
+    limit?.run { queryParams["limit"] = this.toString() }
+    pagingId?.run { queryParams["paging_id"] = this }
+    noOlderThan?.run { queryParams["no_older_than"] = this }
+    lang?.run { queryParams["lang"] = this }
+
+    val finalStatusList = listOf(TransactionStatus.COMPLETED, TransactionStatus.REFUNDED)
 
     log.debug {
-      "Interactive $type request: account = $account, asset_code = ${requestParams["asset_code"]}"
+      "Anchor account's formatted history request: asset = $assetId, authToken = " +
+              "${authToken.prettify()}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
+              "lang = $lang"
     }
 
-    val url =
-      URLBuilder(info.services.sep24.transferServerSep24)
-        .appendPathSegments("transactions", type, "interactive")
-        .build()
-        .toString()
+    val resp: AnchorAllTransactionsResponse =
+      get(authToken) {
+        appendPathSegments("transactions")
+        queryParams.forEach { parameters.append(it.key, it.value) }
+      }
 
-    // Get SEP-24 anchor response
-    return httpClient.postJson(url, requestParams.toImmutableMap(), authToken)
+    return resp.transactions.filter { finalStatusList.contains(it.status) }
+  }
+
+  private suspend inline fun <reified T> get(
+    authToken: AuthToken? = null,
+    urlBlock: URLBuilder.() -> Unit = {},
+  ): T {
+    return httpClient.anchorGet(anchor.getInfo(), authToken, urlBlock)
   }
 }
