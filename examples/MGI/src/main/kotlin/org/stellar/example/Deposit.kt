@@ -3,6 +3,8 @@ package org.stellar.example
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.walletsdk.anchor.TransactionStatus
+import org.stellar.walletsdk.anchor.auth
+import org.stellar.walletsdk.anchor.interactive
 
 object Deposit {
   @JvmStatic

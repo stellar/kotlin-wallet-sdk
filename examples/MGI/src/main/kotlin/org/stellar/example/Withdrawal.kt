@@ -2,9 +2,7 @@ package org.stellar.example
 
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
-import org.stellar.walletsdk.anchor.AnchorTransaction
-import org.stellar.walletsdk.anchor.TransactionStatus
-import org.stellar.walletsdk.anchor.WithdrawalTransaction
+import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.horizon.sign
 import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
 

@@ -22,7 +22,7 @@ suspend fun getAuthToken(): AuthToken {
 }
 
 suspend fun getAnchorServices(): AnchorServiceInfo {
-  return anchor.getServicesInfo()
+  return anchor.interactive().getServicesInfo()
 }
 
 val asset = IssuedAssetId("SRT", "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B")
@@ -58,7 +58,7 @@ suspend fun accountHistory(): List<AnchorTransaction> {
 }
 
 suspend fun watchTransaction() {
-  val watcher = anchor.watcher()
+  val watcher = anchor.interactive().watcher()
   val result = watcher.watchOneTransaction(getAuthToken(), "transaction id")
 
   do {
@@ -73,7 +73,7 @@ suspend fun watchTransaction() {
 }
 
 suspend fun watchAsset() {
-  val watcher = anchor.watcher()
+  val watcher = anchor.interactive().watcher()
   val result = watcher.watchAsset(getAuthToken(), asset)
   
   do {

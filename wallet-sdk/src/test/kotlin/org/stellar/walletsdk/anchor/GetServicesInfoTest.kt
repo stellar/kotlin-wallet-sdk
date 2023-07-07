@@ -11,6 +11,6 @@ internal class GetServicesInfoTest {
 
   @Test
   fun `fetches info endpoint data`() {
-    runBlocking { wallet.anchor(AUTH_HOME_DOMAIN).getServicesInfo() }
+    runBlocking { wallet.anchor(AUTH_HOME_DOMAIN).interactive().getServicesInfo() }
   }
 }

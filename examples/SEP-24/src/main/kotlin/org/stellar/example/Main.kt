@@ -39,12 +39,13 @@ suspend fun main() {
   stellar.submitTransaction(tx)
 
   val anchor = wallet.anchor("https://$DOMAIN")
+  val sep24 = anchor.interactive()
 
   // Get info from the anchor server
   val info = anchor.getInfo()
 
   // Get SEP-24 info
-  val servicesInfo = anchor.getServicesInfo()
+  val servicesInfo = sep24.getServicesInfo()
 
   println("Info from anchor server: $info")
   println("SEP-24 info from anchor server: $servicesInfo")
@@ -64,7 +65,7 @@ suspend fun main() {
   val sep9 = mapOf("email_address" to "mail@example.com")
 
   // Start interactive deposit
-  val deposit = anchor.interactive().deposit(asset, token, sep9)
+  val deposit = sep24.deposit(asset, token, sep9)
 
   // Request user input
   println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -72,7 +73,7 @@ suspend fun main() {
   println("Waiting for tokens...")
 
   val depositWatcher =
-    anchor.watcher().watchAsset(token, USDC, since = Instant.fromEpochMilliseconds(0))
+    sep24.watcher().watchAsset(token, USDC, since = Instant.fromEpochMilliseconds(0))
 
   do {
     val statusChange = depositWatcher.channel.receive()
@@ -92,12 +93,12 @@ suspend fun main() {
   println("Successful deposit")
 
   // Start interactive withdrawal
-  val withdrawal = anchor.interactive().withdraw(asset, authToken = token)
+  val withdrawal = sep24.withdraw(asset, authToken = token)
 
   // Request user input
   println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
 
-  val withdrawalWatcher = anchor.watcher().watchOneTransaction(token, withdrawal.id)
+  val withdrawalWatcher = sep24.watcher().watchOneTransaction(token, withdrawal.id)
   var statusChange: StatusUpdateEvent
 
   // Wait for user input

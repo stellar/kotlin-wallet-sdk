@@ -593,7 +593,7 @@ fees, payment methods.
 
 ```kotlin
 suspend fun getAnchorServices(): AnchorServiceInfo {
-  return anchor.getServicesInfo()
+  return anchor.interactive().getServicesInfo()
 }
 ```
 
@@ -651,7 +651,7 @@ suspend fun accountHistory(): List<AnchorTransaction> {
 Watch transaction
 ```kotlin
 suspend fun watchTransaction() {
-  val watcher = anchor.watcher()
+  val watcher = anchor.interactive().watcher()
   val result = watcher.watchOneTransaction(getAuthToken(), "transaction id")
 
   do {
@@ -669,7 +669,7 @@ suspend fun watchTransaction() {
 Watch asset
 ```kotlin
 suspend fun watchAsset() {
-  val watcher = anchor.watcher()
+  val watcher = anchor.interactive().watcher()
   val result = watcher.watchAsset(getAuthToken(), asset)
   
   do {
@@ -714,6 +714,7 @@ import kotlinx.serialization.*
 import org.stellar.example.exampleAnchor01.*
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.anchor.auth
 import org.stellar.walletsdk.auth.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 

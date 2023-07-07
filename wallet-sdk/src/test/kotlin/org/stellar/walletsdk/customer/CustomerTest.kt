@@ -12,7 +12,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.walletsdk.*
-import org.stellar.walletsdk.auth.Auth
+import org.stellar.walletsdk.anchor.Auth
+import org.stellar.walletsdk.anchor.Customer
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.json.toJson
 

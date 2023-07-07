@@ -7,6 +7,8 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.stellar.walletsdk.anchor.auth
+import org.stellar.walletsdk.anchor.customer
 import org.stellar.walletsdk.customer.Sep12Status
 import org.stellar.walletsdk.exception.CustomerExceptions
 import org.stellar.walletsdk.horizon.SigningKeyPair

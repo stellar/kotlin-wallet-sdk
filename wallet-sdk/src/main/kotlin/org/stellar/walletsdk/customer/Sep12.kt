@@ -11,7 +11,7 @@ import org.stellar.walletsdk.util.Util.authDelete
 import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.putJson
 
-class Customer
+class Sep12
 internal constructor(
   private val token: AuthToken,
   private val baseUrl: String,

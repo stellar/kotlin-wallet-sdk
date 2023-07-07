@@ -11,6 +11,7 @@ import kotlinx.serialization.*
 import org.stellar.example.exampleAnchor01.*
 import org.stellar.sdk.*
 import org.stellar.walletsdk.*
+import org.stellar.walletsdk.anchor.auth
 import org.stellar.walletsdk.auth.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 
