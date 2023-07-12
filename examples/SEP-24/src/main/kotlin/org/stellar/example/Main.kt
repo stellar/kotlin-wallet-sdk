@@ -110,27 +110,33 @@ suspend fun main() {
   )
 
   // Send transaction with transfer
-  val t = (statusChange.transaction as WithdrawalTransaction)
-  val transfer = stellar.transaction(keypair).transferWithdrawalTransaction(t, asset).build()
+  val anchorTransaction = (statusChange.transaction as WithdrawalTransaction)
+  val transfer = stellar.transaction(keypair).transferWithdrawalTransaction(anchorTransaction, asset).build()
 
   transfer.sign(keypair)
 
   stellar.submitTransaction(transfer)
 
+  var terminalStatus: TransactionStatus? = null
+
   do {
     statusChange = withdrawalWatcher.channel.receive()
 
     when (statusChange) {
-      is StatusChange ->
-        println(
-          "Withdrawal transaction status changed to ${statusChange.status}. " +
-            "Message: ${statusChange.transaction.message}"
-        )
+      is StatusChange -> {
+        if (statusChange.status.isTerminal()) {
+          terminalStatus = statusChange.status
+        }
+      }
       is ChannelClosed -> println("Transaction tracking finished")
       is ExceptionHandlerExit ->
         println("Retries exhausted trying obtain transaction data, giving up.")
     }
   } while (statusChange !is ChannelClosed)
+
+  if (terminalStatus != TransactionStatus.COMPLETED) {
+    println("Transaction was not completed")
+  }
 
   println("Successful withdrawal")
 
