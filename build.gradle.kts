@@ -16,7 +16,7 @@ val jvmVersion = JavaVersion.VERSION_1_8
 
 allprojects {
   group = "org.stellar.wallet-sdk"
-  version = "0.9.0"
+  version = "0.9.1"
 }
 
 subprojects {
