@@ -222,6 +222,7 @@ internal constructor(
    * @throws [AssetNotSupportedException] if asset is not supported by the anchor
    */
   @Suppress("LongParameterList")
+  @Deprecated("Use getTransactionsForAsset instead")
   suspend fun getHistory(
     assetId: AssetId,
     authToken: AuthToken,
