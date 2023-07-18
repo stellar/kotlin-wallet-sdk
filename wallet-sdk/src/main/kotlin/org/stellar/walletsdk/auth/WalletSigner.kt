@@ -14,6 +14,7 @@ import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.PublicKeyPair
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
+import org.stellar.walletsdk.util.Util.postJson
 
 /** Interface to provide wallet signer methods. */
 interface WalletSigner {
@@ -50,7 +51,7 @@ interface WalletSigner {
    * @constructor Create empty Json http signer
    * @property url url to which requests should be made
    * @property requestTransformer optional transformer of the default request. Can be used for
-   * authentication purposes, etc.
+   *   authentication purposes, etc.
    */
   class DomainSigner(val url: String, val requestTransformer: HttpRequestBuilder.() -> Unit = {}) :
     DefaultSigner() {
@@ -68,13 +69,9 @@ interface WalletSigner {
       account: AccountKeyPair
     ): Transaction {
       val response: SigningData =
-        client
-          .post(url) {
-            contentType(ContentType.Application.Json)
-            setBody(SigningData(transactionXDR, networkPassPhrase))
-            requestTransformer()
-          }
-          .body()
+        client.postJson(url, SigningData(transactionXDR, networkPassPhrase)) {
+          requestTransformer()
+        }
 
       return Transaction.fromEnvelopeXdr(response.transaction, Network(networkPassPhrase))
         as Transaction

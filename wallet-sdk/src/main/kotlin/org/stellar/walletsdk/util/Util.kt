@@ -39,7 +39,7 @@ internal object Util {
 
   internal suspend inline fun <reified T> HttpClient.authGet(
     url: String,
-    authToken: AuthToken?,
+    authToken: AuthToken? = null,
   ): T {
     val textBody =
       this.get(url) {
