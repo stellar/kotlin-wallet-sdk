@@ -12,6 +12,7 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
+import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.postJson
 
 private val log = KotlinLogging.logger {}
@@ -91,7 +92,7 @@ internal constructor(
       "Challenge request: account = $account, memo = $memoId, client_domain = $clientDomain"
     }
 
-    val jsonResponse = httpClient.get(url.build()).body<ChallengeResponse>()
+    val jsonResponse = httpClient.authGet<ChallengeResponse>(url.build().toString())
 
     if (jsonResponse.transaction.isBlank()) {
       throw MissingTransactionException
