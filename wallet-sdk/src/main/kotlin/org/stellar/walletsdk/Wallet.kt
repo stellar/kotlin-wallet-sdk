@@ -133,6 +133,7 @@ data class ApplicationConfiguration(
     HttpClient(OkHttp) {
       install(ContentNegotiation) { json(defaultJson) }
       defaultRequest { url { protocol = URLProtocol.HTTPS } }
+      expectSuccess = true
       defaultClientConfig()
     }
 }
