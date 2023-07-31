@@ -5,8 +5,6 @@ import io.ktor.http.*
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.CustomerNotFoundException
 import org.stellar.walletsdk.exception.CustomerUpdateException
-import org.stellar.walletsdk.exception.ErrorOnDeletingCustomerException
-import org.stellar.walletsdk.exception.UnauthorizedCustomerDeletionException
 import org.stellar.walletsdk.util.Util.authDelete
 import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.putJson
@@ -68,7 +66,7 @@ internal constructor(
     urlBuilder.appendPathSegments("customer")
     val urlString = urlBuilder.buildString()
 
-    return httpClient.putJson<Map<String, String>, AddCustomerResponse>(urlString, customer, token)
+    return httpClient.putJson(urlString, customer, token)
   }
 
   /**
@@ -103,7 +101,7 @@ internal constructor(
     urlBuilder.appendPathSegments("customer")
     val urlString = urlBuilder.buildString()
 
-    return httpClient.putJson<Map<String, String>, AddCustomerResponse>(urlString, customer, token)
+    return httpClient.putJson(urlString, customer, token)
   }
 
   /**
@@ -118,16 +116,6 @@ internal constructor(
     urlBuilder.appendPathSegments(customerAccount)
     val urlString = urlBuilder.buildString()
 
-    val statusCode = httpClient.authDelete(urlString, memo, token)
-
-    if (statusCode == HttpStatusCode.Unauthorized || statusCode == HttpStatusCode.Forbidden) {
-      throw UnauthorizedCustomerDeletionException(customerAccount)
-    }
-    if (statusCode == HttpStatusCode.NotFound) {
-      throw CustomerNotFoundException("Customer not found")
-    }
-    if (statusCode != HttpStatusCode.OK) {
-      throw ErrorOnDeletingCustomerException(customerAccount)
-    }
+    httpClient.authDelete(urlString, memo, token)
   }
 }
