@@ -12,6 +12,7 @@ import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
 import org.stellar.walletsdk.util.toTimeBounds
+import kotlin.math.min
 
 private val log = KotlinLogging.logger {}
 
@@ -153,6 +154,7 @@ internal constructor(
    * @param baseFeeIncrease amount on which fee will be increased after timeout is reached.
    * @param baseFee base transaction fee. If not specified, [default configuration value]
    * [StellarConfiguration.baseFee] will be used.
+   * @param maxFee maximum allowed fee. Increased fee is limited by this value.
    * @param memo optional transaction memo.
    * @param buildingFunction function that will build the transaction.
    * @return transaction that has been submitted to the network.
@@ -163,6 +165,7 @@ internal constructor(
     timeout: Duration,
     baseFeeIncrease: UInt,
     baseFee: UInt? = null,
+    maxFee: UInt = Integer.MAX_VALUE.toUInt(),
     memo: Pair<MemoType, String>? = null,
     buildingFunction: TransactionBuilder.() -> TransactionBuilder
   ): Transaction {
@@ -171,6 +174,7 @@ internal constructor(
       timeout,
       baseFeeIncrease,
       baseFee,
+      maxFee,
       memo,
       { this.sign(sourceAccount) },
       buildingFunction
@@ -187,6 +191,7 @@ internal constructor(
    * @param baseFeeIncrease amount on which fee will be increased after timeout is reached
    * @param baseFee base transaction fee. If not specified, [default configuration value]
    * [StellarConfiguration.baseFee] will be used
+   * @param maxFee maximum allowed fee. Increased fee is limited by this value.
    * @param memo optional transaction memo
    * @param signerFunction function that will be used to sign the transaction
    * @param buildingFunction function that will build the transaction
@@ -198,6 +203,7 @@ internal constructor(
     timeout: Duration,
     baseFeeIncrease: UInt,
     baseFee: UInt? = null,
+    maxFee: UInt = Integer.MAX_VALUE.toUInt(),
     memo: Pair<MemoType, String>? = null,
     signerFunction: Transaction.() -> Transaction,
     buildingFunction: TransactionBuilder.() -> TransactionBuilder
@@ -211,7 +217,7 @@ internal constructor(
       return transaction
     } catch (e: TransactionSubmitFailedException) {
       if (e.transactionResultCode == "tx_too_late") {
-        val newFee = transaction.fee.toUInt() + baseFeeIncrease
+        val newFee = min(maxFee, transaction.fee.toUInt() + baseFeeIncrease)
         log.info {
           "Transaction ${transaction.hashHex()} has expired. Increasing fee to $newFee Stroops."
         }
@@ -220,6 +226,7 @@ internal constructor(
           timeout,
           baseFeeIncrease,
           newFee,
+          maxFee,
           memo,
           signerFunction,
           buildingFunction
