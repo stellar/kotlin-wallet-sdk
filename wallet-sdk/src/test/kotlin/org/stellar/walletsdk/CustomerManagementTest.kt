@@ -1,5 +1,6 @@
 package org.stellar.walletsdk
 
+import io.ktor.client.plugins.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.walletsdk.anchor.auth
 import org.stellar.walletsdk.anchor.customer
 import org.stellar.walletsdk.customer.Sep12Status
-import org.stellar.walletsdk.exception.CustomerExceptions
 import org.stellar.walletsdk.horizon.SigningKeyPair
 
 class CustomerManagementTest {
@@ -77,8 +77,11 @@ class CustomerManagementTest {
       )
 
       assertDoesNotThrow { runBlocking { customer.delete(testCustomerAccount) } }
-      assertFailsWith<CustomerExceptions> {
+      assertFailsWith<ClientRequestException> {
         runBlocking { customer.getByIdAndType(addCustomerResponse.id, testCustomerType) }
+      }
+      assertFailsWith<ClientRequestException> {
+        runBlocking { customer.delete(testCustomerAccount) }
       }
     }
   }

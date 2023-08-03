@@ -96,18 +96,16 @@ internal object Util {
     url: String,
     memo: String?,
     authToken: AuthToken?,
-  ): HttpStatusCode {
-    val response =
-      this.delete(url) {
-        if (authToken != null) {
-          headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
-        }
-        if (memo != null) {
-          contentType(ContentType.Application.Json)
-          setBody(mapOf("memo" to memo))
-        }
+  ) {
+    this.delete(url) {
+      if (authToken != null) {
+        headers { append(HttpHeaders.Authorization, "Bearer $authToken") }
       }
-    return response.status
+      if (memo != null) {
+        contentType(ContentType.Application.Json)
+        setBody(mapOf("memo" to memo))
+      }
+    }
   }
 
   private inline fun <reified T> String.fromJsonOrError(): T {
