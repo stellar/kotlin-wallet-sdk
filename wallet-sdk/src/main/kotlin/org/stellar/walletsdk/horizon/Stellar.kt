@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.horizon
 
 import java.time.Duration
+import kotlin.math.min
 import mu.KotlinLogging
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
@@ -12,7 +13,6 @@ import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.extension.accountOrNull
 import org.stellar.walletsdk.horizon.transaction.TransactionBuilder
 import org.stellar.walletsdk.util.toTimeBounds
-import kotlin.math.min
 
 private val log = KotlinLogging.logger {}
 
