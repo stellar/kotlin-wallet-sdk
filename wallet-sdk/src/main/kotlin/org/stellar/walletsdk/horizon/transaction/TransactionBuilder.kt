@@ -1,7 +1,6 @@
 package org.stellar.walletsdk.horizon.transaction
 
 import org.stellar.sdk.*
-import org.stellar.sdk.TransactionBuilder as SdkBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.MemoType
@@ -14,6 +13,7 @@ import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.util.*
+import org.stellar.sdk.TransactionBuilder as SdkBuilder
 
 /** Class that allows to construct Stellar transactions, containing one or more operations */
 @Suppress("TooManyFunctions")
@@ -43,11 +43,11 @@ internal constructor(
   }
 
   /**
-   * Add memo to this builder
+   * Set memo to this builder
    *
    * @param memo memo to add
    */
-  fun addMemo(memo: Pair<MemoType, String>): TransactionBuilder {
+  fun setMemo(memo: Pair<MemoType, String>): TransactionBuilder {
     builder.addMemo(memo.first.mapper(memo.second))
     return this
   }
@@ -171,7 +171,7 @@ suspend fun TransactionBuilder.transferWithdrawalTransaction(
 ): TransactionBuilder {
   transaction.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
 
-  return this.addMemo(
+  return this.setMemo(
       transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }
         ?: throw ValidationException("Missing withdrawal_memo in the transaction")
     )
