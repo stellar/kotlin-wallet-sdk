@@ -3,7 +3,7 @@
 coroutines = "1.6.4"
 google-gson = "2.8.9"
 hoplite = "2.7.0"
-java-stellar-sdk = "0.40.0"
+java-stellar-sdk = "release-0.41.0-SNAPSHOT:uber"
 dokka = "1.6.10"
 kotlin = "1.8.20"
 kotlinx-json = "1.5.0"

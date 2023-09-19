@@ -26,7 +26,8 @@ configurations {
 
 dependencies {
   api(libs.coroutines.core)
-  api(libs.java.stellar.sdk)
+  api("com.github.stellar:java-stellar-sdk:release-0.41.0-SNAPSHOT:uber")
+//  api(libs.java.stellar.sdk)
   api(libs.kotlin.datetime)
   api(libs.bundles.ktor.client)
   implementation(libs.kotlin.serialization.json)

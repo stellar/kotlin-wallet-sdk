@@ -1,10 +1,10 @@
 package org.stellar.walletsdk.toml
 
+import com.moandjiezana.toml.Toml
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import shadow.com.moandjiezana.toml.Toml
 
 /**
  * [Stellar info file](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)

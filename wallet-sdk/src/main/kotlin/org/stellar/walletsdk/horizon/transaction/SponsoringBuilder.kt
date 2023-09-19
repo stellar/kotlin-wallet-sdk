@@ -20,7 +20,7 @@ internal constructor(
    * @param startingBalance optional Starting account balance in XLM. Default value is 0.
    * @throws [InvalidSponsoredAccountException]
    */
-  fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt = 0u): SponsoringBuilder =
+  fun createAccount(newAccount: AccountKeyPair, startingBalance: ULong = 0u): SponsoringBuilder =
     building {
       doCreateAccount(newAccount, startingBalance, sponsorAccount.address)
     }

@@ -1,7 +1,7 @@
 package org.stellar.walletsdk.helpers
 
+import com.moandjiezana.toml.Toml
 import java.io.FileReader
-import shadow.com.moandjiezana.toml.Toml
 
 fun mapFromTomlFile(fileName: String): Map<String, Any> {
   val filePath = getFileFromResource(fileName)

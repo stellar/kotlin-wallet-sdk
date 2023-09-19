@@ -118,7 +118,7 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
 
   protected fun doCreateAccount(
     newAccount: AccountKeyPair,
-    startingBalance: UInt,
+    startingBalance: ULong,
     sourceAddress: String
   ): CreateAccountOperation {
     log.debug {

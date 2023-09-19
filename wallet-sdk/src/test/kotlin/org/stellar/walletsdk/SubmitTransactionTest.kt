@@ -103,8 +103,8 @@ internal class SubmitTransactionTest {
       }
 
     val newKeyPair = wallet.stellar().account().createKeyPair()
-    val baseFee = 123U
-    val feeIncrease = 100U
+    val baseFee = 123UL
+    val feeIncrease = 100UL
     val expectedFee = (baseFee + feeIncrease * 2u).toLong()
 
     val transaction = assertDoesNotThrow {
