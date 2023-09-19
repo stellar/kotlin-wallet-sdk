@@ -2,6 +2,7 @@ package org.stellar.walletsdk.horizon
 
 import mu.KotlinLogging
 import org.stellar.sdk.*
+import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.*
@@ -41,20 +42,8 @@ internal constructor(
    * @return formatted account information
    * @throws [HorizonRequestFailedException] for Horizon exceptions
    */
-  suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountInfo {
-    val account = serverInstance.accountByAddress(accountAddress)
-    val balances = formatAccountBalances(account, serverInstance)
-
-    log.debug { "Account info: accountAddress = $accountAddress" }
-
-    // TODO: add accountDetails
-
-    return AccountInfo(
-      publicKey = account.accountId,
-      assets = balances.assets,
-      liquidityPools = balances.liquidityPools,
-      reservedNativeBalance = account.reservedBalance()
-    )
+  suspend fun getInfo(accountAddress: String, serverInstance: Server = server): AccountResponse {
+    return serverInstance.accountByAddress(accountAddress)
   }
 
   /**
@@ -75,14 +64,12 @@ internal constructor(
     order: Order? = Order.DESC,
     cursor: String? = null,
     includeFailed: Boolean? = null
-  ): List<WalletOperation<OperationResponse>> {
+  ): List<OperationResponse> {
     log.debug {
       "Account history: accountAddress = $accountAddress, limit = $limit, order" +
         " = $order, cursor = $cursor, includeFailed = $includeFailed"
     }
 
-    return server.accountOperations(accountAddress, limit, order, cursor, includeFailed).map {
-      formatStellarOperation(accountAddress, it)
-    }
+    return server.accountOperations(accountAddress, limit, order, cursor, includeFailed)
   }
 }
