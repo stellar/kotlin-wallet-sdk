@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.horizon.transaction
 
 import org.stellar.sdk.*
+import org.stellar.sdk.TransactionBuilder as SdkBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.anchor.MemoType
@@ -13,7 +14,6 @@ import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.util.*
-import org.stellar.sdk.TransactionBuilder as SdkBuilder
 
 /** Class that allows to construct Stellar transactions, containing one or more operations */
 @Suppress("TooManyFunctions")
@@ -21,17 +21,17 @@ class TransactionBuilder
 internal constructor(
   cfg: Config,
   sourceAccount: AccountResponse,
-  baseFee: UInt?,
+  baseFee: ULong?,
   memo: Pair<MemoType, String>?,
   timeBounds: TimeBounds?
 ) : CommonTransactionBuilder<TransactionBuilder>(sourceAccount.accountId) {
   private val network: Network = cfg.stellar.network
-  private val maxBaseFeeInStroops: Int = cfg.stellar.baseFee.toInt()
+  private val maxBaseFeeInStroops: Long = cfg.stellar.baseFee.toLong()
   override val operations: MutableList<Operation> = mutableListOf()
 
   private val builder: SdkBuilder =
     SdkBuilder(sourceAccount, network)
-      .setBaseFee(baseFee?.toInt() ?: maxBaseFeeInStroops)
+      .setBaseFee(baseFee?.toLong() ?: maxBaseFeeInStroops)
       .addPreconditions(
         TransactionPreconditions.builder()
           .timeBounds(timeBounds ?: cfg.stellar.defaultTimeout.toTimeBounds())
@@ -81,7 +81,7 @@ internal constructor(
    * accounts is 1 XLM. Default value is 1.
    * @throws [InvalidStartingBalanceException] on invalid starting balance
    */
-  fun createAccount(newAccount: AccountKeyPair, startingBalance: UInt = 1u) = building {
+  fun createAccount(newAccount: AccountKeyPair, startingBalance: ULong = 1u) = building {
     if (startingBalance < 1u) {
       throw InvalidStartingBalanceException
     }

@@ -1,12 +1,12 @@
 package org.stellar.walletsdk.toml
 
+import com.google.gson.annotations.SerializedName
 import io.ktor.http.*
 import org.stellar.sdk.Network
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.asset.NativeAssetId
 import org.stellar.walletsdk.asset.StellarAssetId
 import org.stellar.walletsdk.exception.ValidationException
-import shadow.com.google.gson.annotations.SerializedName
 
 data class TomlInfo(
   @SerializedName("VERSION") val version: String?,

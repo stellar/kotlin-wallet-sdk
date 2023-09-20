@@ -1,15 +1,12 @@
 package org.stellar.walletsdk.extension
 
-import org.stellar.sdk.LiquidityPoolID
 import org.stellar.sdk.Server
 import org.stellar.sdk.requests.ErrorResponse
 import org.stellar.sdk.responses.AccountResponse
-import org.stellar.sdk.responses.LiquidityPoolResponse
 import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.exception.HorizonRequestFailedException
 import org.stellar.walletsdk.exception.OperationsLimitExceededException
-import org.stellar.walletsdk.util.formatAmount
 
 @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
 private fun <T> safeHorizonCall(body: () -> T): T {
@@ -43,68 +40,6 @@ suspend fun Server.accountOrNull(accountAddress: String): AccountResponse? {
     }
     throw e
   }
-}
-
-/**
- * Fetch liquidity pool information from the Stellar network.
- *
- * @param liquidityPoolId Liquidity pool ID
- * @param cachedAssetInfo Previously cached asset information to use for liquidity pool assets
- * @return liquidity pool data object
- * @throws [HorizonRequestFailedException] for Horizon exceptions
- */
-@Deprecated("Formatted classes are to be removed")
-suspend fun Server.liquidityPoolInfo(
-  liquidityPoolId: LiquidityPoolID,
-  cachedAssetInfo: MutableMap<String, CachedAsset>
-): LiquidityPoolInfo {
-  val response: LiquidityPoolResponse = safeHorizonCall {
-    liquidityPools().liquidityPool(liquidityPoolId)
-  }
-
-  val responseReserves = response.reserves
-  val totalTrustlines = response.totalTrustlines
-  val totalShares = response.totalShares
-
-  val reserves: MutableList<LiquidityPoolReserve> = mutableListOf()
-
-  responseReserves.forEach { item ->
-    if (item.asset.type == AssetType.NATIVE.type) {
-      val nativeReserve =
-        LiquidityPoolReserve(
-          id = XLM_ASSET_DEFAULT.id,
-          homeDomain = XLM_ASSET_DEFAULT.homeDomain,
-          name = XLM_ASSET_DEFAULT.name,
-          imageUrl = XLM_ASSET_DEFAULT.imageUrl,
-          assetCode = XLM_ASSET_DEFAULT.assetCode,
-          assetIssuer = XLM_ASSET_DEFAULT.assetIssuer,
-          amount = formatAmount(item.amount),
-        )
-
-      reserves.add(nativeReserve)
-    } else {
-      val assetArr = item.asset.toString().split(":")
-      val assetCode = assetArr[0]
-      val assetIssuer = assetArr[1]
-
-      val cachedItem = cachedAssetInfo[item.asset.toString()]
-      // TODO: if there is no cached info, fetch toml file to get homeDomain, name, and imageURL
-      val lpAsset =
-        LiquidityPoolReserve(
-          id = item.asset.toString(),
-          assetCode = assetCode,
-          assetIssuer = assetIssuer,
-          homeDomain = cachedItem?.homeDomain,
-          name = cachedItem?.name,
-          imageUrl = cachedItem?.imageUrl,
-          amount = formatAmount(item.amount),
-        )
-
-      reserves.add(lpAsset)
-    }
-  }
-
-  return LiquidityPoolInfo(totalTrustlines, totalShares, reserves)
 }
 
 /**

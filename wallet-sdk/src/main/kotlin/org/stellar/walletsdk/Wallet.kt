@@ -10,6 +10,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import java.time.Duration
 import java.util.*
+import okhttp3.OkHttpClient
 import org.stellar.sdk.Network
 import org.stellar.sdk.Server
 import org.stellar.walletsdk.anchor.Anchor
@@ -19,7 +20,6 @@ import org.stellar.walletsdk.json.defaultJson
 import org.stellar.walletsdk.recovery.Recovery
 import org.stellar.walletsdk.recovery.RecoveryServer
 import org.stellar.walletsdk.recovery.RecoveryServerKey
-import shadow.okhttp3.OkHttpClient
 
 /**
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
@@ -92,7 +92,7 @@ data class StellarConfiguration(
    * [Default base fee]
    * (https://developers.stellar.org/docs/encyclopedia/fees-surge-pricing-fee-strategies#network-fees-on-stellar)
    */
-  val baseFee: UInt = 100u,
+  val baseFee: ULong = 100u,
   val defaultTimeout: Duration = Duration.ofMinutes(3),
   val horizonClient: OkHttpClient? = null,
   val submitClient: OkHttpClient? = null

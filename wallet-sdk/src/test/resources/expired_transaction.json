@@ -2,11 +2,11 @@
   "extras": {
     "envelope_xdr": "AAAAAgAAAAAyOhY6Xz6jgVflpUvtD8/57U+k/tgMnu6zhEC8EMHn8gAAAGQAABPBAAAAsAAAAAEAAAAAAAAAAAAAAABkghsTAAAAAAAAAAEAAAABAAAAADI6FjpfPqOBV+WlS+0Pz/ntT6T+2Aye7rOEQLwQwefyAAAAAAAAAAB3Dr2esPWxInsMccK18euqPgdYgV8quB30xAIwf5MHawAAAAAAmJaAAAAAAAAAAAA\u003d",
     "result_xdr": "AAAAAAAAAGT////9AAAAAA\u003d\u003d",
-    "resultCodes": {
-      "transactionResultCode": "tx_too_late"
+    "result_codes": {
+      "transaction": "tx_too_late"
     }
   },
-  "rateLimitLimit": 0,
-  "rateLimitRemaining": 0,
-  "rateLimitReset": 0
+  "rate_limit_limit": 0,
+  "rate_limit_remaining": 0,
+  "rate_limit_reset": 0
 }

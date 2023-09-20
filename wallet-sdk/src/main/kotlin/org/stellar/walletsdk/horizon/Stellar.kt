@@ -41,7 +41,7 @@ internal constructor(
    */
   suspend fun transaction(
     sourceAddress: AccountKeyPair,
-    baseFee: UInt? = null,
+    baseFee: ULong? = null,
     memo: Pair<MemoType, String>? = null,
     timeBounds: TimeBounds? = null
   ): TransactionBuilder {
@@ -66,7 +66,7 @@ internal constructor(
   suspend fun transaction(
     sourceAddress: AccountKeyPair,
     timeout: Duration,
-    baseFee: UInt? = null,
+    baseFee: ULong? = null,
     memo: Pair<MemoType, String>? = null,
   ): TransactionBuilder {
     return transaction(sourceAddress, baseFee, memo, timeout.toTimeBounds())
@@ -85,7 +85,7 @@ internal constructor(
   fun makeFeeBump(
     feeAddress: AccountKeyPair,
     transaction: Transaction,
-    baseFee: UInt? = null
+    baseFee: ULong? = null
   ): FeeBumpTransaction {
     return FeeBumpTransaction.Builder(transaction)
       .setBaseFee((baseFee ?: cfg.stellar.baseFee).toLong())
@@ -163,9 +163,9 @@ internal constructor(
   suspend fun submitWithFeeIncrease(
     sourceAccount: SigningKeyPair,
     timeout: Duration,
-    baseFeeIncrease: UInt,
-    baseFee: UInt? = null,
-    maxFee: UInt = Integer.MAX_VALUE.toUInt(),
+    baseFeeIncrease: ULong,
+    baseFee: ULong? = null,
+    maxFee: ULong = Integer.MAX_VALUE.toULong(),
     memo: Pair<MemoType, String>? = null,
     buildingFunction: TransactionBuilder.() -> TransactionBuilder
   ): Transaction {
@@ -201,9 +201,9 @@ internal constructor(
   suspend fun submitWithFeeIncrease(
     sourceAddress: AccountKeyPair,
     timeout: Duration,
-    baseFeeIncrease: UInt,
-    baseFee: UInt? = null,
-    maxFee: UInt = Integer.MAX_VALUE.toUInt(),
+    baseFeeIncrease: ULong,
+    baseFee: ULong? = null,
+    maxFee: ULong = Integer.MAX_VALUE.toULong(),
     memo: Pair<MemoType, String>? = null,
     signerFunction: Transaction.() -> Transaction,
     buildingFunction: TransactionBuilder.() -> TransactionBuilder
@@ -217,7 +217,7 @@ internal constructor(
       return transaction
     } catch (e: TransactionSubmitFailedException) {
       if (e.transactionResultCode == "tx_too_late") {
-        val newFee = min(maxFee, transaction.fee.toUInt() + baseFeeIncrease)
+        val newFee = min(maxFee, transaction.fee.toULong() + baseFeeIncrease)
         log.info {
           "Transaction ${transaction.hashHex()} has expired. Increasing fee to $newFee Stroops."
         }

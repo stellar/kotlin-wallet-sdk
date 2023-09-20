@@ -33,9 +33,9 @@
     }
   },
   "id": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB",
-  "accountId": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB",
+  "account_id": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB",
   "sequence": "4382782197334016",
-  "subentryCount": 0,
+  "subentry_count": 0,
   "lastModifiedLedger": 1020446,
   "lastModifiedTime": "2022-08-23T15:08:27Z",
   "thresholds": {
@@ -52,9 +52,9 @@
   "balances": [
     {
       "balance": "1.0000000",
-      "buyingLiabilities": "0.0000000",
-      "sellingLiabilities": "0.0000000",
-      "assetType": "native"
+      "buying_liabilities": "0.0000000",
+      "selling_liabilities": "0.0000000",
+      "asset_type": "native"
     }
   ],
   "signers": [
@@ -65,7 +65,7 @@
     }
   ],
   "data": {},
-  "numSponsoring": 0,
-  "numSponsored": 0,
+  "num_sponsoring": 0,
+  "num_sponsored": 0,
   "pagingToken": "GAFRGFVBQHOLZBTDF75FHLECSJB547NFUGZZ4WG756FALNUYITK7R4JB"
 }

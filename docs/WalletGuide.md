@@ -128,6 +128,7 @@ Once the Wallet is configured, you can use the following:
 
 <!--- INCLUDE .*account.*
 import org.stellar.sdk.responses.operations.OperationResponse
+import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.*
 -->
 <!--- SUFFIX .*account.*
@@ -150,7 +151,7 @@ val accountKeyPair = account.createKeyPair()
 Get account information from the Stellar network (assets, liquidity pools, and reserved native balance).
 
 ```kotlin
-suspend fun getAccountInfo(): AccountInfo {
+suspend fun getAccountInfo(): AccountResponse {
   return account.getInfo(accountKeyPair.address)
 }
 ```
@@ -158,7 +159,7 @@ suspend fun getAccountInfo(): AccountInfo {
 Get account history (all operations) from the Stellar network.
 
 ```kotlin
-suspend fun getAccountHistory(): List<WalletOperation<OperationResponse>> {
+suspend fun getAccountHistory(): List<OperationResponse> {
   return account.getHistory(accountKeyPair.address)
 }
 ```
