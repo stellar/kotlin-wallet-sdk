@@ -6,17 +6,13 @@ plugins {
   alias(libs.plugins.detekt)
 }
 
-buildscript { dependencies { classpath(libs.knit) } }
-
 apply(plugin = "base")
-
-apply(plugin = "kotlinx-knit")
 
 val jvmVersion = JavaVersion.VERSION_1_8
 
 allprojects {
   group = "org.stellar.wallet-sdk"
-  version = "0.11.0"
+  version = "1.0.0"
 }
 
 subprojects {

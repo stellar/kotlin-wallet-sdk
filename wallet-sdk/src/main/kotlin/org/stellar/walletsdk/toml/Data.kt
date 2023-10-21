@@ -165,7 +165,6 @@ data class InfoCurrency(
 
 data class InfoServices(
   val sep6: Sep6?,
-  // TODO: add SEP8
   val sep10: Sep10?,
   val sep12: Sep12?,
   val sep24: Sep24?,

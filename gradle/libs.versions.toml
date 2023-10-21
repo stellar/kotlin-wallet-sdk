@@ -3,12 +3,11 @@
 coroutines = "1.6.4"
 google-gson = "2.8.9"
 hoplite = "2.7.0"
-java-stellar-sdk = "0.41.0"
+java-stellar-sdk = "0.41.1"
 dokka = "1.6.10"
 kotlin = "1.8.20"
 kotlinx-json = "1.5.0"
 kotlinx-datetime = "0.4.0"
-knit = "0.4.0"
 ktor = "2.2.1"
 mockk = "1.12.2"
 okhttp3 = "4.9.3"
@@ -30,7 +29,6 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-json" }
 kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
-knit = { module = "org.jetbrains.kotlinx:kotlinx-knit", version.ref = "knit" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }

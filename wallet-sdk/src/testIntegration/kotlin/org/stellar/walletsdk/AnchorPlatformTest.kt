@@ -18,13 +18,13 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.walletsdk.anchor.DepositTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.anchor.WithdrawalTransaction
+import org.stellar.walletsdk.anchor.interactive
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.customer.Sep12Status
 import org.stellar.walletsdk.exception.CustomerExceptions
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.horizon.sign
-import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
 
 class AnchorPlatformTest {
   private val USDC =
@@ -62,7 +62,7 @@ class AnchorPlatformTest {
     // Start interactive deposit
     val deposit = anchor.sep24().deposit(asset, token)
 
-    val transaction = anchor.getTransaction(deposit.id, token)
+    val transaction = anchor.interactive().getTransaction(deposit.id, token)
 
     assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
@@ -77,7 +77,7 @@ class AnchorPlatformTest {
     // Start interactive withdrawal
     val withdrawal = anchor.sep24().withdraw(asset, token)
 
-    val transaction = anchor.getTransaction(withdrawal.id, token)
+    val transaction = anchor.interactive().getTransaction(withdrawal.id, token)
 
     assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
@@ -85,11 +85,9 @@ class AnchorPlatformTest {
 
     waitStatus(withdrawal.id, TransactionStatus.PENDING_USER_TRANSFER_START, token)
 
+    val t = (anchor.interactive().getTransaction(withdrawal.id, token) as WithdrawalTransaction)
     val transfer =
-      (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction).toStellarTransfer(
-        wallet.stellar(),
-        asset
-      )
+      wallet.stellar().transaction(t.from!!).transferWithdrawalTransaction(t, asset).build()
 
     transfer.sign(keypair)
 
@@ -119,7 +117,7 @@ class AnchorPlatformTest {
       // Start interactive withdrawal
       val withdrawal = anchor.sep24().withdraw(asset, token, mapOf("amount" to "10"))
 
-      val transaction = anchor.getTransaction(withdrawal.id, token)
+      val transaction = anchor.interactive().getTransaction(withdrawal.id, token)
 
       assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
@@ -129,11 +127,9 @@ class AnchorPlatformTest {
 
       waitStatus(withdrawal.id, TransactionStatus.PENDING_USER_TRANSFER_START, token)
 
+      val t = (anchor.interactive().getTransaction(withdrawal.id, token) as WithdrawalTransaction)
       val transfer =
-        (anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction).toStellarTransfer(
-          wallet.stellar(),
-          asset
-        )
+        wallet.stellar().transaction(t.from!!).transferWithdrawalTransaction(t, asset).build()
 
       transfer.sign(keypair)
 
@@ -163,9 +159,9 @@ class AnchorPlatformTest {
     wallet.stellar().submitTransaction(tx)
 
     val token = anchor.sep10().authenticate(newAcc)
-    val deposits = (0..5).map { makeDeposit(token, newAcc).also { delay(7.seconds) } }
+    val deposits = (0..5).map { makeDeposit(token).also { delay(7.seconds) } }
     deposits.forEach { waitStatus(it, TransactionStatus.COMPLETED, token) }
-    val history = anchor.getHistory(USDC, token)
+    val history = anchor.interactive().getTransactionsForAsset(USDC, token, null, null, null, null)
 
     history.forEach { assertContains(deposits, it.id) }
   }
@@ -179,10 +175,12 @@ class AnchorPlatformTest {
 
     waitStatus(txId, TransactionStatus.COMPLETED, token)
 
-    val transaction = anchor.getTransaction(txId, token) as DepositTransaction
+    val transaction = anchor.interactive().getTransaction(txId, token) as DepositTransaction
 
     val transactionByStellarId =
-      anchor.getTransactionBy(token, stellarTransactionId = transaction.stellarTransactionId)
+      anchor
+        .interactive()
+        .getTransactionBy(token, stellarTransactionId = transaction.stellarTransactionId)
 
     assertEquals(transaction, transactionByStellarId)
   }
@@ -194,7 +192,7 @@ class AnchorPlatformTest {
       val token = anchor.sep10().authenticate(keypair)
       val customer = anchor.sep12(token)
       val testCustomerType = "sep31-receiver"
-      val testCustomerAccount = token.principalAccount
+      val testCustomerAccount = token.account
       val testCreateSep9Payload =
         mapOf(
           "first_name" to "John",
@@ -220,7 +218,7 @@ class AnchorPlatformTest {
         )
       assertNotNull(addCustomerResponse.id)
 
-      var customerData = customer.getByIdAndType(addCustomerResponse.id, testCustomerType)
+      var customerData = customer.get(addCustomerResponse.id, type = testCustomerType)
       assertNotNull(customerData)
       assertEquals(customerData.providedFields?.get("first_name")?.status, Sep12Status.ACCEPTED)
       assertEquals(customerData.providedFields?.get("last_name")?.status, Sep12Status.ACCEPTED)
@@ -235,7 +233,7 @@ class AnchorPlatformTest {
         )
       assertNotNull(updateCustomerResponse.id)
 
-      customerData = customer.getByIdAndType(addCustomerResponse.id, testCustomerType)
+      customerData = customer.get(addCustomerResponse.id, type = testCustomerType)
       assertNotNull(customerData)
       assertEquals(customerData.providedFields?.get("bank_number")?.status, Sep12Status.ACCEPTED)
       assertEquals(
@@ -245,16 +243,16 @@ class AnchorPlatformTest {
 
       assertDoesNotThrow { runBlocking { customer.delete(testCustomerAccount) } }
       assertFailsWith<CustomerExceptions> {
-        runBlocking { customer.getByIdAndType(addCustomerResponse.id, testCustomerType) }
+        runBlocking { customer.get(addCustomerResponse.id, type = testCustomerType) }
       }
     }
   }
 
-  private suspend fun makeDeposit(token: AuthToken, keyPair: SigningKeyPair = keypair): String {
+  private suspend fun makeDeposit(token: AuthToken): String {
     // Start interactive deposit
     val deposit = anchor.sep24().deposit(asset, token, mapOf("amount" to "10"))
 
-    val transaction = anchor.getTransaction(deposit.id, token)
+    val transaction = anchor.interactive().getTransaction(deposit.id, token)
 
     assertEquals(TransactionStatus.INCOMPLETE, transaction.status)
 
@@ -270,7 +268,7 @@ class AnchorPlatformTest {
 
     for (i in 0..maxTries) {
       // Get transaction info
-      val transaction = anchor.getTransaction(id, token)
+      val transaction = anchor.interactive().getTransaction(id, token)
 
       if (status != transaction.status) {
         status = transaction.status

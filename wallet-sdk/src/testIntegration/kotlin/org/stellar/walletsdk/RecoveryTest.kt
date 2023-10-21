@@ -83,7 +83,7 @@ class RecoveryTest {
   @Order(5)
   @DisplayName("1.5 - Add Device Keypair As Signer And Remove Master Keypair As Signer")
   fun addDeviceKeyPairAsSigner() = runTest {
-    val results = addDeviceRemoveMaster()
+    addDeviceRemoveMaster()
   }
 
   private suspend fun addDeviceRemoveMaster() {

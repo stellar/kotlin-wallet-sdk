@@ -4,7 +4,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.horizon.sign
-import org.stellar.walletsdk.horizon.transaction.toStellarTransfer
 
 object Withdrawal {
   suspend fun main() {
@@ -26,12 +25,13 @@ object Withdrawal {
     // Wait for user input
     do {
       // Get transaction info
-      transaction = anchor.getTransaction(withdrawal.id, token)
+      transaction = anchor.sep24().getTransaction(withdrawal.id, token)
       delay(5.seconds)
     } while (transaction.status != TransactionStatus.PENDING_USER_TRANSFER_START)
 
     // Send transaction with transfer
-    val transfer = (transaction as WithdrawalTransaction).toStellarTransfer(stellar, asset)
+    val t = (transaction as WithdrawalTransaction)
+    val transfer = stellar.transaction(t.from!!).transferWithdrawalTransaction(t, asset).build()
 
     transfer.sign(myAccount)
 
@@ -40,7 +40,7 @@ object Withdrawal {
     println("Stellar transaction has been sent ${transfer.hashHex()}")
 
     do {
-      transaction = anchor.getTransaction(withdrawal.id, token) as WithdrawalTransaction
+      transaction = anchor.sep24().getTransaction(withdrawal.id, token) as WithdrawalTransaction
 
       if (status != transaction.status) {
         status = transaction.status

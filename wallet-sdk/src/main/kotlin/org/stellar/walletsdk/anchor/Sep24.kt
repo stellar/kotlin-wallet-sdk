@@ -6,7 +6,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
 import kotlinx.datetime.Instant
-import mu.KotlinLogging
 import org.stellar.walletsdk.InteractiveFlowResponse
 import org.stellar.walletsdk.asset.AssetId
 import org.stellar.walletsdk.asset.IssuedAssetId
@@ -16,8 +15,6 @@ import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.json.toJson
 import org.stellar.walletsdk.util.Util.anchorGet
-
-private val log = KotlinLogging.logger {}
 
 /** Interactive flow for deposit and withdrawal using SEP-24. */
 class Sep24
@@ -205,59 +202,6 @@ internal constructor(
         lang?.run { parameters.append("lang", lang.toString()) }
       }
       .transactions
-  }
-
-  /**
-   * Get all successfully finished (either completed or refunded) account transactions for specified
-   * asset. Optional field implementation depends on anchor.
-   *
-   * @param authToken auth token of the account authenticated with the anchor
-   * @param assetId asset to make a query for
-   * @param limit optional how many transactions to fetch
-   * @param pagingId optional return transactions prior to this ID
-   * @param noOlderThan optional return transactions starting on or after this date and time
-   * @param lang optional language code specified using
-   * [RFC 4646](https://www.rfc-editor.org/rfc/rfc4646), default is `en`
-   * @return a list of formatted operations
-   * @throws [AssetNotSupportedException] if asset is not supported by the anchor
-   */
-  @Suppress("LongParameterList")
-  @Deprecated("Use getTransactionsForAsset instead")
-  suspend fun getHistory(
-    assetId: AssetId,
-    authToken: AuthToken,
-    limit: Int? = null,
-    pagingId: String? = null,
-    noOlderThan: String? = null,
-    lang: String? = null
-  ): List<AnchorTransaction> {
-    if (anchor.sep1().currencies?.find { it.assetId == assetId } == null) {
-      throw AssetNotSupportedException(assetId)
-    }
-
-    // Add query params
-    val queryParams = mutableMapOf<String, String>()
-    queryParams["asset_code"] = assetId.sep38
-    limit?.run { queryParams["limit"] = this.toString() }
-    pagingId?.run { queryParams["paging_id"] = this }
-    noOlderThan?.run { queryParams["no_older_than"] = this }
-    lang?.run { queryParams["lang"] = this }
-
-    val finalStatusList = listOf(TransactionStatus.COMPLETED, TransactionStatus.REFUNDED)
-
-    log.debug {
-      "Anchor account's formatted history request: asset = $assetId, authToken = " +
-        "${authToken.prettify()}, limit = $limit, pagingId = $pagingId, noOlderThan = $noOlderThan, " +
-        "lang = $lang"
-    }
-
-    val resp: AnchorAllTransactionsResponse =
-      get(authToken) {
-        appendPathSegments("transactions")
-        queryParams.forEach { parameters.append(it.key, it.value) }
-      }
-
-    return resp.transactions.filter { finalStatusList.contains(it.status) }
   }
 
   private suspend inline fun <reified T> get(

@@ -8,7 +8,7 @@ object GetTransaction {
     val token: String = System.getenv("AUTH_TOKEN")
     val id: String = System.getenv("TRANSACTION_ID")
 
-    val transaction = anchor.getTransaction(id, AuthToken.from(token))
+    val transaction = anchor.sep24().getTransaction(id, AuthToken.from(token))
 
     println(transaction)
   }

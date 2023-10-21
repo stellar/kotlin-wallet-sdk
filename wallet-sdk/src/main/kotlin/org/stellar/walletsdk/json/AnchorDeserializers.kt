@@ -14,14 +14,13 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.stellar.walletsdk.anchor.*
 import org.stellar.walletsdk.asset.*
 import org.stellar.walletsdk.exception.InvalidJsonException
-import org.stellar.walletsdk.util.toAssetId
 
 internal object AnchorTransactionSerializer :
   JsonContentPolymorphicSerializer<AnchorTransaction>(AnchorTransaction::class) {
   @Suppress("NestedBlockDepth")
   override fun selectDeserializer(
     element: JsonElement
-  ): DeserializationStrategy<out AnchorTransaction> {
+  ): DeserializationStrategy<AnchorTransaction> {
     val kind = element.jsonObject["kind"]?.jsonPrimitive
     val status = element.jsonObject["status"]?.jsonPrimitive
     if (kind?.isString == true) {
@@ -47,20 +46,6 @@ internal object AnchorTransactionSerializer :
       throw InvalidJsonException("status not found", element)
     }
     throw InvalidJsonException("kind not found", element)
-  }
-}
-
-internal object AssetIdSerializer : KSerializer<AssetId> {
-  override val descriptor =
-    PrimitiveSerialDescriptor(AssetId::class.qualifiedName!!, PrimitiveKind.STRING)
-
-  override fun serialize(encoder: Encoder, value: AssetId) = encoder.encodeString(value.toString())
-
-  @Suppress("ReturnCount")
-  override fun deserialize(decoder: Decoder): AssetId {
-    val str = decoder.decodeString()
-
-    return str.toAssetId()
   }
 }
 

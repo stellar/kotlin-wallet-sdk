@@ -5,6 +5,7 @@ import io.ktor.http.*
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.CustomerNotFoundException
 import org.stellar.walletsdk.exception.CustomerUpdateException
+import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.util.Util.authDelete
 import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.putJson
@@ -16,26 +17,46 @@ internal constructor(
   private val httpClient: HttpClient,
 ) {
   /**
-   * Get customer information by customer ID.
+   * Get customer information.
    *
-   * @param id customer id
-   * @param type customer type
+   * @param id (optional) The ID of the customer as returned in the response of a previous PUT
+   * request. If the customer has not been registered, they do not yet have an id.
+   * @param memo (optional) the client-generated memo that uniquely identifies the customer. If a
+   * memo is present in the decoded SEP-10 JWT's sub value, it must match this parameter value.
+   * @param type (optional) the type of action the customer is being KYCd for.
+   * @param lang (optional) Defaults to en. Language code specified using ISO 639-1. Human-readable
+   * descriptions, choices, and messages should be in this language.
    * @return a customer data object
    */
-  suspend fun getByIdAndType(id: String, type: String): GetCustomerResponse {
+  suspend fun get(
+    id: String? = null,
+    memo: ULong? = null,
+    type: String? = null,
+    lang: String? = null,
+  ): GetCustomerResponse {
+    validateMemo(memo)
+
     val urlBuilder = URLBuilder(baseUrl)
     urlBuilder.appendPathSegments("customer")
-    urlBuilder.parameters.append("id", id)
-    urlBuilder.parameters.append("type", type)
+    urlBuilder.addParameter("id", id)
+    urlBuilder.addParameter("memo", memo?.toString())
+    urlBuilder.addParameter("type", type)
+    urlBuilder.addParameter("lang", lang)
     val urlString = urlBuilder.buildString()
 
     val response = httpClient.authGet<GetCustomerResponse>(urlString, token)
 
     if (response.id == null) {
-      throw CustomerNotFoundException(account = token.principalAccount)
+      throw CustomerNotFoundException(account = token.account)
     }
 
     return response
+  }
+
+  private fun URLBuilder.addParameter(name: String, value: String?) {
+    if (value != null) {
+      this.parameters.append(name, value)
+    }
   }
 
   /**
@@ -45,28 +66,25 @@ internal constructor(
    * first_name, last_name, and email_address are required
    * @param type (optional) the type of action the customer is being KYC for. See the Type
    * Specification on SEP-12 definition.
+   * @param memo (optional) the client-generated memo of type ID that uniquely identifies the
+   * customer. If a memo is present in the decoded SEP-10 JWT's sub value, it must match this
+   * parameter value.
    * @return a customer with id information
    */
   suspend fun add(
     sep9Info: Map<String, String>,
+    memo: ULong? = null,
     type: String? = null,
   ): AddCustomerResponse {
+    val customer: MutableMap<String, String> = mutableMapOf()
 
-    var customer: Map<String, String> = mapOf()
-
-    if (type != null) {
-      customer = customer + mapOf("type" to type)
-    }
-
-    if (sep9Info.isNotEmpty()) {
-      customer = customer + sep9Info
-    }
+    populateMap(type, customer, memo, sep9Info)
 
     val urlBuilder = URLBuilder(baseUrl)
     urlBuilder.appendPathSegments("customer")
     val urlString = urlBuilder.buildString()
 
-    return httpClient.putJson(urlString, customer, token)
+    return httpClient.putJson(urlString, customer.toMap(), token)
   }
 
   /**
@@ -77,31 +95,53 @@ internal constructor(
    * customer has not been registered, they do not yet have an id.
    * @param type (optional) the type of action the customer is being KYC for. See the Type
    * Specification on SEP-12 definition.
+   * @param memo (optional) the client-generated memo of type ID that uniquely identifies the
+   * customer. If a memo is present in the decoded SEP-10 JWT's sub value, it must match this
+   * parameter value.
    * @return a customer with id information
    */
   suspend fun update(
     sep9Info: Map<String, String>,
     id: String,
     type: String? = null,
+    memo: ULong? = null,
   ): AddCustomerResponse {
-
-    var customer: Map<String, String> = mapOf()
-    customer = customer + mapOf("id" to id)
-
-    if (type != null) {
-      customer = customer + mapOf("type" to type)
-    }
+    val customer: MutableMap<String, String> = mutableMapOf("id" to id)
 
     if (sep9Info.isEmpty()) {
       throw CustomerUpdateException()
     }
-    customer = customer + sep9Info
+
+    populateMap(type, customer, memo, sep9Info)
 
     val urlBuilder = URLBuilder(baseUrl)
     urlBuilder.appendPathSegments("customer")
     val urlString = urlBuilder.buildString()
 
-    return httpClient.putJson(urlString, customer, token)
+    return httpClient.putJson(urlString, customer.toMap(), token)
+  }
+
+  private fun populateMap(
+    type: String?,
+    customer: MutableMap<String, String>,
+    memo: ULong?,
+    sep9Info: Map<String, String>
+  ) {
+    if (type != null) {
+      customer["type"] = type
+    }
+    validateMemo(memo) { customer["memo"] = it.toString() }
+
+    customer.putAll(sep9Info)
+  }
+
+  private fun validateMemo(memo: ULong?, onMemo: (memo: ULong) -> (Unit) = {}) {
+    if (memo != null) {
+      if (token.memo != null && token.memo != memo) {
+        throw ValidationException("Passed memo $memo doesn't match token memo ${token.memo}")
+      }
+      onMemo(memo)
+    }
   }
 
   /**
@@ -109,13 +149,13 @@ internal constructor(
    *
    * @param account account address
    */
-  suspend fun delete(account: String?, memo: String? = null) {
-    val customerAccount = account ?: token.principalAccount
+  suspend fun delete(account: String = token.account, memo: ULong? = null) {
     val urlBuilder = URLBuilder(baseUrl)
+    validateMemo(memo)
     urlBuilder.appendPathSegments("customer")
-    urlBuilder.appendPathSegments(customerAccount)
+    urlBuilder.appendPathSegments(account)
     val urlString = urlBuilder.buildString()
 
-    httpClient.authDelete(urlString, memo, token)
+    httpClient.authDelete(urlString, memo?.toString(), token)
   }
 }
