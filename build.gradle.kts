@@ -8,7 +8,7 @@ plugins {
 
 apply(plugin = "base")
 
-val jvmVersion = JavaVersion.VERSION_1_8
+val jvmVersion = JavaVersion.VERSION_11
 
 allprojects {
   group = "org.stellar.wallet-sdk"
@@ -76,6 +76,7 @@ subprojects {
     }
 
     compileTestKotlin {
+      kotlinOptions.jvmTarget = jvmVersion.toString()
       compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.io.encoding.ExperimentalEncodingApi")
       }

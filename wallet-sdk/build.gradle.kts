@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 // The alias call in plugins scope produces IntelliJ false error which is suppressed here.
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -62,6 +64,10 @@ val testIntegration by
 
     mustRunAfter(tasks.test)
   }
+
+tasks.getByName("compileTestIntegrationKotlin") {
+  (this as KotlinCompile).kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+}
 
 tasks.check.get().dependsOn += testIntegration
 
