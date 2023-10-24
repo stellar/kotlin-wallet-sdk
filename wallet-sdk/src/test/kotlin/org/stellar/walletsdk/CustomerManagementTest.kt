@@ -27,7 +27,7 @@ class CustomerManagementTest {
       val token = anchor.auth().authenticate(keypair)
       val customer = anchor.customer(token)
       val testCustomerType = "sep31-receiver"
-      val testCustomerAccount = token.principalAccount
+      val testCustomerAccount = token.account
       val testCreateSep9Payload =
         mapOf(
           "first_name" to "John",
@@ -53,7 +53,7 @@ class CustomerManagementTest {
         )
       assertNotNull(addCustomerResponse.id)
 
-      var customerData = customer.getByIdAndType(addCustomerResponse.id, testCustomerType)
+      var customerData = customer.get(id = addCustomerResponse.id, type = testCustomerType)
       assertNotNull(customerData)
       assertEquals(customerData.providedFields?.get("first_name")?.status, Sep12Status.ACCEPTED)
       assertEquals(customerData.providedFields?.get("last_name")?.status, Sep12Status.ACCEPTED)
@@ -68,7 +68,7 @@ class CustomerManagementTest {
         )
       assertNotNull(updateCustomerResponse.id)
 
-      customerData = customer.getByIdAndType(addCustomerResponse.id, testCustomerType)
+      customerData = customer.get(addCustomerResponse.id, type = testCustomerType)
       assertNotNull(customerData)
       assertEquals(customerData.providedFields?.get("bank_number")?.status, Sep12Status.ACCEPTED)
       assertEquals(
@@ -78,7 +78,7 @@ class CustomerManagementTest {
 
       assertDoesNotThrow { runBlocking { customer.delete(testCustomerAccount) } }
       assertFailsWith<ClientRequestException> {
-        runBlocking { customer.getByIdAndType(addCustomerResponse.id, testCustomerType) }
+        runBlocking { customer.get(addCustomerResponse.id, type = testCustomerType) }
       }
       assertFailsWith<ClientRequestException> {
         runBlocking { customer.delete(testCustomerAccount) }

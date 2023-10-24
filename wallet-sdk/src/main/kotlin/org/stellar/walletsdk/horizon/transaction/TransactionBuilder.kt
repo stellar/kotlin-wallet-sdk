@@ -12,7 +12,6 @@ import org.stellar.walletsdk.asset.toAsset
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.extension.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
-import org.stellar.walletsdk.horizon.Stellar
 import org.stellar.walletsdk.util.*
 
 /** Class that allows to construct Stellar transactions, containing one or more operations */
@@ -119,61 +118,23 @@ internal constructor(
     operations.forEach { builder.addOperation(it) }
     return builder.build()
   }
-}
 
-/**
- * Transforms this withdrawal transaction to the Stellar Transfer transaction that can be submitted
- * to the network.
- *
- * @param stellar instance of the Stellar service.
- * @param assetId asset that is being transferred.
- * @param sourceAddress (optional) origin account that will be used to transfer funds. If not
- * specified, `from` field of this transaction will be used.
- * @return Stellar transfer transaction.
- */
-@Deprecated(
-  "Deprecated in favor of TransactionBuilder function",
-  replaceWith =
-    ReplaceWith(
-      "stellar.transaction(this.from).transferWithdrawalTransaction(this, assetId).build()"
-    )
-)
-suspend fun WithdrawalTransaction.toStellarTransfer(
-  stellar: Stellar,
-  assetId: StellarAssetId,
-  sourceAddress: AccountKeyPair? = null
-): Transaction {
-  this.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
+  /**
+   * Add a transfer to this builder from the withdrawal transaction
+   *
+   * @param transaction withdrawal transaction to fulfill
+   * @param assetId target asset id
+   */
+  fun transferWithdrawalTransaction(
+    transaction: WithdrawalTransaction,
+    assetId: StellarAssetId
+  ): TransactionBuilder {
+    transaction.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
 
-  return stellar
-    .transaction(
-      sourceAddress
-        ?: this.from
-          ?: throw ValidationException(
-          "Source account is not provided and from account is unknown"
-        ),
-      memo = this.withdrawalMemo?.let { this.withdrawalMemoType to it }
+    return this.setMemo(
+        transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }
           ?: throw ValidationException("Missing withdrawal_memo in the transaction")
-    )
-    .transfer(this.withdrawAnchorAccount, assetId, this.amountIn)
-    .build()
-}
-
-/**
- * Add a transfer to this builder from the withdrawal transaction
- *
- * @param transaction withdrawal transaction to fulfill
- * @param assetId target asset id
- */
-suspend fun TransactionBuilder.transferWithdrawalTransaction(
-  transaction: WithdrawalTransaction,
-  assetId: StellarAssetId
-): TransactionBuilder {
-  transaction.requireStatus(TransactionStatus.PENDING_USER_TRANSFER_START)
-
-  return this.setMemo(
-      transaction.withdrawalMemo?.let { transaction.withdrawalMemoType to it }
-        ?: throw ValidationException("Missing withdrawal_memo in the transaction")
-    )
-    .transfer(transaction.withdrawAnchorAccount, assetId, transaction.amountIn)
+      )
+      .transfer(transaction.withdrawAnchorAccount, assetId, transaction.amountIn)
+  }
 }

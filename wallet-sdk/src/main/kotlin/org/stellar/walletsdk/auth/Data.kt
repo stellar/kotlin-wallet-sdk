@@ -21,13 +21,28 @@ data class ChallengeResponse(
 @Serializable
 data class AuthToken(
   @SerialName("iss") val issuer: String,
-  @SerialName("sub") val principalAccount: String,
+  @SerialName("sub") private val principalAccount: String,
   @SerialName("iat") val issuedAt: Instant,
   @SerialName("exp") val expiresAt: Instant,
   @SerialName("client_domain") val clientDomain: String? = null
 ) {
   @Transient // not jvm transient
   lateinit var token: String
+  val account: String
+    get() = principalAccount.split(":")[0]
+
+  val memo: ULong?
+    get() = parseMemo()
+
+  private fun parseMemo(): ULong? {
+    val spilt = principalAccount.split(":")
+
+    return if (spilt.size != 2) {
+      null
+    } else {
+      spilt[1].toULongOrNull()
+    }
+  }
 
   fun prettify(): String {
     return token.take(STRING_TRIM_LENGTH)

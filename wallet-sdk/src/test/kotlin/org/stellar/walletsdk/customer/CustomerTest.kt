@@ -63,7 +63,7 @@ internal class CustomerTest : SuspendTest() {
 }"""
 
     val customer = runBlocking {
-      val mockEngine = MockEngine { request ->
+      val mockEngine = MockEngine { _ ->
         respond(
           content = ByteReadChannel(testCustomerPayload),
           status = HttpStatusCode.Created,
@@ -73,7 +73,7 @@ internal class CustomerTest : SuspendTest() {
 
       val httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { json() } }
 
-      Customer(token, AUTH_HOME_DOMAIN, httpClient).getByIdAndType(testCustomerId, testCustomerType)
+      Customer(token, AUTH_HOME_DOMAIN, httpClient).get(testCustomerId, type = testCustomerType)
     }
 
     assertNotNull(customer)
@@ -95,7 +95,7 @@ internal class CustomerTest : SuspendTest() {
       )
 
     val customer = runBlocking {
-      val mockEngine = MockEngine { request ->
+      val mockEngine = MockEngine { _ ->
         respond(
           content = ByteReadChannel(expectedCustomer.toJson()),
           status = HttpStatusCode.Created,
@@ -124,7 +124,7 @@ internal class CustomerTest : SuspendTest() {
     val expectedCustomer = AddCustomerResponse("1")
 
     val customer = runBlocking {
-      val mockEngine = MockEngine { request ->
+      val mockEngine = MockEngine { _ ->
         respond(
           content = ByteReadChannel(expectedCustomer.toJson()),
           status = HttpStatusCode.Created,
@@ -150,7 +150,7 @@ internal class CustomerTest : SuspendTest() {
     val testAccount = "test-account"
 
     runBlocking {
-      val mockEngine = MockEngine { request ->
+      val mockEngine = MockEngine { _ ->
         respond(
           content = "",
           status = HttpStatusCode.OK,

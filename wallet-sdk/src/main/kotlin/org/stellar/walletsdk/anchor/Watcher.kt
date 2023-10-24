@@ -37,7 +37,8 @@ internal constructor(
             var shouldExit: Boolean
 
             try {
-              val transaction = anchor.getTransactionBy(authToken, id = id, lang = lang)
+              val transaction =
+                anchor.interactive().getTransactionBy(authToken, id = id, lang = lang)
               val statusChange = StatusChange(transaction, transaction.status, oldStatus)
 
               if (statusChange.status != statusChange.oldStatus) {
@@ -93,6 +94,7 @@ internal constructor(
             try {
               val transactions =
                 anchor
+                  .interactive()
                   .getTransactionsForAsset(asset, authToken, since, kind = kind, lang = lang)
                   .associateBy { it.id }
 

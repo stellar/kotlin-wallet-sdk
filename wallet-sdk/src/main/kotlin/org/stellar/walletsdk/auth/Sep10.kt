@@ -42,7 +42,7 @@ internal constructor(
   suspend fun authenticate(
     accountAddress: AccountKeyPair,
     walletSigner: WalletSigner? = null,
-    memoId: String? = null,
+    memoId: ULong? = null,
     clientDomain: String? = null
   ): AuthToken {
     val challengeTxn =
@@ -63,7 +63,7 @@ internal constructor(
   @Suppress("ThrowsCount")
   private suspend fun challenge(
     account: AccountKeyPair,
-    memoId: String? = null,
+    memoId: ULong? = null,
     clientDomain: String? = null
   ): ChallengeResponse {
     val url = URLBuilder(webAuthEndpoint)
@@ -72,19 +72,11 @@ internal constructor(
     url.parameters.append("account", account.address)
     url.parameters.append("home_domain", homeDomain)
 
-    if (!memoId.isNullOrBlank()) {
-      if (memoId.toInt() < 0) {
-        throw InvalidMemoIdException
-      }
-
-      url.parameters.append("memo", memoId)
+    if (memoId != null) {
+      url.parameters.append("memo", memoId.toString())
     }
 
     if (!clientDomain.isNullOrBlank()) {
-      if (!memoId.isNullOrBlank()) {
-        throw ClientDomainWithMemoException
-      }
-
       url.parameters.append("client_domain", clientDomain)
     }
 

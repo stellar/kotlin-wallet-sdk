@@ -27,7 +27,7 @@ object Deposit {
     // Optional step: wait for token to appear on user account
     do {
       // Get transaction info
-      val transaction = anchor.getTransaction(deposit.id, token)
+      val transaction = anchor.sep24().getTransaction(deposit.id, token)
 
       if (status != transaction.status) {
         status = transaction.status

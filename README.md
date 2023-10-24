@@ -14,14 +14,14 @@ Maven:
 <dependency>
   <groupId>org.stellar</groupId>
   <artifactId>wallet-sdk</artifactId>
-  <version>0.11.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```gradle
-implementation("org.stellar:wallet-sdk:0.11.0")
+implementation("org.stellar:wallet-sdk:1.0.0")
 ```
 
 ## Introduction
@@ -49,8 +49,6 @@ created using it.
   val newKeyPair = wallet.stellar().account().createKeyPair()
 ```
 
-> You can get the full code [here](examples/documentation/src/example-readme-01.kt).
-
-Read [full wallet guide](docs/WalletGuide.md) for more info
+Read [full wallet guide](https://developers.stellar.org/docs/category/build-a-wallet-with-the-wallet-sdk) for more info
 
 You can find auto-generated documentation website on [javadoc.io](https://javadoc.io/doc/org.stellar/wallet-sdk) 

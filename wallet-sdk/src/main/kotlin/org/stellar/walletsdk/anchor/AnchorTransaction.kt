@@ -9,6 +9,11 @@ import org.stellar.walletsdk.horizon.PublicKeyPair
 import org.stellar.walletsdk.json.AnchorTransactionSerializer
 import org.stellar.walletsdk.json.NullableAccountAsStringSerializer
 
+/**
+ * Represents SEP-24 anchor transaction.
+ *
+ * @constructor Create empty Anchor transaction
+ */
 @Serializable(AnchorTransactionSerializer::class)
 sealed interface AnchorTransaction {
   val id: String

@@ -1,9 +1,9 @@
 package org.stellar.walletsdk
 
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.stellar.walletsdk.anchor.Auth
 
 internal class AuthTest : SuspendTest() {
@@ -38,22 +38,24 @@ internal class AuthTest : SuspendTest() {
   }
 
   @Test
-  fun `throw exception if both memo and clientDomain are provided`() {
-    assertThrows<Exception> {
-      runBlocking {
-        Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
-          .authenticate(ADDRESS_ACTIVE, memoId = "123", clientDomain = AUTH_CLIENT_DOMAIN)
-      }
+  fun `auth token has correct account`() {
+    val authToken = runBlocking {
+      Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
+        .authenticate(ADDRESS_ACTIVE, clientDomain = AUTH_CLIENT_DOMAIN)
     }
+
+    assertEquals(authToken.account, ADDRESS_ACTIVE.address)
   }
 
   @Test
-  fun `throw exception if Memo ID is not a positive integer`() {
-    assertThrows<Exception> {
-      runBlocking {
-        Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
-          .authenticate(ADDRESS_ACTIVE, memoId = "abc")
-      }
+  fun `auth token has correct account and memo`() {
+    val memo = 18446744073709551615U
+    val authToken = runBlocking {
+      Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
+        .authenticate(ADDRESS_ACTIVE, memoId = memo, clientDomain = AUTH_CLIENT_DOMAIN)
     }
+
+    assertEquals(authToken.account, ADDRESS_ACTIVE.address)
+    assertEquals(authToken.memo, memo)
   }
 }

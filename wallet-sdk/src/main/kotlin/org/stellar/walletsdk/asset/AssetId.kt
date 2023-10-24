@@ -52,10 +52,7 @@ fun Asset.toAssetId(): StellarAssetId =
       IssuedAssetId(this.code, this.issuer)
     }
     is AssetTypePoolShare -> {
-      log.warn { "Pool share is not supported by SDK yet" }
-
-      IssuedAssetId("", "")
-      // TODO: add this when we add support for liquidity pools
+      throw UnsupportedOperationException("Unsupported asset type")
     }
     else -> {
       throw UnsupportedOperationException("Unknown asset type")
