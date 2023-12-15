@@ -15,7 +15,8 @@ object Deposit {
     println("Auth token: $token")
 
     // Start interactive deposit
-    val deposit = anchor.interactive().deposit(asset, authToken = token)
+    val deposit =
+      anchor.interactive().deposit(asset, destinationAccount = myAccount.address, authToken = token)
 
     // Request user input
     println("Additional user info is required for the deposit, please visit: ${deposit.url}")
@@ -31,7 +32,7 @@ object Deposit {
 
       if (status != transaction.status) {
         status = transaction.status
-        println("Deposit transaction status changed to $status. Message: ${transaction.message}")
+        println("Deposit transaction status changed to $status. Transaction: $transaction")
       }
 
       delay(5.seconds)
