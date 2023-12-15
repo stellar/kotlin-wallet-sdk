@@ -13,7 +13,8 @@ object Withdrawal {
     println("Auth token: $token")
 
     // Start interactive withdrawal
-    val withdrawal = anchor.interactive().withdraw(asset, authToken = token)
+    val withdrawal =
+      anchor.interactive().withdraw(asset, withdrawalAccount = myAccount.address, authToken = token)
 
     // Request user input
     println("Additional user info is required for the withdrawal, please visit: ${withdrawal.url}")
@@ -44,7 +45,7 @@ object Withdrawal {
 
       if (status != transaction.status) {
         status = transaction.status
-        println("Withdrawal transaction status changed to $status. Message: ${transaction.message}")
+        println("Withdrawal transaction status changed to $status. Transaction: $transaction")
       }
 
       delay(5.seconds)
