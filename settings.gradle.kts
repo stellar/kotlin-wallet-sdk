@@ -13,4 +13,3 @@ fun example(name: String) {
 example("SEP-24")
 example("MGI")
 example("recovery")
-example("documentation")

@@ -28,17 +28,18 @@ configurations {
 
 dependencies {
   api(libs.coroutines.core)
-  api(variantOf(libs.java.stellar.sdk) { classifier("uber") })
+  api(libs.java.stellar.sdk)
   api(libs.kotlin.datetime)
   api(libs.bundles.ktor.client)
   implementation(libs.kotlin.serialization.json)
   implementation(libs.kotlin.logging)
+  implementation(libs.google.gson)
+  implementation(libs.toml4j)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)
   testImplementation(libs.mockk)
   testImplementation(libs.okhttp3.mockserver)
-  testImplementation(libs.google.gson)
   testImplementation(libs.logback.classic)
   testImplementation(libs.ktor.client.mock)
 
