@@ -129,6 +129,10 @@ data class ApplicationConfiguration(
   val defaultClientDomain: String? = null,
   val defaultClientConfig: ClientConfigFn = {}
 ) {
+  companion object {
+    val useHttp: ClientConfigFn = { defaultRequest { url { protocol = URLProtocol.HTTP } } }
+  }
+
   val defaultClient =
     HttpClient(OkHttp) {
       install(ContentNegotiation) { json(defaultJson) }
