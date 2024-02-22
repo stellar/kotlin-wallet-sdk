@@ -16,13 +16,11 @@ sealed interface AccountKeyPair {
     get() = keyPair.publicKey
 }
 
-@JvmInline
-value class PublicKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
+data class PublicKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
   override fun toString() = "${PublicKeyPair::class.simpleName}(address=$address)"
 }
 
-@JvmInline
-value class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
+data class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
   init {
     require(keyPair.canSign()) { "This keypair doesn't have private key and can't sign" }
   }
@@ -35,6 +33,7 @@ value class SigningKeyPair(override val keyPair: KeyPair) : AccountKeyPair {
   }
 
   companion object {
+    @JvmStatic
     fun fromSecret(secret: String): SigningKeyPair {
       return SigningKeyPair(KeyPair.fromSecretSeed(secret))
     }

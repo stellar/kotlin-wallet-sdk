@@ -4,7 +4,6 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import java.util.*
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.stellar.sdk.Network
@@ -14,6 +13,8 @@ import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.util.Util.authGet
 import org.stellar.walletsdk.util.Util.postJson
+import java.math.BigInteger
+import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -46,7 +47,19 @@ internal constructor(
     clientDomain: String? = null
   ): AuthToken {
     val challengeTxn =
-      challenge(accountAddress, memoId, clientDomain ?: cfg.app.defaultClientDomain)
+      challenge(accountAddress, memoId?.toString(), clientDomain ?: cfg.app.defaultClientDomain)
+    val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
+    return getToken(signedTxn)
+  }
+
+  suspend fun authenticateBigInt(
+    accountAddress: AccountKeyPair,
+    walletSigner: WalletSigner? = null,
+    memoId: BigInteger? = null,
+    clientDomain: String? = null
+  ): AuthToken {
+    val challengeTxn =
+      challenge(accountAddress, memoId?.toString(), clientDomain ?: cfg.app.defaultClientDomain)
     val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
   }
@@ -63,7 +76,7 @@ internal constructor(
   @Suppress("ThrowsCount")
   private suspend fun challenge(
     account: AccountKeyPair,
-    memoId: ULong? = null,
+    memoId: String? = null,
     clientDomain: String? = null
   ): ChallengeResponse {
     val url = URLBuilder(webAuthEndpoint)
@@ -73,7 +86,7 @@ internal constructor(
     url.parameters.append("home_domain", homeDomain)
 
     if (memoId != null) {
-      url.parameters.append("memo", memoId.toString())
+      url.parameters.append("memo", memoId)
     }
 
     if (!clientDomain.isNullOrBlank()) {
