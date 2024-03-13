@@ -1,10 +1,12 @@
 package org.stellar.walletsdk.exception
 
 import java.math.BigDecimal
+import org.stellar.sdk.AbstractTransaction
 import org.stellar.sdk.responses.SubmitTransactionResponse
 
 sealed class StellarException : WalletException {
   constructor(message: String) : super(message)
+
   constructor(message: String, cause: Exception) : super(message, cause)
 }
 
@@ -20,10 +22,12 @@ class AccountNotEnoughBalanceException(
 
 class TransactionSubmitFailedException(
   val response: SubmitTransactionResponse,
+  val transaction: AbstractTransaction
 ) :
   StellarException(
     "Submit transaction failed with code ${response.resultCode ?: "<unknown>"}" +
-      ".${response.operationsResultCodes ?. run { " Operation result codes: $this" } ?: ""}"
+      ".${response.operationsResultCodes ?. run { " Operation result codes: $this" } ?: ""}" +
+      " Transaction XDR: ${transaction.toEnvelopeXdrBase64()}"
   ) {
   val transactionResultCode = response.resultCode
   val operationsResultCodes = response.operationsResultCodes

@@ -117,7 +117,7 @@ internal constructor(
           val response = server.submitTransaction(signedTransaction)
 
           if (!response.isSuccess) {
-            throw TransactionSubmitFailedException(response)
+            throw TransactionSubmitFailedException(response, signedTransaction)
           }
 
           log.debug { "Transaction submitted with hash ${response.hash}" }
@@ -131,7 +131,7 @@ internal constructor(
           val response = server.submitTransaction(signedTransaction)
 
           if (!response.isSuccess) {
-            throw TransactionSubmitFailedException(response)
+            throw TransactionSubmitFailedException(response, signedTransaction)
           }
 
           log.debug { "Transaction submitted with hash ${response.hash}" }
