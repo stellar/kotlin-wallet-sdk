@@ -1,10 +1,15 @@
 package org.stellar.walletsdk
 
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import io.jsonwebtoken.Jwts
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.anchor.Auth
+import org.stellar.walletsdk.auth.DefaultAuthHeaderSigner
+import org.stellar.walletsdk.auth.createAuthSignToken
+import org.stellar.walletsdk.horizon.SigningKeyPair
+import org.stellar.walletsdk.util.Util.toJava
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 internal class AuthTest : SuspendTest() {
   private val cfg = TestWallet.cfg
@@ -57,5 +62,42 @@ internal class AuthTest : SuspendTest() {
 
     assertEquals(authToken.account, ADDRESS_ACTIVE.address)
     assertEquals(authToken.memo, memo)
+  }
+
+  @Test
+  fun headerSignerTest() {
+    val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
+    val signer = DefaultAuthHeaderSigner()
+    val token = signer.createToken("test", "subject", null, kp)
+
+    val claims = Jwts.parser().verifyWith(kp.toJava().public).build().parseSignedClaims(token)
+
+    assertEquals("test", claims.payload["url"])
+    assertEquals("subject", claims.payload["sub"])
+    assertEquals(kp.address, claims.payload["iss"])
+  }
+
+  @Test
+  fun `create token test custodial`() {
+    val signer = DefaultAuthHeaderSigner()
+    val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
+    val url =
+      "https://auth.example.com/?account=GCXXH6AYJUVTDGIHT42OZNMF3LHCV4DOKCX6HHDKWECUZYXDZSWZN6HS&memo=1234567"
+    val token = createAuthSignToken(kp, url, memoId = "1234567", authHeaderSigner = signer)
+
+    val claims = Jwts.parser().verifyWith(kp.toJava().public).build().parseSignedClaims(token)
+
+    println(token)
+  }
+
+  // In real impl custodial case is not supported, must be signed with domain signer
+  @Test
+  fun `create token test non custodial`() {
+    val signer = DefaultAuthHeaderSigner()
+    val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
+    val url =
+      "https://auth.example.com/?account=GCIBUCGPOHWMMMFPFTDWBSVHQRT4DIBJ7AD6BZJYDITBK2LCVBYW7HUQ&client_domain=example-wallet.stellar.org"
+    val token = createAuthSignToken(kp, url, authHeaderSigner = signer)
+    println(token)
   }
 }

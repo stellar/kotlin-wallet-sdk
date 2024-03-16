@@ -4,8 +4,6 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import java.math.BigInteger
-import java.util.*
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.stellar.sdk.Network
@@ -13,8 +11,10 @@ import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
-import org.stellar.walletsdk.util.Util.authGet
+import org.stellar.walletsdk.util.Util.authGetStringToken
 import org.stellar.walletsdk.util.Util.postJson
+import java.math.BigInteger
+import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -44,10 +44,16 @@ internal constructor(
     accountAddress: AccountKeyPair,
     walletSigner: WalletSigner? = null,
     memoId: ULong? = null,
-    clientDomain: String? = null
+    clientDomain: String? = null,
+    authHeaderSigner: AuthHeaderSigner? = null
   ): AuthToken {
     val challengeTxn =
-      challenge(accountAddress, memoId?.toString(), clientDomain ?: cfg.app.defaultClientDomain)
+      challenge(
+        accountAddress,
+        memoId?.toString(),
+        clientDomain ?: cfg.app.defaultClientDomain,
+        authHeaderSigner
+      )
     val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
   }
@@ -56,10 +62,16 @@ internal constructor(
     accountAddress: AccountKeyPair,
     walletSigner: WalletSigner? = null,
     memoId: BigInteger? = null,
-    clientDomain: String? = null
+    clientDomain: String? = null,
+    authHeaderSigner: AuthHeaderSigner? = null
   ): AuthToken {
     val challengeTxn =
-      challenge(accountAddress, memoId?.toString(), clientDomain ?: cfg.app.defaultClientDomain)
+      challenge(
+        accountAddress,
+        memoId?.toString(),
+        clientDomain ?: cfg.app.defaultClientDomain,
+        authHeaderSigner
+      )
     val signedTxn = sign(accountAddress, challengeTxn, walletSigner ?: cfg.app.defaultSigner)
     return getToken(signedTxn)
   }
@@ -77,7 +89,8 @@ internal constructor(
   private suspend fun challenge(
     account: AccountKeyPair,
     memoId: String? = null,
-    clientDomain: String? = null
+    clientDomain: String? = null,
+    authHeaderSigner: AuthHeaderSigner?
   ): ChallengeResponse {
     val url = URLBuilder(webAuthEndpoint)
 
@@ -97,7 +110,10 @@ internal constructor(
       "Challenge request: account = $account, memo = $memoId, client_domain = $clientDomain"
     }
 
-    val jsonResponse = httpClient.authGet<ChallengeResponse>(url.build().toString())
+    val urlString = url.build().toString()
+    val token = createAuthSignToken(account, urlString, memoId, clientDomain, authHeaderSigner)
+
+    val jsonResponse = httpClient.authGetStringToken<ChallengeResponse>(urlString, token)
 
     if (jsonResponse.transaction.isBlank()) {
       throw MissingTransactionException
@@ -177,4 +193,22 @@ internal constructor(
 
     return token
   }
+}
+
+internal fun createAuthSignToken(
+  account: AccountKeyPair,
+  urlString: String,
+  memoId: String? = null,
+  clientDomain: String? = null,
+  authHeaderSigner: AuthHeaderSigner? = null
+): String? {
+  if (authHeaderSigner != null) {
+    var subject = account.address
+    if (memoId != null) {
+      subject += ":$memoId"
+    }
+    val issuer = if (clientDomain == null) account else null
+    return authHeaderSigner.createToken(urlString, subject, clientDomain, issuer)
+  }
+  return null
 }

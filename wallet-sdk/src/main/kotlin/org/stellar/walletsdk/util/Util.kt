@@ -4,19 +4,30 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import java.time.Duration
-import java.time.Instant
 import kotlinx.serialization.SerializationException
+import org.bouncycastle.asn1.DEROctetString
+import org.bouncycastle.asn1.edec.EdECObjectIdentifiers
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.stellar.sdk.StrKey
 import org.stellar.sdk.TimeBounds
 import org.stellar.walletsdk.anchor.AnchorTransaction
 import org.stellar.walletsdk.anchor.TransactionStatus
 import org.stellar.walletsdk.asset.*
-import org.stellar.walletsdk.asset.FIAT_SCHEME
-import org.stellar.walletsdk.asset.STELLAR_SCHEME
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.exception.*
+import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.json.fromJson
 import org.stellar.walletsdk.toml.TomlInfo
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.Security
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
+import java.time.Duration
+import java.time.Instant
 
 internal object Util {
   internal fun String.isHex(): Boolean {
@@ -40,6 +51,13 @@ internal object Util {
   internal suspend inline fun <reified T> HttpClient.authGet(
     url: String,
     authToken: AuthToken? = null,
+  ): T {
+    return this.authGetStringToken(url, authToken.toString())
+  }
+
+  internal suspend inline fun <reified T> HttpClient.authGetStringToken(
+    url: String,
+    authToken: String? = null,
   ): T {
     val textBody =
       this.get(url) {
@@ -119,6 +137,27 @@ internal object Util {
 
       throw AnchorRequestException("Failed to deserialize string: $this", e)
     }
+  }
+
+  internal fun SigningKeyPair.toJava(): java.security.KeyPair {
+    Security.addProvider(BouncyCastleProvider())
+
+    val factory: KeyFactory = KeyFactory.getInstance("Ed25519")
+    val privKeyInfo =
+      PrivateKeyInfo(
+        AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519),
+        DEROctetString(StrKey.decodeEd25519SecretSeed(this.keyPair.secretSeed))
+      )
+    val pkcs8KeySpec = PKCS8EncodedKeySpec(privKeyInfo.getEncoded())
+
+    val pubKeyInfo =
+      SubjectPublicKeyInfo(AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), this.publicKey)
+    val x509KeySpec = X509EncodedKeySpec(pubKeyInfo.getEncoded())
+    var jcaPublicKey = factory.generatePublic(x509KeySpec)
+
+    val private: PrivateKey = factory.generatePrivate(pkcs8KeySpec)
+
+    return java.security.KeyPair(jcaPublicKey, private)
   }
 }
 

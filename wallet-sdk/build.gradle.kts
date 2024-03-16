@@ -35,6 +35,8 @@ dependencies {
   implementation(libs.kotlin.logging)
   implementation(libs.google.gson)
   implementation(libs.toml4j)
+  implementation(libs.jjwt)
+  implementation(libs.bcastle)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)
