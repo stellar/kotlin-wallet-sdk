@@ -4,6 +4,8 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import java.math.BigInteger
+import java.util.*
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.stellar.sdk.Network
@@ -13,8 +15,6 @@ import org.stellar.walletsdk.exception.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.util.Util.authGetStringToken
 import org.stellar.walletsdk.util.Util.postJson
-import java.math.BigInteger
-import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -111,7 +111,7 @@ internal constructor(
     }
 
     val urlString = url.build().toString()
-    val token = createAuthSignToken(account, urlString, memoId, clientDomain, authHeaderSigner)
+    val token = createAuthSignToken(account, urlString, clientDomain, authHeaderSigner)
 
     val jsonResponse = httpClient.authGetStringToken<ChallengeResponse>(urlString, token)
 
@@ -198,17 +198,12 @@ internal constructor(
 internal fun createAuthSignToken(
   account: AccountKeyPair,
   urlString: String,
-  memoId: String? = null,
   clientDomain: String? = null,
   authHeaderSigner: AuthHeaderSigner? = null
 ): String? {
   if (authHeaderSigner != null) {
-    var subject = account.address
-    if (memoId != null) {
-      subject += ":$memoId"
-    }
     val issuer = if (clientDomain == null) account else null
-    return authHeaderSigner.createToken(urlString, subject, clientDomain, issuer)
+    return authHeaderSigner.createToken(urlString, clientDomain, issuer)
   }
   return null
 }

@@ -1,15 +1,19 @@
 package org.stellar.walletsdk
 
 import io.jsonwebtoken.Jwts
+import java.time.Instant
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.time.Duration.Companion.days
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.anchor.Auth
 import org.stellar.walletsdk.auth.DefaultAuthHeaderSigner
 import org.stellar.walletsdk.auth.createAuthSignToken
+import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.SigningKeyPair
 import org.stellar.walletsdk.util.Util.toJava
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 internal class AuthTest : SuspendTest() {
   private val cfg = TestWallet.cfg
@@ -68,36 +72,59 @@ internal class AuthTest : SuspendTest() {
   fun headerSignerTest() {
     val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
     val signer = DefaultAuthHeaderSigner()
-    val token = signer.createToken("test", "subject", null, kp)
+    val token = signer.createToken("test", null, kp)
 
     val claims = Jwts.parser().verifyWith(kp.toJava().public).build().parseSignedClaims(token)
 
     assertEquals("test", claims.payload["url"])
-    assertEquals("subject", claims.payload["sub"])
-    assertEquals(kp.address, claims.payload["iss"])
   }
 
   @Test
   fun `create token test custodial`() {
-    val signer = DefaultAuthHeaderSigner()
-    val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
+    val signer = DefaultAuthHeaderSigner(100000.days)
+    val accountKp =
+      SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
     val url =
       "https://auth.example.com/?account=GCXXH6AYJUVTDGIHT42OZNMF3LHCV4DOKCX6HHDKWECUZYXDZSWZN6HS&memo=1234567"
-    val token = createAuthSignToken(kp, url, memoId = "1234567", authHeaderSigner = signer)
+    val token = createAuthSignToken(accountKp, url, authHeaderSigner = signer)
 
-    val claims = Jwts.parser().verifyWith(kp.toJava().public).build().parseSignedClaims(token)
+    val claims =
+      Jwts.parser().verifyWith(accountKp.toJava().public).build().parseSignedClaims(token)
+
+    assertEquals(url, claims.payload["url"])
 
     println(token)
   }
 
-  // In real impl custodial case is not supported, must be signed with domain signer
   @Test
   fun `create token test non custodial`() {
-    val signer = DefaultAuthHeaderSigner()
-    val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
+    val accountKp =
+      SigningKeyPair.fromSecret("SC6UWRT6SMC7DSGJR67JTYHJQ6GPSGCKYJ66V5AVCLRGSGKXUNW5OXX7")
+    val domainKp =
+      SigningKeyPair.fromSecret("SCYVDFYEHNDNTB2UER2FCYSZAYQFAAZ6BDYXL3BWRQWNL327GZUXY7D7")
+    // Signing with a domain signer
+    val signer =
+      object : DefaultAuthHeaderSigner(100000.days) {
+        override fun createToken(
+          url: String,
+          clientDomain: String?,
+          issuer: AccountKeyPair?
+        ): String {
+          val timeExp = Instant.ofEpochSecond(Clock.System.now().plus(expiration).epochSeconds)
+          val builder = createBuilder(timeExp, url)
+
+          builder.signWith(domainKp.toJava().private, Jwts.SIG.EdDSA)
+
+          return builder.compact()
+        }
+      }
     val url =
       "https://auth.example.com/?account=GCIBUCGPOHWMMMFPFTDWBSVHQRT4DIBJ7AD6BZJYDITBK2LCVBYW7HUQ&client_domain=example-wallet.stellar.org"
-    val token = createAuthSignToken(kp, url, authHeaderSigner = signer)
+    val token = createAuthSignToken(accountKp, url, authHeaderSigner = signer)
+    val claims = Jwts.parser().verifyWith(domainKp.toJava().public).build().parseSignedClaims(token)
+
+    assertEquals(url, claims.payload["url"])
+
     println(token)
   }
 }
