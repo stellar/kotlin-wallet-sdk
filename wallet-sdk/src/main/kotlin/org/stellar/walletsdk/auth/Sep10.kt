@@ -206,7 +206,7 @@ internal constructor(
   }
 }
 
-internal fun createAuthSignToken(
+fun createAuthSignToken(
   account: AccountKeyPair,
   host: String,
   path: String,
