@@ -1,6 +1,7 @@
 package org.stellar.walletsdk
 
 import io.jsonwebtoken.Jwts
+import io.ktor.http.*
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -13,7 +14,7 @@ import org.stellar.walletsdk.auth.DefaultAuthHeaderSigner
 import org.stellar.walletsdk.auth.createAuthSignToken
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.horizon.SigningKeyPair
-import org.stellar.walletsdk.util.Util.toJava
+import org.stellar.walletsdk.util.toJava
 
 internal class AuthTest : SuspendTest() {
   private val cfg = TestWallet.cfg
@@ -72,11 +73,11 @@ internal class AuthTest : SuspendTest() {
   fun headerSignerTest() {
     val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
     val signer = DefaultAuthHeaderSigner()
-    val token = signer.createToken("test", null, kp)
+    val token = signer.createToken(mapOf("testkey" to "test"), null, kp)
 
     val claims = Jwts.parser().verifyWith(kp.toJava().public).build().parseSignedClaims(token)
 
-    assertEquals("test", claims.payload["url"])
+    assertEquals("test", claims.payload["testkey"])
   }
 
   @Test
@@ -84,14 +85,27 @@ internal class AuthTest : SuspendTest() {
     val signer = DefaultAuthHeaderSigner(100000.days)
     val accountKp =
       SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
-    val url =
-      "https://auth.example.com/?account=GCXXH6AYJUVTDGIHT42OZNMF3LHCV4DOKCX6HHDKWECUZYXDZSWZN6HS&memo=1234567"
-    val token = createAuthSignToken(accountKp, url, authHeaderSigner = signer)
+    val memo = "1234567"
+    val url = "https://auth.example.com/?account=${accountKp.address}&memo=$memo"
+    val builder = URLBuilder(url)
+    val params = mapOf("account" to accountKp.address, "memo" to memo)
+
+    val token =
+      createAuthSignToken(
+        accountKp,
+        builder.host,
+        builder.encodedPath,
+        params,
+        authHeaderSigner = signer
+      )
 
     val claims =
       Jwts.parser().verifyWith(accountKp.toJava().public).build().parseSignedClaims(token)
 
-    assertEquals(url, claims.payload["url"])
+    assertEquals(builder.host, claims.payload["host"])
+    assertEquals(builder.encodedPath, claims.payload["path"])
+    assertEquals(accountKp.address, claims.payload["account"])
+    assertEquals(memo, claims.payload["memo"])
 
     println(token)
   }
@@ -106,24 +120,37 @@ internal class AuthTest : SuspendTest() {
     val signer =
       object : DefaultAuthHeaderSigner(100000.days) {
         override fun createToken(
-          url: String,
+          claims: Map<String, String>,
           clientDomain: String?,
           issuer: AccountKeyPair?
         ): String {
           val timeExp = Instant.ofEpochSecond(Clock.System.now().plus(expiration).epochSeconds)
-          val builder = createBuilder(timeExp, url)
+          val builder = createBuilder(timeExp, claims)
 
           builder.signWith(domainKp.toJava().private, Jwts.SIG.EdDSA)
 
           return builder.compact()
         }
       }
-    val url =
-      "https://auth.example.com/?account=GCIBUCGPOHWMMMFPFTDWBSVHQRT4DIBJ7AD6BZJYDITBK2LCVBYW7HUQ&client_domain=example-wallet.stellar.org"
-    val token = createAuthSignToken(accountKp, url, authHeaderSigner = signer)
+    val clientDomain = "example-wallet.stellar.org"
+    val url = "https://auth.example.com/?account=${accountKp.address}&client_domain=${clientDomain}"
+    val builder = URLBuilder(url)
+    val params = mapOf("account" to accountKp.address, "client_domain" to clientDomain)
+
+    val token =
+      createAuthSignToken(
+        accountKp,
+        builder.host,
+        builder.encodedPath,
+        params,
+        authHeaderSigner = signer
+      )
     val claims = Jwts.parser().verifyWith(domainKp.toJava().public).build().parseSignedClaims(token)
 
-    assertEquals(url, claims.payload["url"])
+    assertEquals(builder.host, claims.payload["host"])
+    assertEquals(builder.encodedPath, claims.payload["path"])
+    assertEquals(accountKp.address, claims.payload["account"])
+    assertEquals(clientDomain, claims.payload["client_domain"])
 
     println(token)
   }

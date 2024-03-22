@@ -138,27 +138,6 @@ internal object Util {
       throw AnchorRequestException("Failed to deserialize string: $this", e)
     }
   }
-
-  internal fun SigningKeyPair.toJava(): java.security.KeyPair {
-    Security.addProvider(BouncyCastleProvider())
-
-    val factory: KeyFactory = KeyFactory.getInstance("Ed25519")
-    val privKeyInfo =
-      PrivateKeyInfo(
-        AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519),
-        DEROctetString(StrKey.decodeEd25519SecretSeed(this.keyPair.secretSeed))
-      )
-    val pkcs8KeySpec = PKCS8EncodedKeySpec(privKeyInfo.getEncoded())
-
-    val pubKeyInfo =
-      SubjectPublicKeyInfo(AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), this.publicKey)
-    val x509KeySpec = X509EncodedKeySpec(pubKeyInfo.getEncoded())
-    var jcaPublicKey = factory.generatePublic(x509KeySpec)
-
-    val private: PrivateKey = factory.generatePrivate(pkcs8KeySpec)
-
-    return java.security.KeyPair(jcaPublicKey, private)
-  }
 }
 
 fun Duration.toTimeBounds(): TimeBounds {
@@ -188,4 +167,25 @@ fun String.toAssetId(): AssetId {
     return FiatAssetId(str)
   }
   throw InvalidJsonException("Unknown scheme", str)
+}
+
+fun SigningKeyPair.toJava(): java.security.KeyPair {
+  Security.addProvider(BouncyCastleProvider())
+
+  val factory: KeyFactory = KeyFactory.getInstance("Ed25519")
+  val privKeyInfo =
+    PrivateKeyInfo(
+      AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519),
+      DEROctetString(StrKey.decodeEd25519SecretSeed(this.keyPair.secretSeed))
+    )
+  val pkcs8KeySpec = PKCS8EncodedKeySpec(privKeyInfo.getEncoded())
+
+  val pubKeyInfo =
+    SubjectPublicKeyInfo(AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), this.publicKey)
+  val x509KeySpec = X509EncodedKeySpec(pubKeyInfo.getEncoded())
+  val jcaPublicKey = factory.generatePublic(x509KeySpec)
+
+  val private: PrivateKey = factory.generatePrivate(pkcs8KeySpec)
+
+  return java.security.KeyPair(jcaPublicKey, private)
 }

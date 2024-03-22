@@ -95,25 +95,36 @@ internal constructor(
     val url = URLBuilder(webAuthEndpoint)
 
     // Add required query params
-    url.parameters.append("account", account.address)
-    url.parameters.append("home_domain", homeDomain)
+    val parameters = mutableMapOf<String, String>()
+    parameters["account"] = account.address
+    parameters["home_domain"] = homeDomain
 
     if (memoId != null) {
-      url.parameters.append("memo", memoId)
+      parameters["memo"] = memoId
     }
 
     if (!clientDomain.isNullOrBlank()) {
-      url.parameters.append("client_domain", clientDomain)
+      parameters["client_domain"] = clientDomain
     }
+
+    parameters.forEach { url.parameters.append(it.key, it.value) }
 
     log.debug {
       "Challenge request: account = $account, memo = $memoId, client_domain = $clientDomain"
     }
 
-    val urlString = url.build().toString()
-    val token = createAuthSignToken(account, urlString, clientDomain, authHeaderSigner)
+    val token =
+      createAuthSignToken(
+        account,
+        url.host,
+        url.encodedPath,
+        parameters,
+        clientDomain,
+        authHeaderSigner
+      )
 
-    val jsonResponse = httpClient.authGetStringToken<ChallengeResponse>(urlString, token)
+    val jsonResponse =
+      httpClient.authGetStringToken<ChallengeResponse>(url.build().toString(), token)
 
     if (jsonResponse.transaction.isBlank()) {
       throw MissingTransactionException
@@ -197,13 +208,19 @@ internal constructor(
 
 internal fun createAuthSignToken(
   account: AccountKeyPair,
-  urlString: String,
+  host: String,
+  path: String,
+  parameters: Map<String, String>,
   clientDomain: String? = null,
   authHeaderSigner: AuthHeaderSigner? = null
 ): String? {
   if (authHeaderSigner != null) {
+    // For noncustodial issuer is unknown -> comes from SEP-1 toml file
     val issuer = if (clientDomain == null) account else null
-    return authHeaderSigner.createToken(urlString, clientDomain, issuer)
+    val claims = parameters.toMutableMap()
+    claims["host"] = host
+    claims["path"] = path
+    return authHeaderSigner.createToken(claims, clientDomain, issuer)
   }
   return null
 }
