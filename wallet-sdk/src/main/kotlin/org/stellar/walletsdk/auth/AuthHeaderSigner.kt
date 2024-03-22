@@ -41,9 +41,9 @@ open class DefaultAuthHeaderSigner(val expiration: Duration = 15.minutes) : Auth
   }
 
   fun createBuilder(timeExp: Instant, claims: Map<String, String>): JwtBuilder {
-    return Jwts.builder()
-      .issuedAt(Date.from(Instant.now()))
-      .expiration(Date.from(timeExp))
-      .also { builder -> claims.forEach { builder.claim(it.key, it.value) } }
+    return Jwts.builder().issuedAt(Date.from(Instant.now())).expiration(Date.from(timeExp)).also {
+      builder ->
+      claims.forEach { builder.claim(it.key, it.value) }
+    }
   }
 }
