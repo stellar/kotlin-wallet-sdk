@@ -210,7 +210,7 @@ fun createAuthSignToken(
     // For noncustodial issuer is unknown -> comes from SEP-1 toml file
     val issuer = if (clientDomain == null) account else null
     val claims = parameters.toMutableMap()
-    claims["aud"] = webAuthEndpoint
+    claims["web_auth_endpoint"] = webAuthEndpoint
     return authHeaderSigner.createToken(claims, clientDomain, issuer)
   }
   return null

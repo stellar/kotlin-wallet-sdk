@@ -100,7 +100,7 @@ internal class AuthTest : SuspendTest() {
     val claims =
       Jwts.parser().verifyWith(accountKp.toJava().public).build().parseSignedClaims(token)
 
-    assertEquals("https://example.com/sep10/auth", claims.payload["aud"])
+    assertEquals("https://example.com/sep10/auth", claims.payload["web_auth_endpoint"])
     assertEquals(accountKp.address, claims.payload["account"])
     assertEquals(memo, claims.payload["memo"])
 
@@ -145,7 +145,7 @@ internal class AuthTest : SuspendTest() {
       )
     val claims = Jwts.parser().verifyWith(domainKp.toJava().public).build().parseSignedClaims(token)
 
-    assertEquals("https://example.com/sep10/auth", claims.payload["aud"])
+    assertEquals("https://example.com/sep10/auth", claims.payload["web_auth_endpoint"])
     assertEquals(accountKp.address, claims.payload["account"])
     assertEquals(clientDomain, claims.payload["client_domain"])
 
