@@ -92,8 +92,7 @@ internal class AuthTest : SuspendTest() {
     val token =
       createAuthSignToken(
         accountKp,
-        builder.host,
-        builder.encodedPath,
+        "https://example.com/sep10/auth",
         params,
         authHeaderSigner = signer
       )
@@ -101,8 +100,7 @@ internal class AuthTest : SuspendTest() {
     val claims =
       Jwts.parser().verifyWith(accountKp.toJava().public).build().parseSignedClaims(token)
 
-    assertEquals(builder.host, claims.payload["host"])
-    assertEquals(builder.encodedPath, claims.payload["path"])
+    assertEquals("https://example.com/sep10/auth", claims.payload["aud"])
     assertEquals(accountKp.address, claims.payload["account"])
     assertEquals(memo, claims.payload["memo"])
 
@@ -141,15 +139,13 @@ internal class AuthTest : SuspendTest() {
     val token =
       createAuthSignToken(
         accountKp,
-        builder.host,
-        builder.encodedPath,
+        "https://example.com/sep10/auth",
         params,
         authHeaderSigner = signer
       )
     val claims = Jwts.parser().verifyWith(domainKp.toJava().public).build().parseSignedClaims(token)
 
-    assertEquals(builder.host, claims.payload["host"])
-    assertEquals(builder.encodedPath, claims.payload["path"])
+    assertEquals("https://example.com/sep10/auth", claims.payload["aud"])
     assertEquals(accountKp.address, claims.payload["account"])
     assertEquals(clientDomain, claims.payload["client_domain"])
 

@@ -114,14 +114,7 @@ internal constructor(
     }
 
     val token =
-      createAuthSignToken(
-        account,
-        url.host,
-        url.encodedPath,
-        parameters,
-        clientDomain,
-        authHeaderSigner
-      )
+      createAuthSignToken(account, webAuthEndpoint, parameters, clientDomain, authHeaderSigner)
 
     val jsonResponse =
       httpClient.authGetStringToken<ChallengeResponse>(url.build().toString(), token)
@@ -208,8 +201,7 @@ internal constructor(
 
 fun createAuthSignToken(
   account: AccountKeyPair,
-  host: String,
-  path: String,
+  webAuthEndpoint: String,
   parameters: Map<String, String>,
   clientDomain: String? = null,
   authHeaderSigner: AuthHeaderSigner? = null
@@ -218,8 +210,7 @@ fun createAuthSignToken(
     // For noncustodial issuer is unknown -> comes from SEP-1 toml file
     val issuer = if (clientDomain == null) account else null
     val claims = parameters.toMutableMap()
-    claims["host"] = host
-    claims["path"] = path
+    claims["aud"] = webAuthEndpoint
     return authHeaderSigner.createToken(claims, clientDomain, issuer)
   }
   return null
