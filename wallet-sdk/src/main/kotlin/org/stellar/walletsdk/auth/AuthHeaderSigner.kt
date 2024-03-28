@@ -77,7 +77,8 @@ open class DomainAuthHeaderSigner(
     issuer: AccountKeyPair?
   ): String {
     require(clientDomain != null) {
-      "This signed should only be used for remote signing. For local signing use ${DefaultAuthHeaderSigner::class.simpleName} instead"
+      "This signed should only be used for remote signing. For local signing use " +
+              "${DefaultAuthHeaderSigner::class.simpleName} instead"
     }
     val now = Clock.System.now()
     val timeExp = now.plus(expiration).epochSeconds
