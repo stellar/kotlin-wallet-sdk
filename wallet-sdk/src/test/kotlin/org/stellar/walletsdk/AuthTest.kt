@@ -6,6 +6,7 @@ import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import org.junit.jupiter.api.Test
 import org.stellar.walletsdk.anchor.Auth
@@ -69,7 +70,7 @@ internal class AuthTest : SuspendTest() {
   }
 
   @Test
-  fun headerSignerTest() {
+  fun headerSignerTest() = runTest {
     val kp = SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
     val signer = DefaultAuthHeaderSigner()
     val token = signer.createToken(mapOf("testkey" to "test"), null, kp)
@@ -80,13 +81,12 @@ internal class AuthTest : SuspendTest() {
   }
 
   @Test
-  fun `create token test custodial`() {
+  fun `create token test custodial`() = runTest {
     val signer = DefaultAuthHeaderSigner()
     val accountKp =
       SigningKeyPair.fromSecret("SBPPLU2KO3PDBLSDFIWARQSW5SAOIHTJDUQIWN3BQS7KPNMVUDSU37QO")
     val memo = "1234567"
     val url = "https://example.com/sep10/auth?account=${accountKp.address}&memo=$memo"
-    val builder = URLBuilder(url)
     val params = mapOf("account" to accountKp.address, "memo" to memo)
 
     val token =
@@ -109,7 +109,7 @@ internal class AuthTest : SuspendTest() {
   }
 
   @Test
-  fun `create token test non custodial`() {
+  fun `create token test non custodial`() = runTest {
     val accountKp =
       SigningKeyPair.fromSecret("SC6UWRT6SMC7DSGJR67JTYHJQ6GPSGCKYJ66V5AVCLRGSGKXUNW5OXX7")
     val domainKp =
@@ -117,7 +117,7 @@ internal class AuthTest : SuspendTest() {
     // Signing with a domain signer
     val signer =
       object : DefaultAuthHeaderSigner() {
-        override fun createToken(
+        override suspend fun createToken(
           claims: Map<String, String>,
           clientDomain: String?,
           issuer: AccountKeyPair?

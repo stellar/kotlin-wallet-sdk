@@ -67,6 +67,8 @@ internal object Util {
         }
         .bodyAsText()
 
+    println(textBody)
+
     return textBody.fromJsonOrError()
   }
 

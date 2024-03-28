@@ -199,7 +199,7 @@ internal constructor(
   }
 }
 
-fun createAuthSignToken(
+suspend fun createAuthSignToken(
   account: AccountKeyPair,
   webAuthEndpoint: String,
   parameters: Map<String, String>,
