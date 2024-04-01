@@ -54,6 +54,10 @@ open class DefaultAuthHeaderSigner(open val expiration: Duration = 15.minutes) :
   }
 }
 
+/**
+ * Auth header signer using remote server to form and sign the JWT. On calling [createToken] it will
+ * send [JWTSignData] to the specified [url], expecting [SignedJWT] in response.
+ */
 open class DomainAuthHeaderSigner(
   val url: String,
   val requestTransformer: HttpRequestBuilder.() -> Unit = {},
@@ -78,7 +82,7 @@ open class DomainAuthHeaderSigner(
   ): String {
     require(clientDomain != null) {
       "This signed should only be used for remote signing. For local signing use " +
-              "${DefaultAuthHeaderSigner::class.simpleName} instead"
+        "${DefaultAuthHeaderSigner::class.simpleName} instead"
     }
     val now = Clock.System.now()
     val timeExp = now.plus(expiration).epochSeconds
