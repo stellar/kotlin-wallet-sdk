@@ -49,7 +49,7 @@ data class Payment(
 @Serializable
 data class FeeDetails(
   val total: String,
-  val asset: String? = null,
+  val asset: String,
   val details: List<FeeDescription>? = null
 )
 

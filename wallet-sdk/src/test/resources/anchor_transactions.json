@@ -36,7 +36,8 @@
     "amount_out": "32.00",
     "amount_fee": "1.00",
     "fee_details": {
-      "total": "1.00"
+      "total": "1.00",
+      "asset":  "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
     },
     "started_at": "2022-06-07T20:18:59.349856Z",
     "completed_at": "2022-06-07T20:20:24.569693Z",
