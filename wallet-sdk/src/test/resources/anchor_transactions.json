@@ -10,6 +10,10 @@
     "amount_out_asset": "stellar:SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B",
     "amount_fee": "1.00",
     "amount_fee_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+    "fee_details": {
+      "total": "1.00",
+      "asset":  "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+    },
     "started_at": "2022-05-25T20:32:54.751725Z",
     "completed_at": "2022-05-25T20:33:33.954697Z",
     "stellar_transaction_id": "636e471ac1fc07053d54aa9904233e6e2ac55289dd9f522b49fce2bd9fc69467",
@@ -31,6 +35,10 @@
     "amount_in": "33.00",
     "amount_out": "32.00",
     "amount_fee": "1.00",
+    "fee_details": {
+      "total": "1.00",
+      "asset":  "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+    },
     "started_at": "2022-06-07T20:18:59.349856Z",
     "completed_at": "2022-06-07T20:20:24.569693Z",
     "stellar_transaction_id": "2c5ed43935774db06995da719d6a1901275ec65251e4ae3a4f73dd808b1a1486",
@@ -52,6 +60,7 @@
     "amount_in": null,
     "amount_out": null,
     "amount_fee": null,
+    "fee_details": null,
     "started_at": "2022-12-05T21:47:41.608025Z",
     "completed_at": null,
     "stellar_transaction_id": null,
@@ -73,6 +82,7 @@
     "amount_in": null,
     "amount_out": null,
     "amount_fee": null,
+    "fee_details": null,
     "started_at": "2022-12-05T23:04:57.704541Z",
     "completed_at": null,
     "stellar_transaction_id": null,

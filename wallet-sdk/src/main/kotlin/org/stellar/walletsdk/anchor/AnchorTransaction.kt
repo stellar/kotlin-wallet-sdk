@@ -31,7 +31,8 @@ sealed interface ProcessingAnchorTransaction : AnchorTransaction {
   val amountOutAsset: String?
   val amountOut: String
   val amountFeeAsset: String?
-  val amountFee: String
+  val amountFee: String?
+  val feeDetails: FeeDetails?
   val completedAt: Instant?
   val stellarTransactionId: String?
   val externalTransactionId: String?
@@ -52,7 +53,8 @@ data class DepositTransaction(
   @SerialName("amount_out_asset") override val amountOutAsset: String? = null,
   @SerialName("amount_out") override val amountOut: String,
   @SerialName("amount_fee_asset") override val amountFeeAsset: String? = null,
-  @SerialName("amount_fee") override val amountFee: String,
+  @SerialName("amount_fee") override val amountFee: String? = null,
+  @SerialName("fee_details") override val feeDetails: FeeDetails? = null,
   @SerialName("started_at") override val startedAt: Instant,
   @SerialName("completed_at") override val completedAt: Instant? = null,
   @SerialName("stellar_transaction_id") override val stellarTransactionId: String? = null,
@@ -78,7 +80,8 @@ data class WithdrawalTransaction(
   @SerialName("amount_out_asset") override val amountOutAsset: String? = null,
   @SerialName("amount_out") override val amountOut: String,
   @SerialName("amount_fee_asset") override val amountFeeAsset: String? = null,
-  @SerialName("amount_fee") override val amountFee: String,
+  @SerialName("amount_fee") override val amountFee: String? = null,
+  @SerialName("fee_details") override val feeDetails: FeeDetails? = null,
   @SerialName("started_at") override val startedAt: Instant,
   @SerialName("completed_at") override val completedAt: Instant? = null,
   @SerialName("stellar_transaction_id") override val stellarTransactionId: String? = null,
@@ -130,6 +133,7 @@ data class ErrorTransaction(
   @SerialName("amount_out") val amountOut: String? = null,
   @SerialName("amount_fee_asset") val amountFeeAsset: String? = null,
   @SerialName("amount_fee") val amountFee: String? = null,
+  @SerialName("fee_details") val feeDetails: FeeDetails? = null,
   @SerialName("completed_at") val completedAt: String? = null,
   @SerialName("stellar_transaction_id") val stellarTransactionId: String? = null,
   @SerialName("external_transaction_id") val externalTransactionId: String? = null,

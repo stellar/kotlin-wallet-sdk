@@ -46,6 +46,16 @@ data class Payment(
   @SerialName("id_type") val idType: String
 )
 
+@Serializable
+data class FeeDetails(
+  val total: String,
+  val asset: String,
+  val details: List<FeeDescription>? = null
+)
+
+@Serializable
+data class FeeDescription(val name: String, val description: String, val amount: String?)
+
 enum class MemoType(val mapper: (String) -> Memo, val serialName: String) {
   @SerialName("text") TEXT({ s -> Memo.text(s) }, "text"),
   /** Hash memo. Supports hex or base64 string encoding */
