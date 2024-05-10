@@ -41,9 +41,9 @@ data class Refunds(
 @Serializable
 data class Payment(
   @SerialName("amount") val amount: String,
-  @SerialName("fee") val fee: String,
+  @SerialName("fee") val fee: String? = null,
   @SerialName("id") val id: String,
-  @SerialName("id_type") val idType: String
+  @SerialName("id_type") val idType: String? = null
 )
 
 @Serializable
