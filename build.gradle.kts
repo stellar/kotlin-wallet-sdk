@@ -12,7 +12,7 @@ val jvmVersion = JavaVersion.VERSION_11
 
 allprojects {
   group = "org.stellar.wallet-sdk"
-  version = "1.5.1"
+  version = "1.6.0"
 }
 
 subprojects {
@@ -25,7 +25,6 @@ subprojects {
   repositories {
     mavenLocal()
     mavenCentral()
-    maven { url = uri("https://jitpack.io") }
   }
 
   // Do not apply spotless and detekt to auto-generated files
