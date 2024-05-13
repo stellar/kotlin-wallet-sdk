@@ -12,6 +12,7 @@ import java.security.spec.X509EncodedKeySpec
 import java.time.Duration
 import java.time.Instant
 import kotlinx.serialization.SerializationException
+import mu.KotlinLogging
 import org.bouncycastle.asn1.DEROctetString
 import org.bouncycastle.asn1.edec.EdECObjectIdentifiers
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
@@ -30,6 +31,8 @@ import org.stellar.walletsdk.json.fromJson
 import org.stellar.walletsdk.toml.TomlInfo
 
 internal object Util {
+  private val log = KotlinLogging.logger {}
+
   internal fun String.isHex(): Boolean {
     return this.toBigIntegerOrNull(16) != null
   }
@@ -67,7 +70,7 @@ internal object Util {
         }
         .bodyAsText()
 
-    println(textBody)
+    log.debug { "Received $url response $textBody" }
 
     return textBody.fromJsonOrError()
   }
