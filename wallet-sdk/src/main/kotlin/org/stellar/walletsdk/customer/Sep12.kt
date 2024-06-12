@@ -25,8 +25,9 @@ internal constructor(
    * memo is present in the decoded SEP-10 JWT's sub value, it must match this parameter value.
    * @param type (optional) the type of action the customer is being KYCd for.
    * @param lang (optional) Defaults to en. Language code specified using ISO 639-1. Human-readable
-   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed for.
    * descriptions, choices, and messages should be in this language.
+   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed
+   * for.
    * @return a customer data object
    */
   suspend fun get(
@@ -72,14 +73,15 @@ internal constructor(
    * @param memo (optional) the client-generated memo of type ID that uniquely identifies the
    * customer. If a memo is present in the decoded SEP-10 JWT's sub value, it must match this
    * parameter value.
-   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed for.
+   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed
+   * for.
    * @return a customer with id information
    */
   suspend fun add(
     sep9Info: Map<String, String>,
     memo: ULong? = null,
     type: String? = null,
-    transactionId : String? = null,
+    transactionId: String? = null,
   ): AddCustomerResponse {
     val customer: MutableMap<String, String> = mutableMapOf()
 
@@ -104,7 +106,8 @@ internal constructor(
    * @param memo (optional) the client-generated memo of type ID that uniquely identifies the
    * customer. If a memo is present in the decoded SEP-10 JWT's sub value, it must match this
    * parameter value.
-   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed for.
+   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed
+   * for.
    * @return a customer with id information
    */
   suspend fun update(
