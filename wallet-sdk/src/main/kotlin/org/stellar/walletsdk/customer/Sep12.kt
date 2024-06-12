@@ -26,6 +26,8 @@ internal constructor(
    * @param type (optional) the type of action the customer is being KYCd for.
    * @param lang (optional) Defaults to en. Language code specified using ISO 639-1. Human-readable
    * descriptions, choices, and messages should be in this language.
+   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed
+   * for.
    * @return a customer data object
    */
   suspend fun get(
@@ -33,6 +35,7 @@ internal constructor(
     memo: ULong? = null,
     type: String? = null,
     lang: String? = null,
+    transactionId: String? = null,
   ): GetCustomerResponse {
     validateMemo(memo)
 
@@ -42,6 +45,7 @@ internal constructor(
     urlBuilder.addParameter("memo", memo?.toString())
     urlBuilder.addParameter("type", type)
     urlBuilder.addParameter("lang", lang)
+    urlBuilder.addParameter("transaction_id", transactionId)
     val urlString = urlBuilder.buildString()
 
     val response = httpClient.authGet<GetCustomerResponse>(urlString, token)
@@ -69,12 +73,15 @@ internal constructor(
    * @param memo (optional) the client-generated memo of type ID that uniquely identifies the
    * customer. If a memo is present in the decoded SEP-10 JWT's sub value, it must match this
    * parameter value.
+   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed
+   * for.
    * @return a customer with id information
    */
   suspend fun add(
     sep9Info: Map<String, String>,
     memo: ULong? = null,
     type: String? = null,
+    transactionId: String? = null,
   ): AddCustomerResponse {
     val customer: MutableMap<String, String> = mutableMapOf()
 
@@ -82,6 +89,7 @@ internal constructor(
 
     val urlBuilder = URLBuilder(baseUrl)
     urlBuilder.appendPathSegments("customer")
+    urlBuilder.addParameter("transaction_id", transactionId)
     val urlString = urlBuilder.buildString()
 
     return httpClient.putJson(urlString, customer.toMap(), token)
@@ -98,6 +106,8 @@ internal constructor(
    * @param memo (optional) the client-generated memo of type ID that uniquely identifies the
    * customer. If a memo is present in the decoded SEP-10 JWT's sub value, it must match this
    * parameter value.
+   * @param transactionId (optional) the ID of the transaction that the customer is being KYC'ed
+   * for.
    * @return a customer with id information
    */
   suspend fun update(
@@ -105,6 +115,7 @@ internal constructor(
     id: String,
     type: String? = null,
     memo: ULong? = null,
+    transactionId: String? = null,
   ): AddCustomerResponse {
     val customer: MutableMap<String, String> = mutableMapOf("id" to id)
 
@@ -116,6 +127,7 @@ internal constructor(
 
     val urlBuilder = URLBuilder(baseUrl)
     urlBuilder.appendPathSegments("customer")
+    urlBuilder.addParameter("transaction_id", transactionId)
     val urlString = urlBuilder.buildString()
 
     return httpClient.putJson(urlString, customer.toMap(), token)
