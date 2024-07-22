@@ -92,7 +92,7 @@ data class WithdrawalTransaction(
   val to: PublicKeyPair? = null,
   @SerialName("withdraw_memo") val withdrawalMemo: String? = null,
   @SerialName("withdraw_memo_type") val withdrawalMemoType: MemoType,
-  @SerialName("withdraw_anchor_account") val withdrawAnchorAccount: String
+  @SerialName("withdraw_anchor_account") val withdrawAnchorAccount: String? = null
 ) : ProcessingAnchorTransaction
 
 @Serializable
