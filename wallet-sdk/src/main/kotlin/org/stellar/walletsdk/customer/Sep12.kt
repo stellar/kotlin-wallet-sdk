@@ -85,11 +85,10 @@ internal constructor(
   ): AddCustomerResponse {
     val customer: MutableMap<String, String> = mutableMapOf()
 
-    populateMap(type, customer, memo, sep9Info)
+    populateMap(type, transactionId, customer, memo, sep9Info)
 
     val urlBuilder = URLBuilder(baseUrl)
     urlBuilder.appendPathSegments("customer")
-    urlBuilder.addParameter("transaction_id", transactionId)
     val urlString = urlBuilder.buildString()
 
     return httpClient.putJson(urlString, customer.toMap(), token)
@@ -123,11 +122,10 @@ internal constructor(
       throw CustomerUpdateException()
     }
 
-    populateMap(type, customer, memo, sep9Info)
+    populateMap(type, transactionId, customer, memo, sep9Info)
 
     val urlBuilder = URLBuilder(baseUrl)
     urlBuilder.appendPathSegments("customer")
-    urlBuilder.addParameter("transaction_id", transactionId)
     val urlString = urlBuilder.buildString()
 
     return httpClient.putJson(urlString, customer.toMap(), token)
@@ -135,12 +133,16 @@ internal constructor(
 
   private fun populateMap(
     type: String?,
+    transactionId: String?,
     customer: MutableMap<String, String>,
     memo: ULong?,
     sep9Info: Map<String, String>
   ) {
     if (type != null) {
       customer["type"] = type
+    }
+    if (transactionId != null) {
+      customer["transaction_id"] = transactionId
     }
     validateMemo(memo) { customer["memo"] = it.toString() }
 
