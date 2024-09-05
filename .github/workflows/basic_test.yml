@@ -19,7 +19,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Check code formatting
-        run: ./gradlew spotlessCheck || echo "❌ Your code is not properly formatted. You can run './gradlew spotlessApply' to format it. 👀"
+        run: ./gradlew spotlessCheck || (echo "❌ Your code is not properly formatted. You can run './gradlew spotlessApply' to format it. 👀" && exit 1)
 
       - name: Detekt
         run: ./gradlew detekt

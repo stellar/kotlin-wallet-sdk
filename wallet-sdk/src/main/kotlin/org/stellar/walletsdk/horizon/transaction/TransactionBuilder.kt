@@ -1,6 +1,7 @@
 package org.stellar.walletsdk.horizon.transaction
 
 import org.stellar.sdk.*
+import org.stellar.sdk.TransactionBuilder as SdkBuilder
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.anchor.MemoType
@@ -13,7 +14,6 @@ import org.stellar.walletsdk.exception.ValidationException
 import org.stellar.walletsdk.horizon.AccountKeyPair
 import org.stellar.walletsdk.util.requireStatus
 import org.stellar.walletsdk.util.toTimeBounds
-import org.stellar.sdk.TransactionBuilder as SdkBuilder
 
 /** Class that allows to construct Stellar transactions, containing one or more operations */
 @Suppress("TooManyFunctions")
