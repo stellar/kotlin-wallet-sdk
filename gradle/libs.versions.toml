@@ -1,25 +1,25 @@
 [versions]
 # Library versions
-bcastle = "1.77"
-coroutines = "1.6.4"
-google-gson = "2.8.9"
-hoplite = "2.7.0"
-jjwt = "0.12.5"
-java-stellar-sdk = "0.43.2"
-dokka = "1.6.10"
+bcastle = "1.78.1"
+coroutines = "1.8.1"
+google-gson = "2.11.0"
+hoplite = "2.7.5"
+jjwt = "0.12.6"
+java-stellar-sdk = "0.44.0"
+dokka = "1.9.20"
 kotlin = "1.8.20"
-kotlinx-json = "1.5.0"
-kotlinx-datetime = "0.4.0"
-ktor = "2.2.1"
-mockk = "1.12.2"
-okhttp3 = "4.9.3"
-kotlin-logging = "3.0.2"
-logback-classic = "1.4.5"
+kotlinx-json = "1.7.2"
+kotlinx-datetime = "0.6.1"
+ktor = "2.3.12"
+mockk = "1.13.12"
+okhttp3 = "4.12.0"
+kotlin-logging = "3.0.5"
+logback-classic = "1.5.7"
 toml4j = "0.7.2"
 
 # Plugin versions
-spotless = "6.9.1"
-detekt = "1.22.0"
+spotless = "6.25.0"
+detekt = "1.23.6"
 
 [libraries]
 bcastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bcastle" }
