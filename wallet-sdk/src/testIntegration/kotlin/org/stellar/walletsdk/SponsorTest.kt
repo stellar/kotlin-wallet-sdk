@@ -11,7 +11,7 @@ class SponsorTest {
   private val stellar = wallet.stellar()
   private val account = wallet.stellar().account()
   private val sponsoringKey =
-    SigningKeyPair.fromSecret("SAHXRL7XY2RMUETMIRORXSQ7JJ73FOOF4OMLDSCJW22HRPMULKY4M7KP")
+    SigningKeyPair.fromSecret("SBHTWEF5U7FK53FLGDMBQYGXRUJ24VBM3M6VDXCHRIGCRG3Z64PH45LW")
 
   @Test @Order(0) fun testSponsorNewAccount(): Unit = runBlocking { createAccount() }
 
