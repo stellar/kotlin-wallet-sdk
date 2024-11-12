@@ -1,7 +1,9 @@
 package org.stellar.walletsdk.horizon.transaction
 
+import java.math.BigDecimal
 import mu.KotlinLogging
 import org.stellar.sdk.*
+import org.stellar.sdk.operations.*
 import org.stellar.walletsdk.DECIMAL_POINT_PRECISION
 import org.stellar.walletsdk.asset.IssuedAssetId
 import org.stellar.walletsdk.exception.HorizonRequestFailedException
@@ -37,9 +39,10 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
 
     val signer = Signer.ed25519PublicKey(signerAddress.keyPair)
 
-    SetOptionsOperation.Builder()
-      .setSourceAccount(sourceAddress)
-      .setSigner(signer, signerWeight)
+    SetOptionsOperation.builder()
+      .sourceAccount(sourceAddress)
+      .signer(signer)
+      .signerWeight(signerWeight)
       .build()
   }
 
@@ -70,7 +73,7 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
   fun lockAccountMasterKey() = building {
     log.debug { "Lock master key tx: accountAddress = $sourceAddress" }
 
-    SetOptionsOperation.Builder().setSourceAccount(sourceAddress).setMasterKeyWeight(0).build()
+    SetOptionsOperation.builder().sourceAccount(sourceAddress).masterKeyWeight(0).build()
   }
 
   /**
@@ -91,9 +94,13 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
         "asset=$asset, trustLimit = $trustLimit"
     }
 
-    val stellarAsset = ChangeTrustAsset.createNonNativeAsset(asset.code, asset.issuer)
+    val stellarAsset = ChangeTrustAsset(Asset.createNonNativeAsset(asset.code, asset.issuer))
 
-    ChangeTrustOperation.Builder(stellarAsset, trustLimit).setSourceAccount(sourceAddress).build()
+    ChangeTrustOperation.builder()
+      .asset(stellarAsset)
+      .limit(BigDecimal(trustLimit))
+      .sourceAccount(sourceAddress)
+      .build()
   }
 
   /**
@@ -108,11 +115,11 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
   }
 
   fun setThreshold(low: Int, medium: Int, high: Int) = building {
-    SetOptionsOperation.Builder()
-      .setSourceAccount(sourceAddress)
-      .setLowThreshold(low)
-      .setMediumThreshold(medium)
-      .setHighThreshold(high)
+    SetOptionsOperation.builder()
+      .sourceAccount(sourceAddress)
+      .lowThreshold(low)
+      .mediumThreshold(medium)
+      .highThreshold(high)
       .build()
   }
 
@@ -126,8 +133,10 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
         "startBalance = $startingBalance"
     }
 
-    return CreateAccountOperation.Builder(newAccount.address, startingBalance.toString())
-      .setSourceAccount(sourceAddress)
+    return CreateAccountOperation.builder()
+      .destination(newAccount.address)
+      .startingBalance(BigDecimal(startingBalance.toString()))
+      .sourceAccount(sourceAddress)
       .build()
   }
 }

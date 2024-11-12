@@ -2,7 +2,8 @@ package org.stellar.walletsdk.recovery
 
 import io.ktor.client.*
 import mu.KotlinLogging
-import org.stellar.sdk.*
+import org.stellar.sdk.KeyPair
+import org.stellar.sdk.Transaction
 import org.stellar.sdk.xdr.DecoratedSignature
 import org.stellar.sdk.xdr.Signature
 import org.stellar.walletsdk.AccountThreshold

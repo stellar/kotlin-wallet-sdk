@@ -33,8 +33,7 @@ fun AccountResponse.reservedBalance(): String {
   val numSponsoring = numSponsoring.toBigDecimal()
   val numSponsored = numSponsored.toBigDecimal()
 
-  val sellingLiabilities =
-    balances.find { it.assetType == "native" }?.sellingLiabilities?.get() ?: "0"
+  val sellingLiabilities = balances.find { it.assetType == "native" }?.sellingLiabilities ?: "0"
 
   //  (2 + numSubEntries + numSponsoring - numSponsored) * baseReserve + liabilities.selling
   return BigDecimal(BASE_RESERVE_MIN_COUNT)

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.stellar.sdk.Server
-import org.stellar.sdk.SetOptionsOperation
+import org.stellar.sdk.operations.SetOptionsOperation
 import org.stellar.walletsdk.*
 
 internal class AddRemoveSignerTest {

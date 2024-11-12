@@ -2,7 +2,7 @@ package org.stellar.walletsdk.exception
 
 import java.math.BigDecimal
 import org.stellar.sdk.AbstractTransaction
-import org.stellar.sdk.responses.SubmitTransactionResponse
+import org.stellar.sdk.exception.BadRequestException
 
 sealed class StellarException : WalletException {
   constructor(message: String) : super(message)
@@ -21,23 +21,25 @@ class AccountNotEnoughBalanceException(
   )
 
 class TransactionSubmitFailedException(
-  val response: SubmitTransactionResponse,
+  val exception: BadRequestException,
   val transaction: AbstractTransaction
 ) :
   StellarException(
-    "Submit transaction failed with code ${response.resultCode ?: "<unknown>"}" +
-      ".${response.operationsResultCodes ?. run { " Operation result codes: $this" } ?: ""}" +
+    "Submit transaction failed with code ${exception.resultCode ?: "<unknown>"}" +
+      ".${exception.operationsResultCodes ?. run { " Operation result codes: $this" } ?: ""}" +
       " Transaction XDR: ${transaction.toEnvelopeXdrBase64()}"
   ) {
-  val transactionResultCode = response.resultCode
-  val operationsResultCodes = response.operationsResultCodes
+  val transactionResultCode = exception.resultCode
+  val operationsResultCodes = exception.operationsResultCodes
 }
 
-private val SubmitTransactionResponse.resultCode: String?
-  get() = this.extras?.resultCodes?.transactionResultCode
+private val BadRequestException.resultCode: String?
+  get() = this.problem?.extras?.resultCodes?.transactionResultCode
 
-private val SubmitTransactionResponse.operationsResultCodes: List<String>?
+private val BadRequestException.operationsResultCodes: List<String>?
   get() =
-    this.extras?.resultCodes?.operationsResultCodes?.run { if (this.isEmpty()) null else this }
+    this.problem?.extras?.resultCodes?.operationsResultCodes?.run {
+      if (this.isEmpty()) null else this
+    }
 
 class OperationsLimitExceededException : StellarException("Maximum limit is 200 operations")

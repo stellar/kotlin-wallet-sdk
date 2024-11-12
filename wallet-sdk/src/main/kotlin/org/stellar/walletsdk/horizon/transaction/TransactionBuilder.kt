@@ -1,7 +1,13 @@
 package org.stellar.walletsdk.horizon.transaction
 
-import org.stellar.sdk.*
+import java.math.BigDecimal
+import org.stellar.sdk.Network
+import org.stellar.sdk.TimeBounds
+import org.stellar.sdk.Transaction
 import org.stellar.sdk.TransactionBuilder as SdkBuilder
+import org.stellar.sdk.TransactionPreconditions
+import org.stellar.sdk.operations.Operation
+import org.stellar.sdk.operations.PaymentOperation
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.anchor.MemoType
@@ -100,7 +106,11 @@ internal constructor(
    * @return formed transfer transaction
    */
   fun transfer(destinationAddress: String, assetId: StellarAssetId, amount: String) = building {
-    PaymentOperation.Builder(destinationAddress, assetId.toAsset(), amount).build()
+    PaymentOperation.builder()
+      .destination(destinationAddress)
+      .asset(assetId.toAsset())
+      .amount(BigDecimal(amount))
+      .build()
   }
 
   /**

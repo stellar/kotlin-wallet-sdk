@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import org.stellar.sdk.Asset
 import org.stellar.sdk.AssetTypeCreditAlphaNum
 import org.stellar.sdk.AssetTypeNative
-import org.stellar.sdk.AssetTypePoolShare
 
 val log = KotlinLogging.logger {}
 
@@ -50,9 +49,6 @@ fun Asset.toAssetId(): StellarAssetId =
     is AssetTypeNative -> NativeAssetId
     is AssetTypeCreditAlphaNum -> {
       IssuedAssetId(this.code, this.issuer)
-    }
-    is AssetTypePoolShare -> {
-      throw UnsupportedOperationException("Unsupported asset type")
     }
     else -> {
       throw UnsupportedOperationException("Unknown asset type")

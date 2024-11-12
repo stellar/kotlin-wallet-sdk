@@ -1,7 +1,7 @@
 package org.stellar.walletsdk.extension
 
 import org.stellar.sdk.Server
-import org.stellar.sdk.requests.ErrorResponse
+import org.stellar.sdk.exception.NetworkException
 import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.operations.OperationResponse
 import org.stellar.walletsdk.*
@@ -12,7 +12,7 @@ import org.stellar.walletsdk.exception.OperationsLimitExceededException
 private fun <T> safeHorizonCall(body: () -> T): T {
   try {
     return body()
-  } catch (e: ErrorResponse) {
+  } catch (e: NetworkException) {
     throw HorizonRequestFailedException(e)
   } catch (e: Exception) {
     throw e
