@@ -28,7 +28,13 @@ configurations {
 
 dependencies {
   api(libs.coroutines.core)
-  api(libs.java.stellar.sdk)
+  api(libs.java.stellar.sdk) {
+    // The Java SDK uses version bcprov-jdk18on 1.78.1, but I think there are some issues with this version,
+    // so we had to exclude this dependency; the problem also appears in 1.79.
+    // https://github.com/bcgit/bc-java/issues/1621
+    // Maybe I should downgrade the version to 1.77 in the final release.
+    exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
+  }
   api(libs.kotlin.datetime)
   api(libs.bundles.ktor.client)
   implementation(libs.kotlin.serialization.json)
@@ -37,7 +43,6 @@ dependencies {
   implementation(libs.toml4j)
   implementation(libs.jjwt)
   implementation(libs.bcastle)
-  implementation(libs.bcutil)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)
