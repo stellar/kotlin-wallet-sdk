@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // The alias call in plugins scope produces IntelliJ false error which is suppressed here.
@@ -8,10 +9,11 @@ plugins {
   signing
   alias(libs.plugins.kotlin.serialization)
   idea
+  id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 fun DependencyHandler.testIntegrationImplementation(dependencyNotation: Any): Dependency? =
-  add("testIntegrationImplementation", dependencyNotation)
+    add("testIntegrationImplementation", dependencyNotation)
 
 sourceSets {
   val testIntegration by creating {
@@ -59,14 +61,14 @@ idea.module {
 }
 
 val testIntegration by
-  tasks.register<Test>("integrationTest") {
-    useJUnitPlatform()
+    tasks.register<Test>("integrationTest") {
+      useJUnitPlatform()
 
-    testClassesDirs = sourceSets.getByName("testIntegration").output.classesDirs
-    classpath = sourceSets.getByName("testIntegration").runtimeClasspath
+      testClassesDirs = sourceSets.getByName("testIntegration").output.classesDirs
+      classpath = sourceSets.getByName("testIntegration").runtimeClasspath
 
-    mustRunAfter(tasks.test)
-  }
+      mustRunAfter(tasks.test)
+    }
 
 tasks.getByName("compileTestIntegrationKotlin") {
   (this as KotlinCompile).kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
@@ -79,20 +81,47 @@ val dokkaOutputDir = buildDir.resolve("dokka")
 tasks.dokkaHtml { outputDirectory.set(dokkaOutputDir) }
 
 val deleteDokkaOutputDir by
-  tasks.register<Delete>("deleteDokkaOutputDirectory") { delete(dokkaOutputDir) }
+    tasks.register<Delete>("deleteDokkaOutputDirectory") { delete(dokkaOutputDir) }
 
 val javadocJar =
-  tasks.register<Jar>("javadocJar") {
-    dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
-    archiveClassifier.set("javadoc")
-    from(dokkaOutputDir)
-  }
+    tasks.register<Jar>("javadocJar") {
+      dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
+      archiveClassifier.set("javadoc")
+      from(dokkaOutputDir)
+    }
 
 val sourcesJar by
-  tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(kotlin.sourceSets.main.get().kotlin)
+    tasks.registering(Jar::class) {
+      archiveClassifier.set("sources")
+      from(kotlin.sourceSets.main.get().kotlin)
+    }
+
+val uberJar =
+    tasks.register<ShadowJar>("uberJar") {
+      archiveBaseName.set("kotlin-wallet-sdk-uber")
+      archiveClassifier.set("") // No classifier
+
+      // Include all runtime dependencies
+      from(sourceSets.main.get().output)
+      configurations = listOf(project.configurations.runtimeClasspath.get())
+
+      // Relocations
+      relocate("com", "shadow.wallet-sdk.com")
+      relocate("io", "shadow.wallet-sdk.io")
+      relocate("mu", "shadow.wallet-sdk.mu")
+      relocate("net", "shadow.wallet-sdk.net")
+      relocate("okhttp3", "shadow.wallet-sdk.okhttp3")
+      relocate("okio", "shadow.wallet-sdk.okio")
+      relocate("org", "shadow.wallet-sdk.org") { exclude("org.stellar.walletsdk") }
+    }
+
+tasks {
+  build {
+    dependsOn(javadocJar)
+    dependsOn(sourcesJar)
+    dependsOn(uberJar)
   }
+}
 
 publishing {
   repositories {
