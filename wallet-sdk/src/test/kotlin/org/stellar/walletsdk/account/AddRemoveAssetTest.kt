@@ -1,12 +1,13 @@
 package org.stellar.walletsdk.account
 
 import io.mockk.spyk
+import java.math.BigDecimal
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.stellar.sdk.ChangeTrustOperation
 import org.stellar.sdk.Server
+import org.stellar.sdk.operations.ChangeTrustOperation
 import org.stellar.walletsdk.ADDRESS_ACTIVE
 import org.stellar.walletsdk.ASSET_USDC
 import org.stellar.walletsdk.HORIZON_URL
@@ -61,7 +62,6 @@ internal class AddRemoveAssetTest {
     val transaction =
       runBlocking { stellar.transaction(ADDRESS_ACTIVE).removeAssetSupport(ASSET_USDC) }.build()
     val trustLimit = (transaction.operations[0] as ChangeTrustOperation).limit
-
-    assertEquals("0", trustLimit)
+    assertEquals(0, trustLimit.compareTo(BigDecimal.ZERO))
   }
 }

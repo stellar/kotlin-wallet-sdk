@@ -37,6 +37,7 @@ dependencies {
   implementation(libs.toml4j)
   implementation(libs.jjwt)
   implementation(libs.bcastle)
+  implementation(libs.bcutil)
 
   testImplementation(libs.coroutines.test)
   testImplementation(libs.kotlin.junit)

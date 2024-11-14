@@ -4,7 +4,7 @@ package org.stellar.walletsdk.anchor
 
 import io.ktor.client.*
 import io.ktor.http.*
-import org.stellar.sdk.*
+import org.stellar.sdk.Network
 import org.stellar.walletsdk.*
 import org.stellar.walletsdk.auth.AuthToken
 import org.stellar.walletsdk.auth.Sep10

@@ -9,12 +9,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
+import okio.IOException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.sdk.Server
 import org.stellar.sdk.Transaction
-import org.stellar.sdk.responses.SubmitTransactionResponse
-import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
+import org.stellar.sdk.exception.BadRequestException
+import org.stellar.sdk.exception.RequestTimeoutException
+import org.stellar.sdk.responses.Problem
+import org.stellar.sdk.responses.TransactionResponse
 import org.stellar.walletsdk.exception.TransactionSubmitFailedException
 import org.stellar.walletsdk.helpers.stellarObjectFromJsonFile
 
@@ -29,9 +32,8 @@ internal class SubmitTransactionTest {
 
   @Test
   fun `returns true on success`() {
-    val mockResponse = mockk<SubmitTransactionResponse>()
+    val mockResponse = mockk<TransactionResponse>()
 
-    every { mockResponse.isSuccess } returns true
     every { server.submitTransaction(any() as Transaction) } returns mockResponse
 
     assertDoesNotThrow { (runBlocking { wallet.stellar().submitTransaction(transaction) }) }
@@ -41,12 +43,12 @@ internal class SubmitTransactionTest {
   @Test
   fun `throws exception with txn result code`() {
     val txnResultCode = "txn_failed_test"
-    val mockResponse = mockk<SubmitTransactionResponse>()
+    val badRequestException = mockk<BadRequestException>()
+    every { badRequestException.problem?.extras?.resultCodes?.transactionResultCode } returns
+      txnResultCode
+    every { badRequestException.problem?.extras?.resultCodes?.operationsResultCodes } returns null
 
-    every { mockResponse.isSuccess } returns false
-    every { mockResponse.extras.resultCodes.transactionResultCode } returns txnResultCode
-    every { mockResponse.extras.resultCodes.operationsResultCodes } returns null
-    every { server.submitTransaction(any() as Transaction) } returns mockResponse
+    every { server.submitTransaction(any() as Transaction) } throws badRequestException
 
     val exception =
       assertFailsWith<TransactionSubmitFailedException>(
@@ -74,12 +76,11 @@ internal class SubmitTransactionTest {
 
   @Test
   fun `resubmit works`() {
-    val mockResponse = mockk<SubmitTransactionResponse>()
-    every { mockResponse.isSuccess } returns true
+    val mockResponse = mockk<TransactionResponse>()
 
     every { server.submitTransaction(any() as Transaction) } throws
-      SubmitTransactionTimeoutResponseException() andThenThrows
-      SubmitTransactionTimeoutResponseException() andThen
+      RequestTimeoutException(IOException()) andThenThrows
+      RequestTimeoutException(IOException()) andThen
       mockResponse
 
     assertDoesNotThrow { (runBlocking { wallet.stellar().submitTransaction(transaction) }) }
@@ -92,12 +93,14 @@ internal class SubmitTransactionTest {
   // 4. Verify account has been created
   @Test
   fun `rebuild works`() {
-    val expiredResponse: SubmitTransactionResponse =
-      stellarObjectFromJsonFile("expired_transaction.json")
+    val problem: Problem = stellarObjectFromJsonFile("expired_transaction.json")
 
-    every { server.submitTransaction(any() as Transaction) } returns
-      expiredResponse andThen
-      expiredResponse andThenAnswer
+    val badRequestException = mockk<BadRequestException>()
+    every { badRequestException.problem } returns problem
+
+    every { server.submitTransaction(any() as Transaction) } throws
+      badRequestException andThenThrows
+      badRequestException andThenAnswer
       {
         callOriginal()
       }

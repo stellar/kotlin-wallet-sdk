@@ -1,6 +1,6 @@
 package org.stellar.walletsdk.horizon.transaction
 
-import org.stellar.sdk.*
+import org.stellar.sdk.operations.*
 import org.stellar.walletsdk.horizon.AccountKeyPair
 
 class SponsoringBuilder
@@ -26,12 +26,15 @@ internal constructor(
     }
 
   private fun startSponsoring(address: String) = building {
-    BeginSponsoringFutureReservesOperation.Builder(address)
-      .setSourceAccount(sponsorAccount.address)
+    BeginSponsoringFutureReservesOperation.builder()
+      .sponsoredId(address)
+      .sourceAccount(sponsorAccount.address)
       .build()
   }
 
-  internal fun stopSponsoring() = building { EndSponsoringFutureReservesOperation(sourceAddress) }
+  internal fun stopSponsoring() = building {
+    EndSponsoringFutureReservesOperation.builder().sourceAccount(sourceAddress).build()
+  }
 
   /**
    * Adds operation to this builder

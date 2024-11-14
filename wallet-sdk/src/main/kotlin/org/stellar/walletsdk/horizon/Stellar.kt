@@ -4,7 +4,8 @@ import java.time.Duration
 import kotlin.math.min
 import mu.KotlinLogging
 import org.stellar.sdk.*
-import org.stellar.sdk.responses.SubmitTransactionTimeoutResponseException
+import org.stellar.sdk.exception.BadRequestException
+import org.stellar.sdk.exception.RequestTimeoutException
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.StellarConfiguration
 import org.stellar.walletsdk.anchor.MemoType
@@ -87,10 +88,11 @@ internal constructor(
     transaction: Transaction,
     baseFee: ULong? = null
   ): FeeBumpTransaction {
-    return FeeBumpTransaction.Builder(transaction)
-      .setBaseFee((baseFee ?: cfg.stellar.baseFee).toLong())
-      .setFeeAccount(feeAddress.address)
-      .build()
+    return FeeBumpTransaction.createWithBaseFee(
+      feeAddress.address,
+      (baseFee ?: cfg.stellar.baseFee).toLong(),
+      transaction
+    )
   }
 
   /**
@@ -113,35 +115,26 @@ internal constructor(
               "${signedTransaction.operations.size}, signatureCount = ${signedTransaction
                     .signatures.size}"
           }
-
           val response = server.submitTransaction(signedTransaction)
-
-          if (!response.isSuccess) {
-            throw TransactionSubmitFailedException(response, signedTransaction)
-          }
-
           log.debug { "Transaction submitted with hash ${response.hash}" }
         }
         is FeeBumpTransaction -> {
           log.debug {
-            "Submit fee bump transaction. Source account :${signedTransaction.feeAccount}. Inner transaction hash: " +
+            "Submit fee bump transaction. Source account :${signedTransaction.feeSource}. Inner transaction hash: " +
               "${signedTransaction.innerTransaction.hashHex()}."
           }
-
           val response = server.submitTransaction(signedTransaction)
-
-          if (!response.isSuccess) {
-            throw TransactionSubmitFailedException(response, signedTransaction)
-          }
-
           log.debug { "Transaction submitted with hash ${response.hash}" }
         }
         else -> error("Unknown transaction type")
       }
-    } catch (e: SubmitTransactionTimeoutResponseException) {
+    } catch (e: BadRequestException) {
+      throw TransactionSubmitFailedException(e, signedTransaction)
+    } catch (e: RequestTimeoutException) {
       log.info { "Transaction ${signedTransaction.hashHex()} timed out. Resubmitting..." }
       return submitTransaction(signedTransaction)
     }
+    // Other exceptions are not caught and are propagated
   }
 
   /**

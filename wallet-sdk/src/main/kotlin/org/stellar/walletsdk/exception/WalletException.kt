@@ -1,7 +1,7 @@
 package org.stellar.walletsdk.exception
 
 import kotlinx.serialization.Serializable
-import org.stellar.sdk.requests.ErrorResponse
+import org.stellar.sdk.exception.NetworkException
 
 @Serializable data class AnchorErrorResponse(val error: String)
 
@@ -12,7 +12,7 @@ sealed class WalletException : Exception {
 
 class AnchorRequestException(message: String, cause: Exception) : WalletException(message, cause)
 
-class HorizonRequestFailedException(val response: ErrorResponse) :
+class HorizonRequestFailedException(val response: NetworkException) :
   WalletException(response.body ?: response.message ?: "Horizon request failed") {
-  val errorCode = response.code
+  val errorCode: Int? = response.code
 }
