@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import kotlin.system.exitProcess
 
 // The alias call in plugins scope produces IntelliJ false error which is suppressed here.
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -107,7 +106,7 @@ publishing {
       credentials {
         if (System.getenv("OSSRH_USER") == null || System.getenv("OSSRH_PASSWORD") == null) {
           println(">>> Please set OSSRH_USER and OSSRH_PASSWORD environment variables to continue publishing to Maven.<<<")
-          throw GradleException("OSSRH_USER and OSSRH_PASSWORD environment variables are not set.")
+//          throw GradleException("OSSRH_USER and OSSRH_PASSWORD environment variables are not set.")
         } else {
           username = System.getenv("OSSRH_USER") ?: return@credentials
           password = System.getenv("OSSRH_PASSWORD") ?: return@credentials
