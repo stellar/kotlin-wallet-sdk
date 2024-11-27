@@ -102,9 +102,16 @@ publishing {
       val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
       val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
       url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+
       credentials {
-        username = System.getenv("OSSRH_USER") ?: return@credentials
-        password = System.getenv("OSSRH_PASSWORD") ?: return@credentials
+        if (System.getenv("OSSRH_USER") == null || System.getenv("OSSRH_PASSWORD") == null) {
+          println(">>> Please set OSSRH_USER and OSSRH_PASSWORD environment variables to continue publishing to Maven.<<<")
+          // @TODO: Enable this exception when we are ready to publish to Maven.
+          // throw GradleException("OSSRH_USER and OSSRH_PASSWORD environment variables are not set.")
+        } else {
+          username = System.getenv("OSSRH_USER") ?: return@credentials
+          password = System.getenv("OSSRH_PASSWORD") ?: return@credentials
+        }
       }
     }
   }
@@ -154,7 +161,26 @@ publishing {
 
   apply<SigningPlugin>()
   configure<SigningExtension> {
-    useGpgCmd()
+    if (System.getenv("GPG_SIGNING_KEY") == null || System.getenv("GPG_SIGNING_PASSWORD") == null) {
+      println("GPG_SIGNING_KEY and GPG_SIGNING_PASSWORD environment variables are not set.")
+      println("Switching to useGpgCmd()")
+      useGpgCmd()
+    } else {
+      // To use in-memory keys instead of GPG command line, use the following:
+      // # List the keys
+      // gpg --list-secret-keys
+      //
+      // # Export the private key in ASCII-armored format
+      // export GPG_SIGNING_KEY=`gpg --export-secret-keys --armor <KEY_ID>`
+      // export GPG_SIGNING_PASSWORD=<PASSPHRASE>
+      println("GPG_SIGNING_KEY and GPG_SIGNING_PASSWORD environment variables are set.")
+      println("Switching to useInMemoryPgpKeys()")
+      useInMemoryPgpKeys(
+        System.getenv("GPG_SIGNING_KEY"), // The private key in ASCII-armored format
+        System.getenv("GPG_SIGNING_PASSWORD")  // The passphrase for the private key
+      )
+    }
+
     sign(publishing.publications)
   }
 }
