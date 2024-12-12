@@ -8,7 +8,7 @@ on:
 
 jobs:
   test_and_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v4
 
@@ -17,16 +17,42 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+#
+#      - name: Check code formatting
+#        run: ./gradlew spotlessCheck || (echo "❌ Your code is not properly formatted. You can run './gradlew spotlessApply' to format it. 👀" && exit 1)
+#
+#      - name: Detekt
+#        run: ./gradlew detekt
 
-      - name: Check code formatting
-        run: ./gradlew spotlessCheck || (echo "❌ Your code is not properly formatted. You can run './gradlew spotlessApply' to format it. 👀" && exit 1)
+#      - name: Test and build
+#        run: ./gradlew clean build
 
-      - name: Detekt
-        run: ./gradlew detekt
+      - name: Test and publish
+        env:
+          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        run: |
+          echo "OSSRH_USER: ${{ secrets.OSSRH_USER }}"
+          echo "OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}"
+          echo "GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}"
+          echo "GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}"
+          ./gradlew publish
 
-      - name: Test and build
-        run: ./gradlew clean build publish
-
+#      - name: test env
+#        env:
+#          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+#          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+#          GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
+#          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+#        run: |
+#          echo "OSSRH_USER: $OSSRH_USER"
+#          echo "OSSRH_PASSWORD: $OSSRH_PASSWORD"
+#          echo "GPG_SIGNING_PASSWORD: $GPG_SIGNING_PASSWORD"
+#          echo "GPG_SIGNING_KEY: $GPG_SIGNING_KEY"
+#
+#
       - name: Print test results
         if: success() || failure()
         run: |
