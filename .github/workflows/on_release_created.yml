@@ -1,0 +1,33 @@
+name: Release Published
+
+on:
+  workflow_dispatch:
+  release:
+    types: [ created, edited ]
+
+jobs:
+  build_and_publish_jar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Publish
+        env:
+          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        run: | 
+          ./gradlew clean publish
+
+      - name: Print test results
+        if: success() || failure()
+        run: |
+          echo "\n\n*** Wallet SDK test report ***\n"
+          cat /home/runner/work/kotlin-wallet-sdk/kotlin-wallet-sdk/wallet-sdk/build/reports/tests/test/index.html
