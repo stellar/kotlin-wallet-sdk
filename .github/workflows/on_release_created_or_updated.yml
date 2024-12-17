@@ -3,7 +3,7 @@ name: Release Published
 on:
   workflow_dispatch:
   release:
-    types: [ created, edited ]
+    types: [ created, edited, published ]
 
 jobs:
   build_and_publish_jar:
@@ -24,10 +24,4 @@ jobs:
           GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
         run: | 
-          ./gradlew clean publish
-
-      - name: Print test results
-        if: success() || failure()
-        run: |
-          echo "\n\n*** Wallet SDK test report ***\n"
-          cat /home/runner/work/kotlin-wallet-sdk/kotlin-wallet-sdk/wallet-sdk/build/reports/tests/test/index.html
+          ./gradlew publish
