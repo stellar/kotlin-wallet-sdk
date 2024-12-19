@@ -5,7 +5,7 @@ utilizes [Java Stellar SDK](https://github.com/stellar/java-stellar-sdk) to comm
 
 ## Dependency
 
-The library is hosted on the [Maven Central](https://central.sonatype.com/search?q=pkg%253Amaven%252Forg.stellar%252Fwallet-sdk&namespace=org.stellar).
+The library is hosted on the [Maven Central](https://central.sonatype.com/artifact/org.stellar/wallet-sdk).
 To import `wallet-sdk` library you need to add following dependencies to your code:
 
 Maven:
@@ -14,16 +14,21 @@ Maven:
 <dependency>
   <groupId>org.stellar</groupId>
   <artifactId>wallet-sdk</artifactId>
-  <version>1.1.0</version>
+  <version>2.0.0</version>
 </dependency>
 ```
 
-Gradle:
+Gradle (Kotlin):
 
 ```gradle
-implementation("org.stellar:wallet-sdk:1.1.0")
+implementation("org.stellar:wallet-sdk:2.0.0")
 ```
 
+Gradle (Groovy):
+```gradle
+implementation 'org.stellar:wallet-sdk:2.0.0'
+
+```
 ## Introduction
 
 <!--- INCLUDE .*readme.*
