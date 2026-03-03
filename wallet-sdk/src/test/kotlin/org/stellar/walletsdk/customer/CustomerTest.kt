@@ -25,6 +25,7 @@ internal class CustomerTest : SuspendTest() {
       Auth(
           cfg,
           webAuthEndpoint = AUTH_ENDPOINT,
+          serverSigningKey = AUTH_SERVER_SIGNING_KEY,
           homeDomain = AUTH_HOME_DOMAIN,
           cfg.app.defaultClient
         )

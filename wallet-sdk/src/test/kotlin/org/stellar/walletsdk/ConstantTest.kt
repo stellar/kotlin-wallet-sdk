@@ -25,6 +25,7 @@ val ASSET_USDC = IssuedAssetId("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL
 
 const val AUTH_ENDPOINT = "https://testanchor.stellar.org/auth"
 const val AUTH_HOME_DOMAIN = "testanchor.stellar.org"
+const val AUTH_SERVER_SIGNING_KEY = "GCHLHDBOKG2JWMJQBTLSL5XG6NO7ESXI2TAQKZXCXWXB5WI2X6W233PR"
 const val AUTH_CLIENT_DOMAIN = "demo-wallet-server.stellar.org"
 const val AUTH_CLIENT_DOMAIN_URL = "https://demo-wallet-server.stellar.org/sign"
 

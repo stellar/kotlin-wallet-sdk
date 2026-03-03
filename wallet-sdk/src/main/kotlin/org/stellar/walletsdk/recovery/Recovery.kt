@@ -67,7 +67,7 @@ internal constructor(
    */
   fun sep10Auth(key: RecoveryServerKey): Sep10 {
     val server = servers.getServer(key)
-    return Sep10(cfg, server.authEndpoint, server.homeDomain, client)
+    return Sep10(cfg, server.authEndpoint, server.signingKey, server.homeDomain, client)
   }
 
   private fun getLatestRecoverySigner(signers: List<RecoveryAccountSigner>): String {

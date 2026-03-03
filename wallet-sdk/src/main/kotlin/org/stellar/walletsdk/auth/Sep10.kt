@@ -5,10 +5,12 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import java.math.BigInteger
+import java.net.URI
 import java.util.*
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.stellar.sdk.Network
+import org.stellar.sdk.Sep10Challenge
 import org.stellar.sdk.Transaction
 import org.stellar.walletsdk.Config
 import org.stellar.walletsdk.exception.*
@@ -26,6 +28,7 @@ class Sep10
 internal constructor(
   private val cfg: Config,
   private val webAuthEndpoint: String,
+  private val serverSigningKey: String,
   private val homeDomain: String,
   private val httpClient: HttpClient
 ) {
@@ -143,11 +146,30 @@ internal constructor(
     challengeResponse: ChallengeResponse,
     walletSigner: WalletSigner
   ): Transaction {
-    var challengeTxn =
-      Transaction.fromEnvelopeXdr(
-        challengeResponse.transaction,
-        Network(challengeResponse.networkPassphrase)
-      ) as Transaction
+    val network = Network(challengeResponse.networkPassphrase)
+    val webAuthDomain = URI(webAuthEndpoint).host
+
+    val challengeTransaction =
+      try {
+        Sep10Challenge.readChallengeTransaction(
+          challengeResponse.transaction,
+          serverSigningKey,
+          network,
+          homeDomain,
+          webAuthDomain
+        )
+      } catch (e: Exception) {
+        throw InvalidChallengeException(e.message ?: "Challenge validation failed").initCause(e)
+      }
+
+    if (challengeTransaction.clientAccountId != account.address) {
+      throw ChallengeClientAccountMismatchException(
+        account.address,
+        challengeTransaction.clientAccountId
+      )
+    }
+
+    var challengeTxn = challengeTransaction.transaction
 
     val clientDomainOperation =
       challengeTxn.operations.firstOrNull {
@@ -157,12 +179,18 @@ internal constructor(
     if (clientDomainOperation != null) {
       log.debug { "Authenticating with client domain" }
 
+      val originalHash = challengeTxn.hash()
+
       challengeTxn =
         walletSigner.signWithDomainAccount(
           challengeResponse.transaction,
           challengeResponse.networkPassphrase,
           account
         )
+
+      if (!challengeTxn.hash().contentEquals(originalHash)) {
+        throw DomainSigningModifiedException()
+      }
     }
 
     walletSigner.signWithClientAccount(challengeTxn, account)

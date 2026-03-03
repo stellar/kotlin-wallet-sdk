@@ -28,6 +28,7 @@ internal class AuthTest : SuspendTest() {
       Auth(
           cfg,
           webAuthEndpoint = AUTH_ENDPOINT,
+          serverSigningKey = AUTH_SERVER_SIGNING_KEY,
           homeDomain = AUTH_HOME_DOMAIN,
           cfg.app.defaultClient
         )
@@ -40,7 +41,7 @@ internal class AuthTest : SuspendTest() {
   @Test
   fun `auth token with client domain`() {
     val authToken = runBlocking {
-      Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
+      Auth(cfg, AUTH_ENDPOINT, AUTH_SERVER_SIGNING_KEY, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
         .authenticate(ADDRESS_ACTIVE, clientDomain = AUTH_CLIENT_DOMAIN)
     }
 
@@ -50,7 +51,7 @@ internal class AuthTest : SuspendTest() {
   @Test
   fun `auth token has correct account`() {
     val authToken = runBlocking {
-      Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
+      Auth(cfg, AUTH_ENDPOINT, AUTH_SERVER_SIGNING_KEY, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
         .authenticate(ADDRESS_ACTIVE, clientDomain = AUTH_CLIENT_DOMAIN)
     }
 
@@ -61,7 +62,7 @@ internal class AuthTest : SuspendTest() {
   fun `auth token has correct account and memo`() {
     val memo = 18446744073709551615U
     val authToken = runBlocking {
-      Auth(cfg, AUTH_ENDPOINT, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
+      Auth(cfg, AUTH_ENDPOINT, AUTH_SERVER_SIGNING_KEY, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
         .authenticate(ADDRESS_ACTIVE, memoId = memo, clientDomain = AUTH_CLIENT_DOMAIN)
     }
 
