@@ -14,19 +14,19 @@ Maven:
 <dependency>
   <groupId>org.stellar</groupId>
   <artifactId>wallet-sdk</artifactId>
-  <version>2.0.0</version>
+  <version>2.1.0</version>
 </dependency>
 ```
 
 Gradle (Kotlin):
 
 ```gradle
-implementation("org.stellar:wallet-sdk:2.0.0")
+implementation("org.stellar:wallet-sdk:2.1.0")
 ```
 
 Gradle (Groovy):
 ```gradle
-implementation 'org.stellar:wallet-sdk:2.0.0'
+implementation 'org.stellar:wallet-sdk:2.1.0'
 
 ```
 ## Introduction
