@@ -50,6 +50,8 @@ data class RecoverableWalletConfig(
  * @property authEndpoint SEP-10 auth endpoint to be used. Should be in format
  * `<https://domain/auth>`. E.g. `https://testanchor.stellar.org/auth`)
  * @property homeDomain is a SEP-10 home domain. E.g. `testanchor.stellar.org`
+ * @property signingKey Stellar public key (`G...`) of the recovery server, used to verify SEP-10
+ * challenge transactions. Must match the `SIGNING_KEY` published in the server's `stellar.toml`.
  * @property walletSigner optional [WalletSigner] used to sign authentication
  */
 data class RecoveryServer(
