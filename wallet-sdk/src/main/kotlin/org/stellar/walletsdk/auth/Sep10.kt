@@ -196,7 +196,7 @@ internal constructor(
       }
     }
 
-    walletSigner.signWithClientAccount(challengeTxn, account)
+    challengeTxn = walletSigner.signWithClientAccount(challengeTxn, account)
 
     return challengeTxn
   }
