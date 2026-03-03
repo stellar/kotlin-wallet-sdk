@@ -7,6 +7,7 @@ import io.ktor.http.*
 import java.math.BigInteger
 import java.net.URI
 import java.util.*
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.stellar.sdk.Network
@@ -158,6 +159,8 @@ internal constructor(
           homeDomain,
           webAuthDomain
         )
+      } catch (e: CancellationException) {
+        throw e
       } catch (e: Exception) {
         throw InvalidChallengeException(e.message ?: "Challenge validation failed").initCause(e)
       }
