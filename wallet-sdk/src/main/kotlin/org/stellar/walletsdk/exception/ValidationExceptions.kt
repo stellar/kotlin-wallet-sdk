@@ -35,3 +35,12 @@ class InvalidDataException(message: String) : InvalidResponseException(message)
 
 class InvalidJsonException(reason: String, json: Any) :
   InvalidResponseException("Invalid json response object: $reason. Json: $json")
+
+class InvalidChallengeException(message: String) :
+  ValidationException("Invalid SEP-10 challenge: $message")
+
+class ChallengeClientAccountMismatchException(expected: String, got: String) :
+  ValidationException("SEP-10 challenge client account mismatch: expected $expected, got $got")
+
+class DomainSigningModifiedException :
+  ValidationException("Domain signing server returned a modified transaction")

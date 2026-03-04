@@ -40,10 +40,11 @@ internal constructor(
    * @throws [AnchorAuthNotSupported] if SEP-10 is not configured
    */
   suspend fun sep10(): Sep10 {
+    val sep10Info = sep1().services.sep10 ?: throw AnchorAuthNotSupported
     return Sep10(
       cfg,
-      sep1().services.sep10?.webAuthEndpoint ?: throw AnchorAuthNotSupported,
-      // Strip protocol
+      sep10Info.webAuthEndpoint,
+      sep10Info.signingKey,
       baseUrl.toString().replace("${baseUrl.protocol.name}://", ""),
       httpClient
     )
