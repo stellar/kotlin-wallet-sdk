@@ -148,7 +148,15 @@ internal constructor(
     walletSigner: WalletSigner
   ): Transaction {
     val network = Network(challengeResponse.networkPassphrase)
-    val webAuthDomain = URI(webAuthEndpoint).host
+    val webAuthDomain =
+      try {
+        URI(webAuthEndpoint).host
+          ?: throw InvalidChallengeException("Invalid webAuthEndpoint: missing host")
+      } catch (e: InvalidChallengeException) {
+        throw e
+      } catch (e: Exception) {
+        throw InvalidChallengeException("Invalid webAuthEndpoint: ${e.message}").initCause(e)
+      }
 
     val challengeTransaction =
       try {
