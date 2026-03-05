@@ -37,11 +37,11 @@ abstract class CommonTransactionBuilder<T>(protected val sourceAddress: String) 
         "$sourceAddress, signerAddress = $signerAddress, signerWeight = $signerWeight"
     }
 
-    val signer = Signer.ed25519PublicKey(signerAddress.keyPair)
+    val signerKey = SignerKey.fromEd25519PublicKey(signerAddress.keyPair.accountId)
 
     SetOptionsOperation.builder()
       .sourceAccount(sourceAddress)
-      .signer(signer)
+      .signer(signerKey)
       .signerWeight(signerWeight)
       .build()
   }

@@ -20,6 +20,8 @@ import org.stellar.walletsdk.json.defaultJson
 import org.stellar.walletsdk.recovery.Recovery
 import org.stellar.walletsdk.recovery.RecoveryServer
 import org.stellar.walletsdk.recovery.RecoveryServerKey
+import org.stellar.walletsdk.uri.Sep7
+import org.stellar.walletsdk.uri.Sep7Base
 
 /**
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
@@ -48,6 +50,26 @@ class Wallet(
     httpClientConfig: ClientConfigFn? = null
   ): Recovery {
     return Recovery(cfg, stellar(), getClient(httpClientConfig), servers)
+  }
+
+  /**
+   * Access SEP-7 URI functionality for creating and parsing Stellar URIs.
+   *
+   * @return Sep7 object providing SEP-7 utilities
+   */
+  fun uri(): Sep7 {
+    return Sep7
+  }
+
+  /**
+   * Parse a SEP-7 URI string into the appropriate Sep7 object.
+   *
+   * @param uriString The SEP-7 URI string to parse
+   * @return Sep7Base instance (either Sep7Pay or Sep7Tx)
+   * @throws org.stellar.walletsdk.uri.Sep7InvalidUriError if the URI is invalid
+   */
+  fun parseSep7Uri(uriString: String): Sep7Base {
+    return Sep7.parseUri(uriString)
   }
 
   override fun close() {

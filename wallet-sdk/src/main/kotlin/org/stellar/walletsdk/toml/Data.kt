@@ -38,6 +38,12 @@ data class TomlInfo(
         } else {
           null
         },
+      sep7 =
+        if (uriRequestSigningKey != null) {
+          Sep7(uriRequestSigningKey)
+        } else {
+          null
+        },
       sep10 =
         if (hasAuth) {
           Sep10(webAuthEndpoint.toString(), signingKey.toString())
@@ -165,6 +171,7 @@ data class InfoCurrency(
 
 data class InfoServices(
   val sep6: Sep6?,
+  val sep7: Sep7?,
   val sep10: Sep10?,
   val sep12: Sep12?,
   val sep24: Sep24?,
@@ -180,6 +187,14 @@ data class InfoServices(
  * [SEP-38](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
  */
 data class Sep6(val transferServer: String, val anchorQuoteServer: String?)
+
+/**
+ * [SEP-7](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0007.md): URI
+ * scheme for Stellar transactions and operations.
+ *
+ * @property signingKey Stellar public address of the URI request signing key
+ */
+data class Sep7(val signingKey: String)
 
 /**
  * [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md): Stellar

@@ -3,6 +3,7 @@ package org.stellar.walletsdk.anchor
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.stellar.walletsdk.*
@@ -31,6 +32,8 @@ internal class GetInteractiveFlowTest {
   }
 
   @Test
+  @Disabled // disabled because the test anchor is currently not supporting destination accounts
+  // other then the one from the auth token
   fun `get interactive deposit URL with different funds account`() {
     val depositResponse = runBlocking {
       val authToken = anchor.auth().authenticate(ADDRESS_ACTIVE)
@@ -64,6 +67,8 @@ internal class GetInteractiveFlowTest {
   }
 
   @Test
+  @Disabled // disabled because the test anchor is currently not supporting withdrawal accounts
+  // other then the one from the auth token
   fun `get interactive withdrawal URL with different funds account`() {
     val depositResponse = runBlocking {
       val authToken = anchor.auth().authenticate(ADDRESS_ACTIVE)

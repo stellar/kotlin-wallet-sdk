@@ -60,7 +60,9 @@ internal class AuthTest : SuspendTest() {
 
   @Test
   fun `auth token has correct account and memo`() {
-    val memo = 18446744073709551615U
+    // changed from "18446744073709551615U" to some smaller value because
+    // the test anchor has currently issues with max uint64.
+    val memo = 1844674407370955UL
     val authToken = runBlocking {
       Auth(cfg, AUTH_ENDPOINT, AUTH_SERVER_SIGNING_KEY, AUTH_HOME_DOMAIN, cfg.app.defaultClient)
         .authenticate(ADDRESS_ACTIVE, memoId = memo, clientDomain = AUTH_CLIENT_DOMAIN)
