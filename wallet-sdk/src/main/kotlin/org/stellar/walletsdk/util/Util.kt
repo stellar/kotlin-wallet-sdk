@@ -70,7 +70,7 @@ internal object Util {
         }
         .bodyAsText()
 
-    log.debug { "Received $url response $textBody" }
+    log.debug { "Received response from $url" }
 
     return textBody.fromJsonOrError()
   }
@@ -140,7 +140,7 @@ internal object Util {
         throw AnchorRequestException(error.error, e)
       } catch (ignored: SerializationException) {}
 
-      throw AnchorRequestException("Failed to deserialize string: $this", e)
+      throw AnchorRequestException("Failed to deserialize anchor response", e)
     }
   }
 }
