@@ -164,14 +164,14 @@ fun String.toAssetId(): AssetId {
 
     // scheme:code:issuer
     if (split.size != 3) {
-      throw InvalidJsonException("Invalid asset format", str)
+      throw InvalidJsonException("Invalid asset format")
     }
 
     return IssuedAssetId(split[1], split[2])
   } else if (str.startsWith(FIAT_SCHEME)) {
     return FiatAssetId(str)
   }
-  throw InvalidJsonException("Unknown scheme", str)
+  throw InvalidJsonException("Unknown scheme")
 }
 
 fun SigningKeyPair.toJava(): java.security.KeyPair {
