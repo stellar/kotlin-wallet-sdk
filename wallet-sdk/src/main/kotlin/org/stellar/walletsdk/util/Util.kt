@@ -70,7 +70,7 @@ internal object Util {
         }
         .bodyAsText()
 
-    log.debug { "Received $url response $textBody" }
+    log.debug { "Received response from $url" }
 
     return textBody.fromJsonOrError()
   }
@@ -140,7 +140,7 @@ internal object Util {
         throw AnchorRequestException(error.error, e)
       } catch (ignored: SerializationException) {}
 
-      throw AnchorRequestException("Failed to deserialize string: $this", e)
+      throw AnchorRequestException("Failed to deserialize anchor response", e)
     }
   }
 }
@@ -164,14 +164,14 @@ fun String.toAssetId(): AssetId {
 
     // scheme:code:issuer
     if (split.size != 3) {
-      throw InvalidJsonException("Invalid asset format", str)
+      throw InvalidJsonException("Invalid asset format")
     }
 
     return IssuedAssetId(split[1], split[2])
   } else if (str.startsWith(FIAT_SCHEME)) {
     return FiatAssetId(str)
   }
-  throw InvalidJsonException("Unknown scheme", str)
+  throw InvalidJsonException("Unknown scheme")
 }
 
 fun SigningKeyPair.toJava(): java.security.KeyPair {

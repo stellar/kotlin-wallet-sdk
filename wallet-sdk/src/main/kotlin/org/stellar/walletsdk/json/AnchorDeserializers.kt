@@ -40,12 +40,12 @@ internal object AnchorTransactionSerializer :
               else -> DepositTransaction.serializer()
             }
           }
-          else -> throw InvalidJsonException("invalid kind", element)
+          else -> throw InvalidJsonException("invalid kind")
         }
       }
-      throw InvalidJsonException("status not found", element)
+      throw InvalidJsonException("status not found")
     }
-    throw InvalidJsonException("kind not found", element)
+    throw InvalidJsonException("kind not found")
   }
 }
 

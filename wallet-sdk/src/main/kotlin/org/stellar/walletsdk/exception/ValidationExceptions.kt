@@ -33,8 +33,8 @@ object NetworkMismatchException : InvalidResponseException("Networks don't match
 
 class InvalidDataException(message: String) : InvalidResponseException(message)
 
-class InvalidJsonException(reason: String, json: Any) :
-  InvalidResponseException("Invalid json response object: $reason. Json: $json")
+class InvalidJsonException(reason: String) :
+  InvalidResponseException("Invalid json response object: $reason")
 
 class InvalidChallengeException(message: String) :
   ValidationException("Invalid SEP-10 challenge: $message")
