@@ -21,6 +21,7 @@ toml4j = "0.7.2"
 # Plugin versions
 spotless = "6.9.1"
 detekt = "1.22.0"
+vanniktech-maven-publish = "0.27.0"
 
 [libraries]
 bcastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bcastle" }
@@ -58,3 +59,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }
