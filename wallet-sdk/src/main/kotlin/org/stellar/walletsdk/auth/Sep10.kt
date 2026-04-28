@@ -142,6 +142,11 @@ internal constructor(
    * endpoint
    * @return signed transaction
    */
+  // Suppress: this function performs SEP-10 challenge validation, which legitimately needs to
+  // raise distinct exception types per failure category (network mismatch, missing host, missing
+  // operations, wrong source account, etc.). Refactoring to a single throw site would just
+  // obscure the validation contract.
+  @Suppress("ThrowsCount")
   private suspend fun sign(
     account: AccountKeyPair,
     challengeResponse: ChallengeResponse,
