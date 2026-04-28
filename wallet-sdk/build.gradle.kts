@@ -1,11 +1,12 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // The alias call in plugins scope produces IntelliJ false error which is suppressed here.
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-  `maven-publish`
+  alias(libs.plugins.vanniktech.maven.publish)
   alias(libs.plugins.dokka)
-  signing
   alias(libs.plugins.kotlin.serialization)
   idea
 }
@@ -75,112 +76,63 @@ tasks.getByName("compileTestIntegrationKotlin") {
 
 tasks.check.get().dependsOn += testIntegration
 
-val dokkaOutputDir = buildDir.resolve("dokka")
+mavenPublishing {
+  // The plugin does NOT auto-detect Dokka; explicitly tell it to back the
+  // javadoc JAR with the existing `dokkaHtml` task so the published
+  // documentation matches what prior 2.x releases shipped.
+  configure(
+    KotlinJvm(
+      javadocJar = JavadocJar.Dokka("dokkaHtml"),
+      sourcesJar = true,
+    )
+  )
 
-tasks.dokkaHtml { outputDirectory.set(dokkaOutputDir) }
+  publishToMavenCentral(automaticRelease = true)
+  signAllPublications()
 
-val deleteDokkaOutputDir by
-  tasks.register<Delete>("deleteDokkaOutputDirectory") { delete(dokkaOutputDir) }
+  coordinates("org.stellar", "wallet-sdk", project.version.toString())
 
-val javadocJar =
-  tasks.register<Jar>("javadocJar") {
-    dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
-    archiveClassifier.set("javadoc")
-    from(dokkaOutputDir)
-  }
+  pom {
+    name.set("Stellar Wallet SDK")
+    description.set(
+      "DEPRECATED — no longer maintained. " +
+        "See https://github.com/stellar/kotlin-wallet-sdk for alternatives."
+    )
+    url.set("https://github.com/stellar/kotlin-wallet-sdk")
+    inceptionYear.set("2022")
 
-val sourcesJar by
-  tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(kotlin.sourceSets.main.get().kotlin)
-  }
-
-publishing {
-  repositories {
-    maven {
-      name = "oss"
-      val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-      val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-      url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-
-      credentials {
-        if (System.getenv("OSSRH_USER") == null || System.getenv("OSSRH_PASSWORD") == null) {
-          println(">>> Please set OSSRH_USER and OSSRH_PASSWORD environment variables to continue publishing to Maven.<<<")
-          // @TODO: Enable this exception when we are ready to publish to Maven.
-          // throw GradleException("OSSRH_USER and OSSRH_PASSWORD environment variables are not set.")
-        } else {
-          username = System.getenv("OSSRH_USER") ?: return@credentials
-          password = System.getenv("OSSRH_PASSWORD") ?: return@credentials
-        }
+    licenses {
+      license {
+        name.set("The Apache License, Version 2.0")
+        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+        distribution.set("repo")
       }
     }
-  }
-
-  publications {
-    create<MavenPublication>("mavenJava") {
-      groupId = "org.stellar"
-      artifactId = "wallet-sdk"
-
-      from(components["java"])
-      artifact(javadocJar)
-      artifact(sourcesJar)
-
-      pom {
-        name.set("Stellar Wallet SDK")
-        description.set("Kotlin Stellar Wallet SDK")
-        licenses {
-          license {
-            name.set("The Apache License, Version 2.0")
-            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-          }
-        }
-        url.set("https://github.com/stellar/kotlin-wallet-sdk")
-        issueManagement {
-          system.set("Github")
-          url.set("https://github.com/stellar/kotlin-wallet-sdk/issues")
-        }
-        scm {
-          connection.set("https://github.com/stellar/kotlin-wallet-sdk.git")
-          url.set("https://github.com/stellar/kotlin-wallet-sdk")
-        }
-        developers {
-          developer {
-            id.set("Ifropc")
-            name.set("Gleb")
-            email.set("gleb@stellar.org")
-          }
-          developer {
-            id.set("quietbits")
-            name.set("Iveta")
-            email.set("iveta@stellar.org")
-          }
-        }
+    issueManagement {
+      system.set("Github")
+      url.set("https://github.com/stellar/kotlin-wallet-sdk/issues")
+    }
+    scm {
+      connection.set("scm:git:git://github.com/stellar/kotlin-wallet-sdk.git")
+      developerConnection.set("scm:git:ssh://git@github.com/stellar/kotlin-wallet-sdk.git")
+      url.set("https://github.com/stellar/kotlin-wallet-sdk")
+    }
+    developers {
+      developer {
+        id.set("Ifropc")
+        name.set("Gleb")
+        email.set("gleb@stellar.org")
+      }
+      developer {
+        id.set("quietbits")
+        name.set("Iveta")
+        email.set("iveta@stellar.org")
+      }
+      developer {
+        id.set("CassioMG")
+        name.set("Cassio")
+        email.set("cassio@stellar.org")
       }
     }
-  }
-
-  apply<SigningPlugin>()
-  configure<SigningExtension> {
-    if (System.getenv("GPG_SIGNING_KEY") == null || System.getenv("GPG_SIGNING_PASSWORD") == null) {
-      println("GPG_SIGNING_KEY and GPG_SIGNING_PASSWORD environment variables are not set.")
-      println("Switching to useGpgCmd()")
-      useGpgCmd()
-    } else {
-      // To use in-memory keys instead of GPG command line, use the following:
-      // # List the keys
-      // gpg --list-secret-keys
-      //
-      // # Export the private key in ASCII-armored format
-      // export GPG_SIGNING_KEY=`gpg --export-secret-keys --armor <KEY_ID>`
-      // export GPG_SIGNING_PASSWORD=<PASSPHRASE>
-      println("GPG_SIGNING_KEY and GPG_SIGNING_PASSWORD environment variables are set.")
-      println("Switching to useInMemoryPgpKeys()")
-      useInMemoryPgpKeys(
-        System.getenv("GPG_SIGNING_KEY"), // The private key in ASCII-armored format
-        System.getenv("GPG_SIGNING_PASSWORD")  // The passphrase for the private key
-      )
-    }
-
-    sign(publishing.publications)
   }
 }
