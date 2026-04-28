@@ -40,7 +40,9 @@ subprojects {
     }
 
     detekt {
-      toolVersion = "1.22.0"
+      // Keep in sync with the `detekt` version in gradle/libs.versions.toml.
+      // The `libs` accessor isn't available inside `subprojects { }`.
+      toolVersion = "1.23.7"
       config = files("$rootDir/config/detekt/detekt.yml")
       buildUponDefaultConfig = true
     }

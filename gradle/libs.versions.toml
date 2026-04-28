@@ -20,7 +20,7 @@ toml4j = "0.7.2"
 
 # Plugin versions
 spotless = "6.9.1"
-detekt = "1.22.0"
+detekt = "1.23.7"
 vanniktech-maven-publish = "0.34.0"
 
 [libraries]
