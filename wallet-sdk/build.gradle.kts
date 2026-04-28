@@ -109,7 +109,7 @@ mavenPublishing {
       }
     }
     issueManagement {
-      system.set("Github")
+      system.set("GitHub")
       url.set("https://github.com/stellar/kotlin-wallet-sdk/issues")
     }
     scm {
