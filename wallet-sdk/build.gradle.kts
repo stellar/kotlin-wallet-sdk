@@ -90,6 +90,10 @@ mavenPublishing {
   publishToMavenCentral(automaticRelease = true)
   signAllPublications()
 
+  // Maven groupId is "org.stellar" (matches what prior 2.x releases shipped as on
+  // Maven Central) and intentionally differs from the project's Gradle `group`
+  // ("org.stellar.wallet-sdk"). Changing the published groupId would orphan
+  // existing consumers, so we override here rather than aligning the two.
   coordinates("org.stellar", "wallet-sdk", project.version.toString())
 
   pom {
@@ -104,7 +108,7 @@ mavenPublishing {
     licenses {
       license {
         name.set("The Apache License, Version 2.0")
-        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
         distribution.set("repo")
       }
     }
