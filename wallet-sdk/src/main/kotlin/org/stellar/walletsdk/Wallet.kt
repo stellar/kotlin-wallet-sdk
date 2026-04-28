@@ -25,6 +25,15 @@ import org.stellar.walletsdk.recovery.RecoveryServerKey
  * Wallet SDK main entry point. It provides methods to build wallet applications on the Stellar
  * network.
  */
+@Deprecated(
+  message =
+    "The Kotlin Wallet SDK has been discontinued. " +
+      "There is no direct Kotlin/Java successor. " +
+      "If you need to stay on the JVM, use the lower-level Java Stellar SDK directly " +
+      "(https://github.com/stellar/java-stellar-sdk) and implement SEP protocols yourself. " +
+      "See https://github.com/stellar/kotlin-wallet-sdk for alternatives.",
+  level = DeprecationLevel.WARNING,
+)
 class Wallet(
   stellarConfiguration: StellarConfiguration,
   applicationConfiguration: ApplicationConfiguration = ApplicationConfiguration()

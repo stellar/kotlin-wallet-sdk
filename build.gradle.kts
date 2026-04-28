@@ -12,7 +12,7 @@ val jvmVersion = JavaVersion.VERSION_11
 
 allprojects {
   group = "org.stellar.wallet-sdk"
-  version = "2.1.0"
+  version = "3.0.0"
 }
 
 subprojects {
@@ -40,7 +40,9 @@ subprojects {
     }
 
     detekt {
-      toolVersion = "1.22.0"
+      // Keep in sync with the `detekt` version in gradle/libs.versions.toml.
+      // The `libs` accessor isn't available inside `subprojects { }`.
+      toolVersion = "1.23.7"
       config = files("$rootDir/config/detekt/detekt.yml")
       buildUponDefaultConfig = true
     }
@@ -48,6 +50,12 @@ subprojects {
 
   dependencies {
     // Define common dependencies here
+  }
+
+  // Gradle 8 enforces JVM-target consistency between compileJava and compileKotlin.
+  java {
+    sourceCompatibility = jvmVersion
+    targetCompatibility = jvmVersion
   }
 
   tasks {

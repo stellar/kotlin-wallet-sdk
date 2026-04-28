@@ -1,3 +1,16 @@
+> ⚠️ **This SDK is deprecated and no longer maintained.**
+>
+> The Kotlin Wallet SDK has been discontinued. There is no direct Kotlin/Java successor.
+>
+> Wallet SDKs remain actively maintained in:
+> - **TypeScript** — https://github.com/stellar/typescript-wallet-sdk
+> - **Flutter (Dart)** — https://github.com/Soneso/stellar_wallet_flutter_sdk
+> - **Swift** — https://github.com/Soneso/stellar-swift-wallet-sdk
+>
+> If you need to stay on the JVM, you can use the lower-level [Java Stellar SDK](https://github.com/stellar/java-stellar-sdk) directly, but you will need to implement SEP protocols (SEP-1/10/12/24/30) yourself.
+
+---
+
 # Kotlin Wallet SDK [![javadoc](https://javadoc.io/badge2/org.stellar/wallet-sdk/dokka.svg?logo=kotlin)](https://javadoc.io/doc/org.stellar/wallet-sdk) [![Maven Central](https://img.shields.io/maven-central/v/org.stellar/wallet-sdk?color=success&logo=apache-maven)](https://central.sonatype.com/search?q=pkg%253Amaven%252Forg.stellar%252Fwallet-sdk&namespace=org.stellar)
 
 Kotlin Wallet SDK is a library that allows developers to build wallet applications on the Stellar network faster. It
@@ -14,19 +27,19 @@ Maven:
 <dependency>
   <groupId>org.stellar</groupId>
   <artifactId>wallet-sdk</artifactId>
-  <version>2.1.0</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 
 Gradle (Kotlin):
 
 ```gradle
-implementation("org.stellar:wallet-sdk:2.1.0")
+implementation("org.stellar:wallet-sdk:3.0.0")
 ```
 
 Gradle (Groovy):
 ```gradle
-implementation 'org.stellar:wallet-sdk:2.1.0'
+implementation 'org.stellar:wallet-sdk:3.0.0'
 
 ```
 ## Introduction

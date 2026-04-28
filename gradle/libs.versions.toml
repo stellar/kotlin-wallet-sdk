@@ -7,8 +7,8 @@ google-gson = "2.8.9"
 hoplite = "2.7.0"
 jjwt = "0.12.5"
 java-stellar-sdk = "1.0.0"
-dokka = "1.6.10"
-kotlin = "1.8.20"
+dokka = "1.9.20"
+kotlin = "1.9.25"
 kotlinx-json = "1.5.0"
 kotlinx-datetime = "0.4.0"
 ktor = "2.2.1"
@@ -20,7 +20,8 @@ toml4j = "0.7.2"
 
 # Plugin versions
 spotless = "6.9.1"
-detekt = "1.22.0"
+detekt = "1.23.7"
+vanniktech-maven-publish = "0.34.0"
 
 [libraries]
 bcastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bcastle" }
@@ -58,3 +59,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }
