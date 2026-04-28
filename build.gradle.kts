@@ -50,6 +50,12 @@ subprojects {
     // Define common dependencies here
   }
 
+  // Gradle 8 enforces JVM-target consistency between compileJava and compileKotlin.
+  java {
+    sourceCompatibility = jvmVersion
+    targetCompatibility = jvmVersion
+  }
+
   tasks {
     compileKotlin {
       // Ignore spotless for auto-generated files
