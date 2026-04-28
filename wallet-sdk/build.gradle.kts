@@ -74,7 +74,9 @@ tasks.getByName("compileTestIntegrationKotlin") {
   (this as KotlinCompile).kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
 }
 
-tasks.check.get().dependsOn += testIntegration
+// Integration tests are intentionally NOT part of `check` — they make live
+// network calls (e.g. to testanchor.stellar.org) and require working
+// infrastructure. Run them explicitly with `./gradlew integrationTest`.
 
 mavenPublishing {
   // The plugin does NOT auto-detect Dokka; explicitly tell it to back the
